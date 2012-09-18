@@ -1,0 +1,14 @@
+EXPORTS
+    EndPlugin @1
+    GetPluginInfo @2
+    StartPlugin @3
+    _Z10AProDeleteIN4APro7CounterEEvPT_PKcS5_i @4
+    _Z10AProDeleteIN4APro8ResourceEEvPT_PKcS5_i @5
+    _ZN4APro10PluginInfoC1Ev @6
+    _ZN4APro10PluginInfoD1Ev @7
+    _ZN4APro13SharedPointerINS_8ResourceEE7destroyEv @8
+    _ZN4APro13SharedPointerINS_8ResourceEED1Ev @9
+    _ZN4APro7Counter3popEv @10
+    _ZN4APro7CounterD1Ev @11
+    _ZNK4APro7Counter5valueEv @12
+    info @13 DATA

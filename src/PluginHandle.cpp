@@ -18,37 +18,28 @@ namespace APro
 {
     typedef void (*DLL_START_PLUGIN)(void);
     typedef void (*DLL_END_PLUGIN)(void);
-    typedef PluginInfo (*DLL_GET_PLUGININFO)(void);
+    typedef void* (*DLL_GET_PLUGININFO)(void);
 
     PluginHandle::PluginHandle()
-        : name(""), dynLib(nullptr)
+        : name(""), info(nullptr), dynLib(nullptr)
     {
-        info.name = String("");
-        info.author = String("");
-        info.date = String("");
-        info.description = String("");
+
     }
 
     PluginHandle::PluginHandle(const String& mname)
-        : name(mname), dynLib(nullptr)
+        : name(mname), info(nullptr), dynLib(nullptr)
     {
-        info.name = String("");
-        info.author = String("");
-        info.date = String("");
-        info.description = String("");
+
     }
 
     PluginHandle::PluginHandle(const PluginHandle& other)
-        : name(""), dynLib(nullptr)
+        : name(""), info(nullptr), dynLib(nullptr)
     {
-        info.name = String("");
-        info.author = String("");
-        info.date = String("");
-        info.description = String("");
+
     }
 
     PluginHandle::PluginHandle(const String& mname, const SharedPointer<DynamicLibrary>& lib)
-        : name(mname), dynLib(nullptr)
+        : name(mname), info(nullptr), dynLib(nullptr)
     {
         initialize(lib);
     }
@@ -66,12 +57,13 @@ namespace APro
         DLL_START_PLUGIN startPluginFunc = (DLL_START_PLUGIN) dynLib->getSymbol(String("StartPlugin"));
         if(!startPluginFunc)
         {
-            Console::get() << "[Plugin] Couldn't find function StartPlugin in library " << dynLib->getName() << ".";
+            Console::get() << "\n[PluginHandle] Couldn't find function StartPlugin in library " << dynLib->getName() << ".";
         }
         else
         {
-            refreshPluginInfo();
+            Console::get() << "\n[PluginHandle] Starting plugin " << name << "...";
             startPluginFunc();
+            refreshPluginInfo();
         }
     }
 
@@ -86,6 +78,7 @@ namespace APro
             }
             else
             {
+                Console::get() << "\n[PluginHandle] Stopping plugin " << name << "...";
                 endPluginFunc();
             }
 
@@ -94,34 +87,28 @@ namespace APro
         }
     }
 
-    const PluginInfo& PluginHandle::getPluginInfo() const
+    PluginInfo* PluginHandle::getPluginInfo() const
     {
         return info;
     }
 
     void PluginHandle::refreshPluginInfo()
     {
-        if(dynLib.isNull())
+        if(dynLib.isNull() || !dynLib->isLoaded())
         {
-            info.name = String("");
-            info.author = String("");
-            info.date = String("");
-            info.description = String("");
+            info = nullptr;
         }
         else
         {
             DLL_GET_PLUGININFO infofunc = (DLL_GET_PLUGININFO) dynLib->getSymbol(String("GetPluginInfo"));
             if(infofunc)
             {
-                info = infofunc();
+                info = (PluginInfo*) infofunc();
             }
             else
             {
                 Console::get() << "[Plugin] Can't retrieve information of library " << dynLib->getName() << ".";
-                info.name = String("");
-                info.author = String("");
-                info.date = String("");
-                info.description = String("");
+                info = nullptr;
             }
         }
     }

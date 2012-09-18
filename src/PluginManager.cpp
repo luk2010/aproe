@@ -16,8 +16,6 @@
 
 namespace APro
 {
-    PluginInfo nullinfo;
-
     APRO_IMPLEMENT_SINGLETON(PluginManager)
 
     PluginManager::PluginManager()
@@ -47,6 +45,7 @@ namespace APro
         if(ret.isNull())
         {
             SharedPointer<DynamicLibrary> lib = ResourceManager::get().loadResource<DynamicLibrary>(name + String("_") + filename, filename);
+
             if(lib.isNull())
             {
                 return SharedPointer<PluginHandle>();
@@ -54,6 +53,7 @@ namespace APro
             else
             {
                 ret = AProNew(1, PluginHandle) (name, lib);
+                pluginList.append(ret);
                 return ret;
             }
         }
@@ -75,6 +75,7 @@ namespace APro
             else
             {
                 ret = AProNew(1, PluginHandle) (name, lib);
+                pluginList.append(ret);
                 return ret;
             }
         }
@@ -99,7 +100,7 @@ namespace APro
         pluginList.clear();
     }
 
-    const PluginInfo& PluginManager::getPluginInfo(const String& pluginhandle)
+    PluginInfo* PluginManager::getPluginInfo(const String& pluginhandle)
     {
         SharedPointer<PluginHandle> ph = getPluginHandle(pluginhandle);
         if(!ph.isNull())
@@ -108,7 +109,7 @@ namespace APro
         }
         else
         {
-            return nullinfo;
+            return nullptr;
         }
     }
 }

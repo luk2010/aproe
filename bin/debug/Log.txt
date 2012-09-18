@@ -1,0 +1,136 @@
+Hello World ! We will test the Memory module. 
+============================================= 
+
+TURTLE
+
+Testing Exceptions...
+----------
+
+An exception has been launched : [MyType] : This is a fake ! Thrown at line 63 in function main from class none.
+
+
+Testing arrays...
+----------
+
+DACCB
+Current Allocations : 298bytes.
+
+
+Testing Strings...
+----------
+
+Bij blabla  blabla r ! Ceci est une string !
+Bijour !!
+
+Testing Console Screen...
+----------
+
+The screen will diseappar for 5 seconds so don't exit app !
+
+Testing lists...
+----------
+
+5
+
+Testing SharedPointer...
+----------
+
+blabla
+blabla
+
+Testing Map...
+----------
+
+Hello
+
+Testing Variant...
+----------
+
+Ceci vient du variant !
+Cevient du variant !
+ABCDEF
+
+Testing ResourceLoader and ResourceManager...
+----------
+
+[ResourceManager] Added Loader NullLoader.
+[ResourceManager] Added Loader FileLoader.
+[ResourceManager] Added Loader DynamicLibraryLoader.
+[ResourceManager] Added Writer FileWriter.
+[ResourceManager] Loading resource leaks.log with name MyResource and loader NullLoader.
+[ResourceManager] Loading resource MyResource completed !
+MyResource
+MyResource
+
+Loaders's list : 
+----------
+Number of loaders : 3.
+  + NullLoader : A Null Loader for testing purpose.
+  + FileLoader : A loader that caches any file.
+  + DynamicLibraryLoader : Does nothing itself, create the DynamicLibrary resource object.
+
+Resources's list : 
+----------
+Number of resources : 0.
+
+
+
+Testing File... 
+----------
+
+[ResourceManager] Loading resource test.txt with name TestFile and loader FileLoader.
+[ResourceManager] Loading resource TestFile completed !
+Bo blabla njour !ÿ
+NullWriter : ParametedObject 
+{
+  + Name : Name of the writer.
+  + Description : Description or Usage of the writer.
+  + DefaultFile : Default file to write resource.
+}
+[FileWriter] Wrote TestFile to file file.txt.
+Writer's list : 
+----------
+Number of Writers : 1.
+  + FileWriter : Write files to disk.
+
+Testing Window... 
+----------
+
+[WindowManager] Created Window with name : MyWindow, title : First Window and size : 1280x768.
+0 : 0
+1024x768
+
+ParametedObject 
+{
+  + Name : Name of the Window Object.
+  + Title : Title of the Window.
+  + Size : Size of the Window, Width by Height.
+  + Position : Position of the Window, x and y.
+  + Fullscreen : Set if the Window is Fullscreen Mode or not.                                                               If you change this property, the window has to be reloaded to                                                               this property to take effect.
+  + Status : Status of the Window. If Null, the window hasn't been created yet.
+  + HANDLE : 
+  + HINSTANCE : 
+}
+Window closed !
+
+Testing DynamicLibrary... 
+----------
+
+[ResourceManager] Loading resource ExamplePlugin.dll with name MyPlugin_ExamplePlugin.dll and loader DynamicLibraryLoader.
+[DynamicLibrary] DynLib ExamplePlugin.dll loaded successfuly.
+[ResourceManager] Loading resource MyPlugin_ExamplePlugin.dll completed !
+[PluginHandle] Starting plugin MyPlugin...
+[ExamplePlugin] This is a message from the plugin ;) ! START 
+[ResourceManager] Loading resource leaks.log with name MyResource and loader NullLoader.
+[ResourceManager] Loading resource MyResource completed !
+Name of the plugin is : ExamplePlugin
+Description is : This program is an example on how to create a pugin for Atlanti's Projet Engine.
+Resources's list : 
+----------
+Number of resources : 3.
+  + TestFile : 2 uses.
+  + MyPlugin_ExamplePlugin.dll : 2 uses.
+  + MyResource : 1 uses.
+[PluginHandle] Stopping plugin MyPlugin...
+[ExamplePlugin] This is a message from the plugin ;) ! END 
+[DynamicLibrary] DynLib ExamplePlugin.dll unloaded successfuly.

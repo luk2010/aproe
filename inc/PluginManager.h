@@ -19,7 +19,7 @@
 
 namespace APro
 {
-    class PluginManager : public Singleton<PluginManager>
+    class APRO_DLL PluginManager : public Singleton<PluginManager>
     {
         APRO_DECLARE_SINGLETON(PluginManager)
 
@@ -40,7 +40,7 @@ namespace APro
         void removePluginHandle(const String& name);
         void clear();
 
-        const PluginInfo& getPluginInfo(const String& pluginhandle);
+        PluginInfo* getPluginInfo(const String& pluginhandle);
 
     };
 }

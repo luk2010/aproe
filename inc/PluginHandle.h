@@ -33,7 +33,7 @@ namespace APro
     protected:
 
         String name;
-        PluginInfo info;
+        PluginInfo* info;
         SharedPointer<DynamicLibrary> dynLib;
 
     public:
@@ -51,7 +51,7 @@ namespace APro
         void initialize(const SharedPointer<DynamicLibrary>& lib);
         void end();
 
-        const PluginInfo& getPluginInfo() const;
+        PluginInfo* getPluginInfo() const;
         void refreshPluginInfo();
 
         SharedPointer<DynamicLibrary> toDynamicLibrary();

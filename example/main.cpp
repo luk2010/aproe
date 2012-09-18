@@ -29,6 +29,7 @@
 #include "Pair.h"
 #include "Keyboard.h"
 #include "Dialog.h"
+#include "PluginManager.h"
 #include "DynamicLibraryLoader.h"
 
 int main()
@@ -169,7 +170,7 @@ int main()
 
             APro::SharedPointer<APro::File> myFile = APro::ResourceManager::get().loadResourceWithLoader<APro::File>(APro::String("TestFile"),
                                                                                                                      APro::String("test.txt"),
-                                                                                                                     APro::String("FileLoader")));
+                                                                                                                     APro::String("FileLoader"));
             myFile->seek(-4, APro::File::Position::End);
             myFile->put(APro::String(" blabla "));
             APro::Console::get() << "\n" << myFile->toString();
@@ -290,8 +291,17 @@ int main()
 
             APro::Console::get() << "\n\nTesting DynamicLibrary... \n----------\n";
 
-            APro::SharedPointer<APro::DynamicLibrary> lib = APro::ResourceManager::get().loadResource<APro::DynamicLibrary>(APro::String("MyDynLib"),
-                                                                                                                            APro::String("PluginExample.dll"));
+            APro::SharedPointer<APro::PluginHandle> plugin = APro::PluginManager::get().addPluginHandle(APro::String("MyPlugin"),
+                                                                                                        APro::String("ExamplePlugin.dll"));
+
+            if(!plugin.isNull())
+            {
+                APro::PluginInfo* info = plugin->getPluginInfo();
+                APro::Console::get() << "\nName of the plugin is : " << info->name.toCstChar();
+                APro::Console::get() << "\nDescription is : " << info->description;
+
+                APro::Console::get() << "\n" << APro::ResourceManager::get().listResources();
+            }
 
         }
         catch(std::exception const& e2)
@@ -307,6 +317,7 @@ int main()
     std::cout << "\nVeuillez appuyer sur entree pour terminer le programme...";
     std::cin.get();
 
+    APro::PluginManager::get().clear();
     APro::ResourceManager::get().clear();
     APro::WindowManager::get().clear();
 
