@@ -14,23 +14,21 @@
 #ifndef APROPLUGINMANAGER_H
 #define APROPLUGINMANAGER_H
 
-#include "Singleton.h"
+#include "Manager.h"
 #include "PluginHandle.h"
 
 namespace APro
 {
-    class APRO_DLL PluginManager : public Singleton<PluginManager>
+    class APRO_DLL PluginManager : public Manager<PluginHandle>
     {
-        APRO_DECLARE_SINGLETON(PluginManager)
-
-    protected:
+    public:
 
         PluginManager();
         ~PluginManager();
 
     private:
 
-        List<SharedPointer<PluginHandle> > pluginList;
+        List<SharedPointer<PluginHandle> >& pluginList;
 
     public:
 
@@ -38,7 +36,6 @@ namespace APro
         SharedPointer<PluginHandle> addPluginHandle(const String& name, const String& filename);
         SharedPointer<PluginHandle> addPluginHandle(const String& name, const SharedPointer<DynamicLibrary>& lib = SharedPointer<DynamicLibrary>());
         void removePluginHandle(const String& name);
-        void clear();
 
         PluginInfo* getPluginInfo(const String& pluginhandle);
 

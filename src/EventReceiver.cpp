@@ -92,6 +92,8 @@ namespace APro
                     processEvent(r);
                 }
             }
+
+            i.get()->purge();
         }
     }
 

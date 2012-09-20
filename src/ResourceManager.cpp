@@ -17,9 +17,8 @@
 
 namespace APro
 {
-    APRO_IMPLEMENT_SINGLETON(ResourceManager)
-
     ResourceManager::ResourceManager()
+        : resources(Manager<Resource>::objects), loaders(Manager<ResourceLoader>::objects), writers(Manager<ResourceWriter>::objects)
     {
 
     }
@@ -236,7 +235,7 @@ namespace APro
 
         result << "Loaders's list : " << "\n" << "----------";
         result << "\nNumber of loaders : " << String::toString((int) loaders.size()) << ".";
-        for(List<SharedPointer<ResourceLoader> >::ConstIterator i = loaders.begin(); !i.isEnd(); i++)
+        for(List<SharedPointer<ResourceLoader> >::Iterator i = loaders.begin(); !i.isEnd(); i++)
         {
             result << "\n  + " << i.get()->name() << " : " << i.get()->description();
         }
@@ -250,7 +249,7 @@ namespace APro
 
         result << "Writer's list : " << "\n" << "----------";
         result << "\nNumber of Writers : " << String::toString((int) writers.size()) << ".";
-        for(List<SharedPointer<ResourceWriter> >::ConstIterator i = writers.begin(); !i.isEnd(); i++)
+        for(List<SharedPointer<ResourceWriter> >::Iterator i = writers.begin(); !i.isEnd(); i++)
         {
             result << "\n  + " << i.get()->name() << " : " << i.get()->description();
         }
@@ -264,7 +263,7 @@ namespace APro
 
         result << "Resources's list : " << "\n" << "----------";
         result << "\nNumber of resources : " << String::toString((int) resources.size()) << ".";
-        for(List<SharedPointer<Resource> >::ConstIterator i = resources.begin(); !i.isEnd(); i++)
+        for(List<SharedPointer<Resource> >::Iterator i(resources.begin()); !i.isEnd(); i++)
         {
             result << "\n  + " << i.get()->getName() << " : " << String::toString((int) i.get().getUses()) << " uses.";
         }

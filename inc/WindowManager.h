@@ -21,12 +21,9 @@
 
 namespace APro
 {
-    class APRO_DLL WindowManager : public Singleton<WindowManager>
+    class APRO_DLL WindowManager : public Manager<Window>
     {
-
-        APRO_DECLARE_SINGLETON(WindowManager)
-
-    protected:
+    public:
 
         WindowManager();
 
@@ -49,7 +46,7 @@ namespace APro
 
     private:
 
-        List<SharedPointer<Window> > windows;
+        List<SharedPointer<Window> >& windows;
     };
 }
 

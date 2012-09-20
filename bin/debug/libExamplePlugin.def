@@ -8,7 +8,8 @@ EXPORTS
     _ZN4APro10PluginInfoD1Ev @7
     _ZN4APro13SharedPointerINS_8ResourceEE7destroyEv @8
     _ZN4APro13SharedPointerINS_8ResourceEED1Ev @9
-    _ZN4APro7Counter3popEv @10
-    _ZN4APro7CounterD1Ev @11
-    _ZNK4APro7Counter5valueEv @12
-    info @13 DATA
+    _ZN4APro4Main18getResourceManagerEv @10
+    _ZN4APro7Counter3popEv @11
+    _ZN4APro7CounterD1Ev @12
+    _ZNK4APro7Counter5valueEv @13
+    info @14 DATA

@@ -13,6 +13,7 @@
 **/
 #include "Window.h"
 #include "WindowManager.h"
+#include "Main.h"
 
 namespace APro
 {
@@ -21,9 +22,9 @@ namespace APro
 
     SharedPointer<Window> findWindow(HWND hwnd)
     {
-        for(size_t i = 0; i < WindowManager::get().getWindowNumber(); ++i)
+        for(size_t i = 0; i < Main::get().getWindowManager().getWindowNumber(); ++i)
         {
-            SharedPointer<Window> w = WindowManager::get().getWindow(i);
+            SharedPointer<Window> w = Main::get().getWindowManager().getWindow(i);
             if(!w.isNull() && w->getParam(String("HANDLE")).to<HWND>() == hwnd)
                 return w;
         }
@@ -528,5 +529,28 @@ namespace APro
     SharedPointer<Keyboard> Window::getKeyboard()
     {
         return keyboard;
+    }
+
+    void Window::attachContext(Context* c)
+    {
+        if(context)
+        {
+            detachContext();
+        }
+
+        context = c;
+        context->addListener(addListener(String("WindowToContextListener")));
+    }
+
+    void Window::detachContext()
+    {
+        if(context)
+        {
+            context->removeListener(String("WindowToContextListener"));
+            removeListener(String("WindowToContextListener"));
+
+            context->release();
+            context = nullptr;
+        }
     }
 }

@@ -10,7 +10,7 @@
 #include <PluginHandle.h>
 #include <Console.h>
 #include <SString.h>
-#include <ResourceManager.h>
+#include <Main.h>
 
 using namespace APro;
 
@@ -23,16 +23,23 @@ extern "C" void* GetPluginInfo(void)
 
 extern "C" void StartPlugin(void)
 {
-    Console::get() << "\n[ExamplePlugin] This is a message from the plugin ;) ! START ";
+    Console::get().backgroundColor(Console::Color::Green)
+                  .foregroundColor(Console::Color::White)
+                  << "\n[ExamplePlugin] This is a message from the plugin ;) ! START ";
+    Console::get().reset();
 
     info.name = String("ExamplePlugin");
     info.description = String("This program is an example on how to create a pugin for Atlanti's Projet Engine.");
 
-    SharedPointer<Resource> myresource = ResourceManager::get().loadResourceWithLoader(String("MyResource"), String("leaks.log"),
+    SharedPointer<Resource> myresource = Main::get().getResourceManager().loadResourceWithLoader(String("MyResource"), String("leaks.log"),
                                                                                        String("NullLoader"));
 }
 
 extern "C" void EndPlugin(void)
 {
-    Console::get() << "\n[ExamplePlugin] This is a message from the plugin ;) ! END ";
+    Console::get().backgroundColor(Console::Color::Red)
+                  .foregroundColor(Console::Color::White)
+                  << "\n[ExamplePlugin] This is a message from the plugin ;) ! END ";
+
+    Console::get().reset();
 }

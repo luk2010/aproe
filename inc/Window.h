@@ -20,6 +20,7 @@
 #include "Pair.h"
 #include "EventEmitter.h"
 #include "Keyboard.h"
+#include "Context.h"
 
 namespace APro
 {
@@ -81,9 +82,13 @@ namespace APro
 
         SharedPointer<Keyboard> getKeyboard();
 
+        void attachContext(Context* c);
+        void detachContext();
+
     private:
 
         SharedPointer<Keyboard> keyboard;
+        Context* context;
     };
 }
 

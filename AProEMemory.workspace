@@ -3,5 +3,6 @@
 	<Workspace title="Workspace">
 		<Project filename="AProEMemory.cbp" />
 		<Project filename="example/MemoryExample.cbp" />
+		<Project filename="Plugins/ExamplePlugin/ExamplePlugin.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

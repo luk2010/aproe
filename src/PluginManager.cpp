@@ -13,19 +13,21 @@
 **/
 #include "PluginManager.h"
 #include "ResourceManager.h"
+#include "Main.h"
 
 namespace APro
 {
-    APRO_IMPLEMENT_SINGLETON(PluginManager)
+    //APRO_IMPLEMENT_SINGLETON(PluginManager)
 
     PluginManager::PluginManager()
+        : pluginList(Manager<PluginHandle>::objects)
     {
 
     }
 
     PluginManager::~PluginManager()
     {
-        clear();
+
     }
 
     SharedPointer<PluginHandle> PluginManager::getPluginHandle(const String& name)
@@ -44,7 +46,7 @@ namespace APro
         SharedPointer<PluginHandle> ret = getPluginHandle(name);
         if(ret.isNull())
         {
-            SharedPointer<DynamicLibrary> lib = ResourceManager::get().loadResource<DynamicLibrary>(name + String("_") + filename, filename);
+            SharedPointer<DynamicLibrary> lib = Main::get().getResourceManager().loadResource<DynamicLibrary>(name + String("_") + filename, filename);
 
             if(lib.isNull())
             {
@@ -53,7 +55,7 @@ namespace APro
             else
             {
                 ret = AProNew(1, PluginHandle) (name, lib);
-                pluginList.append(ret);
+                Manager<PluginHandle>::push(ret);
                 return ret;
             }
         }
@@ -75,7 +77,7 @@ namespace APro
             else
             {
                 ret = AProNew(1, PluginHandle) (name, lib);
-                pluginList.append(ret);
+                Manager<PluginHandle>::push(ret);
                 return ret;
             }
         }
@@ -90,14 +92,9 @@ namespace APro
         SharedPointer<PluginHandle> rm = getPluginHandle(name);
         if(!rm.isNull())
         {
-            pluginList.erase(pluginList.find(rm));
+            Manager<PluginHandle>::pop(rm);
             rm.release();
         }
-    }
-
-    void PluginManager::clear()
-    {
-        pluginList.clear();
     }
 
     PluginInfo* PluginManager::getPluginInfo(const String& pluginhandle)

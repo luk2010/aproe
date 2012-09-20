@@ -48,19 +48,21 @@
 			<Add option="-DBUILD_DLL" />
 			<Add directory="inc" />
 		</Compiler>
-		<Unit filename="inc\Allocator.h"/>
+		<Unit filename="inc\Allocator.h" />
 		<Unit filename="inc\Array.h" />
 		<Unit filename="inc\Base.h" />
 		<Unit filename="inc\Console.h" />
+		<Unit filename="inc\Context.h" />
 		<Unit filename="inc\Dialog.h" />
 		<Unit filename="inc\Dictionnary.h" />
 		<Unit filename="inc\DynamicLibrary.h" />
 		<Unit filename="inc\DynamicLibraryLoader.h" />
 		<Unit filename="inc\Event.h" />
-		<Unit filename="inc\EventEmitter.h"/>
+		<Unit filename="inc\EventEmitter.h" />
 		<Unit filename="inc\EventListener.h" />
 		<Unit filename="inc\EventReceiver.h" />
 		<Unit filename="inc\Exception.h" />
+		<Unit filename="inc\Factory.h" />
 		<Unit filename="inc\File.h" />
 		<Unit filename="inc\FileLoader.h" />
 		<Unit filename="inc\FileSystem.h" />
@@ -68,6 +70,8 @@
 		<Unit filename="inc\FileWriter.h" />
 		<Unit filename="inc\Keyboard.h" />
 		<Unit filename="inc\List.h" />
+		<Unit filename="inc\Main.h" />
+		<Unit filename="inc\Manager.h" />
 		<Unit filename="inc\Map.h" />
 		<Unit filename="inc\Memory.h" />
 		<Unit filename="inc\MemoryTracker.h" />
@@ -91,6 +95,7 @@
 		<Unit filename="inc\Window.h" />
 		<Unit filename="inc\WindowManager.h" />
 		<Unit filename="src\Console.cpp" />
+		<Unit filename="src\Context.cpp" />
 		<Unit filename="src\Dialog.cpp" />
 		<Unit filename="src\DynamicLibrary.cpp" />
 		<Unit filename="src\DynamicLibraryLoader.cpp" />
@@ -105,6 +110,7 @@
 		<Unit filename="src\FileUtils.cpp" />
 		<Unit filename="src\FileWriter.cpp" />
 		<Unit filename="src\Keyboard.cpp" />
+		<Unit filename="src\Main.cpp" />
 		<Unit filename="src\Memory.cpp" />
 		<Unit filename="src\MemoryTracker.cpp" />
 		<Unit filename="src\NullLoader.cpp" />

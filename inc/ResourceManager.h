@@ -15,7 +15,7 @@
 #define APRORESOURCEMANAGER_H
 
 #include "Platform.h"
-#include "Singleton.h"
+#include "Manager.h"
 #include "Resource.h"
 #include "ResourceLoader.h"
 #include "ResourceWriter.h"
@@ -23,18 +23,17 @@
 
 namespace APro
 {
-    class APRO_DLL ResourceManager : public Singleton<ResourceManager>
+    class APRO_DLL ResourceManager : public Manager<Resource>,
+                                     public Manager<ResourceLoader>,
+                                     public Manager<ResourceWriter>
     {
-
-        APRO_DECLARE_SINGLETON(ResourceManager)
-
     private:
 
-        List<SharedPointer<Resource> > resources;
-        List<SharedPointer<ResourceLoader> > loaders;
-        List<SharedPointer<ResourceWriter> > writers;
+        List<SharedPointer<Resource> >& resources;
+        List<SharedPointer<ResourceLoader> >& loaders;
+        List<SharedPointer<ResourceWriter> >& writers;
 
-    protected:
+    public:
 
         ResourceManager();
         ~ResourceManager();

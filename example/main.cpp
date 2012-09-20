@@ -19,18 +19,16 @@
 #include "Console.h"
 #include "List.h"
 #include "SharedPointer.h"
-#include "ResourceManager.h"
 #include "NullLoader.h"
 #include "FileLoader.h"
 #include "File.h"
 #include "NullWriter.h"
 #include "FileWriter.h"
-#include "WindowManager.h"
 #include "Pair.h"
 #include "Keyboard.h"
 #include "Dialog.h"
-#include "PluginManager.h"
 #include "DynamicLibraryLoader.h"
+#include "Main.h"
 
 int main()
 {
@@ -40,11 +38,13 @@ int main()
         APro::MemoryTracker::get()->setMaxFilenameSize(30);
         APro::MemoryTracker::get()->setRetain(false);
 
-        APro::Console::get().foregroundColor(APro::Console::Color::Green)
+        APro::Console& console = APro::Main::get().getConsole();
+
+        console.foregroundColor(APro::Console::Color::Green)
                             << "Hello World ! We will test the Memory module. \n";
-        APro::Console::get().foregroundColor(APro::Console::Color::Yellow)
+        console.foregroundColor(APro::Console::Color::Yellow)
                             << "============================================= \n\n";
-        APro::Console::get().reset();
+        console.reset();
 
         char* buffer = APro::Allocator<char>::allocateArray(7);
         buffer[0] = 'T';
@@ -55,20 +55,21 @@ int main()
         buffer[5] = 'E';
         buffer[6] = '\0';
 
-        APro::Console::get() << buffer;
+        console << buffer;
         APro::Allocator<char>::deallocatePtr(buffer);
 
-        APro::Console::get() << "\n\nTesting Exceptions...\n----------\n\n";
+        console << "\n\nTesting Exceptions...\n----------\n\n";
 
         APRO_THROW("MyType", "This is a fake !", "none");
     }
     catch(APro::Exception const& e)
     {
-        APro::Console::get() << "An exception has been launched : " << e.getFullDescription().c_str() << "\n";
+        APro::Console& console = APro::Main::get().getConsole();
+        console << "An exception has been launched : " << e.getFullDescription().c_str() << "\n";
 
         try
         {
-            APro::Console::get() << "\n\nTesting arrays...\n----------\n\n";
+            console << "\n\nTesting arrays...\n----------\n\n";
 
             APro::Array<char> myArray;
             myArray.append('A');
@@ -79,10 +80,10 @@ int main()
 
             myArray << 'B' << 'C' << 'D' << 'E';
 
-            APro::Console::get() << myArray[0] << myArray[1] << myArray[2] << myArray[3] << myArray[4] << "\n";
-            APro::Console::get() << "Current Allocations : " << (int) APro::MemoryTracker::get()->getCurrentBytesAllocated() << "bytes.\n";
+            console << myArray[0] << myArray[1] << myArray[2] << myArray[3] << myArray[4] << "\n";
+            console << "Current Allocations : " << (int) APro::MemoryTracker::get()->getCurrentBytesAllocated() << "bytes.\n";
 
-            APro::Console::get() << "\n\nTesting Strings...\n----------\n\n";
+            console << "\n\nTesting Strings...\n----------\n\n";
             APro::String str;
             str << "Ceci est une string !";
 
@@ -90,115 +91,114 @@ int main()
             str.erase(3, 4);
             str.insert(3, " blabla ", 2);
 
-            APro::Console::get() << str.toCstChar();
+            console << str.toCstChar();
 
-            APro::Console::get().foregroundColor(APro::Console::Color::Green)
+            console.foregroundColor(APro::Console::Color::Green)
                                 .backgroundColor(APro::Console::Color::Yellow)
                                 << "\nBijour !!";
 
-            APro::Console::get().reset()
+            console.reset()
                                 << "\n\nTesting Console Screen...\n----------\n\n"
                                 << "The screen will diseappar for 5 seconds so don't exit app !";
 
             //Sleep(2000);
 
-            APro::Console::get().reset().hide();
+            console.reset().hide();
 
             //Sleep(5000);
 
-            APro::Console::get().show();
+            console.show();
 
-            APro::Console::get() << "\n\nTesting lists...\n----------\n\n";
+            console << "\n\nTesting lists...\n----------\n\n";
 
             APro::List<int> l;
             l << 4 << 5 << 7 << 9;
 
-            APro::Console::get() << l.at(1);
+            console << l.at(1);
 
-            APro::Console::get() << "\n\nTesting SharedPointer...\n----------\n\n";
+            console << "\n\nTesting SharedPointer...\n----------\n\n";
 
             APro::SharedPointer<APro::String> myStrPtr(AProNew(1, APro::String)(APro::String("blabla")));
-            APro::Console::get() << myStrPtr->toCstChar();
+            console << myStrPtr->toCstChar();
             APro::SharedPointer<APro::String> ptr2 = myStrPtr;
-            APro::Console::get() << "\n" << ptr2->toCstChar();
+            console << "\n" << ptr2->toCstChar();
 
-            APro::Console::get() << "\n\nTesting Map...\n----------\n\n";
+            console << "\n\nTesting Map...\n----------\n\n";
 
             APro::Map<APro::String, APro::String> frToUk;
             frToUk.push(APro::String("Bonjour"), APro::String("Hello"));
             frToUk.push(APro::String("Au Revoir"), APro::String("GoodBye"));
-            APro::Console::get() << frToUk[APro::String("Bonjour")].toCstChar();
+            console << frToUk[APro::String("Bonjour")].toCstChar();
 
-            APro::Console::get() << "\n\nTesting Variant...\n----------\n\n";
+            console << "\n\nTesting Variant...\n----------\n\n";
 
             APro::Variant myVariant(APro::String("Ceci vient du variant !"));
-            APro::Console::get() << myVariant.to<APro::String>();
+            console << myVariant.to<APro::String>();
 
             APro::Variant myVariant2 = myVariant;
             myVariant2.to<APro::String>().erase(2,4);
-            APro::Console::get() << "\n" << myVariant2.to<APro::String>();
+            console << "\n" << myVariant2.to<APro::String>();
 
             APro::Variant myVariant3;
             myVariant3 = APro::String("ABCDEF");
-            APro::Console::get() << "\n" << myVariant3.to<APro::String>();
+            console << "\n" << myVariant3.to<APro::String>();
 
-            APro::Console::get() << "\n\nTesting ResourceLoader and ResourceManager...\n----------\n";
+            console << "\n\nTesting ResourceLoader and ResourceManager...\n----------\n";
 
-            APro::ResourceManager::get().addLoader(APro::SharedPointer<APro::ResourceLoader>(AProNew(1, APro::NullLoader)));
-            APro::ResourceManager::get().addLoader(APro::SharedPointer<APro::ResourceLoader>(AProNew(1, APro::FileLoader)));
-            APro::ResourceManager::get().addLoader(APro::SharedPointer<APro::ResourceLoader>(AProNew(1, APro::DynamicLibraryLoader)));
+            APro::ResourceManager& rmanager = APro::Main::get().getResourceManager();
 
-            APro::ResourceManager::get().addWriter(APro::SharedPointer<APro::ResourceWriter>(AProNew(1, APro::FileWriter)));
+            rmanager.addLoader(APro::SharedPointer<APro::ResourceLoader>(AProNew(1, APro::NullLoader)));
+            rmanager.addLoader(APro::SharedPointer<APro::ResourceLoader>(AProNew(1, APro::FileLoader)));
+            rmanager.addLoader(APro::SharedPointer<APro::ResourceLoader>(AProNew(1, APro::DynamicLibraryLoader)));
 
-            APro::SharedPointer<APro::Resource> myResource = APro::ResourceManager::get().loadResourceWithLoader(APro::String("MyResource"),
-                                                                                                                 APro::String("leaks.log"),
-                                                                                                                 APro::String("NullLoader"));
+            rmanager.addWriter(APro::SharedPointer<APro::ResourceWriter>(AProNew(1, APro::FileWriter)));
 
-            APro::SharedPointer<APro::Resource> myResource2 = APro::ResourceManager::get().getResource(APro::String("MyResource"));
+            APro::SharedPointer<APro::Resource> myResource = rmanager.loadResourceWithLoader(APro::String("MyResource"),
+                                                                                             APro::String("leaks.log"),
+                                                                                             APro::String("NullLoader"));
 
-            APro::Console::get() << "\n" << myResource->getName();
-            APro::Console::get() << "\n" << myResource2->getName();
+            APro::SharedPointer<APro::Resource> myResource2 = rmanager.getResource(APro::String("MyResource"));
+
+            console << "\n" << myResource->getName();
+            console << "\n" << myResource2->getName();
 
             myResource.release();
             myResource2.release();
-            APro::ResourceManager::get().unloadResource(APro::String("MyResource"));
+            rmanager.unloadResource(APro::String("MyResource"));
 
-            APro::Console::get() << "\n\n" << APro::ResourceManager::get().listLoaders();
-            APro::Console::get() << "\n\n" << APro::ResourceManager::get().listResources() << "\n\n";
+            console << "\n\n" << rmanager.listLoaders();
+            console << "\n\n" << rmanager.listResources() << "\n\n";
 
-            APro::Console::get() << "\n\nTesting File... \n----------\n";
+            console << "\n\nTesting File... \n----------\n";
 
-            APro::SharedPointer<APro::File> myFile = APro::ResourceManager::get().loadResourceWithLoader<APro::File>(APro::String("TestFile"),
-                                                                                                                     APro::String("test.txt"),
-                                                                                                                     APro::String("FileLoader"));
+            APro::SharedPointer<APro::File> myFile = rmanager.loadResourceWithLoader<APro::File>(APro::String("TestFile"),
+                                                                                                 APro::String("test.txt"),
+                                                                                                 APro::String("FileLoader"));
             myFile->seek(-4, APro::File::Position::End);
             myFile->put(APro::String(" blabla "));
-            APro::Console::get() << "\n" << myFile->toString();
+            console << "\n" << myFile->toString();
 
             APro::NullWriter writer;
-            APro::Console::get() << "\n" << writer.name() << " : " << writer.listParameters();
+            console << "\n" << writer.name() << " : " << writer.listParameters();
 
-            APro::ResourceManager::get().write(APro::String("TestFile"), APro::String("FileWriter"), APro::String("file.txt"));
-            APro::Console::get() << "\n" << APro::ResourceManager::get().listWriters();
+            rmanager.write(APro::String("TestFile"), APro::String("FileWriter"), APro::String("file.txt"));
+            console << "\n" << rmanager.listWriters();
 
-            APro::Console::get() << "\n\nTesting Window... \n----------\n";
+            console << "\n\nTesting Window... \n----------\n";
 
+            APro::WindowManager& wmanager = APro::Main::get().getWindowManager();
             APro::SharedPointer<APro::Window> window;
 
             if(APro::Dialog::ask(APro::String("Fullscreen choice"),
                                  APro::String("Do you want to turn fullscreen mode on ?")) == APro::Dialog::Answer::Yes)
             {
-                window = APro::WindowManager::get().create(APro::String("MyWindow"),
-                                                           APro::String("First Window"),
-                                                           APro::String("1280x768"),
-                                                           true);
+                window = wmanager.create(APro::String("MyWindow"), APro::String("First Window"),
+                                                      APro::String("1280x768"), true);
             }
             else
             {
-                window = APro::WindowManager::get().create(APro::String("MyWindow"),
-                                                           APro::String("First Window"),
-                                                           APro::String("1280x768"),
-                                                           false);
+                window = wmanager.create(APro::String("MyWindow"), APro::String("First Window"),
+                                                      APro::String("1280x768"), false);
             }
 
             if(!window.isNull())
@@ -207,12 +207,12 @@ int main()
                 window->move(50, 50, true);
                 window->resize(1024, 768);
 
-                APro::Console::get() << "\n" << (int) window->position().first() << " : " << (int) window->position().second();
-                APro::Console::get() << "\n" << (int) window->size().first() << "x" << (int) window->size().second();
+                console << "\n" << (int) window->position().first() << " : " << (int) window->position().second();
+                console << "\n" << (int) window->size().first() << "x" << (int) window->size().second();
 
                 APro::SharedPointer<APro::EventListener> eListener = window->addListener(APro::String("MyWindowListener"));
 
-                APro::Console::get() << "\n\n" << window->listParameters();
+                console << "\n\n" << window->listParameters();
 
                 APro::SharedPointer<APro::EventListener> keyListener = window->getKeyboard()->addListener(APro::String("MyKeyListener"));
                 keyListener->getParam(APro::String("KeyInfos")).to<APro::Keyboard::KeyBoardListenerInfo>().keyInfos[APro::KEY_A].repeat = true;
@@ -223,7 +223,7 @@ int main()
 
                 while(window->status() != APro::Window::Status::Null)
                 {
-                    APro::WindowManager::get().loop();
+                    wmanager.loop();
 
                     if(window->status() == APro::Window::Status::HasToBeReset)
                     {
@@ -239,7 +239,7 @@ int main()
                     {
                         APro::Pair<size_t, size_t> newPosition = e->getParam(APro::String("Position")).to<APro::Pair<size_t, size_t> >();
 
-                        APro::Console::get() << "\nWindow Moved ! New Position : " << (int) newPosition.first() << " : "
+                        console << "\nWindow Moved ! New Position : " << (int) newPosition.first() << " : "
                                                                              << (int) newPosition.second();
                     }
 
@@ -249,7 +249,7 @@ int main()
                     {
                         APro::Pair<size_t, size_t> newSize = e->getParam(APro::String("Size")).to<APro::Pair<size_t, size_t> >();
 
-                        APro::Console::get() << "\nWindow Resized ! New Size : " << (int) newSize.first() << " : "
+                        console << "\nWindow Resized ! New Size : " << (int) newSize.first() << " : "
                                                                              << (int) newSize.second();
                     }
 
@@ -257,14 +257,14 @@ int main()
 
                     if(!e.isNull())
                     {
-                        APro::Console::get() << "\nWindow closed !";
+                        console << "\nWindow closed !";
                     }
 
                     e = eListener->received(APro::String("WindowMinimizedEvent"));
 
                     if(!e.isNull())
                     {
-                        APro::Console::get() << "\nWindow Minimized !";
+                        console << "\nWindow Minimized !";
                     }
 
                     eListener->purge();
@@ -272,7 +272,7 @@ int main()
                     e = keyListener->received(APro::String("KeyPressedEvent"));
                     if(!e.isNull())
                     {
-                        APro::Console::get() << "\n" << APro::keyToString(e->getParam(APro::String("Key")).to<APro::KEY>()) << " pressed !";
+                        console << "\n" << APro::keyToString(e->getParam(APro::String("Key")).to<APro::KEY>()) << " pressed !";
                         if(e->getParam(APro::String("Key")).to<APro::KEY>() == APro::KEY_ESC && window->isFullScreen())
                         {
                             window->fullscreen(false);
@@ -282,44 +282,44 @@ int main()
                     e = keyListener->received(APro::String("KeyReleasedEvent"));
                     if(!e.isNull())
                     {
-                        APro::Console::get() << "\n" << APro::keyToString(e->getParam(APro::String("Key")).to<APro::KEY>()) << " released ! " << (int) e.getUses();
+                        console << "\n" << APro::keyToString(e->getParam(APro::String("Key")).to<APro::KEY>()) << " released ! " << (int) e.getUses();
                     }
 
                     keyListener->purge();
                 }
             }
 
-            APro::Console::get() << "\n\nTesting DynamicLibrary... \n----------\n";
+            console << "\n\nTesting DynamicLibrary... \n----------\n";
 
-            APro::SharedPointer<APro::PluginHandle> plugin = APro::PluginManager::get().addPluginHandle(APro::String("MyPlugin"),
-                                                                                                        APro::String("ExamplePlugin.dll"));
+            APro::PluginManager& pmmanager = APro::Main::get().getPluginManager();
+
+            APro::SharedPointer<APro::PluginHandle> plugin = pmmanager.addPluginHandle(APro::String("MyPlugin"),
+                                                                                       APro::String("ExamplePlugin.dll"));
 
             if(!plugin.isNull())
             {
                 APro::PluginInfo* info = plugin->getPluginInfo();
-                APro::Console::get() << "\nName of the plugin is : " << info->name.toCstChar();
-                APro::Console::get() << "\nDescription is : " << info->description;
+                console << "\nName of the plugin is : " << info->name.toCstChar();
+                console << "\nDescription is : " << info->description;
 
-                APro::Console::get() << "\n" << APro::ResourceManager::get().listResources();
+                console << "\n" << rmanager.listResources();
             }
 
         }
         catch(std::exception const& e2)
         {
-            APro::Console::get() << "An std exception has been launched : " << e2.what() << "\n";
+            console << "An std exception has been launched : " << e2.what() << "\n";
         }
         catch(APro::Exception const& e2)
         {
-            APro::Console::get() << "An exception has been launched : " << e2.getFullDescription().c_str() << "\n";
+            console << "An exception has been launched : " << e2.getFullDescription().c_str() << "\n";
         }
     }
 
     std::cout << "\nVeuillez appuyer sur entree pour terminer le programme...";
     std::cin.get();
 
-    APro::PluginManager::get().clear();
-    APro::ResourceManager::get().clear();
-    APro::WindowManager::get().clear();
+    APro::Main::get().clear();
 
     APro::Console::get().dump("Log.txt");
     APro::MemoryTracker::get()->dump("Leaks.log");

@@ -15,21 +15,20 @@
 
 namespace APro
 {
-    APRO_IMPLEMENT_SINGLETON(WindowManager)
-
     WindowManager::WindowManager()
+        : windows(Manager<Window>::objects)
     {
 
     }
 
     WindowManager::~WindowManager()
     {
-        clear();
+
     }
 
     SharedPointer<Window> WindowManager::getWindow(const String & name) const
     {
-        for(List<SharedPointer<Window> >::ConstIterator i(windows.begin()); !i.isEnd(); i++)
+        for(List<SharedPointer<Window> >::Iterator i(windows.begin()); !i.isEnd(); i++)
         {
             if(i.get()->name() == name)
             {
