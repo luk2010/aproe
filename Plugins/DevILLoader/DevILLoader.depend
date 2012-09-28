@@ -4,7 +4,7 @@
 	"Loader.h"
 	"Writer.h"
 
-1348130637 c:\users\luk2010\documents\github\aproe\inc\main.h
+1348815096 c:\users\luk2010\documents\github\aproe\inc\main.h
 	"Platform.h"
 	"Singleton.h"
 	"Context.h"
@@ -239,7 +239,7 @@
 	<ResourceWriter.h>
 	"Loader.h"
 
-1348814559 source:c:\users\luk2010\documents\github\aproe\plugins\devilloader\src\devilwriter.cpp
+1348814724 source:c:\users\luk2010\documents\github\aproe\plugins\devilloader\src\devilwriter.cpp
 	<Image.h>
 	<Console.h>
 	<SharedPointer.h>

@@ -133,6 +133,7 @@ namespace APro
         setParam(String("Status"), Variant(Status::Null), String("Status of the Window. If Null, the window hasn't been created yet."));
 
         keyboard = AProNew(1, Keyboard) ();
+        context = nullptr;
     }
 
     Window::Window(const String& name, const String & title, const String & sz)
@@ -152,6 +153,7 @@ namespace APro
         setParam(String("Status"), Variant(Status::Null), String("Status of the Window. If Null, the window hasn't been created yet."));
 
         keyboard = AProNew(1, Keyboard) ();
+        context = nullptr;
     }
 
     Window::Window(const Window& other)
@@ -163,6 +165,7 @@ namespace APro
         setParam(String("Status"), Variant(Status::Null), String("Status of the Window. If Null, the window hasn't been created yet."));
 
         keyboard = other.keyboard;
+        context = nullptr;
     }
 
     Window::~Window()
