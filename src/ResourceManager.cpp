@@ -202,6 +202,7 @@ namespace APro
             if(!(getLoader(loader->name()).isNull()))
             {
                 loaders.erase(loaders.find(loader));
+                Console::get() << "\n[ResourceManager] Removed Loader " << loader->name() << ".";
             }
         }
     }
@@ -225,6 +226,7 @@ namespace APro
             if(!(getWriter(writer->name()).isNull()))
             {
                 writers.erase(writers.find(writer));
+                Console::get() << "\n[ResourceManager] Removed Writer " << writer->name() << ".";
             }
         }
     }

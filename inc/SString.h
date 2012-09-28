@@ -91,6 +91,7 @@ namespace APro
         String& operator << (const String & str);
         String& operator << (const char* str);
 
+        static String toString(unsigned int num);
         static String toString(int num);
         static String toString(double num);
 
@@ -105,6 +106,7 @@ namespace APro
         bool operator == (const char* other) const;
         bool operator != (const char* other) const;
 
+        String operator + (const char* other) const;
         String operator + (const String& other) const;
 
     protected:

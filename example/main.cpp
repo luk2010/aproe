@@ -28,6 +28,7 @@
 #include "Keyboard.h"
 #include "Dialog.h"
 #include "DynamicLibraryLoader.h"
+#include "Image.h"
 #include "Main.h"
 
 int main()
@@ -304,6 +305,18 @@ int main()
 
                 console << "\n" << rmanager.listResources();
             }
+
+            APro::SharedPointer<APro::PluginHandle> devilLoader = pmmanager.addPluginHandle(APro::String("DevILLoaderPlugin"),
+                                                                                            APro::String("DevIlLoader.dll"));
+
+            APro::SharedPointer<APro::Image> myImg = rmanager.loadResourceWithLoader<APro::Image>(APro::String("MyImage"),
+                                                                                                  APro::String("Screenshot.jpg"),
+                                                                                                  APro::String("DevILLoader"));
+
+            console << "\nWidth : " << (int) myImg->width() << ", Height : " << (int) myImg->height() << ".";
+            console << "\n" << myImg->get(400, 200);
+
+            rmanager.write(APro::String("MyImage"), APro::String("DevILWriter"), APro::String("myimage.jpg"));
 
         }
         catch(std::exception const& e2)

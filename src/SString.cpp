@@ -306,6 +306,13 @@ namespace APro
             mstr.append('\0');
     }
 
+    String String::toString(unsigned int num)
+    {
+        char buffer[30];
+        sprintf(buffer, "%d", num);
+        return String(buffer);
+    }
+
     String String::toString(int num)
     {
         char buffer[30];
@@ -415,6 +422,13 @@ namespace APro
     }
 
     String String::operator+(const String& other) const
+    {
+        String ret(*this);
+        ret.append(other);
+        return ret;
+    }
+
+    String String::operator+(const char* other) const
     {
         String ret(*this);
         ret.append(other);

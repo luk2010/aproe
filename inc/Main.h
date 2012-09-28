@@ -44,8 +44,8 @@ namespace APro
 
         void clear()
         {
-            contextFactoryManager.clear();
             pluginManager.clear();
+            contextFactoryManager.clear();
             resourceManager.clear();
             windowManager.clear();
         }

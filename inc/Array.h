@@ -100,6 +100,36 @@ namespace APro
             clear();
         }
 
+        void set(const T* a, size_t sz)
+        {
+            clear();
+
+            if(a)
+            {
+                reserve(sz);
+                if(first)
+                {
+                    memcpy(first, a, sz * sizeof(T));
+                    size = sz;
+                }
+            }
+        }
+
+        void set(const Array<T>& other)
+        {
+            clear();
+
+            if(!other.isEmpty())
+            {
+                reserve(other.getPhysicalSize());
+                if(first != NULL)
+                {
+                    memcpy(first, other.first, sizeof(T) * other.getPhysicalSize());
+                    size = other.getSize();
+                }
+            }
+        }
+
         size_t getPhysicalSize() const
         {
             return physicalSize;

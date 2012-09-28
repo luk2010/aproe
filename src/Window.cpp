@@ -280,6 +280,8 @@ namespace APro
 
         ChangeDisplaySettings(NULL, 0);
 
+        detachContext();
+
         HWND hwnd = getParam(String("HANDLE")).to<HWND>();
         if(hwnd && !DestroyWindow(hwnd))
         {
@@ -539,6 +541,8 @@ namespace APro
         }
 
         context = c;
+
+        context->initialize();
         context->addListener(addListener(String("WindowToContextListener")));
     }
 
