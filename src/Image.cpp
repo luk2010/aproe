@@ -167,10 +167,21 @@ namespace APro
 
     void Image::flip()
     {
-        for(size_t j = 0; j < height(); ++j)
+        for(size_t j = 0; j < height() / 2; ++j)
         {
-            std::swap_ranges(&data.colors[j * width()], &data.colors[(j + 1) * width() - 1],
-                             &data.colors[(height() - j - 1 * width())]);
+           std::swap_ranges(&data.colors[j * width()], &data.colors[(j + 1) * width() - 1],
+                             &data.colors[(height() - j - 1) * width()]);
+        }
+    }
+
+    void Image::flipWidth(size_t h)
+    {
+        if(h < height())
+        {
+            for(size_t c = h * width(); c <= (h + 1) * width() - 1; c++)
+            {
+
+            }
         }
     }
 
@@ -178,7 +189,7 @@ namespace APro
     {
         for(size_t i = 0; i < width() / 2; ++i)
         {
-            for(size_t j = 0; j < height() / 2; ++j)
+            for(size_t j = 0; j < height(); ++j)
             {
                 std::swap_ranges(&data.colors[i + j * data.width],
                                  &data.colors[i + j * data.width + 1],

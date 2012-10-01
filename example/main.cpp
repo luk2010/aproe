@@ -318,6 +318,35 @@ int main()
 
             rmanager.write(APro::String("MyImage"), APro::String("DevILWriter"), APro::String("myimage.jpg"));
 
+            myImg.release();
+            rmanager.unloadResource(APro::String("MyImage"));
+
+            APro::List<APro::String> fileList = APro::Dialog::chooseFile(APro::String("Choose an image to open"),
+                                                                         APro::String("Images\0*.jpg *.bmp\0All\0*.*"),
+                                                                         APro::String(), false);
+
+            if(!fileList.isEmpty())
+            {
+                console << "\n" << fileList.at(0);
+                myImg = rmanager.loadResourceWithLoader<APro::Image>(APro::String("SelectedImage"), fileList.at(0), APro::String("DevILLoader"));
+
+                if(!myImg.isNull())
+                {
+
+                    console << "\nWidth : " << (int) myImg->width() << ", Height : " << (int) myImg->height() << ".";
+                    myImg->flip();
+                    myImg->mirror();
+                    myImg->flip();
+                    myImg->mirror();
+
+                    rmanager.write(APro::String("SelectedImage"), APro::String("DevILWriter"), APro::String("selected.jpg"));
+                }
+            }
+            else
+            {
+                console << "\nYou didn't choose any image !";
+            }
+
         }
         catch(std::exception const& e2)
         {

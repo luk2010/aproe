@@ -161,6 +161,7 @@ namespace APro
         if(!res.isNull())
         {
             resources.erase(resources.find(res));
+            Console::get() << "\n[ResourceManager] Unloading resource " << name << ".";
         }
     }
 

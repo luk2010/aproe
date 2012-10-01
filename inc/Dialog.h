@@ -16,6 +16,7 @@
 
 #include "Platform.h"
 #include "SString.h"
+#include "List.h"
 
 namespace APro
 {
@@ -39,6 +40,7 @@ namespace APro
         static void warning(const String& title, const String & msg);
         static Answer::_ ask(const String& title, const String & msg);
         static Answer::_ askError(const String& title, const String & msg);
+        static List<String> chooseFile(const String& title, const String& filters, const String& defaultFilename, bool multiSelection);
     };
 }
 

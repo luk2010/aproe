@@ -48,6 +48,9 @@
 			<Add option="-DBUILD_DLL" />
 			<Add directory="inc" />
 		</Compiler>
+		<Linker>
+			<Add option="-lcomdlg32" />
+		</Linker>
 		<Unit filename="inc/Allocator.h" />
 		<Unit filename="inc/Array.h" />
 		<Unit filename="inc/Base.h" />

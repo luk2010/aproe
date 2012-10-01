@@ -78,6 +78,10 @@ namespace APro
 
         void destroy();
 
+    protected:
+
+        void flipWidth(size_t h);
+
     private:
 
         Data data;
