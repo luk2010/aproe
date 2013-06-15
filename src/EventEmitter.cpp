@@ -13,6 +13,7 @@
 **/
 #include "EventEmitter.h"
 #include "Console.h"
+#include "StringStream.h"
 
 namespace APro
 {
@@ -32,31 +33,39 @@ namespace APro
 
     }
 
-    void EventEmitter::sendEvent(const SharedPointer<Event>& e)
+    void EventEmitter::sendEvent(const Event::ptr& e)
     {
-        for(List<SharedPointer<EventListener> >::Iterator i(listeners.begin()); !i.isEnd(); i++)
+    for(List<EventListener::ptr>::Iterator i(listeners.begin()); !i.isEnd(); i++)
         {
             sendManualEvent(e, i.get());
         }
     }
 
-    void EventEmitter::sendSpecificEvent(const SharedPointer<Event>& e, const String& name)
+    void EventEmitter::sendSpecificEvent(const Event::ptr& e, const String& name)
     {
-        SharedPointer<EventListener> listener = getListener(name);
+        EventListener::ptr listener = getListener(name);
         sendManualEvent(e, listener);
     }
 
-    void EventEmitter::sendManualEvent(const SharedPointer<Event>& e, SharedPointer<EventListener>& listener)
+    void EventEmitter::sendManualEvent(const Event::ptr& e, EventListener::ptr& listener)
     {
         if(!listener.isNull())
+        {
+            if(!isEventDocumented(e->type()))
+            {
+                Console::get() << "\n[EventEmitter] None documented event \"" << e->type() << "\" has been send ! Try not to send yourself custom event from a non-custom event emitter.";
+            }
+
             listener->receive(e);
+        }
+
     }
 
-    SharedPointer<EventListener> EventEmitter::addListener(const String& name)
+    EventListener::ptr EventEmitter::addListener(const String& name)
     {
-        if(name.isEmpty()) return SharedPointer<EventListener>();
+        if(name.isEmpty()) return EventListener::ptr();
 
-        SharedPointer<EventListener> ret = getListener(name);
+        EventListener::ptr ret = getListener(name);
         if(!ret.isNull())
         {
             Console::get() << "\n[EventEmitter] Listener " << name << " already exists ! Can't add one with same name.";
@@ -70,23 +79,23 @@ namespace APro
         return ret;
     }
 
-    SharedPointer<EventListener> EventEmitter::getListener(const String& name)
+    EventListener::ptr EventEmitter::getListener(const String& name)
     {
-        for(List<SharedPointer<EventListener> >::Iterator i(listeners.begin()); !i.isEnd(); i++)
+        for(List<EventListener::ptr>::Iterator i(listeners.begin()); !i.isEnd(); i++)
         {
             if(i.get()->name() == name)
                 return i.get();
         }
 
-        return SharedPointer<EventListener>();
+        return EventListener::ptr();
     }
 
-    SharedPointer<EventListener> EventEmitter::registerListener(const SharedPointer<EventListener> & listener)
+    EventListener::ptr EventEmitter::registerListener(const EventListener::ptr & listener)
     {
         if(listener.isNull())
             return listener;
 
-        SharedPointer<EventListener> ret = getListener(listener->name());
+        EventListener::ptr ret = getListener(listener->name());
 
         if(!ret.isNull())
         {
@@ -104,20 +113,61 @@ namespace APro
 
     void EventEmitter::removeListener(const String& name)
     {
-        SharedPointer<EventListener> ret = getListener(name);
+        EventListener::ptr ret = getListener(name);
         if(!ret.isNull())
         {
             listeners.erase(listeners.find(ret));
         }
     }
 
-    SharedPointer<EventListener> EventEmitter::createListener(const String& name) const
+    EventListener::ptr EventEmitter::createListener(const String& name) const
     {
-        return SharedPointer<EventListener>(AProNew(1, EventListener) (name));
+        EventListener::ptr listener = EventListener::ptr(AProNew3(EventListener) (name));
+        listener.setDeletionMethod(DeletionMethod::Delete3);
+        return listener;
     }
 
-    SharedPointer<Event> EventEmitter::createEvent(const String& name) const
+    Event::ptr EventEmitter::createEvent(const String& name) const
     {
-        return SharedPointer<Event>(AProNew(1, Event) (name));
+        Event::ptr event = Event::ptr(AProNew3(Event) (name));
+        event.setDeletionMethod(DeletionMethod::Delete3);
+        return event;
+    }
+
+    void EventEmitter::documentEvent(const String& event, const String& description)
+    {
+        events[event] = description;
+    }
+
+    String EventEmitter::explainEvents() const
+    {
+        String ret;
+
+        ret << "\n[EventEmitter] Explaining events"
+            << "\n--------------------------------";
+
+        for(unsigned int i = 0; i < events.size(); ++i)
+        {
+            const EventsList::Pair& pair = events.getPair(i);
+            ret << "\n+ " << pair.first() << " : " << pair.second() << ".";
+        }
+
+        ret << "\n--------------------------------";
+        return ret;
+    }
+
+    const String EventEmitter::getEventDocumentation(const String& event) const
+    {
+        if(events.exists(event))
+        {
+            return events[event];
+        }
+
+        return String();
+    }
+
+    bool EventEmitter::isEventDocumented(const String& event) const
+    {
+        return events.exists(event);
     }
 }

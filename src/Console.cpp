@@ -1,19 +1,21 @@
+////////////////////////////////////////////////////////////
 /** @file Console.cpp
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
  *  @date 27/06/2012
  *
- *  @addtogroup Global
- *  @addtogroup Utils
- *
- *  This file defines the Console Utility class.
+ *  Implements the Console Utility class.
  *
 **/
+////////////////////////////////////////////////////////////
 #define _WIN32_WINNT 0x0500
 #include "Console.h"
 #include <stdio.h>
+#include "ThreadMutex.h"
+#include "ThreadMutexLockGuard.h"
 
 namespace APro
 {
@@ -21,6 +23,7 @@ namespace APro
     APRO_IMPLEMENT_SINGLETON(Console)
 
     Console::Console()
+        : ThreadSafe()
     {
         currentState.background = Color::Black;
         currentState.foreground = Color::White;
@@ -35,21 +38,30 @@ namespace APro
 
     Console& Console::dump(const char* filename)
     {
-        return dump(String(filename));
+        if(filename)
+        {
+            APRO_THREADSAFE_AUTOLOCK
+
+            FILE* file = nullptr;
+
+            file = fopen(filename, "w+");
+            if(file)
+            {
+                fprintf(file, "Console Log");
+                fprintf(file, "\n-----------\n\n");
+                fprintf(file, "%s", dumpedLog.toCstChar());
+                fclose(file);
+            }
+        }
+
+        return *this;
     }
 
     Console& Console::dump(const String& filename)
     {
         if(!filename.isEmpty())
         {
-            FILE* file = nullptr;
-
-            file = fopen(filename.toCstChar(), "w+");
-            if(file)
-            {
-                fprintf(file, dumpedLog.toCstChar());
-                fclose(file);
-            }
+            dump(filename.toCstChar());
         }
 
         return *this;
@@ -144,10 +156,19 @@ namespace APro
         return put(String(buffer));
     }
 
+    Console& Console::operator<<(unsigned long li)
+    {
+        char buffer[33];
+        sprintf(buffer, "%lu", li);
+        return put(String(buffer));
+    }
+
 #if APRO_PLATFORM == APRO_WINDOWS
 
     void Console::write(const String& str, Color::_ foreground, Color::_ background, bool bold, bool blink)
     {
+        APRO_THREADSAFE_AUTOLOCK
+
         int b = (int) background;
         int colour = ((int) foreground) + (b * 16);
 
@@ -166,6 +187,8 @@ namespace APro
 
     void Console::write(const String& str, Color::_ foreground, Color::_ background, bool bold, bool blink)
     {
+        APRO_THREADSAFE_AUTOLOCK
+
         makeC("0");
 
         int f = (int) foreground;
@@ -180,7 +203,7 @@ namespace APro
         makeI(f);
         makeI(b);
 
-        printf(str.toCstChar());
+        printf("%s", str.toCstChar());
 
         dumpedLog.append(str);
     }
@@ -215,7 +238,7 @@ namespace APro
 
 #else
 
-        put(String("\Showing this window isn't supported yet !"));
+        put(String("\nShowing this window isn't supported yet !"));
 
 #endif
 

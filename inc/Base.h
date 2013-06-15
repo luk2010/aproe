@@ -21,7 +21,7 @@
 #define APRO_ON 1
 
 /** Set if the C++0X should be used. */
-#define APRO_USECPLUSPLUS0X APRO_OFF
+#define APRO_USECPLUSPLUS0X APRO_ON
 
 /** Set if we must use Exception. */
 #define APRO_EXCEPTION APRO_ON
@@ -53,10 +53,10 @@
 #endif
 
 /** Set DLL config to export. */
-#define APRO_BUILDDLLEXPORT __declspec(dllexport)
+#define APRO_BUILDDLLEXPORT /* __declspec(dllexport)*/
 
 /** Set DLL config to import. */
-#define APRO_BUILDDLLIMPORT __declspec(dllimport)
+#define APRO_BUILDDLLIMPORT /* __declspec(dllimport)*/
 
 /** Defines either DLL is export or import. */
 #if defined(BUILD_DLL) || defined(DLL) || defined(__DLL__)
@@ -70,5 +70,9 @@
 #endif
 
 #include "System.h"
+
+typedef char                Byte;
+typedef long int            Offset;
+typedef unsigned long int   Id;
 
 #endif

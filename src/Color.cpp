@@ -16,6 +16,22 @@
 
 namespace APro
 {
+    Color Color::Black((unsigned char) 0,0,0,255);
+    Color Color::White((unsigned char) 255,255,255,255);
+    Color Color::Red((unsigned char) 255,0,0,255);
+    Color Color::Green((unsigned char) 0,255,0,255);
+    Color Color::Blue((unsigned char) 0,0,255,255);
+
+    Color Color::rgb(unsigned char r, unsigned char g, unsigned char b)
+    {
+        return Color(r,g,b,255);
+    }
+
+    Color Color::rgba(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+    {
+        return Color(r,g,b,a);
+    }
+
     Color::Color()
         : color(0)
     {
@@ -32,6 +48,14 @@ namespace APro
         : color(0)
     {
         set(r, g, b, a);
+    }
+
+    Color::Color(float r, float g, float b, float a)
+    {
+        set(colorvaluefromfloat(r),
+            colorvaluefromfloat(g),
+            colorvaluefromfloat(b),
+            colorvaluefromfloat(a));
     }
 
     Color::Color(const Color& other)
@@ -76,6 +100,14 @@ namespace APro
         c[1] = g;
         c[2] = b;
         c[3] = a;
+    }
+
+    void Color::set(float r, float g, float b, float a)
+    {
+        set(colorvaluefromfloat(r),
+            colorvaluefromfloat(g),
+            colorvaluefromfloat(b),
+            colorvaluefromfloat(a));
     }
 
     void Color::set(Component::_ component, unsigned char c)

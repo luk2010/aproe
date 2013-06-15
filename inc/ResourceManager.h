@@ -47,7 +47,8 @@ namespace APro
 
         template <typename ResourceType> SharedPointer<ResourceType> loadResource(const String& name, const String& filename)
         {
-            return spCast<ResourceType, Resource>(loadResource(name, filename));
+            Resource::ptr r = loadResource(name, filename);
+            return spCast<ResourceType, Resource>(r);
         }
         SharedPointer<Resource> loadResource(const String& name, const String& filename);
 

@@ -220,7 +220,7 @@ namespace APro
             return pairs;
         }
 
-        bool exists(const T1& key)
+        bool exists(const T1& key) const
         {
             return getIndex(key) > -1;
         }

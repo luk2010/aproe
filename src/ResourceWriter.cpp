@@ -50,7 +50,7 @@ namespace APro
         return *this;
     }
 
-    void ResourceWriter::write(const SharedPointer<Resource> & resource, const String& filename) const
+    void ResourceWriter::write(const SharedPointer<Resource> & /* resource */, const String& /* filename */) const
     {
 
     }

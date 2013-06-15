@@ -21,7 +21,7 @@
 
 namespace APro
 {
-    template<class Numeric>
+    template<typename Numeric>
     class Vector2
     {
     public:
@@ -261,12 +261,12 @@ namespace APro
 
         Numeric distance(const Vector2<Numeric>& v) const
         {
-            return (v - *this).lenght();
+            return (*this - v).lenght();
         }
 
         Numeric squaredDistance(const Vector2<Numeric>& v) const
         {
-            return (v - *this).squaredLenght();
+            return (*this - v).squaredLenght();
         }
 
         Vector2<Numeric> midPoint(const Vector2<Numeric>& v) const

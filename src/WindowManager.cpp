@@ -12,11 +12,13 @@
  *
 **/
 #include "WindowManager.h"
+#include "ThreadMutex.h"
+#include "ThreadMutexLockGuard.h"
 
 namespace APro
 {
     WindowManager::WindowManager()
-        : windows(Manager<Window>::objects)
+        : ThreadSafe(), windows(Manager<Window>::objects)
     {
 
     }
@@ -51,22 +53,30 @@ namespace APro
 
     SharedPointer<Window> WindowManager::create(const String& name, const String& title, const String& size, bool fullscreen)
     {
+        APRO_THREADSAFE_AUTOLOCK
+
         SharedPointer<Window> ret = getWindow(name);
         if(ret.isNull())
         {
-            ret = AProNew(1, Window) (name, title, size);
+            ret = AProNew3(Window) (name, title, size);
+            ret.setDeletionMethod(DeletionMethod::Delete3);
             ret->fullscreen(fullscreen);
             if(fullscreen)
             {
                 ret->reset();
             }
-            else if(!ret->create())
+            else
             {
-                Console::get() << "\n[WindowManager] Couldn't create Window " << name << " !";
-                return SharedPointer<Window>();
+                bool created = ret->create();
+                if(!created)
+                {
+                    Console::get() << "\n[WindowManager] Couldn't create Window " << name << " !";
+                    return Window::ptr();
+                }
+
             }
 
-            windows.append(ret);
+            Manager<Window>::push(ret);
             Console::get() << "\n[WindowManager] Created Window with name : " << name << ", title : " << title << " and size : " << size << ".";
         }
 
@@ -75,6 +85,7 @@ namespace APro
 
     void WindowManager::destroy(const String& name)
     {
+        APRO_THREADSAFE_AUTOLOCK
         SharedPointer<Window> d = getWindow(name);
         if(!d.isNull())
         {
@@ -84,6 +95,7 @@ namespace APro
 
     void WindowManager::destroy(const SharedPointer<Window>& window)
     {
+        APRO_THREADSAFE_AUTOLOCK
         SharedPointer<Window> d = getWindow(window->name());
         if(!d.isNull())
         {
@@ -93,6 +105,7 @@ namespace APro
 
     void WindowManager::clear()
     {
+        APRO_THREADSAFE_AUTOLOCK
         while(!windows.isEmpty())
         {
             destroy(windows.at(0));
@@ -102,6 +115,7 @@ namespace APro
 
     void WindowManager::loop()
     {
+        APRO_THREADSAFE_AUTOLOCK
         for(List<SharedPointer<Window> >::Iterator i(windows.begin()); !i.isEnd(); i++)
         {
             if(!(i.get().isNull()))

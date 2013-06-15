@@ -32,7 +32,7 @@ namespace APro
 
     }
 
-    PluginHandle::PluginHandle(const PluginHandle& other)
+    PluginHandle::PluginHandle(const PluginHandle& /* other */)
         : name(""), info(nullptr), dynLib(nullptr)
     {
 

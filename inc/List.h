@@ -1,14 +1,12 @@
 /** @file List.h
+ *  @ingroup Memory
  *
  *  @author Luk2010
  *  @version 0.1A
  *
  *  @date 16/07/2012
  *
- *  @addtogroup Global
- *  @addtogroup Memory
- *
- *  This file defines the List container.
+ *  Defines the List container.
  *
 **/
 #ifndef APROLIST_H
@@ -171,22 +169,22 @@ namespace APro
                 return previous();
             }
 
-            bool operator == (Iterator& i) const
+            bool operator == (Iterator i) const
             {
                 return i.node == node;
             }
 
-            bool operator != (Iterator& i) const
+            bool operator != (Iterator i) const
             {
                 return !(*this == i);
             }
 
-            bool operator == (ConstIterator& i) const
+            bool operator == (ConstIterator i) const
             {
                 return i.node == node;
             }
 
-            bool operator != (ConstIterator& i) const
+            bool operator != (ConstIterator i) const
             {
                 return !(*this == i);
             }
@@ -255,6 +253,11 @@ namespace APro
                 node = it.node;
             }
 
+            ConstIterator(const Iterator& it)
+            {
+                node = it.node;
+            }
+
             ~ConstIterator()
             {
                 /* Do nothing */
@@ -318,22 +321,22 @@ namespace APro
                 return previous();
             }
 
-            bool operator == (Iterator& i) const
+            bool operator == (Iterator i) const
             {
                 return i.node == node;
             }
 
-            bool operator == (ConstIterator& i) const
+            bool operator == (ConstIterator i) const
             {
                 return i.node == node;
             }
 
-            bool operator != (ConstIterator& i) const
+            bool operator != (ConstIterator i) const
             {
                 return !(*this == i);
             }
 
-            bool operator != (Iterator& i) const
+            bool operator != (Iterator i) const
             {
                 return !(*this == i);
             }
@@ -388,8 +391,8 @@ namespace APro
 
     private:
 
-          BeginNode firstNode;
-          EndNode   lastNode;
+          BeginNode     firstNode;
+          EndNode       lastNode;
           size_t msize;
 
     public:
@@ -403,6 +406,14 @@ namespace APro
         List(const List<T>& l)
             : msize(0)
         {
+            lastNode.previous = &firstNode;
+            firstNode.next = &lastNode;
+            append(l);
+        }
+
+        List<T>& operator = (const List<T>& other)
+        {
+            clear();
             lastNode.previous = &firstNode;
             firstNode.next = &lastNode;
             append(l);
@@ -602,6 +613,25 @@ namespace APro
             }
         }
 
+        void erase(Iterator& it)
+        {
+            ConstIterator endd = end();
+            if(it == endd)
+                return;
+
+            Node* nodeToErase = it.node;
+            it++;
+
+            Node* previousNode = nodeToErase->previous;
+            Node* nextNode = nodeToErase->next;
+
+            nextNode->previous = previousNode;
+            previousNode->next = nextNode;
+
+            AProDelete(nodeToErase);
+            msize--;
+        }
+
         void clear()
         {
             erase(0, msize);
@@ -702,6 +732,28 @@ namespace APro
             }
 
             return -1;
+        }
+
+        T& last()
+        {
+            Iterator it(end()); it--;
+            return it.get();
+        }
+
+        const T& last() const
+        {
+            ConstIterator it(end()); it--;
+            return it.get();
+        }
+
+        T& first()
+        {
+            return begin().get();
+        }
+
+        const T& first() const
+        {
+            return begin().get();
         }
 
     private:

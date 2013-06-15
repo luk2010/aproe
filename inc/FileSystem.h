@@ -14,57 +14,76 @@
 #ifndef AROFILESYSTEM_H
 #define AROFILESYSTEM_H
 
-#include "Singleton.h"
 #include "SString.h"
-/*
+#include "Implementable.h"
+#include "Implementation.h"
+#include "SharedPointer.h"
+#include "File.h"
+#include "FileSystemImplementation.h"
+
 namespace APro
 {
-    class APRO_DLL FileSystem : public Singleton<FileSystem>
+    /** @class FileSystem
+      * @brief Main-generated class able to give access to files.
+      * @note A platform-dependant implementation is required
+      * to use this class. If none provided, no files will be used !
+      * @note The file system is based on a path and can use relative path to open
+      * files.
+    **/
+    class APRO_DLL FileSystem : public Implementable<FileSystemImplementation>
     {
-        friend class Singleton<FileSystem>;
+        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(FileSystem)
 
     public:
 
-        class OpenMode
-        {
-        public:
-            enum _
-            {
-                ReadWrite,
-                ReadOnly,
-                WriteOnly
-            };
-        };
+        FileSystem(const String& basepath);
+        FileSystem(const FileSystem& other);
 
-        class OpenOption
-        {
-        public:
-            enum _
-            {
-                Append,
-                Truncate,
-                None
-            };
-        };
+        ~FileSystem();
+
+        void clear();
+
+    public:
+
+        void setBasePath(const String & basepath);
+        String getBasePath() const;
+
+    public:
+
+        String getRelativePath(const String & absolutepath) const;
+        File::ptr get(const String& path, bool relative = true);
+
+    public:
+
+        String   absolutePath(const String& filepath) const;
+        bool     isAbsolutePath(const String& filepath) const;
+
+        String   directoryOf(const String& filepath) const;
+        String   normalizePath(const String& filepath, char sep) const;
+        String   normalizeSeparators(const String& filepath, char sep) const;
+
+        bool     copy(const String& source, const String& target);
+        bool     Delete(const String& filepath);
+        bool     exists(const String& filepath) const;
+
+        bool     rename(const String& source, const String& target);
+
+        char     pathSeparator() const;
+
+    public:
+
+        static String extension(const String& filepath);
+        static String getWorkingDirectory();
+        static bool   setWorkingDirectory(const String& working_directory);
 
     protected:
 
-        FileSystem();
-        ~FileSystem();
+        void initImplementation();
 
-    public:
+    protected:
 
-        FileSystem& init(const String& base = String());
-
-        File&       open(const String& filepath, OpenMode::_ om = ReadOnly, OpenOption::_ op = None);
-        File&       create(const String& filepath);
-
-        File&       getLaunchDirectory();
-
-    private:
-
-        String basepath;
+        String m_basepath;
     };
 }
-*/
+
 #endif

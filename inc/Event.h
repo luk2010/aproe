@@ -17,6 +17,7 @@
 #include "Platform.h"
 #include "ParametedObject.h"
 #include "SString.h"
+#include "SharedPointer.h"
 
 #include "Singleton.h"
 
@@ -43,6 +44,8 @@ namespace APro
 
     class APRO_DLL Event : public ParametedObject
     {
+        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Event)
+
     public:
 
         Event();

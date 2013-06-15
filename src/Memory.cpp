@@ -37,7 +37,7 @@ namespace APro
 #if APRO_EXCEPTION == APRO_ON
 
                 char buffer[APRO_EXCEPTIONMAXBUFFERSIZE];
-                sprintf(buffer, "Allocation of %d bytes failed in file %s at line %d", byte, file_, line_);
+                sprintf(buffer, "Allocation of %li bytes failed in file %s at line %d", byte, file_, line_);
 
                 APRO_THROW("Allocation Failed", buffer, "Memory");
 
@@ -50,7 +50,7 @@ namespace APro
 
 #if APRO_MEMORYTRACKER == APRO_ON
 
-            MemoryTracker::get()->reportAllocation(ptr, byte, func_, file_, line_);
+            MemoryManager::get().reportAllocation(ptr, byte, func_, file_, line_);
 
 #endif
 
@@ -81,7 +81,7 @@ namespace APro
 #if APRO_EXCEPTION == APRO_ON
 
                     char buffer[APRO_EXCEPTIONMAXBUFFERSIZE];
-                    sprintf(buffer, "Reallocation of %d bytes failed in file %s at line %d", byte, file_, line_);
+                    sprintf(buffer, "Reallocation of %li bytes failed in file %s at line %d", byte, file_, line_);
 
                     APRO_THROW("Reallocation Failed", buffer, "Memory");
 
@@ -94,7 +94,7 @@ namespace APro
 
 #if APRO_MEMORYTRACKER == APRO_ON
 
-                MemoryTracker::get()->reportReallocation(ptr, new_ptr, byte, func_, file_, line_);
+                MemoryManager::get().reportReallocation(ptr, new_ptr, byte, func_, file_, line_);
 
 #endif
 
@@ -116,7 +116,7 @@ namespace APro
 
 #if APRO_MEMORYTRACKER == APRO_ON
 
-            MemoryTracker::get()->reportDeallocation(ptr, func_, file_, line_);
+            MemoryManager::get().reportDeallocation(ptr, func_, file_, line_);
 
 #endif
 

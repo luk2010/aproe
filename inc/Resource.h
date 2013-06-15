@@ -16,11 +16,15 @@
 
 #include "Platform.h"
 #include "SString.h"
+#include "SharedPointer.h"
+#include "ThreadSafe.h"
 
 namespace APro
 {
-    class APRO_DLL Resource
+    class APRO_DLL Resource : public ThreadSafe
     {
+        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Resource)
+
     public:
 
         Resource();

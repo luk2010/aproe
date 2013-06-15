@@ -23,6 +23,8 @@ namespace APro
 {
     class APRO_DLL EventListener : public ParametedObject
     {
+        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(EventListener)
+
     public:
 
         EventListener();
@@ -30,17 +32,19 @@ namespace APro
 
         virtual ~EventListener();
 
-        virtual void receive(const SharedPointer<Event>& e);
-        SharedPointer<Event> received(const String& name);
+        virtual void receive(const Event::ptr& e);
+        const Event::ptr received(const String& name) const;
+        Event::ptr received(const String& name);
 
         void purge();
 
         const String& name() const;
+        String& name();
 
     private:
 
         String mname;
-        List<SharedPointer<Event> > receivedEvents;
+        List<Event::ptr> receivedEvents;
     };
 }
 

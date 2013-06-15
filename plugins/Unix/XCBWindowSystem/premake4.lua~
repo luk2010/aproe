@@ -1,0 +1,12 @@
+-- XCBWindowSystem plugin premake script
+project "XCBWindowSystem"
+	kind "SharedLib"
+	language "C++"
+	includedirs { "inc/" }
+	files { "inc/*.h",
+		"src/*.cpp" }
+	links { "AProE",  os.findlib("xcb"),
+			  os.findlib("X11"),
+			  os.findlib("X11-xcb"),
+			  os.findlib("GL") }
+setupplugintarget()

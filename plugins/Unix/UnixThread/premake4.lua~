@@ -1,0 +1,8 @@
+-- Unix Thread plugin premake4 script
+project "UnixThread"
+	kind "SharedLib"
+	language "C++"
+	files { "inc/*.h",
+		"src/*.cpp" }
+	links { "AProE", os.findlib("pthread") }
+setupplugintarget()

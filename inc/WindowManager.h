@@ -15,13 +15,15 @@
 #define APROWINDOWMANAGER_H
 
 #include "Window.h"
-#include "Singleton.h"
 #include "SharedPointer.h"
 #include "List.h"
+#include "Manager.h"
+#include "ThreadSafe.h"
 
 namespace APro
 {
-    class APRO_DLL WindowManager : public Manager<Window>
+    class APRO_DLL WindowManager : public Manager<Window>,
+                                   public ThreadSafe
     {
     public:
 

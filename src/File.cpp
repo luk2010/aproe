@@ -12,175 +12,405 @@
  *
 **/
 #include "File.h"
+#include "Main.h"
+#include "FileSystem.h"
+
+#include <stdio.h>
+#include <sys/stat.h>
 
 namespace APro
 {
-    File::File() : Resource(), data(), currentIndex(0), openMode(OpenMode::ReadWrite)
+    File::File()
+        : m_filePath(),
+        m_endianness(Endianness::endianness()),
+        m_openMode(OpenMode::ReadWrite),
+        m_file(NULL)
     {
-        type = "File";
+
     }
 
-    File::File(const String& name_, const String& filename_, OpenMode::_ om)
-        : Resource(name_, filename_), data(), currentIndex(0), openMode(om)
+    File::File(const File& other)
+        : m_filePath(other.m_filePath),
+        m_endianness(other.m_endianness),
+        m_openMode(other.m_openMode),
+        m_file(NULL)
     {
-        type = "File";
+
     }
 
-    File::File(const String& name_, const String& filename_, const String& data_, OpenMode::_ om)
-        : Resource(name_, filename_), data(data_), currentIndex(0), openMode(om)
+    File::File(const String& filename)
+        : m_filePath(filename),
+        m_endianness(Endianness::endianness()),
+        m_openMode(OpenMode::ReadWrite),
+        m_file(NULL)
     {
-        type = "File";
+
+    }
+
+    File::File(const String& filename, OpenMode::t openmode)
+        : m_filePath(filename),
+        m_endianness(Endianness::endianness()),
+        m_openMode(openmode),
+        m_file(NULL)
+    {
+
     }
 
     File::~File()
     {
-
-    }
-
-    void File::destroy()
-    {
-
-    }
-
-    void File::put(char c)
-    {
-        if(openMode != OpenMode::ReadOnly)
+        if(isOpened())
         {
-            data.insert(currentIndex, c);
-            pushIndex();
+            close();
         }
     }
 
-    void File::put(const char* m)
+    bool File::Copy(const String& newPath)
     {
-        put(String(m));
-    }
+        long int oldpos = -1;
+        if(isOpened() &&  (long) getOpenMode() >= OpenMode::WriteOnly /* Writing enabled ? */ )
+        {// Obliger de fermer le fichier.
 
-    void File::put(const String& str)
-    {
-        data.insert(currentIndex, str);
-        if(!isEOF()) currentIndex += str.size();
-    }
+            oldpos = tell();
+            close();
+        }
 
-    void File::pop(size_t nbr, Position::_ from)
-    {
-        seek(0, from);
-        data.erase(currentIndex, currentIndex + nbr - 1);
-    }
+        FileSystem& fs = Main::get().getFileSystem();
+        bool ret = fs.copy(m_filePath, newPath);
 
-    char File::get()
-    {
-        char ret = data.at(currentIndex);
-        pushIndex();
+        if(oldpos >= 0)
+        {// On reouvre le fichier a la meme position
 
-        return ret;
-    }
-
-    String File::getLine()
-    {
-        return get(String("\n"));
-    }
-
-    String File::get(const String& separator)
-    {
-        if(isEOF())
-            return String();
-
-        String ret;
-        String sep;
-        while(sep != separator && !isEOF())
-        {
-            char ap = data.at(currentIndex);
-            sep = data.extract(currentIndex + 1, currentIndex + 1 + separator.size());
-            ret.append(ap);
-            pushIndex();
+            open(m_openMode);
+            seek(oldpos);
         }
 
         return ret;
     }
 
-    void File::seek(int to, Position::_ from)
+    bool File::Rename(const String& newPath)
     {
-        if(to == 0 && from == Position::Current)
-            return;
-
-        if(to >= (int) size()) to = (int) size() - 1;
-
-        switch (from)
+        if(isOpened())
         {
-        case Position::Begin:
-            currentIndex = 0 + to;
-        case Position::End:
-            currentIndex = data.size() + to;
-        case Position::Current:
-        default:
-            currentIndex = currentIndex + to;
+            close();
+        }
+
+        FileSystem& fs = Main::get().getFileSystem();
+        bool ret = fs.rename(m_filePath, newPath);
+        setFile(newPath);
+        return ret;
+    }
+
+    bool File::Delete()
+    {
+        if(isOpened())
+        {
+            close();
+        }
+
+        FileSystem& fs = Main::get().getFileSystem();
+        return fs.Delete(m_filePath);
+    }
+
+    bool File::open(OpenMode::t openmode)
+    {
+        if(isOpened())
+        {
+            close();
+        }
+
+        if(openmode != OpenMode::Current)
+        {
+            m_openMode = openmode;
+        }
+
+        switch ((int) m_openMode)
+        {
+        case OpenMode::ReadOnly :
+            m_file = fopen(m_filePath.toCstChar(), "r");
+            break;
+        case OpenMode::WriteOnly :
+            m_file = fopen(m_filePath.toCstChar(), "w");
+            break;
+        case OpenMode::ReadWrite :
+            m_file = fopen(m_filePath.toCstChar(), "r+");
+            break;
+        case OpenMode::Truncate :
+            m_file = fopen(m_filePath.toCstChar(), "w+");
+            break;
+        case OpenMode::Append :
+            m_file = fopen(m_filePath.toCstChar(), "a+");
+            break;
+        }
+
+        if(!m_file)
+        {
+            Main::get().getConsole() << "\n[File]{open} Can't open file " << m_filePath << " !";
+        }
+        else
+        {
+            Main::get().getConsole() << "\n[File]{open} Opened file " << m_filePath << ".";
+        }
+
+        m_lastOperation = Operation::None;
+        return m_file != NULL;
+    }
+
+    void File::close()
+    {
+        if(isOpened())
+        {
+            fclose(m_file);
+            m_file = NULL;
+            m_lastOperation = Operation::None;
         }
     }
 
-    size_t File::size() const
+    void File::flush()
     {
-        return data.size() + 1;
+        if(isOpened())
+        {
+            fflush(m_file);
+            m_lastOperation = Operation::None;
+        }
     }
 
     void File::clear()
     {
-        data.clear();
+        if(isOpened())
+        {
+            close();
+        }
+
+        m_openMode = OpenMode::ReadWrite;
+        m_endianness = Endianness::endianness();
+        m_filePath.clear();
     }
 
-    const Array<char>& File::getData() const
+    bool File::exists() const
     {
-        return data.toCstArray();
+        if(isOpened())
+        {
+            return true;
+        }
+
+        FileSystem& fs = Main::get().getFileSystem();
+        return fs.exists(m_filePath);
     }
 
-    const String& File::toString() const
+    bool File::isOpened() const
     {
-        return data;
+        return m_file != NULL;
     }
 
     bool File::isEOF() const
     {
-        return data.toCstArray().at(currentIndex) == '\0';
+        if(isOpened())
+        {
+            return feof(m_file) != 0;
+        }
+
+        return false;
     }
 
-    void File::pushIndex()
+    void File::setCursorPos(CursorPosition::t cp, Offset offset)
     {
-        if(!isEOF()) currentIndex++;
+        if(isOpened())
+        {
+            int origin;
+            switch (cp)
+            {
+            case CursorPosition::AtBegin :
+                origin = SEEK_SET;
+                break;
+
+            case CursorPosition::AtEnd :
+                origin = SEEK_END;
+                break;
+
+            case CursorPosition::AtCurrent :
+            default:
+                origin = SEEK_CUR;
+            }
+
+            fseek(m_file, (long int) offset, origin);
+        }
     }
 
-    File& File::operator >> (String& str)
+    void File::seek(CursorPosition::t cp, Offset offset)
     {
-        str = get(String(" "));
-        return *this;
+        setCursorPos(cp, offset);
     }
 
-    File& File::operator >> (char& c)
+    void File::setCursorPos(Offset offset)
     {
-        c = get();
-        return *this;
+        if(isOpened())
+        {
+            fseek(m_file, offset, SEEK_SET);
+        }
     }
 
-    File& File::operator >> (int& i)
+    void File::seek(Offset offset)
     {
-        const char* d = data.toCstChar();
-        i = *((int*) d[currentIndex]);
-
-        if(currentIndex + sizeof(int) < data.size())
-            currentIndex += sizeof(int);
-        else
-            currentIndex = data.size();
-        return *this;
+        setCursorPos(offset);
     }
 
-    File& File::operator >> (double& d)
+    Offset File::getCursorPos() const
     {
-        const char* e = data.toCstChar();
-        d = *((double*) e[currentIndex]);
+        if(isOpened())
+        {
+            return (Offset) ftell(m_file);
+        }
 
-        if(currentIndex + sizeof(double) < data.size())
-            currentIndex += sizeof(double);
-        else
-            currentIndex = data.size();
-        return *this;
+        return 0;
+    }
+
+    Offset File::tell() const
+    {
+        return getCursorPos();
+    }
+
+    Offset File::getSize() const
+    {
+        // Utilisation de stat
+        struct FSTAT fstat;
+        FSTAT(m_filePath.toCstChar(), &fstat);
+
+        return fstat.st_size;
+    }
+
+    void File::setEndianness(Endianness::t e)
+    {
+        m_endianness = e;
+    }
+
+    Endianness::t File::getEndianness() const
+    {
+        return m_endianness;
+    }
+
+    void File::setFile(const String& filepath)
+    {
+        if(isOpened())
+        {
+            close();
+        }
+
+        m_filePath = filepath;
+    }
+
+    void File::setOpenMode(File::OpenMode::t om)
+    {
+        if(isOpened())
+        {
+            close();
+        }
+
+        m_openMode = om;
+    }
+
+    String File::getFile() const
+    {
+        return m_filePath;
+    }
+
+    File::OpenMode::t File::getOpenMode() const
+    {
+        return m_openMode;
+    }
+
+    String File::getDirectory() const
+    {
+        String dir = Main::get().getFileSystem().directoryOf(m_filePath);
+        if(dir.isEmpty())
+            return dir;
+
+        return dir.extract(dir.findLast(Main::get().getFileSystem().pathSeparator()), dir.size() - 1);
+    }
+
+    String File::getPath() const
+    {
+        return Main::get().getFileSystem().directoryOf(m_filePath);
+    }
+
+    String File::getFileName() const
+    {
+        return m_filePath.extract(m_filePath.findLast(Main::get().getFileSystem().pathSeparator()), m_filePath.size() - 1);
+    }
+
+    String File::getFullPath() const
+    {
+        return Main::get().getFileSystem().absolutePath(m_filePath);
+    }
+
+    String File::getFilePath() const
+    {
+        return m_filePath;
+    }
+
+    void File::put(char c)
+    {
+        if(isOpened() && m_openMode >= OpenMode::WriteOnly)
+        {
+            write(&c, 1);
+        }
+    }
+
+    void File::put(const String& str)
+    {
+        if(isOpened() && m_openMode >= OpenMode::WriteOnly)
+        {
+            write(str.toCstChar(), str.size());
+        }
+    }
+
+    bool File::get(char& c)
+    {
+        if(isOpened())
+        {
+            return read(&c, 1);
+        }
+
+        return false;
+    }
+
+    void File::write(const char* bytes, size_t sz)
+    {
+        if(isOpened() && m_openMode >= OpenMode::WriteOnly)
+        {
+            if(m_lastOperation == Operation::Read)
+            {
+                flush();
+            }
+
+            if(fwrite(bytes, sizeof(char), sz, m_file) != sz)
+            {
+                Main::get().getConsole() << "\n[File]{write} Can't write " << (int) (sz * sizeof(char)) << " bytes to file " << getFileName() << " !";
+            }
+
+            m_lastOperation = Operation::Write;
+        }
+    }
+
+    bool File::read(char* buffer, size_t sz)
+    {
+        if(isOpened())
+        {
+            if(m_lastOperation == Operation::Write)
+            {
+                flush();
+            }
+
+            m_lastOperation = Operation::Read;
+
+            if(fread(buffer, sizeof(char), sz, m_file) != sz)
+            {
+                Main::get().getConsole() << "\n[File]{write} Can't read " << (int) (sz * sizeof(char)) << " bytes from file " << getFileName() << " !";
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

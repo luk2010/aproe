@@ -13,6 +13,7 @@
 **/
 #include "Image.h"
 #include "Main.h"
+#include "ResourceManager.h"
 
 namespace APro
 {
@@ -35,7 +36,7 @@ namespace APro
 
         if(data.width + data.height != 0 && data.colors.getSize() == 0)
         {
-            fill(Color(255, 255, 255, 255));
+            fill(Color((unsigned char) 255, 255, 255, 255));
         }
     }
 
@@ -128,15 +129,15 @@ namespace APro
 
     SharedPointer<Image> Image::subRect(const Rectangle<size_t>& rect) const
     {
-        SharedPointer<Image> img = AProNew(1, Image) (getName() + "_sub_" + String::toString(rect.left()) + "_" +
-                                                                       String::toString(rect.top()) + "_" +
-                                                                       String::toString(rect.right()) + "_" +
-                                                                       String::toString(rect.bottom()),
+        SharedPointer<Image> img = AProNew(1, Image) (getName() + "_sub_" + String::toString((unsigned int) rect.left()) + "_" +
+                                                                       String::toString((unsigned int) rect.top()) + "_" +
+                                                                       String::toString((unsigned int) rect.right()) + "_" +
+                                                                       String::toString((unsigned int) rect.bottom()),
 
-                                                      getFilename() + "_sub_" + String::toString(rect.left()) + "_" +
-                                                                           String::toString(rect.top()) + "_" +
-                                                                           String::toString(rect.right()) + "_" +
-                                                                           String::toString(rect.bottom()));
+                                                      getFilename() + "_sub_" + String::toString((unsigned int) rect.left()) + "_" +
+                                                                           String::toString((unsigned int) rect.top()) + "_" +
+                                                                           String::toString((unsigned int) rect.right()) + "_" +
+                                                                           String::toString((unsigned int) rect.bottom()));
 
         Data mdata;
         mdata.width = rect.width();
@@ -158,7 +159,7 @@ namespace APro
         }
         else
         {
-            img->fill(Color(0, 0, 0, 255));
+            img->fill(Color((unsigned char) 0, 0, 0, 255));
         }
 
         Main::get().getResourceManager().Manager<Resource>::push(img);

@@ -21,12 +21,20 @@
 #include "EventEmitter.h"
 #include "Keyboard.h"
 #include "Context.h"
+#include "WindowImplementation.h"
+#include "Implementable.h"
 
 namespace APro
 {
     class APRO_DLL Window : public ParametedObject,
-                            public EventEmitter
+                            public EventEmitter,
+                            public Implementable<WindowImplementation>
     {
+
+        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Window)
+        
+        public: friend class Context;
+
     public:
 
         class Status
@@ -73,22 +81,34 @@ namespace APro
         Pair<size_t, size_t> position() const;
 
         void systemLoop();
+        bool isValid();// Performs system loop, to be used in a while
 
         bool reset();
 
         void showCursor(bool s) const;
 
-        SharedPointer<Event> createEvent(const String& name) const;
+        Event::ptr createEvent(const String& name) const;
 
-        SharedPointer<Keyboard> getKeyboard();
+        Keyboard::ptr getKeyboard();
+        Context::ptr  getContext();
 
         void attachContext(Context* c);
         void detachContext();
 
+    protected:
+
+        void context_bind();
+        void context_unbind();
+
+    protected:
+
+        void initImplementation();
+        void documentEvents();
+
     private:
 
-        SharedPointer<Keyboard> keyboard;
-        Context* context;
+        Keyboard::ptr keyboard;
+        Context*      context;
     };
 }
 

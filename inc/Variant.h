@@ -236,6 +236,12 @@ namespace APro
 
             return *ptr;
         }
+
+        template<typename ValueType>
+        bool isCastable() const
+        {
+            return getType() == typeid(ValueType);
+        }
     };
 }
 

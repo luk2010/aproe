@@ -51,6 +51,8 @@ namespace APro
         }
 
 #endif
+
+        return Answer::No;
     }
 
     Dialog::Answer::_ Dialog::askError(const String& title, const String & msg)
@@ -70,6 +72,8 @@ namespace APro
         }
 
 #endif
+
+        return Answer::No;
     }
 
     List<String> Dialog::chooseFile(const String& title, const String& filters, const String& defaultFilename, bool multiSelection)
@@ -118,5 +122,7 @@ namespace APro
         return strList;
 
 #endif
+
+        return List<String>();
     }
 }

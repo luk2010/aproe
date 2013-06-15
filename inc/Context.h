@@ -15,18 +15,19 @@
 #define APROCONTEXT_H
 
 #include "EventReceiver.h"
-#include "Factory.h"
+#include "ViewPort.h"
 
 namespace APro
 {
     class Window;
-    class ContextFactory;
 
     class APRO_DLL Context : public EventReceiver
     {
-    protected:
+        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Context)
 
-        virtual void processEvent(const SharedPointer<Event>& e);
+    public:
+
+        void processEvent(const SharedPointer<Event>& e);
 
     public:
 
@@ -36,39 +37,51 @@ namespace APro
         Context(const Context& other);
 
     public:
-        virtual ~Context();
+        ~Context();
 
         void setWindow(Window* w);
         Window* getWindow();
 
         bool isLoaded() const;
+        bool isBinded() const;
 
-        virtual void initialize() = 0;
-        virtual void release() = 0;
+        void bind();
+        void unbind();
+
+        void reset();
+
+    public:
+
+        void addViewPort(const ViewPort::ptr& viewport);
+        const ViewPort::ptr getViewPort(const String & name) const;
+        ViewPort::ptr getViewPort(const String & name);
+        void removeViewPort(const String& name);
+
+        bool hasViewPorts() const;
+        size_t getNumViewPorts() const;
+
+        ViewPort::ptr getDefaultViewPort() const;
+        ViewPort::ptr& getViewPort(size_t index);
+        const ViewPort::ptr& getViewPort(size_t index) const;
+
+    protected:
+
+        void initDefaultViewPort();
+        void updateViewPorts(const Event::ptr& e);
 
     protected:
 
         void setLoaded(bool l);
+        void setBinded(bool b);
 
     protected:
 
         Window* window;
         bool loaded;
+        bool binded;
+
+        List<ViewPort::ptr> viewports;
     };
-
-    class APRO_DLL ContextFactory : public Factory<Context>
-    {
-    public:
-
-        ContextFactory();
-        ContextFactory(const String& n);
-
-        virtual ~ContextFactory();
-
-        void destroy(const SharedPointer<Context>& obj);
-    };
-
-    typedef FactoryManager<ContextFactory> ContextFactoryManager;
 }
 
 #endif

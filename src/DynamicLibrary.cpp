@@ -56,7 +56,7 @@ namespace APro
             handle = DYNLIB_LOAD(getFilename().toCstChar());
             if(!handle)
             {
-                Console::get() << "\n[DynamicLibrary] Couldn't load DynLib " << getFilename() << ".";
+                Console::get() << "\n[DynamicLibrary] Couldn't load DynLib " << getFilename() << " : " << dlerror() << ".";
                 loaded = false;
             }
             else

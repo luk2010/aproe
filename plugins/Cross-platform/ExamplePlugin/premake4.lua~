@@ -1,0 +1,8 @@
+-- Example plugin premake4 script
+project "ExamplePlugin"
+	kind "SharedLib"
+	language "C++"
+	files { "inc/*.h",
+		"src/*.cpp" }
+	links { "AProE" }
+setupplugintarget()

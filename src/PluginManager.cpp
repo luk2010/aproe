@@ -13,7 +13,11 @@
 **/
 #include "PluginManager.h"
 #include "ResourceManager.h"
+#include "FileSystem.h"
 #include "Main.h"
+
+#include <dirent.h>
+#include <unistd.h>
 
 namespace APro
 {
@@ -108,5 +112,74 @@ namespace APro
         {
             return nullptr;
         }
+    }
+
+    int PluginManager::loadDirectory(const String& path)
+    {// Doit etre fait sans utiliser FileSystem car l'implementation n'est pas encore charge. C'est ici que sera charge par ailleurs son implementation.
+        if(!path.isEmpty())
+        {
+            DIR* dir;
+            struct dirent* dirp;
+
+            dir = opendir(path.toCstChar());
+            if(!dir)
+            {
+                Console::get() << "\n[PluginManager]{loadDirectory} Couldn't load directory plugin \"" << path << "\" !";
+                return 0;
+            }
+
+            List<String> files;
+            String filepath(FileSystem::getWorkingDirectory());
+            if(path.at(0) != '/')
+                filepath.append("/");
+            filepath.append(path);
+
+            while( (dirp = readdir(dir)) != NULL)
+            {
+                String file(dirp->d_name);
+                files.append(file);
+            }
+
+            int ploaded = 0;
+
+            if(files.size() <= 2)
+            {
+                Console::get() << "\n[PluginManager]{loadDirectory} No plugins in directory \"" << path << "\" !";
+
+            }
+            else
+            {
+                for(unsigned int i = 0; i < files.size(); ++i)
+                {
+                    String f = files.at(i);
+                    if(f.size() <= 3) continue;
+
+                    String f2(filepath);
+                    f2.append(f);
+
+                    PluginHandle::ptr plugin = addPluginHandle(String("testxxhash456789"), f2);
+                    if(!plugin.isNull())
+                    {
+                        String pname = plugin->getPluginInfo()->name;
+                        if(getPluginHandle(pname).isNull())
+                        {
+                            plugin->setName(pname); // Le plugin est valide on le fait savoir.
+                            Main::get().getConsole() << "\n[PluginManager]{loadDirectory} Plugin " << pname << " charge !";
+                            ++ploaded;
+                        }
+                        else
+                        {
+                            // Le plugin a deja ete charge, on detruit celui la.
+                            removePluginHandle(String("testxxhash456789"));
+                        }
+                    }
+                }
+            }
+
+            closedir(dir);
+            return ploaded;
+        }
+
+        return 0;
     }
 }

@@ -166,6 +166,9 @@ namespace APro
             return !(*this == other);
         }
     };
+
+    typedef Rectangle<float> RectangleF;
+    typedef Rectangle<double> RectangleD;
 }
 
 #endif

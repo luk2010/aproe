@@ -16,11 +16,14 @@
 
 #include "ResourceLoader.h"
 #include "DynamicLibrary.h"
+#include "SharedPointer.h"
 
 namespace APro
 {
     class APRO_DLL DynamicLibraryLoader : public ResourceLoader
     {
+        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(DynamicLibraryLoader)
+
     public:
 
         DynamicLibraryLoader();

@@ -33,7 +33,7 @@ namespace APro
 
     }
 
-    void NullWriter::write(const SharedPointer<Resource> & resource, const String& filename) const
+    void NullWriter::write(const SharedPointer<Resource> & resource, const String& /* filename */) const
     {
         Console::get() << "\n[NullWriter] Writing object " << resource->getName() << " finished !";
     }

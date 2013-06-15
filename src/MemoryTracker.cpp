@@ -11,6 +11,8 @@
  *
 **/
 #include "MemoryTracker.h"
+#include "Console.h"
+#include "ThreadManager.h"
 
 #if APRO_MEMORYTRACKER == APRO_ON
 
@@ -23,435 +25,317 @@
 
 namespace APro
 {
-    //MemoryTracker* MemoryTracker::instance = nullptr;
-
-    MemoryTracker::MemoryTracker()
+    namespace
     {
-        file.file = nullptr;
-        file.filename = "";
-        file.liveWriting = false;
+        ThreadMutex::ptr global_mutex = nullptr;
+        bool mutex_created = false;
+        bool mutex_creating = false;
 
-        statistics.objectNumber = 0;
-        statistics.totalBytesAllocated = 0;
-
-        totalStats.objectNumber = 0;
-        totalStats.totalBytesAllocated = 0;
-
-        stack.retain = true;
-        stack.cutFilename = false;
-        stack.maxSize = 0;
-    }
-
-    MemoryTracker::~MemoryTracker()
-    {
-        if(!stack.buffer.empty())
+        void create_global_mutex()
         {
-            updateStack(true);
-        }
-        reportLeaks();
-        deinitfile();
-
-        blockMap.clear();
-        file.file = nullptr;
-    }
-
-    MemoryTracker* MemoryTracker::get()
-    {
-
-        static MemoryTracker tracker;
-        return &tracker;
-    }
-
-    void MemoryTracker::reportAllocation(void* ptr, size_t byte, const char* func, const char* file, int line)
-    {
-        if(ptr == nullptr)
-        {
-            return;
+            mutex_creating = true;
+            APRO_THREAD_MUTEX_SAFELOCK(global_mutex);
+            if(!global_mutex.isNull())
+                mutex_created = true;
+            mutex_creating = false;
         }
 
-        std::string filename = processFilename(file);
-
-        MemoryBlock* block = findBlock(ptr);
-        if(block != nullptr)
+        void lock_global_mutex()
         {
-            std::stringstream stream;
-            stream << "\n[" << filename << "]{" << func << "}(" << line << ") Allocation of already allocated adress : " << ptr << ".";
+            if(mutex_creating) return;
 
-            stack.buffer += stream.str();
-
-            updateStack();
-            return;
+            if(mutex_created)
+                APRO_THREAD_MUTEX_SAFELOCK(global_mutex);
+            else
+                create_global_mutex();
         }
 
-        MemoryBlock newBlock;
-        newBlock.func = func;
-        newBlock.file = filename;
-        newBlock.line = line;
-        newBlock.bytes = byte;
-        blockMap[ptr] = newBlock;
-
-        statistics.totalBytesAllocated += byte;
-        statistics.objectNumber += 1;
-
-        totalStats.objectNumber += 1;
-        totalStats.totalBytesAllocated += byte;
-
-        std::stringstream stream;
-        stream << "\n[" << filename << "]{" << func << "}(" << line << ") Allocation of " << byte << " bytes in block " << ptr << ".";
-
-        if(stack.retain)
+        void unlock_global_mutex()
         {
-            stack.buffer += stream.str();
-            stack.dumper += stream.str();
+            if(mutex_creating) return;
 
-            updateStack();
-        }
-
-        return;
-    }
-
-    void MemoryTracker::reportReallocation(void* ptr, void* new_ptr, size_t byte, const char* func, const char* file, int line)
-    {
-        if(new_ptr == nullptr)
-        {
-            reportDeallocation(ptr, func, file, line);
-            return;
-        }
-        if(ptr == nullptr)
-        {
-            reportAllocation(new_ptr, byte, func, file, line);
-            return;
-        }
-
-        std::string filename = processFilename(file);
-
-        MemoryBlock* block = findBlock(ptr);
-        if(block == nullptr)
-        {
-            std::stringstream stream;
-            stream << "\n[" << filename << "]{" << func << "}(" << line << ") Block not found for adress " << ptr << ", reporting as new allocation for adress " << new_ptr << ".";
-
-            stack.buffer += stream.str();
-
-            updateStack();
-
-            reportAllocation(new_ptr, byte, func, file, line);
-
-            return;
-        }
-
-        MemoryBlockMap::iterator it;
-        for(it = blockMap.begin(); it != blockMap.end(); ++it)
-        {
-            if(it->first == ptr)
-                break;
-        }
-
-        if(it == blockMap.end())
-        {
-            std::stringstream stream;
-            stream << "\n[" << filename << "]{" << func << "}(" << line << ") Can't find block with adress " << ptr << ". Not releasing it will make fake-leaking appears.";
-
-            stack.buffer += stream.str();
-
-            updateStack();
-        }
-        else
-        {
-            statistics.totalBytesAllocated -= it->second.bytes;
-            statistics.objectNumber -= 1;
-
-            blockMap.erase(it);
-        }
-
-        MemoryBlock newBlock;
-        newBlock.file = filename;
-        newBlock.func = func;
-        newBlock.line = line;
-        newBlock.bytes = byte;
-        blockMap[new_ptr] = newBlock;
-
-        statistics.totalBytesAllocated += newBlock.bytes;
-        statistics.objectNumber += 1;
-
-        totalStats.objectNumber += 1;
-        totalStats.totalBytesAllocated += newBlock.bytes;
-
-        std::stringstream stream;
-        stream << "\n[" << filename << "]{" << func << "}(" << line << ") Reallocation from block " << ptr << " to block " << new_ptr << " of " << byte << " bytes.";
-
-        if(stack.retain)
-        {
-            stack.buffer += stream.str();
-            stack.dumper += stream.str();
-
-            updateStack();
-        }
-
-        return;
-    }
-
-    void MemoryTracker::reportDeallocation(void* ptr, const char* func, const char* file, int line)
-    {
-        if(ptr == nullptr)
-        {
-            return;
-        }
-
-        std::string filename = processFilename(file);
-
-        MemoryBlock* block = findBlock(ptr);
-        if(block == nullptr)
-        {
-            std::stringstream stream;
-            stream << "\n[" << filename << "]{" << func << "}(" << line << ") Block not found for adress " << ptr << ", can't register deallocation.";
-
-            stack.buffer += stream.str();
-
-            updateStack();
-            return;
-        }
-
-        MemoryBlockMap::iterator it;
-        for(it = blockMap.begin(); it != blockMap.end(); ++it)
-        {
-            if(it->first == ptr)
-                break;
-        }
-
-        if(it == blockMap.end())
-        {
-            std::stringstream stream;
-            stream << "\n[" << filename << "]{" << func << "}(" << line << ") Can't find block with adress " << ptr << ". Not releasing it will make fake-leaking appears.";
-
-            stack.buffer += stream.str();
-
-            updateStack();
-            return;
-        }
-
-        std::stringstream stream;
-        stream << "\n[" << filename << "]{" << func << "}(" << line << ") Deallocation of " << block->bytes << " bytes in block " << ptr << ".";
-
-        statistics.totalBytesAllocated -= it->second.bytes;
-        statistics.objectNumber -= 1;
-
-        blockMap.erase(it);
-
-        if(stack.retain)
-        {
-            stack.buffer += stream.str();
-            stack.dumper += stream.str();
-
-            updateStack();
-        }
-
-        return;
-    }
-
-    std::string MemoryTracker::getFilename() const
-    {
-        return file.filename;
-    }
-
-    void MemoryTracker::setFilename(const std::string & filename)
-    {
-        file.filename = filename;
-
-        deinitfile();
-        updateStack();
-    }
-
-    bool MemoryTracker::isLiveWriting() const
-    {
-        return file.liveWriting;
-    }
-
-    void MemoryTracker::setLiveWriting(bool liveWriting)
-    {
-        file.liveWriting = liveWriting;
-    }
-
-    double MemoryTracker::getTotalBytesAllocated() const
-    {
-        return totalStats.totalBytesAllocated;
-    }
-
-    double MemoryTracker::getAverageBytesAllocated() const
-    {
-        return totalStats.totalBytesAllocated / totalStats.objectNumber;
-    }
-
-    int MemoryTracker::getObjectAllocatedNumber() const
-    {
-        return totalStats.objectNumber;
-    }
-
-    void MemoryTracker::updateStack(bool bypass)
-    {
-        if(!file.file)
-        {
-            initfile();
-        }
-
-        if( (file.file) &&
-            (stack.buffer.size() > APRO_MEMORYTRACKERMAXBUFFERSIZE ||
-             file.liveWriting == true ||
-             bypass == true) )
-        {
-            fprintf(file.file, stack.buffer.c_str());
-            stack.buffer.clear();
+            if(mutex_created)
+                APRO_THREAD_MUTEX_SAFEUNLOCK(global_mutex);
+            else
+                create_global_mutex();
         }
     }
 
-    void MemoryTracker::deinitfile()
+    MemoryManager& MemoryManager::get()
     {
-        if(file.file != nullptr)
-        {
-            fclose(file.file);
-            file.file = nullptr;
-        }
+        static MemoryManager memmanager; return memmanager;
     }
 
-    void MemoryTracker::initfile()
+    MemoryManager::MemoryManager()
     {
-        deinitfile();
-
-        if(file.filename.size() == 0)
-            return;
-
-        file.file = fopen(file.filename.c_str(), "w+");
-
-        if(file.file != nullptr)
-        {
-            fprintf(file.file, "Atlanti's Project Engine Memory Tracker - %s", APRO_MEMORY_VERSION);
-            fprintf(file.file, "\n----------------------------------------------");
-            fprintf(file.file, "\n\nLogging...\n");
-        }
-        else
-        {
-#if APRO_EXCEPTION == APRO_ON
-            std::stringstream stream;
-            stream << "Couldn't init file " << file.filename << " !";
-
-            APRO_THROW("Memory Tracker", stream.str().c_str(), "Memory Tracker");
-#endif
-        }
+        memstats.bytesallocated  = 0;
+        memstats.bytesfreed      = 0;
+        memstats.blocksallocated = 0;
+        memstats.blocksfreed     = 0;
+        m_opeDump                = false;
     }
 
-    void MemoryTracker::reportLeaks()
+    MemoryManager::~MemoryManager()
     {
-        if(!blockMap.empty() || statistics.totalBytesAllocated > 0)
-        {
-            fprintf(file.file, "\n\nReporting Leaks...");
-#if APRO_USECPLUSPLUS0X == APRO_ON
-            for(auto it : blockMap)
-#else
-            for(MemoryBlockMap::iterator it = blockMap.begin(); it != blockMap.end(); ++it)
-#endif
 
+        for(unsigned int i = 0; i < operations.size(); ++i)
+        {
+            Operation* op = operations.at(i);
+            if(op->getType() == Operation::Allocation)
             {
-                std::stringstream stream;
-                stream << "\n[" << it->second.file << "]{" << it->second.func << "}(" << it->second.line << ") "
-                << it->second.bytes << " bytes leak in adress " << it->first << ".";
+                AllocationOperation* aop = reinterpret_cast<AllocationOperation*>(op);
+                delete aop;
+            }
+            else if (op->getType() == Operation::Deallocation)
+            {
+                DeallocationOperation* aop = reinterpret_cast<DeallocationOperation*>(op);
+                delete aop;
+            }
+            else if (op->getType() == Operation::Reallocation)
+            {
+                ReallocationOperation* aop = reinterpret_cast<ReallocationOperation*>(op);
+                delete aop;
+            }
+        }
 
-                fprintf(file.file, stream.str().c_str());
+        operations.clear();
+        blocks.clear();
+
+    }
+
+    bool MemoryManager::areOperationsDumped() const
+    {
+        return m_opeDump;
+    }
+
+    void MemoryManager::setOperationsDumping(bool opdmp)
+    {
+        m_opeDump = opdmp;
+    }
+
+    void MemoryManager::reportAllocation(void* ptr, size_t byte, const char* func, const char* file, int line)
+    {
+        if(ptr && byte)
+        {
+            lock_global_mutex();
+
+            BlockMap::iterator it = blocks.find((ptr_t) ptr);
+            if(it == blocks.end())
+            {
+                // Ajout du block
+                MemoryBlock block;
+                block.func = func;
+                block.line = line;
+                block.file = file;
+                block.size = byte;
+                blocks[ptr] = block;
+
+                // Ajout d'un nouveau operation
+                AllocationOperation* ope = new AllocationOperation;
+                ope->block = block;
+                ope->ptr   = ptr;
+                operations.push_back(ope);
+            }
+            else
+            {
+                // On remplace l'ancien block par le nouveau
+                it->second.func = func;
+                it->second.file = file;
+                it->second.line = line;
+                it->second.size = byte;
+
+                // Ajout d'un nouveau operation
+                AllocationOperation* ope = new AllocationOperation;
+                ope->block = it->second;
+                ope->ptr   = ptr;
+                operations.push_back(ope);
             }
 
-            fprintf(file.file, "\n\nTotal Bytes leaked : %f bytes.", statistics.totalBytesAllocated);
+            memstats.blocksallocated++;
+            memstats.bytesallocated += byte;
+
+            unlock_global_mutex();
+        }
+    }
+
+    void MemoryManager::reportReallocation(void* ptr, void* new_ptr, size_t byte, const char* func, const char* file, int line)
+    {
+        if(ptr && new_ptr && byte)
+        {
+            lock_global_mutex();
+
+            BlockMap::iterator it = blocks.find((ptr_t) ptr);
+            if(it != blocks.end())
+            {
+                // Sauvegarde de l'ancien block
+                MemoryBlock oldblock = it->second;
+
+                // On supprime l'ancien block
+                blocks.erase(it);
+                memstats.blocksfreed++;
+                memstats.bytesfreed += oldblock.size;
+
+                // On cree un nouveau block
+                MemoryBlock block;
+                block.func = func;
+                block.line = line;
+                block.file = file;
+                block.size = byte;
+                blocks[new_ptr] = block;
+
+                // On ajout l'operation Reallocation
+                ReallocationOperation* ope = new ReallocationOperation;
+                ope->block    = oldblock;
+                ope->ptr      = ptr;
+                ope->newblock = block;
+                ope->new_ptr  = new_ptr;
+                operations.push_back(ope);
+            }
+            else
+            {
+                // On alloue un nouveau block
+                MemoryBlock block;
+                block.func = func;
+                block.line = line;
+                block.file = file;
+                block.size = byte;
+                blocks[new_ptr] = block;
+
+                // On ajout l'operation Reallocation
+                ReallocationOperation* ope = new ReallocationOperation;
+                ope->block.size = 0;
+                ope->newblock   = block;
+                ope->ptr        = ptr;
+                operations.push_back(ope);
+            }
+
+            memstats.blocksallocated++;
+            memstats.bytesallocated += byte;
+
+            unlock_global_mutex();
+        }
+    }
+
+    void MemoryManager::reportDeallocation(void* ptr, const char* func, const char* file, int line)
+    {
+        if(ptr)
+        {
+            lock_global_mutex();
+
+            BlockMap::iterator it = blocks.find((ptr_t) ptr);
+            if(it != blocks.end())
+            {
+                // On sauvegarde l'ancien block
+                MemoryBlock oldblock = it->second;
+
+                // On efface l'ancien
+                blocks.erase(it);
+
+                // On cree un nouveau block
+                MemoryBlock deblock;
+                deblock.file = file;
+                deblock.func = func;
+                deblock.line = line;
+                deblock.size = oldblock.size;
+
+                // On cree une nouvelle operation
+                DeallocationOperation* ope = new DeallocationOperation;
+                ope->block = deblock;
+                ope->ptr   = ptr;
+                operations.push_back(ope);
+
+                memstats.blocksfreed++;
+                memstats.bytesfreed += oldblock.size;
+            }
+
+            unlock_global_mutex();
+        }
+    }
+
+    const MemoryManager::Operation* MemoryManager::getLastOperation()
+    {
+        if(operations.size() > 0)
+            return operations[operations.size() - 1];
+        else
+            return NULL;
+    }
+
+    MemoryManager::Statistics MemoryManager::getStats()
+    {
+        return memstats;
+    }
+
+    void MemoryManager::dump(const std::string& filename)
+    {
+        FILE* file = fopen(filename.c_str(), "w+");
+        if(file)
+        {
+            fprintf(file, "\nMemoryManager Report Dump File");
+            fprintf(file, "\n------------------------------");
+
+            if(m_opeDump)
+            {
+                fprintf(file, "\n\nReporting every operations.\n");
+
+                for(unsigned int i = 0; i < operations.size(); ++i)
+                {
+                    Operation* ope = operations[i];
+                    fprintf(file, "%s", writeOperation(ope).c_str());
+                    fflush(file);
+                }
+            }
+
+            fprintf(file, "\n\nReporting stats.\n");
+            fprintf(file, "\nTotal bytes allocated : %lu bytes.", memstats.bytesallocated);
+            fprintf(file, "\nTotal blocks allocated : %lu blocks.", memstats.blocksallocated);
+            fprintf(file, "\nTotal bytes freed : %lu bytes.", memstats.bytesfreed);
+            fprintf(file, "\nTotal blocks freed : %lu blocks.", memstats.blocksfreed);
+            fprintf(file, "\nEstimated leaks : %lu bytes.", memstats.bytesallocated - memstats.bytesfreed);
+            fflush(file);
+
+            fclose(file);
+        }
+
+    }
+
+    std::string MemoryManager::writeOperation(Operation* ope)
+    {
+        if(ope)
+        {
+            if(ope->getType() == Operation::Allocation)
+            {
+                AllocationOperation* aope = reinterpret_cast<AllocationOperation*>(ope);
+                std::string ret;
+                std::stringstream stream(ret);
+                stream << "\nAllocation (" << aope->ptr << ") [" << aope->block.file << "]{" << aope->block.func << "}|" << aope->block.line << "| of " << aope->block.size << " bytes.";
+                return stream.str();
+            }
+            else if (ope->getType() == Operation::Reallocation)
+            {
+                ReallocationOperation* rope = reinterpret_cast<ReallocationOperation*>(ope);
+                std::string ret;
+                std::stringstream stream(ret);
+                stream << "\nReallocation (" << rope->ptr << ") [" << rope->block.file << "]{" << rope->block.func << "}|" << rope->block.line << "| of " << rope->block.size << " bytes to "
+                                    << "(" << rope->new_ptr << ") [" << rope->newblock.file << "]{" << rope->newblock.func << "}|" << rope->newblock.line << "| of " << rope->newblock.size << " bytes.";
+                return stream.str();
+            }
+            else if (ope->getType() == Operation::Deallocation)
+            {
+                DeallocationOperation* dope = reinterpret_cast<DeallocationOperation*>(ope);
+                std::string ret;
+                std::stringstream stream(ret);
+                stream << "\nDellocation (" << dope->ptr << ") [" << dope->block.file << "]{" << dope->block.func << "}|" << dope->block.line << "| of " << dope->block.size << " bytes.";
+                return stream.str();
+            }
+            else
+            {
+                return "";
+            }
         }
         else
         {
-            fprintf(file.file, "\n\nNo leaks detected ! Good job ;)");
+            return "";
         }
-
-        fprintf(file.file, "\n\nStatistics report : ");
-        fprintf(file.file, "\n+ Total Bytes Allocated : %f bytes.", totalStats.totalBytesAllocated);
-        fprintf(file.file, "\n+ Total Object Allocated : %d Blocks.", totalStats.objectNumber);
-        fprintf(file.file, "\n+ Strict Average Allocation Size : %f bytes.", totalStats.totalBytesAllocated / totalStats.objectNumber);
-    }
-
-    MemoryTracker::MemoryBlock* MemoryTracker::findBlock(void* ptr)
-    {
-#if APRO_USECPLUSPLUS0X == APRO_ON
-        for(auto it : blockMap)
-#else
-        for(MemoryBlockMap::iterator it = blockMap.begin(); it != blockMap.end(); ++it)
-#endif
-
-        {
-            if(it->first == ptr)
-                return &(it->second);
-        }
-
-        return nullptr;
-    }
-
-    bool MemoryTracker::isCuttingFilename() const
-    {
-        return stack.cutFilename;
-    }
-
-    int MemoryTracker::maxFilenameSize() const
-    {
-        return stack.maxSize;
-    }
-
-    void MemoryTracker::setCutFilename(bool cut)
-    {
-        stack.cutFilename = cut;
-    }
-
-    void MemoryTracker::setMaxFilenameSize(int sz)
-    {
-        stack.maxSize = sz;
-    }
-
-    std::string MemoryTracker::processFilename(const char* file)
-    {
-        std::string filename(file);
-
-        if(stack.cutFilename && (int) filename.size() > stack.maxSize)
-        {
-            size_t erasesz = filename.size() - stack.maxSize - 4;
-            filename.erase(0, erasesz);
-            filename.insert(0, "...");
-        }
-
-        return filename;
-    }
-
-    double MemoryTracker::getCurrentBytesAllocated() const
-    {
-        return statistics.totalBytesAllocated;
-    }
-
-    int MemoryTracker::getCurrentObjectAllocated() const
-    {
-        return statistics.objectNumber;
-    }
-
-    void MemoryTracker::dump(const std::string & filename)
-    {
-        FILE* f = fopen(filename.c_str(), "w+");
-        FILE* f2 = file.file;
-        file.file = f;
-
-        fprintf(file.file, "Atlanti's Project Engine Memory Tracker - %s", APRO_MEMORY_VERSION);
-        fprintf(file.file, "\n----------------------------------------------");
-        fprintf(file.file, "\n\nLogging...\n");
-
-        fprintf(f, stack.dumper.c_str());
-
-        reportLeaks();
-
-        file.file = f2;
-        fclose(f);
-    }
-
-    void MemoryTracker::setRetain(bool r)
-    {
-        stack.retain = r;
     }
 }
 

@@ -13,7 +13,7 @@
 **/
 #include "ResourceManager.h"
 #include "Console.h"
-#include "FileUtils.h"
+#include "FileSystem.h"
 
 namespace APro
 {
@@ -86,7 +86,7 @@ namespace APro
 
         SharedPointer<ResourceLoader> loader;
 
-        String ext = FileUtilities::extension(filename);
+        String ext = FileSystem::extension(filename);
         for(List<SharedPointer<ResourceLoader> >::Iterator i(loaders.begin()); !i.isEnd(); i++)
         {
             if(i.get()->extensions().find(ext) >= 0 && !(i.get()->getParam(String("IsManual")).to<bool>()))

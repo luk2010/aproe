@@ -45,6 +45,21 @@
 #   define APRO_ENDIANNESS APRO_BIGENDIAN
 #endif
 
+class Endianness
+{
+public:
+    enum t
+    {
+        Little = 0,
+        Big = 1
+    };
+
+    static t endianness()
+    {
+        return (t) APRO_ENDIANNESS;
+    }
+};
+
 //----------------------------------------------//
 //                Architecture                  //
 //----------------------------------------------//
@@ -88,6 +103,7 @@
 #   define WIN
 #   include <windows.h>
 #   include <Windowsx.h>
+#   define FSTAT _stat
 #endif
 
 //----------------------------------------------//
@@ -97,6 +113,7 @@
 #if defined(_WIN32_WCE)
 #   define APRO_PLATFORM APRO_WINDOWSCE
 #   include <windows.h>
+#   define FSTAT _stat
 #endif
 
 //----------------------------------------------//
@@ -109,6 +126,7 @@
 #   endif
 #
 #   define APRO_PLATFORM APRO_OSX
+#   define FSTAT stat
 #endif
 
 //----------------------------------------------//
@@ -117,7 +135,8 @@
 
 #ifndef APRO_PLATFORM
 #   define APRO_PLATFORM APRO_LINUX
-#   include <X11/Xlib.h>
+//#   include <X11/Xlib.h>
+#   define FSTAT stat
 #endif
 
 #endif

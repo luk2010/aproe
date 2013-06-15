@@ -25,6 +25,8 @@ namespace APro
 {
     class APRO_DLL ResourceLoader : public ParametedObject
     {
+        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(ResourceLoader)
+
     public:
 
         ResourceLoader();

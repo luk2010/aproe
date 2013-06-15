@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<CodeBlocks_workspace_file>
-	<Workspace title="Workspace">
-		<Project filename="AProEMemory.cbp" />
-		<Project filename="example/MemoryExample.cbp" />
-		<Project filename="Plugins/ExamplePlugin/ExamplePlugin.cbp" />
-		<Project filename="Plugins/DevILLoader/DevILLoader.cbp" />
-	</Workspace>
-</CodeBlocks_workspace_file>

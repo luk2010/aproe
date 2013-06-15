@@ -1,0 +1,91 @@
+Console Log
+-----------
+
+
+[Main] Initializing Main...
+[Main] Current Working directory is "/home/luk2010/github/aproe/projects".
+[Main] Setting Working directory to "/home/luk2010/github/aproe/bin/Debug/".OK
+Current configuration is : 
+ - Debugging Implementation = false
+[ResourceManager] Added Loader DynamicLibraryLoader.
+[ResourceManager] Added Loader NullLoader.
+[Main] Resource Manager OK.
+[Main] Implementation Store OK.
+[Main] Plugin Manager OK. Loading plugins and implementations in directory "plugins".
+[ResourceManager] Loading resource /home/luk2010/github/aproe/bin/Debug/plugins/libUnixFileSystem.so with name testxxhash456789_/home/luk2010/github/aproe/bin/Debug/plugins/libUnixFileSystem.so and loader DynamicLibraryLoader.
+[DynamicLibrary] DynLib /home/luk2010/github/aproe/bin/Debug/plugins/libUnixFileSystem.so loaded successfuly.
+[ResourceManager] Loading resource testxxhash456789_/home/luk2010/github/aproe/bin/Debug/plugins/libUnixFileSystem.so completed !
+[PluginHandle] Starting plugin testxxhash456789...
+[Unix FileSystem] Starting Unix File System Plugin.
+[Unix FileSystem] Started successfully !
+[PluginManager]{loadDirectory} Plugin UnixFileSystem charge !
+[ResourceManager] Loading resource /home/luk2010/github/aproe/bin/Debug/plugins/libUnixThread.so with name testxxhash456789_/home/luk2010/github/aproe/bin/Debug/plugins/libUnixThread.so and loader DynamicLibraryLoader.
+[DynamicLibrary] DynLib /home/luk2010/github/aproe/bin/Debug/plugins/libUnixThread.so loaded successfuly.
+[ResourceManager] Loading resource testxxhash456789_/home/luk2010/github/aproe/bin/Debug/plugins/libUnixThread.so completed !
+[PluginHandle] Starting plugin testxxhash456789...
+[PosixThread] Starting plugin...
+[PosixThread] Plugin started.
+[PluginManager]{loadDirectory} Plugin PosixThread charge !
+[ResourceManager] Loading resource /home/luk2010/github/aproe/bin/Debug/plugins/libExamplePlugin.so with name testxxhash456789_/home/luk2010/github/aproe/bin/Debug/plugins/libExamplePlugin.so and loader DynamicLibraryLoader.
+[DynamicLibrary] DynLib /home/luk2010/github/aproe/bin/Debug/plugins/libExamplePlugin.so loaded successfuly.
+[ResourceManager] Loading resource testxxhash456789_/home/luk2010/github/aproe/bin/Debug/plugins/libExamplePlugin.so completed !
+[PluginHandle] Starting plugin testxxhash456789...
+[ExamplePlugin] This is a message from the plugin ;) ! START 
+[ResourceManager] Loading resource leaks.log with name MyResource and loader NullLoader.
+[ResourceManager] Loading resource MyResource completed !
+[PluginManager]{loadDirectory} Plugin ExamplePlugin charge !
+[ResourceManager] Loading resource /home/luk2010/github/aproe/bin/Debug/plugins/libXCBWindowSystem.so with name testxxhash456789_/home/luk2010/github/aproe/bin/Debug/plugins/libXCBWindowSystem.so and loader DynamicLibraryLoader.
+[DynamicLibrary] DynLib /home/luk2010/github/aproe/bin/Debug/plugins/libXCBWindowSystem.so loaded successfuly.
+[ResourceManager] Loading resource testxxhash456789_/home/luk2010/github/aproe/bin/Debug/plugins/libXCBWindowSystem.so completed !
+[PluginHandle] Starting plugin testxxhash456789...
+[XCBWindow] Starting plugin...
+[XCBWindow] Plugin started.
+[PluginManager]{loadDirectory} Plugin XCBWindow charge !
+[Main] Thread Manager OK.
+[Main] Math Function Manager OK.
+[Main] Window Manager OK.
+[Main] File System OK. Base Path is : "/home/luk2010/github/aproe/bin/Debug/".
+[Main] Main Initialized ! Enjoy ;)
+[ImplementationStore] Getting implementations infos
+---------------------------------------------------
++ Class : APro::FileSystem | Name : Unix FileSystem Implementation.
++ Class : APro::Thread | Name : Posix Thread Implementation.
++ Class : APro::ThreadCondition | Name : Posix Condition Implementation.
++ Class : APro::ThreadMutex | Name : Posix Mutex Implementation.
++ Class : APro::Window | Name : XCB Window Implementation.
+---------------------------------------------------
+[WindowManager] Created Window with name : MyWindow, title : First Window and size : 1024x768.
+[EventEmitter] Explaining events
+--------------------------------
++ WindowCreatedEvent : Window is created. There are no garantee that the window has been showed or drawned. This event is sended after "create" has been called..
++ WindowDestroyedEvent : Window is destroyed. This event is sended after "destroy" has been called..
++ WindowMovedEvent : Window has been moved. Event field "Position" contains the new position of the window..
++ WindowSizedEvent : Window has been resized. Event field "Size" contains the new size of the window..
++ WindowClosingEvent : Window is closing..
++ WindowShowedEvent : Window is showed. There is no garantee that the function "show" is a success..
++ WindowHideEvent : Window is hidden. There is no garantee that the function "hide" is a success..
+--------------------------------
+[Main] Clearing everything...
+[Main] File System cleaned !
+[Main] Window Manager cleaned !
+[Main] Math Manager cleaned !
+[Main] Thread Manager cleaned !
+[PluginHandle] Stopping plugin UnixFileSystem...
+[Unix FileSystem] Ending Unix File System Plugin.
+[Unix FileSystem] Ended successfully !
+[DynamicLibrary] DynLib /home/luk2010/github/aproe/bin/Debug/plugins/libUnixFileSystem.so unloaded successfuly.
+[PluginHandle] Stopping plugin PosixThread...
+[PosixThread] Stopping plugin...
+[PosixThread] Plugin stopped.
+[DynamicLibrary] DynLib /home/luk2010/github/aproe/bin/Debug/plugins/libUnixThread.so unloaded successfuly.
+[PluginHandle] Stopping plugin ExamplePlugin...
+[ExamplePlugin] This is a message from the plugin ;) ! END 
+[DynamicLibrary] DynLib /home/luk2010/github/aproe/bin/Debug/plugins/libExamplePlugin.so unloaded successfuly.
+[PluginHandle] Stopping plugin XCBWindow...
+[XCBWindow] Ending plugin...
+[XCBWindow] Plugin ended.
+[DynamicLibrary] DynLib /home/luk2010/github/aproe/bin/Debug/plugins/libXCBWindowSystem.so unloaded successfuly.
+[Main] Plugin Manager cleaned !
+[Main] Implementation Store cleaned !
+[Main] Resource Manager cleaned !
+[Main] Cleaned !

@@ -22,7 +22,7 @@ namespace APro
 
     EventReceiver::~EventReceiver()
     {
-
+        clearListeners();
     }
 
     void EventReceiver::addEventProcessed(const String& e)
@@ -47,7 +47,7 @@ namespace APro
         eventProcessed.clear();
     }
 
-    void EventReceiver::addListener(const SharedPointer<EventListener>& listener)
+    void EventReceiver::addListener(const EventListener::ptr& listener)
     {
         if(listeners.find(listener) == -1)
         {
@@ -55,20 +55,31 @@ namespace APro
         }
     }
 
-    SharedPointer<EventListener> EventReceiver::getListener(const String& name)
+    EventListener::ptr EventReceiver::getListener(const String& name)
     {
-        for(List<SharedPointer<EventListener> >::Iterator i(listeners.begin()); !i.isEnd(); i++)
+        for(List<EventListener::ptr>::Iterator i(listeners.begin()); !i.isEnd(); i++)
         {
             if(i.get()->name() == name)
                 return i.get();
         }
 
-        return SharedPointer<EventListener> ();
+        return EventListener::ptr();
+    }
+
+    const EventListener::ptr EventReceiver::getListener(const String& name) const
+    {
+        for(List<EventListener::ptr>::ConstIterator i(listeners.begin()); !i.isEnd(); i++)
+        {
+            if(i.get()->name() == name)
+                return i.get();
+        }
+
+        return EventListener::ptr();
     }
 
     void EventReceiver::removeListener(const String& name)
     {
-        SharedPointer<EventListener> l = getListener(name);
+        EventListener::ptr l = getListener(name);
         if(!l.isNull())
         {
             listeners.erase(listeners.find(l));
@@ -82,11 +93,11 @@ namespace APro
 
     void EventReceiver::processEvents()
     {
-        for(List<SharedPointer<EventListener> >::Iterator i(listeners.begin()); !i.isEnd(); i++)
+        for(List<EventListener::ptr>::Iterator i(listeners.begin()); !i.isEnd(); i++)
         {
             for(List<String>::Iterator j(eventProcessed.begin()); !j.isEnd(); j++)
             {
-                SharedPointer<Event> r = i.get()->received(j.get());
+                Event::ptr r = i.get()->received(j.get());
                 if(!r.isNull())
                 {
                     processEvent(r);
@@ -97,7 +108,7 @@ namespace APro
         }
     }
 
-    void EventReceiver::processEvent(const SharedPointer<Event>& e)
+    void EventReceiver::processEvent(const Event::ptr&)
     {
 
     }

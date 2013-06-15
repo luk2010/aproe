@@ -34,25 +34,39 @@ namespace APro
         purge();
     }
 
-    void EventListener::receive(const SharedPointer<Event>& e)
+    void EventListener::receive(const Event::ptr& e)
     {
         if(!e.isNull())
             receivedEvents.append(e);
     }
 
-    SharedPointer<Event> EventListener::received(const String& name)
+    Event::ptr EventListener::received(const String& name)
     {
-        for(List<SharedPointer<Event> >::Iterator i(receivedEvents.begin()); !i.isEnd(); i++)
+        for(List<Event::ptr>::Iterator i(receivedEvents.begin()); !i.isEnd(); i++)
         {
             if(i.get()->type() == name)
             {
-                SharedPointer<Event> ret = i.get();
+                Event::ptr ret = i.get();
                 receivedEvents.erase(receivedEvents.find(ret));
                 return ret;
             }
         }
 
-        return SharedPointer<Event>();
+        return Event::ptr();
+    }
+
+    const Event::ptr EventListener::received(const String& name) const
+    {
+        for(List<Event::ptr>::ConstIterator i(receivedEvents.begin()); !i.isEnd(); i++)
+        {
+            if(i.get()->type() == name)
+            {
+                const Event::ptr& ret = i.get();
+                return ret;
+            }
+        }
+
+        return Event::ptr();
     }
 
     void EventListener::purge()
@@ -61,6 +75,11 @@ namespace APro
     }
 
     const String& EventListener::name() const
+    {
+        return mname;
+    }
+
+    String& EventListener::name()
     {
         return mname;
     }

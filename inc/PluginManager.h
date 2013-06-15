@@ -35,6 +35,7 @@ namespace APro
         SharedPointer<PluginHandle> getPluginHandle(const String& name);
         SharedPointer<PluginHandle> addPluginHandle(const String& name, const String& filename);
         SharedPointer<PluginHandle> addPluginHandle(const String& name, const SharedPointer<DynamicLibrary>& lib = SharedPointer<DynamicLibrary>());
+        int                         loadDirectory  (const String& path);
         void removePluginHandle(const String& name);
 
         PluginInfo* getPluginInfo(const String& pluginhandle);

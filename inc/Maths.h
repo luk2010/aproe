@@ -29,6 +29,8 @@ namespace APro
         const double RADTODEG64 = 180.0/PI_64;
     }
 
+    typedef double Real;
+
     inline bool egal32(float a, float b, float error = 0.0f)
     {
         return (a + error >= b) && (a - error <= b);
@@ -115,6 +117,44 @@ namespace APro
     APRO_DLL int    Sqrt (int v);
     APRO_DLL float  Sqrt (float v);
     APRO_DLL double Sqrt (double v);
+
+    APRO_DLL double Cos(double v);
+    APRO_DLL double Sin(double v);
+    APRO_DLL double Tan(double v);
+
+    APRO_DLL double ACos(double v);
+    APRO_DLL double ASin(double v);
+    APRO_DLL double ATan(double v);
+
+    template <typename T> void swapNumeric(T& num1, T& num2)
+    {
+        static T tmp;
+        tmp = num1; num1 = num2; num2 = tmp;
+    }
+
+    template <typename T> void swapNumeric_xor(T& num1, T& num2)
+    {
+        if(num1 != num2) {
+            num1 ^= num2;
+            num2 ^= num1;
+            num1 ^= num2;
+        }
+    }
+
+    template <typename T> T Clamp(const T& value, const T min, const T max)
+    {
+        return max_2(min_2(value, max), min);
+    }
+
+    APRO_DLL float min_angle_32(float a);
+    APRO_DLL double min_angle_64(double a);
+
+    unsigned char colorvaluefromfloat(float v);
+    float         floatfromcolorvalue(unsigned char c);
+    template <typename T> T proportionnal(const T& value, const T base, const T to)
+    {
+        return value * to / base;
+    }
 }
 
 #endif

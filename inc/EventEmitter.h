@@ -21,6 +21,12 @@
 
 namespace APro
 {
+    /** @class EventEmitter
+      * @brief Emit Events through the Normal Event Handling path. Events will be send to listeners registered
+      * to this Emitter.<br />
+      * This emitter can document every events he may be able to send, so the user will be able to show it using
+      * the simple command explainEvents().
+    **/
     class APRO_DLL EventEmitter
     {
     public:
@@ -30,26 +36,39 @@ namespace APro
 
         virtual ~EventEmitter();
 
-        void sendEvent(const SharedPointer<Event>& e);
-        void sendSpecificEvent(const SharedPointer<Event>& e, const String& name);
-        void sendManualEvent(const SharedPointer<Event>& e, SharedPointer<EventListener>& listener);
+        void sendEvent(const Event::ptr& e);
+        void sendSpecificEvent(const Event::ptr& e, const String& name);
+        void sendManualEvent(const Event::ptr& e, EventListener::ptr& listener);
 
     protected:
 
-        List<SharedPointer<EventListener> > listeners;
+        void documentEvent(const String& event, const String& description);
 
     public:
 
-        SharedPointer<EventListener> addListener(const String& name);
-        SharedPointer<EventListener> getListener(const String& name);
-        SharedPointer<EventListener> registerListener(const SharedPointer<EventListener> & listener);
+        String explainEvents() const;
+        const String getEventDocumentation(const String& event) const;
+        bool isEventDocumented(const String& event) const;
+
+    protected:
+
+        typedef Map<String, String> EventsList;
+
+        List<EventListener::ptr>    listeners;
+        EventsList                  events;
+
+    public:
+
+        EventListener::ptr addListener(const String& name);
+        EventListener::ptr getListener(const String& name);
+        EventListener::ptr registerListener(const EventListener::ptr & listener);
 
         void removeListener(const String& name);
 
     public:
 
-        virtual SharedPointer<EventListener> createListener(const String& name) const;
-        virtual SharedPointer<Event> createEvent(const String& name) const;
+        virtual EventListener::ptr createListener(const String& name) const;
+        virtual Event::ptr createEvent(const String& name) const;
     };
 }
 

@@ -30,6 +30,8 @@ namespace APro
 
     class APRO_DLL PluginHandle
     {
+        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(PluginHandle)
+
     protected:
 
         String name;

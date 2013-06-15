@@ -11,7 +11,9 @@
  *  This file defines the String class.
  *
 **/
+#include "ThreadMutex.h"
 #include "SString.h"
+#include "Number.h"
 
 namespace APro
 {
@@ -32,6 +34,12 @@ namespace APro
         assertFinal();
     }
 
+    String::String(const Number& nb)
+    {
+        mstr.append('\0');
+        append(nb);
+    }
+
     String::~String()
     {
         mstr.clear();
@@ -39,6 +47,8 @@ namespace APro
 
     void String::append(char c)
     {
+
+
         mstr.insert(mstr.lastIndex(), c);
 
         assertFinal();
@@ -46,6 +56,8 @@ namespace APro
 
     void String::append(const char* c)
     {
+
+
         size_t sz = strlen(c);
         if(sz > 0)
         {
@@ -57,6 +69,8 @@ namespace APro
 
     void String::append(const String & c)
     {
+
+
         if(c.size() > 0)
         {
             for(unsigned int i = 0; i < c.size(); i++)
@@ -65,14 +79,25 @@ namespace APro
         assertFinal();
     }
 
+    void String::append(const Number& nb)
+    {
+
+
+        append(String::fromDouble(nb.toReal()));
+    }
+
     void String::prepend(char c)
     {
+
+
         mstr.prepend(c);
         assertFinal();
     }
 
     void String::prepend(const String& c)
     {
+
+
         for(int i = ((int) c.size()) - 1; i >= 0; i--)
             prepend(c.at(i));
         assertFinal();
@@ -80,6 +105,8 @@ namespace APro
 
     void String::prepend(const char* c)
     {
+
+
         size_t sz = strlen(c);
         if(sz > 0)
         {
@@ -89,14 +116,25 @@ namespace APro
         assertFinal();
     }
 
+    void String::prepend(const Number& nb)
+    {
+
+
+        prepend(String::fromDouble(nb.toReal()));
+    }
+
     void String::insert(size_t before, char c, size_t it)
     {
+
+
         mstr.insert(before, c, it);
         assertFinal();
     }
 
     void String::insert(size_t before, const char* c, size_t it)
     {
+
+
         size_t sz = strlen(c);
         if(sz > 0)
         {
@@ -116,6 +154,8 @@ namespace APro
 
     void String::insert(size_t before, const String& c, size_t it)
     {
+
+
         for(unsigned int j = 0; j < it; j++)
         {
             unsigned int k = before;
@@ -131,6 +171,8 @@ namespace APro
 
     void String::erase(size_t first, size_t last)
     {
+
+
         if(last >= size()) last = size() - 1;
 
         mstr.erase(first, last);
@@ -139,6 +181,8 @@ namespace APro
 
     size_t String::findFirst(char c, size_t from) const
     {
+
+
         for(unsigned int i = from; i < size(); i++)
             if(mstr.at(i) == c) return i;
 
@@ -147,6 +191,8 @@ namespace APro
 
     size_t String::findFirst(const String & str, size_t from) const
     {
+
+
         for(unsigned int i = from; i < size() && size() - i < str.size(); i++)
         {
             if(mstr.at(i) == str.at(0))
@@ -164,7 +210,9 @@ namespace APro
 
     size_t String::findLast(char c) const
     {
-        for(unsigned int i = size() - 1; i >= 0; i--)
+
+
+        for(int i = size() - 1; i >= 0; i--)
             if(mstr.at(i) == c) return i;
 
         return size();
@@ -172,7 +220,9 @@ namespace APro
 
     size_t String::findLast(const String & str) const
     {
-        for(unsigned int i = size() - str.size(); i >= 0; i--)
+
+
+        for(int i = size() - str.size(); i >= 0; i--)
         {
             if(mstr.at(i) == str.at(0))
             {
@@ -189,6 +239,8 @@ namespace APro
 
     String String::extract(size_t from, size_t to) const
     {
+
+
         String result;
 
         if(from > to) Allocator<size_t>::swap(&from, &to, 1);
@@ -203,105 +255,132 @@ namespace APro
 
     bool String::match(char c) const
     {
+
         return findFirst(c) != size();
     }
 
     bool String::match(const String& str) const
     {
+
         return findFirst(str) != size();
     }
 
     bool String::isEmpty() const
     {
+
         return size() == 0;
     }
 
     size_t String::size() const
     {
+
         return mstr.getSize() - 1;
     }
 
     Array<char>& String::toArray()
     {
+
         return mstr;
     }
 
     const Array<char>& String::toCstArray() const
     {
+
         return mstr;
     }
 
     const char* String::toCstChar() const
     {
+
         return &(mstr[0]);
     }
 
     void String::clear()
     {
+
         mstr.clear();
         mstr.append('\0');
     }
 
     char& String::at(size_t index)
     {
+
         return mstr.at(index);
     }
 
     const char& String::at(size_t index) const
     {
+
         return mstr.at(index);
     }
 
     char& String::operator[](size_t index)
     {
+
         return mstr.at(index);
     }
 
     const char& String::operator[](size_t index) const
     {
+
         return mstr.at(index);
     }
 
     char& String::first()
     {
+
         return mstr.at(0);
     }
 
     const char& String::first() const
     {
+
         return mstr.at(0);
     }
 
     char& String::last()
     {
+
         return mstr.at(size());
     }
 
     const char& String::last() const
     {
+
         return mstr.at(size());
     }
 
     String& String::operator<<(char c)
     {
+
         append(c);
         return *this;
     }
 
     String& String::operator<<(const char* str)
     {
+
         append(str);
         return *this;
     }
 
     String& String::operator<<(const String& str)
     {
+
         append(str);
+        return *this;
+    }
+
+    String& String::operator<<(const Number& nb)
+    {
+
+        append(String::fromDouble(nb.toReal()));
         return *this;
     }
 
     void String::assertFinal()
     {
+
         if(mstr.at(size()) != '\0')
             mstr.append('\0');
     }
@@ -329,26 +408,47 @@ namespace APro
 
     bool String::operator==(const String & other) const
     {
+
         return other.mstr == mstr;
     }
 
     bool String::operator!=(const String & other) const
     {
+
         return !(*this == other);
     }
 
     bool String::operator == (const char* other) const
     {
+
         return *this == String(other);
     }
 
     bool String::operator != (const char* other) const
     {
+
         return !(*this == other);
+    }
+
+    int String::replaceEvery(char from, char to)
+    {
+
+        int nb = 0;
+        for(unsigned int i = 0; i < size(); ++i)
+        {
+            if(at(i) == from)
+            {
+                at(i) = to;
+                ++nb;
+            }
+        }
+
+        return nb;
     }
 
     void String::replace(const String& str, const String& to)
     {
+
         if(str == to) return;
 
         int pos = findFirst(str);
@@ -362,6 +462,7 @@ namespace APro
 
     String& String::operator = (const String & other)
     {
+
         mstr = other.mstr;
         assertFinal();
 
@@ -370,11 +471,13 @@ namespace APro
 
     String& String::operator = (const char* other)
     {
+
         return *this = String(other);
     }
 
     List<String> String::explode(char c) const
     {
+
         String str(*this);
         List<String> ret;
 
@@ -393,12 +496,14 @@ namespace APro
 
     List<String> String::explode(const String& str) const
     {
+
         String strc(*this);
         List<String> ret;
 
         size_t old = 0;
         size_t index = strc.findFirst(str);
-        while(index < str.size())
+
+        while(index < strc.size())
         {
             ret.append(strc.extract(old, index - 1));
             old = index + 1;
@@ -411,6 +516,7 @@ namespace APro
 
     List<String> String::explode(const char* str) const
     {
+
         return explode(String(str));
     }
 
@@ -423,6 +529,7 @@ namespace APro
 
     String String::operator+(const String& other) const
     {
+
         String ret(*this);
         ret.append(other);
         return ret;
@@ -430,8 +537,68 @@ namespace APro
 
     String String::operator+(const char* other) const
     {
+
         String ret(*this);
         ret.append(other);
+        return ret;
+    }
+
+    String String::operator+(const Number& nb) const
+    {
+
+        String ret(*this);
+        ret << nb;
+        return ret;
+    }
+
+    String String::toUpper(const String& other)
+    {
+        String result;
+
+        for(unsigned int i = 0; i < other.size(); ++i)
+            result.append(toUpper(other.at(i)));
+
+        return result;
+    }
+
+    String String::toLower(const String& other)
+    {
+        String result;
+
+        for(unsigned int i = 0; i < other.size(); ++i)
+            result.append(toLower(other.at(i)));
+
+        return result;
+    }
+
+    char String::toUpper(char c)
+    {
+        if(c <= 122 && c >= 97)
+            c -= 32;
+        return c;
+    }
+
+    char String::toLower(char c)
+    {
+        if(c >= 65 && c <= 90)
+            c += 32;
+        return c;
+    }
+
+    double String::toDouble(const String& str)
+    {
+        if(str.isEmpty()) return 0;
+        return atof(str.toCstChar());
+    }
+
+    String String::fromDouble(double d)
+    {
+        char buffer[100];
+        String ret;
+
+        sprintf(buffer, "%.9lf", d);
+        ret.append(buffer);
+
         return ret;
     }
 }

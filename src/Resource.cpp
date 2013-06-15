@@ -13,20 +13,22 @@
 **/
 #include "Resource.h"
 #include "SharedPointer.h"
+#include "ThreadMutex.h"
+#include "ThreadMutexLockGuard.h"
 
 namespace APro
 {
-    Resource::Resource() : name(""), filename(""), type("Resource")
+    Resource::Resource() : ThreadSafe(), name(""), filename(""), type("Resource")
     {
 
     }
 
-    Resource::Resource(const String& name_, const String& other) : name(name_), filename(other), type("Resource")
+    Resource::Resource(const String& name_, const String& other) : ThreadSafe(), name(name_), filename(other), type("Resource")
     {
 
     }
 
-    Resource::Resource(const Resource& other) : name(""), filename(other.filename), type("Resource")
+    Resource::Resource(const Resource& other) : ThreadSafe(), name(""), filename(other.filename), type("Resource")
     {
 
     }
@@ -38,6 +40,8 @@ namespace APro
 
     Resource& Resource::operator = (const Resource& other)
     {
+        APRO_THREADSAFE_AUTOLOCK
+
         name = other.name;
         filename = other.filename;
         type = other.type;
@@ -52,6 +56,8 @@ namespace APro
 
     void Resource::setName(const String& other)
     {
+        APRO_THREADSAFE_AUTOLOCK
+
         name = other;
     }
 
@@ -62,6 +68,8 @@ namespace APro
 
     void Resource::setFilename(const String& other)
     {
+        APRO_THREADSAFE_AUTOLOCK
+
         filename = other;
     }
 

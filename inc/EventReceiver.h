@@ -21,6 +21,8 @@ namespace APro
 {
     class APRO_DLL EventReceiver
     {
+        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(EventReceiver)
+
     public:
 
         EventReceiver();
@@ -33,21 +35,26 @@ namespace APro
         void removeEventProcessed(const String& e);
         void clearEvents();
 
-        void addListener(const SharedPointer<EventListener>& listener);
-        SharedPointer<EventListener> getListener(const String& name);
+        void addListener(const EventListener::ptr& listener);
+
+        EventListener::ptr getListener(const String& name);
+        const EventListener::ptr getListener(const String& name) const;
+
         void removeListener(const String& name);
         void clearListeners();
+
+    public:
 
         void processEvents();
 
     protected:
 
-        virtual void processEvent(const SharedPointer<Event>& e);
+        virtual void processEvent(const Event::ptr&);
 
     private:
 
         List<String> eventProcessed;
-        List<SharedPointer<EventListener> > listeners;
+        List<EventListener::ptr> listeners;
     };
 }
 

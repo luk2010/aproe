@@ -19,21 +19,34 @@
 
 namespace APro
 {
+    //! @class Color
+    /** @brief Represents a color as RGBA in 32 bits ( 8 + 8 + 8 + 8 ).
+     *
+     * This class help manipulating colors.
+     *
+     * @note Colors can be stored in a Array<Color> without any problems, so you should
+     * use this storage system instead of List.
+     *
+     * @note Color size is 4. It is equivalent to int (32bits).
+     *
+     */
     class APRO_DLL Color
     {
     public:
 
+        /** @brief Helper to describe most formats used. */
         class Format
         {
         public:
             enum _
             {
-                RGBA,
-                ARGB,
-                ABGR
+                RGBA, ///< Used by this Engine.
+                ARGB, ///< Used by DirectX.
+                ABGR  ///< Usd by OpenGL.
             };
         };
 
+        /** @brief The four components of the color. */
         class Component
         {
         public:
@@ -51,12 +64,14 @@ namespace APro
         Color();
         explicit Color(unsigned long int c, Format::_ f = Format::RGBA);
         Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);
+        explicit Color(float r, float g, float b, float a = 1.0f);
         Color(const Color& other);
 
         ~Color();
 
         void set(unsigned long int c, Format::_ f = Format::RGBA);
         void set(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);
+        void set(float r, float g, float b, float a = 1.0f);
         void set(Component::_ component, unsigned char c);
         void set(const Color& other);
 
@@ -91,6 +106,15 @@ namespace APro
                            << (int) v.get(Component::Alpha) << " )";
             return c;
         }
+
+        static Color rgb(unsigned char r, unsigned char g, unsigned char b);
+        static Color rgba(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+
+        static Color Black;
+        static Color White;
+        static Color Green;
+        static Color Blue;
+        static Color Red;
 
     private:
         unsigned long int color;

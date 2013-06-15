@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="aproe" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/aproe" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/aproe" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="../inc/Allocator.h" />
+		<Unit filename="../inc/Array.h" />
+		<Unit filename="../inc/Base.h" />
+		<Unit filename="../inc/CArray.h" />
+		<Unit filename="../inc/CameraSceneNodeManager.h" />
+		<Unit filename="../inc/CgEffectCreator.h" />
+		<Unit filename="../inc/Color.h" />
+		<Unit filename="../inc/Console.h" />
+		<Unit filename="../inc/Context.h" />
+		<Unit filename="../inc/Copyable.h" />
+		<Unit filename="../inc/Dialog.h" />
+		<Unit filename="../inc/Dictionnary.h" />
+		<Unit filename="../inc/DynamicLibrary.h" />
+		<Unit filename="../inc/DynamicLibraryLoader.h" />
+		<Unit filename="../inc/EntitySceneNodeManager.h" />
+		<Unit filename="../inc/Event.h" />
+		<Unit filename="../inc/EventEmitter.h" />
+		<Unit filename="../inc/EventListener.h" />
+		<Unit filename="../inc/EventReceiver.h" />
+		<Unit filename="../inc/Exception.h" />
+		<Unit filename="../inc/Factory.h" />
+		<Unit filename="../inc/File.h" />
+		<Unit filename="../inc/FileStream.h" />
+		<Unit filename="../inc/FileSystem.h" />
+		<Unit filename="../inc/FileSystemImplementation.h" />
+		<Unit filename="../inc/Functor.h" />
+		<Unit filename="../inc/Image.h" />
+		<Unit filename="../inc/Implementable.h" />
+		<Unit filename="../inc/Implementation.h" />
+		<Unit filename="../inc/Keyboard.h" />
+		<Unit filename="../inc/Keys.h" />
+		<Unit filename="../inc/Light.h" />
+		<Unit filename="../inc/LightSceneNode.h" />
+		<Unit filename="../inc/LightSceneNodeManager.h" />
+		<Unit filename="../inc/List.h" />
+		<Unit filename="../inc/Main.h" />
+		<Unit filename="../inc/Manager.h" />
+		<Unit filename="../inc/Map.h" />
+		<Unit filename="../inc/MathFunction.h" />
+		<Unit filename="../inc/MathFunctionManager.h" />
+		<Unit filename="../inc/MathModule.h" />
+		<Unit filename="../inc/Maths.h" />
+		<Unit filename="../inc/Matrix4.h" />
+		<Unit filename="../inc/Memory.h" />
+		<Unit filename="../inc/MemoryTracker.h" />
+		<Unit filename="../inc/Node.h" />
+		<Unit filename="../inc/Node_base.h" />
+		<Unit filename="../inc/NonCopyable.h" />
+		<Unit filename="../inc/NullLoader.h" />
+		<Unit filename="../inc/NullResource.h" />
+		<Unit filename="../inc/NullWriter.h" />
+		<Unit filename="../inc/Number.h" />
+		<Unit filename="../inc/Pair.h" />
+		<Unit filename="../inc/ParametedObject.h" />
+		<Unit filename="../inc/Platform.h" />
+		<Unit filename="../inc/PluginHandle.h" />
+		<Unit filename="../inc/PluginManager.h" />
+		<Unit filename="../inc/Rectangle.h" />
+		<Unit filename="../inc/RenderState.h" />
+		<Unit filename="../inc/Renderer.h" />
+		<Unit filename="../inc/RenderingContextSceneNode.h" />
+		<Unit filename="../inc/Resource.h" />
+		<Unit filename="../inc/ResourceLoader.h" />
+		<Unit filename="../inc/ResourceManager.h" />
+		<Unit filename="../inc/ResourceWriter.h" />
+		<Unit filename="../inc/SString.h" />
+		<Unit filename="../inc/Scene.h" />
+		<Unit filename="../inc/SceneManager.h" />
+		<Unit filename="../inc/SceneNode.h" />
+		<Unit filename="../inc/SceneNodeManager.h" />
+		<Unit filename="../inc/ShadersEffectManager.h" />
+		<Unit filename="../inc/SharedPointer.h" />
+		<Unit filename="../inc/Singleton.h" />
+		<Unit filename="../inc/SpaceConfiguration.h" />
+		<Unit filename="../inc/Store.h" />
+		<Unit filename="../inc/StreamInterface.h" />
+		<Unit filename="../inc/StringStream.h" />
+		<Unit filename="../inc/System.h" />
+		<Unit filename="../inc/Thread.h" />
+		<Unit filename="../inc/ThreadCondition.h" />
+		<Unit filename="../inc/ThreadManager.h" />
+		<Unit filename="../inc/ThreadMutex.h" />
+		<Unit filename="../inc/ThreadMutexLockGuard.h" />
+		<Unit filename="../inc/ThreadSafe.h" />
+		<Unit filename="../inc/Tree.h" />
+		<Unit filename="../inc/Tree_base.h" />
+		<Unit filename="../inc/UntexturedMaterial.h" />
+		<Unit filename="../inc/Variant.h" />
+		<Unit filename="../inc/Vector2.h" />
+		<Unit filename="../inc/Vector3.h" />
+		<Unit filename="../inc/ViewPort.h" />
+		<Unit filename="../inc/Window.h" />
+		<Unit filename="../inc/WindowImplementation.h" />
+		<Unit filename="../inc/WindowManager.h" />
+		<Unit filename="../src/CgEffectCreator.cpp" />
+		<Unit filename="../src/Color.cpp" />
+		<Unit filename="../src/Console.cpp" />
+		<Unit filename="../src/Context.cpp" />
+		<Unit filename="../src/Dialog.cpp" />
+		<Unit filename="../src/DynamicLibrary.cpp" />
+		<Unit filename="../src/DynamicLibraryLoader.cpp" />
+		<Unit filename="../src/Event.cpp" />
+		<Unit filename="../src/EventEmitter.cpp" />
+		<Unit filename="../src/EventListener.cpp" />
+		<Unit filename="../src/EventReceiver.cpp" />
+		<Unit filename="../src/Exception.cpp" />
+		<Unit filename="../src/File.cpp" />
+		<Unit filename="../src/FileStream.cpp" />
+		<Unit filename="../src/FileSystem.cpp" />
+		<Unit filename="../src/Image.cpp" />
+		<Unit filename="../src/Implementation.cpp" />
+		<Unit filename="../src/Keyboard.cpp" />
+		<Unit filename="../src/Keys.cpp" />
+		<Unit filename="../src/Light.cpp" />
+		<Unit filename="../src/LightSceneNode.cpp" />
+		<Unit filename="../src/Main.cpp" />
+		<Unit filename="../src/Material.cpp" />
+		<Unit filename="../src/MathFunction.cpp" />
+		<Unit filename="../src/MathFunctionManager.cpp" />
+		<Unit filename="../src/MathModule.cpp" />
+		<Unit filename="../src/Maths.cpp" />
+		<Unit filename="../src/Memory.cpp" />
+		<Unit filename="../src/MemoryTracker.cpp" />
+		<Unit filename="../src/Node_base.cpp" />
+		<Unit filename="../src/NullLoader.cpp" />
+		<Unit filename="../src/NullResource.cpp" />
+		<Unit filename="../src/NullWriter.cpp" />
+		<Unit filename="../src/ParametedObject.cpp" />
+		<Unit filename="../src/PluginHandle.cpp" />
+		<Unit filename="../src/PluginManager.cpp" />
+		<Unit filename="../src/Renderer.cpp" />
+		<Unit filename="../src/RenderingContextSceneNode.cpp" />
+		<Unit filename="../src/Resource.cpp" />
+		<Unit filename="../src/ResourceLoader.cpp" />
+		<Unit filename="../src/ResourceManager.cpp" />
+		<Unit filename="../src/ResourceWriter.cpp" />
+		<Unit filename="../src/SString.cpp" />
+		<Unit filename="../src/Scene.cpp" />
+		<Unit filename="../src/SceneManager.cpp" />
+		<Unit filename="../src/SceneNode.cpp" />
+		<Unit filename="../src/SceneNodeManager.cpp" />
+		<Unit filename="../src/ShadersEffectManager.cpp" />
+		<Unit filename="../src/StreamInterface.cpp" />
+		<Unit filename="../src/StringStream.cpp" />
+		<Unit filename="../src/Thread.cpp" />
+		<Unit filename="../src/ThreadCondition.cpp" />
+		<Unit filename="../src/ThreadImplementation.cpp" />
+		<Unit filename="../src/ThreadManager.cpp" />
+		<Unit filename="../src/ThreadMutex.cpp" />
+		<Unit filename="../src/ThreadMutexLockGuard.cpp" />
+		<Unit filename="../src/ThreadSafe.cpp" />
+		<Unit filename="../src/Tree_base.cpp" />
+		<Unit filename="../src/UntexturedMaterial.cpp" />
+		<Unit filename="../src/ViewPort.cpp" />
+		<Unit filename="../src/Window.cpp" />
+		<Unit filename="../src/WindowManager.cpp" />
+		<Extensions>
+			<envvars />
+			<code_completion />
+			<lib_finder disable_auto="1" />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
