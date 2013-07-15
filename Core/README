@@ -1,0 +1,36 @@
+This folder contains
+--------------------
+
+*  bin/   : The binaries directory, where the libraries are outputted.
+*  inc/   : The includes directory Contains every includes files of the Engine.
+*  src/   : The sources of the Engine.
+*  extra/ : Some extra files and scripts.
+*  doc/   : Some needed doc files.
+
+*  premake4.lua : A premake4 sript to build makefiles.
+
+How to use these files
+----------------------
+
+### Installation
+
+1. Verify that you have premake4 installed. See extra/README for more details.
+2. Run premake4 [plat] where plat is the desired platform.
+3. Use the generated build files to build the library.
+
+This process will generate the Core lirary, without any plugins or examples.
+
+### Cleaning
+
+Just run 'premake4 clean' to clean every unused files. You will have to re-run the initial premake4
+script to get the makefiles again.
+
+### Working on the sources
+
+You can work on the source simply by creating the IDE's files you like ( as 'premake4 codeblocks' for
+example ) and then work on the source. Think to run 'premake4 clean' before any push.
+
+### Documentation
+
+You can build the doc if you have doxygen. Simply run doxygen in this directory. Documentation will output
+by default in the 'html' directory.

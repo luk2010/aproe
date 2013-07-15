@@ -1,8 +1,0 @@
--- Unix FileSystem plugin premake4 script
-project "UnixFileSystem"
-	kind "SharedLib"
-	language "C++"
-	files { "inc/*.h",
-		"src/*.cpp" }
-	links { "AProE" }
-setupplugintarget()

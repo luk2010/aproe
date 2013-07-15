@@ -1,0 +1,5 @@
+This folder contains
+--------------------
+
+*  debug/ : binaries directory for debug configuration.
+*  release/ : binaries directory foor release configuration.

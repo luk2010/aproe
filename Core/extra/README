@@ -1,0 +1,14 @@
+This folder contains
+--------------------
+
+*  premake4 : The premake4 executable to compute premake4 scripts.
+*  install_premake4.sh : A Shell script that install the premake4 executable in your
+ bin/ directory. You must be in admin mode to use this script ( "sudo sh install_premake4.sh" ).
+
+How to use these files
+----------------------
+
+  First, verify thatyou correctly have premake4 installed. Run "premake4 --version" and see if version
+is superior or equal to 4.4 .
+  If version is not correct, run the install premake4 script that will install the 4.4 beta4 version of premake4
+in your bin/ directory.
