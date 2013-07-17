@@ -125,6 +125,7 @@ namespace APro
     APRO_DLL double ACos(double v);
     APRO_DLL double ASin(double v);
     APRO_DLL double ATan(double v);
+    APRO_DLL double ATan2(double v, double v2);
 
     template <typename T> void swapNumeric(T& num1, T& num2)
     {
@@ -154,6 +155,52 @@ namespace APro
     template <typename T> T proportionnal(const T& value, const T base, const T to)
     {
         return value * to / base;
+    }
+
+    template<typename Type, typename Compare>
+    void quicksort(Type* array, size_t num, Compare cmpfunc)
+    {
+        custom_quicksort(array, 0, num - 1, cmpfunc);
+    }
+
+    template <typename Type, typename Compare>
+    void custom_quicksort(Type* t_array, size_t beg, size_t end, Compare cmpfunc)
+    {
+        Type piv, tmp;
+        int l, r, p;
+
+        while(beg < end)
+        {
+            l = beg; p = beg + (end-beg)/2; r = end;
+            piv = t_array[p];
+
+            while(1)
+            {
+                while ( (l<=r) && (cmpfunc(t_array[l], piv) <= 0) ) l++;
+                while ( (l<=r) && (cmpfunc(t_array[r], piv) > 0) ) r--;
+
+                if(l>r) break;
+
+                tmp = t_array[l]; t_array[l] = t_array[r]; t_array[r] = tmp;
+
+                if(p == r) p = l;
+                l++; r--;
+            }
+
+            t_array[p] = t_array[r]; t_array[r] = piv;
+            r--;
+
+            if((r-beg) < (end-l))
+            {
+                custom_quicksort(t_array, beg, r, cmpfunc);
+                beg = l;
+            }
+            else
+            {
+                custom_quicksort(t_array, l, end, cmpfunc);
+                end = r;
+            }
+        }
     }
 }
 

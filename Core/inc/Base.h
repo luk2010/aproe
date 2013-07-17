@@ -46,7 +46,7 @@
 #define APRO_ALLOCATORSTRICT APRO_ON
 
 /** Defines Debug or Release compilation. */
-#if defined(DEBUG) || defined(_DEBUG_) || defined(__DEBUG__)
+#if _HAVE_DEBUG_MODE_
 #   define APRO_DEBUG APRO_ON
 #else
 #   define APRO_DEBUG APRO_OFF

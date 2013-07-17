@@ -1,13 +1,15 @@
 This folder contains
 --------------------
 
-*  bin/   : The binaries directory, where the libraries are outputted.
-*  inc/   : The includes directory Contains every includes files of the Engine.
-*  src/   : The sources of the Engine.
-*  extra/ : Some extra files and scripts.
-*  doc/   : Some needed doc files.
+*  bin/         : The binaries directory, where the libraries are outputted.
+*  inc/         : The includes directory Contains every includes files of the Engine.
+*  src/         : The sources of the Engine.
+*  extra/       : Some extra files and scripts.
+*  doc/         : Some needed doc files.
 
 *  premake4.lua : A premake4 sript to build makefiles.
+*  TODO         : A file that describes what's left to do. Ideas can add features.
+*  Doxyfile     : A doxy-prepared file to generate documentations.
 
 How to use these files
 ----------------------
@@ -33,4 +35,5 @@ example ) and then work on the source. Think to run 'premake4 clean' before any 
 ### Documentation
 
 You can build the doc if you have doxygen. Simply run doxygen in this directory. Documentation will output
-by default in the 'html' directory.
+by default in the 'html' directory. 
+Then open the 'index.html' file in the 'html' directory with your favorite browser.

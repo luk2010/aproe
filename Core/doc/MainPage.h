@@ -20,23 +20,19 @@
     You can download the latest source of the Engine on our Github repository.
     See <a href="https://github.com/luk2010/aproe">GitHub</a> for more informations or the \link Installation \endlink page.
 
-    @section Modifying Modifying the sources
+    @section Helps
 
-    Sources can be easily modified : under the codeblocks_editor
-    directory are some projects files that you can use to modify
-    the sources of the core library.
-    you can send me your patches at alain.ratatouille@gmail.com .
-
-    @section ex Examples
-
-    Some examples on how to use the Engine can be found in this documentation. They are guarantee to work as they are
-    tested. See the \link Examples \endlink page for a list of example.
+    You should read the README file given with the download to understand how to compile, modify and use the sources.
 **/
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
 /* Modules used in the engine. */
 /**
+    @defgroup Maths Maths
+    @addtogroup Maths
+    @brief Reroups every Maths-related class.
+
     @defgroup Utils Utility
     @addtogroup Utils
     @brief Regroups every class that can be used in every context, and

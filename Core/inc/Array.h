@@ -49,7 +49,7 @@ namespace APro
 
         size_t      physicalSize;///< Physical size.
         size_t      size; ///< Logical size.
-        T*    first;///< Pointer to the array.
+        T*          first;///< Pointer to the array.
 
     public:
 
@@ -617,6 +617,41 @@ namespace APro
                 sz = size - position;
 
             ret.append(first + position, sz);
+        }
+
+        void resize(size_t new_size)
+        {
+            if(new_size == 0)
+            {
+                clear();
+                return;
+            }
+
+            if(first)
+            {
+                if(new_size > size)
+                {
+                    reserve(new_size);
+                    for(i = 0; i < new_size - size; ++i)
+                        push_back(T());
+                }
+                else if(new_size < size)
+                {
+                    if(new_size * 2 < size)
+                    {
+                        size_t size_to_erase = size - new_size * 2;
+                        erase(new_size * 2 - 1, size - 1);
+                    }
+
+                    size = new_size;
+                }
+            }
+            else
+            {
+                reserve(new_size);
+                for(i = 0; i < new_size; ++i)
+                    push_back(T());
+            }
         }
 
     };

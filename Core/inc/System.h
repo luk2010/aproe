@@ -93,6 +93,12 @@ public:
 /** Set Platform to OS X. */
 #define APRO_OSX 4
 
+/** Set platform to Xbox360. */
+#define APRO_XBOX360 5
+
+/** Set platform to PS3. */
+#define APRO_PS3 6
+
 //----------------------------------------------//
 //                   Windows                    //
 //----------------------------------------------//
@@ -120,7 +126,7 @@ public:
 //                    OS X                      //
 //----------------------------------------------//
 
-#if defined(_APPLE_) || defined(MACOSX)
+#if defined(_APPLE_) || defined(MACOSX) || defined(_MACOSX_)
 #   if !defined(MACOSX)
 #       define MACOSX
 #   endif
@@ -128,6 +134,25 @@ public:
 #   define APRO_PLATFORM APRO_OSX
 #   define FSTAT stat
 #endif
+
+//----------------------------------------------//
+//                    PS3                       //
+//----------------------------------------------//
+
+#if defined(_PS3_)
+#   define APRO_PLATFORM APRO_PS3
+#   define FSTAT stat
+#endif // defined
+
+//----------------------------------------------//
+//                  XBox360                     //
+//----------------------------------------------//
+
+#if defined(_XBOX360_)
+#   define APRO_PLATFORM APRO_XBOX360
+#   define FSTAT _fstat
+#   include <windows.h>
+#endif // defined
 
 //----------------------------------------------//
 //                   Linux                      //
@@ -138,5 +163,13 @@ public:
 //#   include <X11/Xlib.h>
 #   define FSTAT stat
 #endif
+
+#if defined(LINUX)
+#   define APRO_PLATFORM APRO_LINUX
+//#   include <X11/Xlib.h>
+#   define FSTAT stat
+#endif
+
+
 
 #endif

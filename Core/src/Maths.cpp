@@ -61,6 +61,11 @@ namespace APro
         return atan(v);
     }
 
+    double ATan2(double v, double v2)
+    {
+        return atan2(v, v2);
+    }
+
     float min_angle_32(float a)
     {
         float c = a;
