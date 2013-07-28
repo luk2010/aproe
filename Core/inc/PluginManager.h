@@ -17,6 +17,10 @@
 #include "Manager.h"
 #include "PluginHandle.h"
 
+#define APRO_CURRENT_PLUGIN_MAJOR 1
+#define APRO_CURRENt_PLUGIN_MINOR 0
+#define APRO_CURRENT_PLUGIN_BUILD 1
+
 namespace APro
 {
     class APRO_DLL PluginManager : public Manager<PluginHandle>
@@ -39,6 +43,7 @@ namespace APro
         void removePluginHandle(const String& name);
 
         PluginInfo* getPluginInfo(const String& pluginhandle);
+        const PluginApiVersion getCurrentApiversion() const;
 
     };
 }

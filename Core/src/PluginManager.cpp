@@ -113,6 +113,15 @@ namespace APro
             return nullptr;
         }
     }
+    
+    const PluginApiVersion PluginManager::getCurrentApiVersion() const
+    {
+        PluginApiVersion av;
+        av.major = APRO_CURRENT_PLUGIN_MAJOR;
+        av.minor = APRO_CURRENT_PLUGIN_MINOR;
+        av.build = APRO_CURRENT_PLUGIN_BUILD;
+        return av;
+    }
 
     int PluginManager::loadDirectory(const String& path)
     {// Doit etre fait sans utiliser FileSystem car l'implementation n'est pas encore charge. C'est ici que sera charge par ailleurs son implementation.

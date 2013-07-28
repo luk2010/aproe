@@ -20,12 +20,21 @@
 
 namespace APro
 {
+    typedef struct _PluginApiVersion
+    {
+        int major;
+        int minor;
+        int build;
+        
+    } PluginApiVersion;
+    
     typedef struct PluginInfo
     {
-        String name;
-        String author;
-        String date;
-        String description;
+        String           name;
+        String           author;
+        String           date;
+        String           description;
+        PluginApiVersion apiversion;
     } PluginInfo;
 
     class APRO_DLL PluginHandle
