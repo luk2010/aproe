@@ -60,6 +60,12 @@ namespace APro
             {
                 ret = AProNew(1, PluginHandle) (name, lib);
                 Manager<PluginHandle>::push(ret);
+                
+                if(isOutdated(ret))
+                {
+                    Console::get() << "\n[PluginManager]{addPluginHandle} Plugin " << name << " is outdated !";
+                }
+                
                 return ret;
             }
         }
@@ -190,5 +196,54 @@ namespace APro
         }
 
         return 0;
+    }
+    
+    bool PluginManager::hasValidApiVersion(const PluginHandle::ptr& plugin) const
+    {
+        bool ret = false;
+        
+        if(!plugin->isNull())
+        {
+            PluginInfo* info = plugin->getPluginInfo();
+            if(info)
+            {
+                const PluginApiVersion current = getCurrentApiVersion();
+                
+                if(info->apiversion.major <= current.major && info->apiversion.minor <= current.minor)
+                {
+                    ret = true;
+                }
+                else if(info->apiversion.build <= current.build)
+                {
+                    ret = true;
+                }
+            }
+        }
+        
+        return ret;
+    }
+    
+    bool PluginManager::isOutdated(const PluginHandle::ptr& plugin) const
+    {
+        bool ret = false;
+        if(!plugin.isNull())
+        {
+            if(hasValidApiVersion(plugin))
+            {
+                const PluginApiVersion current = getCurrentApiVersion();
+                PluginInfo* info = plugin->getPluginInfo();
+                
+                if(info->apiversion.build < current.build)
+                {
+                    ret = true;
+                }
+                else if(info->apiversion.major < current.major || info->apiversion.minor < current.minor)
+                {
+                    ret = true;
+                }
+            }
+        }
+        
+        return ret;
     }
 }

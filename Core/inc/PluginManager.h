@@ -44,6 +44,9 @@ namespace APro
 
         PluginInfo* getPluginInfo(const String& pluginhandle);
         const PluginApiVersion getCurrentApiversion() const;
+        
+        bool hasValidApiVersion(const PluginHandle::ptr& plugin) const;
+        bool isOutdated(const PluginHandle::ptr& plugin) const;
 
     };
 }
