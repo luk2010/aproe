@@ -63,7 +63,7 @@ namespace APro
                 
                 if(isOutdated(ret))
                 {
-                    Console::get() << "\n[PluginManager]{addPluginHandle} Plugin " << name << " is outdated !";
+                    Console::get() << "\n[PluginManager]{addPluginHandle} Warning : Plugin " << name << " is outdated !";
                 }
                 
                 return ret;
@@ -80,7 +80,7 @@ namespace APro
         SharedPointer<PluginHandle> ret = getPluginHandle(name);
         if(ret.isNull())
         {
-            if(lib.isNull())
+            if(lib.isNull() || !lib.isLoaded())
             {
                 return AProNew(1, PluginHandle) (name);
             }
@@ -88,6 +88,12 @@ namespace APro
             {
                 ret = AProNew(1, PluginHandle) (name, lib);
                 Manager<PluginHandle>::push(ret);
+                
+                if(isOutdated(ret))
+                {
+                    Console::get() << "\n[PluginManager]{addPluginHandle} Warning : Plugin " << name << " is outdated !";
+                }
+                
                 return ret;
             }
         }
@@ -103,7 +109,9 @@ namespace APro
         if(!rm.isNull())
         {
             Manager<PluginHandle>::pop(rm);
-            rm.release();
+            
+            rm->end();
+            rm.release();// We release the pointer just to be sure.
         }
     }
 
