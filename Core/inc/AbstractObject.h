@@ -183,7 +183,12 @@ namespace APro
     class APRO_DLL AbstractObjectAutoPointer : public AutoPointer<AbstractObject>
     {
     public:
+        
+        APRO_COPY_AUTOPOINTER_CONSTRUCT(AbstractObjectAutoPointer, AbstractObject)
+        
         virtual ~AbstractObjectAutoPointer() { ungrab_pointer(); }
+        
+    protected:
 
         virtual void destroy_pointer()
         {

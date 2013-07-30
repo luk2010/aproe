@@ -39,14 +39,40 @@ namespace APro
      *  You can customize the deletion of particular objects, in
      *  subclassing a specialization of this class.
      *  @code
-        class MyIntPointer : public AutoPointer<int>
+     *  class MyIntPointer : public AutoPointer<int>
      *  @endcode
      *
      *  This can be used to reimplement the ::destroy_pointer method,
      *  to perform customized destruction of objects.
-     *  @note You must call the base ::destroy_pointer function from
-     *  the re-implementation.
      *
+     *  @note You must call the ungrab_pointer function from the
+     *  destructor of your class. The pointer isn't automaticly
+     *  released in the original class.
+     *
+     *  To create a sub class of this one, you should use the template
+     *  as :
+     *
+     *  @code
+     *  class Example {};
+     *  
+     *  class Example_AutoPointer : public AutoPointer<Example>
+     *  {
+     *     public:
+     *        APRO_COPY_AUTOPOINTER_CONSTRUCT(Example_AutoPointer,
+     *                                          Example)
+     *        
+     *        virtual ~Example_AutoPointer() { ungrab_pointer(); }
+     *
+     *     protected:
+     *        void destroy_pointer() {  Do_your_stuff_here_(); }
+     *  };
+     *  @endcode
+     *
+     *  The public part is the standard part, the protected one is 
+     *  your customization part. If your object dosen't have specific
+     *  destruction (except delete of course), you can use
+     *  @code typedef AutoPointer<Example> Example_AutoPointer; @endcode
+     *  to quickly perform AutoPointer subclass. 
      *
     **/
     ////////////////////////////////////////////////////////////
@@ -118,7 +144,7 @@ namespace APro
         template<typename Y>
         AutoPointer(const AutoPointer<Y>& auto_pointer)
         {
-            pointer = auto_pointer.pointer;
+            pointer = dynamic_cast<T*>(auto_pointer.pointer);
             custom_collector = auto_pointer.custom_collector;
             init_pointer();
         }
@@ -129,7 +155,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         virtual ~AutoPointer()
         {
-
+            ungrab_pointer(); 
         }
 
     protected:
@@ -162,13 +188,18 @@ namespace APro
          *  destruction of objects.
          *  This function is called only if the collector tell that use
          *  is 0.
+         * 
+         *  Use it to perform custom destruction as virtual destroy 
+         *  function object (as in AbstractObject).
         **/
         ////////////////////////////////////////////////////////////
-        virtual void destroy_pointer() = 0;
+        virtual void destroy_pointer() { }
 
         ////////////////////////////////////////////////////////////
         /** @brief Deallocate the pointer and removes it from the
          *  collector.
+         *
+         *  This function doesn't check the utility of the pointer.
         **/
         ////////////////////////////////////////////////////////////
         void deallocate_pointer()
@@ -320,6 +351,13 @@ namespace APro
             return *this;
         }
     };
+    
+#define APRO_COPY_AUTOPOINTER_CONSTRUCT(type, object) \
+    type() : AutoPointer<object>() { } \
+    type(object* __o) : AutoPointer<object>(__o) { } \
+    type(object* __o, PointerCollector* __p) : AutoPointer<object>(__o, __p) { } \
+    type(const type<object>& __p) : AutoPointer<object>(__p) { } \
+    template<typename __Y) type(const type<__Y>& __p) : AutoPointer<object>(__p) { }
 }
 
 #endif // APRO_AUTOPOINTER_H
