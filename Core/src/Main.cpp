@@ -24,6 +24,7 @@
 #include "ThreadManager.h"
 #include "PointerCollector.h"
 #include "AbstractObject.h"
+#include "IdGenerator.h"
 
 #include <unistd.h>
 
@@ -42,6 +43,7 @@ namespace APro
         tmanager = nullptr;
         sharedpointer_collector = nullptr;
         abstract_object_factory = nullptr;
+        id_generator = nullptr;
     }
 
     Main& Main::init(int argc, const char* argv[])
@@ -70,10 +72,19 @@ namespace APro
                      << "\n - Debugging Implementation = " << (hasOption((int) GlobalOption::Debugging_Implementation) ? "true" : "false");
 
 
-
+        id_generator = AProNew(IdGenerator);
+        if(id_generator)
+        {
+            getConsole() << "\n[Main] Global ID Generator OK.";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't create Global ID Generator ! Aborting...";
+            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
+        }
 
         sharedpointer_collector = AProNew3(PointerCollector) (String("Global"));
-        if(resourceManager)
+        if(sharedpointer_collector)
         {
             getConsole() << "\n[Main] Global Pointer Collector OK.";
         }
@@ -323,6 +334,17 @@ namespace APro
         else
         {
             getConsole() << "\n[Main] Can't clean Global Pointer Collector because not initialized !";
+        }
+        
+        if(id_generator)
+        {
+            AProDelete(id_generator);
+            id_generator = nullptr;
+            getConsole() << "\n[Main] Global ID Generator cleaned !";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't clean Global ID Generator because not initialized !";
         }
 
         getConsole() << "\n[Main] Cleaned !";

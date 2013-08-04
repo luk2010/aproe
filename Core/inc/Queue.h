@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/05/2013
+ *  @date 03/07/2013
  *
  *  Defines a queue.
  *
