@@ -126,6 +126,16 @@ namespace APro
                 push(pair.first(), pair.second());
             }
         }
+        
+        Map<T1, T2> & operator = (const Map<T1, T2>& other)
+        {
+            clear();
+            for(unsigned int i = 0; i < other.size(); i++)
+            {
+                const Map<T1, T2>::Pair& pair = other.getPair(i);
+                push(pair.first(), pair.second());
+            }
+        }
 
         ~Map()
         {

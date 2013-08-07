@@ -235,7 +235,7 @@ namespace APro
         PointerCollector* sharedpointer_collector;
         ResourceManager* resourceManager;
         ImplementationStore* impStore;
-//      RendererFactoryManager* rfm;
+//      RendererFactoryManager* rfm; // Not use anymore
         PluginManager* pluginManager;
         MathFunctionManager* mathManager;
         WindowManager* windowManager;

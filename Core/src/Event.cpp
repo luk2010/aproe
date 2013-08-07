@@ -1,16 +1,16 @@
+/////////////////////////////////////////////////////////////
 /** @file Event.cpp
+ *  @ingroup Events
  *
  *  @author Luk2010
  *  @version 0.1A
  *
  *  @date 11/09/2012
  *
- *  @addtogroup Global
- *  @addtogroup System
+ *  Implements the Event class.
  *
- *  This file defines the Event class.
- *
-**/
+ **/
+/////////////////////////////////////////////////////////////
 #include <Event.h>
 #include <Main.h>// For the id generator.
 

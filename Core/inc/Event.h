@@ -83,6 +83,19 @@ namespace APro
      *  The event structure can have more fields, but this isn't 
      *  documented as the event is a ParametedObject subclass, you
      *  should use ParametedObject::listParameters to get descriptions.
+     *
+     *  ### Global Process
+     *
+     *  The event emitter is the base. 
+     *
+     *  Emitter detect send signal -> send to either uniter or 
+     *  listener.
+     *
+     *  If uniter -> asynchronous system that send to registered 
+     *  listeners or to specific listener if target is not null.
+     *
+     *  If listener -> synchronous system, direct handling of the
+     *  event.
      *  
     **/
     /////////////////////////////////////////////////////////////
@@ -213,7 +226,7 @@ namespace APro
         
     };
     
-    typedef AutoPointer<Event> EventAPtr;///< An AutoPointer to Events. 
+    typedef AutoPointer<Event> EventPtr;///< An AutoPointer to Events.
 }
 
 #endif
