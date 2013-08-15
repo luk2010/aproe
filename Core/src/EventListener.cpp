@@ -1,86 +1,62 @@
+/////////////////////////////////////////////////////////////
 /** @file EventListener.cpp
+ *  @ingroup Events
  *
  *  @author Luk2010
  *  @version 0.1A
  *
  *  @date 11/09/2012
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the EventListener class.
+ *  Implements the EventListener class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #include "EventListener.h"
 
-#include "Console.h"
+#include "Main.h"
 
 namespace APro
 {
-    EventListener::EventListener()
-        : ParametedObject(), mname("")
+    EventListener::EventListener(const String& name)
     {
-
+        m_name = name;
+        id     = Main::get().getIdGenerator().canPick() ? Main::get().getIdGenerator().pick() : 0;
+        last_event = nullptr;
     }
-
-    EventListener::EventListener(const String& n)
-        : ParametedObject(), mname(n)
+    
+    EventListener::EventListener(const EventListener& other)
     {
-
+        m_name = other.m_name;
+        id = Main::get().getIdGenerator().canPick() ? Main::get().getIdGenerator().pick() : 0;
+        last_event = nullptr;
     }
-
-    EventListener::~EventListener()
+    
+    bool EventListener::receive(const EventPtr& event)
     {
-        purge();
-    }
-
-    void EventListener::receive(const Event::ptr& e)
-    {
-        if(!e.isNull())
-            receivedEvents.append(e);
-    }
-
-    Event::ptr EventListener::received(const String& name)
-    {
-        for(List<Event::ptr>::Iterator i(receivedEvents.begin()); !i.isEnd(); i++)
+        if(event.isNull())
+            return false;
+        
+        if(handle(event))
         {
-            if(i.get()->type() == name)
-            {
-                Event::ptr ret = i.get();
-                receivedEvents.erase(receivedEvents.find(ret));
-                return ret;
-            }
+            last_event = event;
+            return true;
         }
-
-        return Event::ptr();
+        
+        return false;
     }
-
-    const Event::ptr EventListener::received(const String& name) const
+    
+    const String& EventListener::getName() const
     {
-        for(List<Event::ptr>::ConstIterator i(receivedEvents.begin()); !i.isEnd(); i++)
-        {
-            if(i.get()->type() == name)
-            {
-                const Event::ptr& ret = i.get();
-                return ret;
-            }
-        }
-
-        return Event::ptr();
+        return m_name;
     }
-
-    void EventListener::purge()
+    
+    const EventPtr& EventListener::getLastEventReceived() const
     {
-        receivedEvents.clear();
+        return last_event;
     }
-
-    const String& EventListener::name() const
+    
+    const unsigned long& EventListener::getId() const
     {
-        return mname;
-    }
-
-    String& EventListener::name()
-    {
-        return mname;
+        return id;
     }
 }

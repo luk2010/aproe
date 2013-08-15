@@ -38,6 +38,8 @@ namespace APro
      *  You can see that a Listener can always listen events, either
      *  from emitters or from Uniters.
      *
+     *  In this system, this is the event that always have the data.
+     *
      *  ### The listener
      *
      *  A listener is an object that have the possibility to handle
@@ -56,7 +58,7 @@ namespace APro
      *  all his listeners. 
      *
      *  The emitter can send events only to listeners that are
-     *  registered to him. More, it can create custom listeners. 
+     *  registered to him, or that you give the pointer.
      *
      *  ### The uniter
      *
@@ -223,6 +225,18 @@ namespace APro
          **/
         /////////////////////////////////////////////////////////////
         bool hasTarget() const;
+        
+    public:
+        
+        bool operator == (const Event& other) const 
+        {
+            return id() == other.id();
+        }
+        
+        bool operator != (const Event& other) const
+        {
+            return !(*this == other);
+        }
         
     };
     

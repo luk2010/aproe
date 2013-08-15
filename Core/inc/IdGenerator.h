@@ -102,6 +102,8 @@ namespace APro
         /////////////////////////////////////////////////////////////
         bool canPick() const;
     };
+    
+    typedef unsigned long id; ///< A generic id type.
 }
 
 #endif // APRO_IDGENERATOR_H

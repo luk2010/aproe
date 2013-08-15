@@ -37,18 +37,12 @@ namespace APro
      *  @note If the event's target is null, the emitter send it to 
      *  all his listeners. 
      *
-     *  The emitter can send events only to listeners that are
-     *  registered to him. More, it can populate custom listeners. 
+     *  The emitter creates the events it has to send. It populates
+     *  it with correct datas. The listener just receive it and this
+     *  is the listener problem to handle it.
      *
-     *  The listeners populated with the corresponding emitters
-     *  can have more datas than traditionnal listeners, so you
-     *  should use populated listeners only with correponding emitter
-     *  to ensure that your listener will correctly handle datas.
-     *
-     *  The emitters can send any event type, but it can mostly
-     *  send specific events wich are documented. These events
-     *  are recommended when using this particular emitter, because
-     *  they might have custom datas handled only by this emitter.
+     *  @note Getting listeners by name only get the first listener
+     *  with given name, you should use unique id's instead.
      *
      *  @see Events for more explanation about the event system.
     **/
@@ -59,7 +53,7 @@ namespace APro
         
         typedef Map<String, String> EventsList;///< List of events type, with documentation.
         
-        List<EventListenePtr>       listeners;///< List of AutoPointer to listeners.
+        List<EventListenerPtr>       listeners;///< List of AutoPointer to listeners.
         EventsList                  events;///< List of events type with documentation, handled correctly by this emitter.
         
     public:
@@ -110,6 +104,19 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         unsigned int sendEvent(const EventPtr& e, const String& name);
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Send an event using the Synchronous Event System.
+         *  
+         *  @param e : Event to send. If the event is null, nothing is 
+         *  done in this function.
+         *  @param listener : Id of the listener to send. It must 
+         *  correspond to an entry in the registered listeners list.
+         *  @return A value superior or equal to 0, corresponding to 
+         *  the number of listeners that have handled this event.
+        **/
+        /////////////////////////////////////////////////////////////
+        unsigned int sendEvent(const EventPtr& e, const Id& listener);
         
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
@@ -197,6 +204,9 @@ namespace APro
         /////////////////////////////////////////////////////////////
         /** @brief Return listener from his name, registered in this
          *  emitter.
+         *  @note Only the first encountered listener with given name
+         *  is returned. If you have many listeners with same name
+         *  registered, please use the id method instead.
         **/
         /////////////////////////////////////////////////////////////
         const EventListenerPtr& getListener(const String& name) const;
@@ -204,35 +214,64 @@ namespace APro
         /////////////////////////////////////////////////////////////
         /** @brief Return listener from his name, registered in this
          *  emitter. 
-         **/
+         *
+         *  @note Only the first encountered listener with given name
+         *  is returned. If you have many listeners with same name
+         *  registered, please use the id method instead.
+        **/
         /////////////////////////////////////////////////////////////
         EventListenerPtr& getListener(const String& name);
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Return listener from his id, registered in this
+         *  emitter.
+        **/
+        /////////////////////////////////////////////////////////////
+        const EventListenerPtr& getListener(const Id& identifier) const;
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Return listener from his id, registered in this
+         *  emitter.
+        **/
+        /////////////////////////////////////////////////////////////
+        EventListenerPtr& getListener(const Id& identifier);
 
     public:
 
         /////////////////////////////////////////////////////////////
-        /** @brief Populate given listener with custom emitters 
-         *  datas. 
+        /** @brief Create an event and populate it with correct 
+         *  data.
          *
-         *  This function populate a listener with custom datas needed
-         *  by event type to ensure that event will correctly be handled
-         *  by listener.
+         *  @param event_type : Type of the event to create. You should
+         *  set it to a natively handled event by this emitter.
+         *  @param set_target : Set to true if you want to set the target
+         *  field of the event. @see Event for more.
+         *  @param target : Target of the event.
          *
-         *  @param event_type : Type of event to create.
-         *  @param listener : Listener to populate. If null, only event
-         *  is created.
-         *  @param set_target : If you want the newly created event to 
-         *  have given listener as target, set this flag to true. The
-         *  target field of the event class is only used by Uniter class
-         *  in the Asynchronous Event System. by default, value is true
-         *  to ensure this event will be able to be used in the Uniter, 
-         *  but if listener is null, value is ignored.
-         *  @return A pointer to a newly created event that will be able
-         *  to be directly send to populated listener.
+         *  @return A pointer to the created event.
+         *
+         *  This function also call a virtual custom populating function
+         *  that helps the emitter to set correct data into the event.
+         *  You can overload it in subclasses.
+         *  @see ::populateEvent
         **/
         /////////////////////////////////////////////////////////////
-        virtual EventPtr populateListener(const String& event_type, EventListenerPtr& listener = nullptr, bool set_target = true) const;
+        EventPtr createAndPopulateEvent(const String& event_type, bool set_target = false, EventListenerPtr& target = nullptr) const;
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Populate an event from his type.
+         *
+         *  If the type of the event is handled, the emitter will
+         *  populate it with correct datas that will be interpreted
+         *  by listeners and/or uniters.
+         *
+         *  @param event : Event to populate.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual void populateEvent(EventPtr& event) const { }
     };
+    
+    typedef AutoPointer<EventEmitter> EventEmitterPtr;///< AutoPointer to EventEmitter. No need to overload the destruction.
 }
 
 #endif

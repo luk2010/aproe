@@ -191,9 +191,12 @@ namespace APro
          * 
          *  Use it to perform custom destruction as virtual destroy 
          *  function object (as in AbstractObject).
+         *
+         *  @note Never forget to call ::deallocate_pointer at the end 
+         *  of this function.
         **/
         ////////////////////////////////////////////////////////////
-        virtual void destroy_pointer() { }
+        virtual void destroy_pointer() { deallocate_pointer(); }
 
         ////////////////////////////////////////////////////////////
         /** @brief Deallocate the pointer and removes it from the

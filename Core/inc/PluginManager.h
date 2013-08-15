@@ -24,6 +24,33 @@
 namespace APro
 {
     /////////////////////////////////////////////////////////////
+    /** @defgroup Plugin Plugins System
+     *  @brief A plugin system based on dynamic library loading.
+     *
+     *  The Atlanti's Project Engine Plugin System is, basically,
+     *  a dynamic library loading at runtime. The library loaded
+     *  is initialized with a generic function (StartPlugin), and
+     *  is destroyed with the function EndPlugin, present in the 
+     *  library. 
+     *
+     *  The library can also give the GetPluginInfo function to give
+     *  the engine a way to have informations about the plugin.
+     *
+     *  When you create a cool new plugin for the engine, to add
+     *  something, you will first create this three functions, with
+     *  the PluginInfo structure in a global variable at the 
+     *  beginning of your program. Then, consider the StartPlugin
+     *  function at the begin of the old-style main function, and
+     *  EndPlugin where you will destroy everything allocated in
+     *  StartPlugin. 
+     *
+     *  Because of the allocation system, you must deallocate yourself
+     *  what you allocated in the plugin (using the AProNew / AProDelete
+     *  system).
+    **/
+    /////////////////////////////////////////////////////////////
+    
+    /////////////////////////////////////////////////////////////
     /** @class PluginManager
      *  @ingroup Plugin
      *  @brief Manage every plugins.
@@ -34,7 +61,7 @@ namespace APro
      *
      *  Plugins are loaded without API version checking, but you 
      *  should verify it yourself at end of loading. Notice that 
-     *  plugins using older version of API than this one is 
+     *  plugins using older version of API than this one are 
      *  marked as outdated, but you still can use it.
      *
      *  @note You can access a global instance using the Main 
