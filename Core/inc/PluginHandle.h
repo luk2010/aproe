@@ -1,16 +1,16 @@
+/////////////////////////////////////////////////////////////
 /** @file PluginHandle.h
+ *  @ingroup Plugin
  *
  *  @author Luk2010
  *  @version 0.1A
  *
  *  @date 17/09/2012
  *
- *  @addtogroup Global
- *  @addtogroup Plugin
- *
- *  This file defines the PluginHandle class.
+ *  Defines the PluginHandle class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #ifndef APROPLUGINHANDLE_H
 #define APROPLUGINHANDLE_H
 
@@ -20,12 +20,22 @@
 
 namespace APro
 {
+    
+    typedef struct _PluginApiVersion
+    {
+        int major;
+        int minor;
+        int build;
+        
+    } PluginApiVersion;
+    
     typedef struct PluginInfo
     {
-        String name;
-        String author;
-        String date;
-        String description;
+        String           name;
+        String           author;
+        String           date;
+        String           description;
+        PluginApiVersion apiversion;
     } PluginInfo;
 
     class APRO_DLL PluginHandle
@@ -34,9 +44,11 @@ namespace APro
 
     protected:
 
-        String name;
-        PluginInfo* info;
-        SharedPointer<DynamicLibrary> dynLib;
+        String                          name;
+        PluginInfo*                     info;
+        SharedPointer<DynamicLibrary>   dynLib;
+        bool                            started;
+        bool                            terminated;
 
     public:
 
@@ -52,6 +64,9 @@ namespace APro
 
         void initialize(const SharedPointer<DynamicLibrary>& lib);
         void end();
+        
+        bool isStarted() const;
+        bool isTerminated() const;
 
         PluginInfo* getPluginInfo() const;
         void refreshPluginInfo();

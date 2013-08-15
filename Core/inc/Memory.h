@@ -129,6 +129,8 @@ template <typename T> void AProDelete_alone(T* ptr, const char* func_, const cha
 #define AProNew(n, T) new (AProNew<T>(n, __FUNCTION__, __FILE__, __LINE__)) T[n]
 #define AProDelete(ptr) AProDelete(ptr, __FUNCTION__, __FILE__, __LINE__)
 
+#define AProNew(T) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T[1]
+
 // Use for placement new with memory manager and 1 argue
 #define AProNew2(T, arg, ptr) new T ( arg ); APro::MemoryManager::get().reportAllocation(ptr, sizeof(T), __FUNCTION__, __FILE__, __LINE__);
 #define AProDelete2(ptr) APro::MemoryManager::get().reportDeallocation(ptr, __FUNCTION__, __FILE__, __LINE__); delete ptr

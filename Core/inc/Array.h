@@ -181,9 +181,10 @@ namespace APro
         ////////////////////////////////////////////////////////////
         /** Return the real size of the array, in number of elements.
          *
-         *  @details The real size of the array can be different to the logical size
-         *  because it use a 'reserve' system that allow him to reserve space for futur
-         *  reallocations to be faster.
+         *  @details The real size of the array can be different to 
+         *  the logical size because it use a 'reserve' system that 
+         *  allow him to reserve space for futur reallocations to be 
+         *  faster.
          *
          *  @return Real size of the array.
         **/

@@ -30,6 +30,7 @@ namespace APro
     class ThreadManager;
     class PointerCollector;
     class AbstractObjectFactory;
+    class IdGenerator;
 
     ////////////////////////////////////////////////////////////
     /** @class Main
@@ -117,6 +118,16 @@ namespace APro
         bool hasOption(unsigned int option) const;
 
     public:
+        
+        const IdGenerator& getIdGenerator() const
+        {
+            return *id_generator;
+        }
+        
+        IdGenerator& getIdGenerator()
+        {
+            return *id_generator;
+        }
 
         const PointerCollector& getGlobalPointerCollector() const
         {
@@ -220,10 +231,11 @@ namespace APro
 
     private:
         // In activation order ! Don't change
+        IdGenerator* id_generator;
         PointerCollector* sharedpointer_collector;
         ResourceManager* resourceManager;
         ImplementationStore* impStore;
-//      RendererFactoryManager* rfm;
+//      RendererFactoryManager* rfm; // Not use anymore
         PluginManager* pluginManager;
         MathFunctionManager* mathManager;
         WindowManager* windowManager;

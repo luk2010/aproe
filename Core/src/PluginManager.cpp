@@ -60,6 +60,12 @@ namespace APro
             {
                 ret = AProNew(1, PluginHandle) (name, lib);
                 Manager<PluginHandle>::push(ret);
+                
+                if(isOutdated(ret))
+                {
+                    Console::get() << "\n[PluginManager]{addPluginHandle} Warning : Plugin " << name << " is outdated !";
+                }
+                
                 return ret;
             }
         }
@@ -74,7 +80,7 @@ namespace APro
         SharedPointer<PluginHandle> ret = getPluginHandle(name);
         if(ret.isNull())
         {
-            if(lib.isNull())
+            if(lib.isNull() || !lib.isLoaded())
             {
                 return AProNew(1, PluginHandle) (name);
             }
@@ -82,6 +88,12 @@ namespace APro
             {
                 ret = AProNew(1, PluginHandle) (name, lib);
                 Manager<PluginHandle>::push(ret);
+                
+                if(isOutdated(ret))
+                {
+                    Console::get() << "\n[PluginManager]{addPluginHandle} Warning : Plugin " << name << " is outdated !";
+                }
+                
                 return ret;
             }
         }
@@ -97,7 +109,9 @@ namespace APro
         if(!rm.isNull())
         {
             Manager<PluginHandle>::pop(rm);
-            rm.release();
+            
+            rm->end();
+            rm.release();// We release the pointer just to be sure.
         }
     }
 
@@ -112,6 +126,15 @@ namespace APro
         {
             return nullptr;
         }
+    }
+    
+    const PluginApiVersion PluginManager::getCurrentApiVersion() const
+    {
+        PluginApiVersion av;
+        av.major = APRO_CURRENT_PLUGIN_MAJOR;
+        av.minor = APRO_CURRENT_PLUGIN_MINOR;
+        av.build = APRO_CURRENT_PLUGIN_BUILD;
+        return av;
     }
 
     int PluginManager::loadDirectory(const String& path)
@@ -181,5 +204,54 @@ namespace APro
         }
 
         return 0;
+    }
+    
+    bool PluginManager::hasValidApiVersion(const PluginHandle::ptr& plugin) const
+    {
+        bool ret = false;
+        
+        if(!plugin->isNull())
+        {
+            PluginInfo* info = plugin->getPluginInfo();
+            if(info)
+            {
+                const PluginApiVersion current = getCurrentApiVersion();
+                
+                if(info->apiversion.major <= current.major && info->apiversion.minor <= current.minor)
+                {
+                    ret = true;
+                }
+                else if(info->apiversion.build <= current.build)
+                {
+                    ret = true;
+                }
+            }
+        }
+        
+        return ret;
+    }
+    
+    bool PluginManager::isOutdated(const PluginHandle::ptr& plugin) const
+    {
+        bool ret = false;
+        if(!plugin.isNull())
+        {
+            if(hasValidApiVersion(plugin))
+            {
+                const PluginApiVersion current = getCurrentApiVersion();
+                PluginInfo* info = plugin->getPluginInfo();
+                
+                if(info->apiversion.build < current.build)
+                {
+                    ret = true;
+                }
+                else if(info->apiversion.major < current.major || info->apiversion.minor < current.minor)
+                {
+                    ret = true;
+                }
+            }
+        }
+        
+        return ret;
     }
 }

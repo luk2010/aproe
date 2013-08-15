@@ -23,6 +23,7 @@
 namespace APro
 {
     class APRO_DLL AbstractObjectFactory;
+    class APRO_DLL AbstractObjectAutoPointer;
 
     ////////////////////////////////////////////////////////////
     /** @class AbstractObject
@@ -51,6 +52,10 @@ namespace APro
         String                  m_name;      ///< Name of the object.
         AbstractObjectFactory*  m_factory;   ///< Factory that created this object.
         Dictionnary             m_properties;///< Properties of this object.
+        
+    public:
+        
+        typedef AbstractObjectAutoPointer ptr;
 
     public:
 
@@ -178,12 +183,22 @@ namespace APro
     /** @class AbstractObjectAutoPointer
      *  @ingroup Core
      *  @brief Specialized version of AutoPointer.
+     *
+     *  The AbstractObjectAutoPointer destroy the pointer by 
+     *  calling the ungrab_pointer() and destroy_pointer function
+     *  where AbstractObject::destroy is called before
+     *  deallocation.
     **/
     ////////////////////////////////////////////////////////////
     class APRO_DLL AbstractObjectAutoPointer : public AutoPointer<AbstractObject>
     {
     public:
+        
+        APRO_COPY_AUTOPOINTER_CONSTRUCT(AbstractObjectAutoPointer, AbstractObject)
+        
         virtual ~AbstractObjectAutoPointer() { ungrab_pointer(); }
+        
+    protected:
 
         virtual void destroy_pointer()
         {

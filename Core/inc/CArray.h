@@ -71,7 +71,7 @@ namespace APro
         }
 
         /////////////////////////////////////////////////////////////
-        /** @brief Copy the content of an size-equally aarray.
+        /** @brief Copy the content of an size-equally array.
          *  @internal
         **/
         /////////////////////////////////////////////////////////////

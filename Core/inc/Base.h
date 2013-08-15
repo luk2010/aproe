@@ -73,7 +73,7 @@
 
 typedef char                Byte;
 typedef long int            Offset;
-typedef unsigned long int   Id;
+// typedef unsigned long int   Id; Defined in IdGenerator.h
 
 typedef float               unit_t;
 typedef double              angle_t;

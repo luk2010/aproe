@@ -21,25 +21,29 @@ namespace APro
     typedef void* (*DLL_GET_PLUGININFO)(void);
 
     PluginHandle::PluginHandle()
-        : name(""), info(nullptr), dynLib(nullptr)
+        : name(""), info(nullptr), dynLib(nullptr), 
+          started(false), terminated(false)
     {
 
     }
 
     PluginHandle::PluginHandle(const String& mname)
-        : name(mname), info(nullptr), dynLib(nullptr)
+        : name(mname), info(nullptr), dynLib(nullptr),
+          started(false), terminated(false)
     {
 
     }
 
     PluginHandle::PluginHandle(const PluginHandle& /* other */)
-        : name(""), info(nullptr), dynLib(nullptr)
+        : name(""), info(nullptr), dynLib(nullptr),
+          started(false), terminated(false)
     {
 
     }
 
     PluginHandle::PluginHandle(const String& mname, const SharedPointer<DynamicLibrary>& lib)
-        : name(mname), info(nullptr), dynLib(nullptr)
+        : name(mname), info(nullptr), dynLib(nullptr),
+          started(false), terminated(false)
     {
         initialize(lib);
     }
@@ -62,8 +66,15 @@ namespace APro
         else
         {
             Console::get() << "\n[PluginHandle] Starting plugin " << name << "...";
+            
             startPluginFunc();
             refreshPluginInfo();
+            started = true;
+            
+            if(isTerminated())
+            {
+                terminated = false;
+            }
         }
     }
 
@@ -80,10 +91,12 @@ namespace APro
             {
                 Console::get() << "\n[PluginHandle] Stopping plugin " << name << "...";
                 endPluginFunc();
+                terminated = true;
             }
 
             dynLib->unload();
             refreshPluginInfo();
+            started = false;
         }
     }
 
@@ -126,5 +139,15 @@ namespace APro
     const String& PluginHandle::getName() const
     {
         return name;
+    }
+    
+    bool PluginHandle::isStarted() const
+    {
+        return started;
+    }
+    
+    bool PluginHandle::isTerminated() const
+    {
+        return terminated;
     }
 }

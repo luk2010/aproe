@@ -1,16 +1,16 @@
+/////////////////////////////////////////////////////////////
 /** @file EventEmitter.cpp
+ *  @ingroup Events
  *
  *  @author Luk2010
  *  @version 0.1A
  *
  *  @date 11/09/2012
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the EventEmitter class.
+ *  Implements the EventEmitter class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #include "EventEmitter.h"
 #include "Console.h"
 #include "StringStream.h"
@@ -19,155 +19,293 @@ namespace APro
 {
     EventEmitter::EventEmitter()
     {
-
+        
     }
-
-    EventEmitter::EventEmitter(const EventEmitter& other)
-        : listeners(other.listeners)
+    
+    EventEmitter::EventEmitter(const EventEmitter& emitter)
     {
-
+        listeners = emitter.listeners;
+        events    = emitter.events;
     }
-
+    
     EventEmitter::~EventEmitter()
     {
-
+        
     }
-
-    void EventEmitter::sendEvent(const Event::ptr& e)
+    
+    unsigned int EventEmitter::sendEvent(const EventPtr& e, EventListenerPtr& listener)
     {
-    for(List<EventListener::ptr>::Iterator i(listeners.begin()); !i.isEnd(); i++)
+        if(!e.isNull())
         {
-            sendManualEvent(e, i.get());
-        }
-    }
-
-    void EventEmitter::sendSpecificEvent(const Event::ptr& e, const String& name)
-    {
-        EventListener::ptr listener = getListener(name);
-        sendManualEvent(e, listener);
-    }
-
-    void EventEmitter::sendManualEvent(const Event::ptr& e, EventListener::ptr& listener)
-    {
-        if(!listener.isNull())
-        {
-            if(!isEventDocumented(e->type()))
+            unsigned int ret = 0;
+            
+            if(listener.isNull())
             {
-                Console::get() << "\n[EventEmitter] None documented event \"" << e->type() << "\" has been send ! Try not to send yourself custom event from a non-custom event emitter.";
+                // Send to every listeners registered
+                for(unsigned int i = 0; i < listeners.size(); ++i)
+                {
+                    EventListenerPtr& _listener = listeners.at(i);
+                    ret += sendEvent(e, _listener);
+                }
             }
-
-            listener->receive(e);
-        }
-
-    }
-
-    EventListener::ptr EventEmitter::addListener(const String& name)
-    {
-        if(name.isEmpty()) return EventListener::ptr();
-
-        EventListener::ptr ret = getListener(name);
-        if(!ret.isNull())
-        {
-            Console::get() << "\n[EventEmitter] Listener " << name << " already exists ! Can't add one with same name.";
-        }
-        else
-        {
-            ret = createListener(name);
-            listeners.append(ret);
-        }
-
-        return ret;
-    }
-
-    EventListener::ptr EventEmitter::getListener(const String& name)
-    {
-        for(List<EventListener::ptr>::Iterator i(listeners.begin()); !i.isEnd(); i++)
-        {
-            if(i.get()->name() == name)
-                return i.get();
-        }
-
-        return EventListener::ptr();
-    }
-
-    EventListener::ptr EventEmitter::registerListener(const EventListener::ptr & listener)
-    {
-        if(listener.isNull())
-            return listener;
-
-        EventListener::ptr ret = getListener(listener->name());
-
-        if(!ret.isNull())
-        {
-            Console::get() << "\n[EventEmitter] Listener " << listener->name() << " already exists ! Can't add one with same name.";
+            else
+            {
+                // Send to given listener
+                if(listener->receive(e))
+                {
+                    ret += 1;
+                }
+            }
+            
             return ret;
         }
-        else
+        
+        Console::get() << "\n[EventEmitter]{sendEvent} Null event tried to be send !";
+        return 0;
+    }
+    
+    unsigned int EventEmitter::sendEvent(const EventPtr& e, const String& listener)
+    {
+        if(!e.isNull())
         {
-            ret = listener;
-            listeners.append(ret);
+            EventListenerPtr& _listener = getListener(listener);
+            if(!_listener.isNull())
+            {
+                return sendEvent(e, _listener);
+            }
+            else
+            {
+                if(listener == "__all")
+                {
+                    return sendEvent(e, nullptr);
+                }
+                else
+                {
+                    if(listener.isEmpty())
+                    {
+                        Console::get() << "\n[EventEmitter]{sendEvent} No listener provided ! Send \"__all\" if you don't want to set one specific.";
+                        return 0;
+                    }
+                    else
+                    {
+                        Console::get() << "\n[EventEmitter]{sendEvent} Can't find listener \"" << listener << "\".";
+                        return 0;
+                    }
+                }
+            }
         }
-
-        return ret;
+        
+        Console::get() << "\n[EventEmitter]{sendEvent} Null event tried to be send !";
+        return 0;
     }
-
-    void EventEmitter::removeListener(const String& name)
+    
+    unsigned int EventEmitter::sendEvent(const EventPtr& e, const Id& listener)
     {
-        EventListener::ptr ret = getListener(name);
-        if(!ret.isNull())
+        if(!e.isNull())
         {
-            listeners.erase(listeners.find(ret));
+            EventListenerPtr& plistener = getListener(listener);
+            if(plistener.isNull())
+            {
+                Console::get() << "\n[EventEmitter]{sendEvent} Listener's id \"" << listener << "\" not registered !";
+                return 0;
+            }
+            else
+            {
+                return sendEvent(plistener);
+            }
         }
+        
+        Console::get() << "\n[EventEmitter]{sendEvent} Null event tried to be send !";
+        return 0;
     }
-
-    EventListener::ptr EventEmitter::createListener(const String& name) const
+    
+    unsigned int EventEmitter::sendASynchronousEvent(const EventPtr& e, EventUniter* event_uniter)
     {
-        EventListener::ptr listener = EventListener::ptr(AProNew3(EventListener) (name));
-        listener.setDeletionMethod(DeletionMethod::Delete3);
-        return listener;
+        if(!e.isNull())
+        {
+            if(!event_uniter)
+            {
+                event_uniter = Main::get().getEventUniter();
+            }
+            
+            return event_uniter->push(e) ? 1 : 0;
+        }
+        
+        Console::get() << "\n[EventEmitter]{sendASynchronousEvent} Null event tried to be send !";
+        return 0;
     }
-
-    Event::ptr EventEmitter::createEvent(const String& name) const
-    {
-        Event::ptr event = Event::ptr(AProNew3(Event) (name));
-        event.setDeletionMethod(DeletionMethod::Delete3);
-        return event;
-    }
-
+    
     void EventEmitter::documentEvent(const String& event, const String& description)
     {
         events[event] = description;
     }
-
-    String EventEmitter::explainEvents() const
+    
+    String EventEmitter::documentation() const
     {
-        String ret;
-
-        ret << "\n[EventEmitter] Explaining events"
-            << "\n--------------------------------";
-
-        for(unsigned int i = 0; i < events.size(); ++i)
+        String ret("[EventEmitter] Events documentation");
+        ret   << "\n-----------------------------------"
+              << "\n";
+        
+        for (unsigned int i = 0; i < events.size(); ++i)
         {
-            const EventsList::Pair& pair = events.getPair(i);
-            ret << "\n+ " << pair.first() << " : " << pair.second() << ".";
+            ret << " + " << events.getPair(i).first() << " : " << events.getPair(i).second() << "\n";
         }
-
-        ret << "\n--------------------------------";
+        
+        ret << "-----------------------------------";
         return ret;
     }
-
+    
     const String EventEmitter::getEventDocumentation(const String& event) const
     {
-        if(events.exists(event))
-        {
-            return events[event];
-        }
-
-        return String();
+        events.exists(event) ? return events[event] : return String();
     }
-
-    bool EventEmitter::isEventDocumented(const String& event) const
+    
+    bool EventEmitter::isEventDocumented(const String & event) const
     {
         return events.exists(event);
     }
+    
+    bool EventEmitter::isEventHandled(const String & event) const
+    {
+        return events.exists(event);
+    }
+    
+    int EventEmitter::registerListener(const EventListenerPtr& listener)
+    {
+        if(!listener.isNull())
+        {
+            EventListenerPtr& _phl = getListener(listener->getName());
+            if(!_phl.isNull())
+            {
+                Console::get() << "\n[EventEmitter]{registerListener} Can't register listener \"" << listener->getName() << "\" because name already taken.";
+                return -1;
+            }
+            else
+            {
+                listeners.append(listener);
+                return listeners.lastIndex();
+            }
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    
+    int EventEmitter::unregisterListener(const String& name)
+    {
+        if(!name.isEmpty())
+        {
+            EventListenerPtr& _listener = getListener(name);
+            if(_listener.isNull())
+            {
+                Console::get() << "\n[EventEmitter]{unregisterListener} Can't find listener \"" << name << "\".";
+                return -1;
+            }
+            else
+            {
+                int index = listeners.find(_listener);
+                listeners.erase(index);
+                return index;
+            }
+        }
+        
+        return -1;
+    }
+    
+    const EventListenerPtr& EventEmitter::getListener(const String& name) const
+    {
+        if(!name.isEmpty())
+        {
+            const EventListenerPtr& _listener;
+            for(unsigned int i = 0; i < listeners.size(); ++i)
+            {
+                _listener = listeners.at(i);
+                if(!_listener.isNull() && _listener->getName() == name)
+                {
+                    return _listener;
+                }
+            }
+            
+            return nullptr;
+        }
+        else
+        {
+            return EventListenerPtr();
+        }
+    }
+    
+    EventListenerPtr& EventEmitter::getListener(const String& name)
+    {
+        if(!name.isEmpty())
+        {
+            EventListenerPtr& _listener;
+            for(unsigned int i = 0; i < listeners.size(); ++i)
+            {
+                _listener = listeners.at(i);
+                if(!_listener.isNull() && _listener->getName() == name)
+                {
+                    return _listener;
+                }
+            }
+            
+            return nullptr;
+        }
+        else
+        {
+            return EventListenerPtr();
+        }
+    }
+    
+    const EventListenerPtr& EventEmitter::getListener(const Id& identifier) const
+    {
+        const EventListenerPtr& plistener;
+        for (unsigned int i = 0; i < listeners.size(); ++i)
+        {
+            plistener = listeners.at(i);
+            if(!plistener.isNull() && plistener->getId() == identifier)
+            {
+                return plistener;
+            }
+        }
+        
+        return nullptr;
+    }
+    
+    EventListenerPtr& EventEmitter::getListener(const Id& identifier)
+    {
+        EventListenerPtr& plistener;
+        for (unsigned int i = 0; i < listeners.size(); ++i)
+        {
+            plistener = listeners.at(i);
+            if(!plistener.isNull() && plistener->getId() == identifier)
+            {
+                return plistener;
+            }
+        }
+        
+        return nullptr;
+    }
+    
+    EventPtr createAndPopulateEvent(const String& event_type, bool set_target, EventListenerPtr& target) const
+    {
+        if(!isEventHandled(event_type))
+        {
+            Console::get() << "\n[Console]{createAndPopulateEvent} Sending not handled event type \"" << event_type << "\" is not recommended !";
+        }
+        
+        EventPtr ret = AProNew(Event) (event_type, this, set_target ? target.getPointer() : nullptr);
+        
+        if(ret.isNull())
+        {
+            Console::get() << "\n[Console]{createAndPopulateEvent} Couldn't create event \"" << event_type << "\".";
+        }
+        else
+        {
+            populateEvent(ret);
+        }
+        
+        return ret;
+    }
+    
 }

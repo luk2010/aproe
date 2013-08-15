@@ -656,6 +656,11 @@ namespace APro
         {
             return at(index);
         }
+        
+        int lastIndex() const
+        {
+            return msize ? msize - 1 : 0;
+        }
 
         Iterator begin()
         {
