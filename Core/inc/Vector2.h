@@ -102,15 +102,21 @@ namespace APro
         ////////////////////////////////////////////////////////////
         /** @brief Swap current vector with given one.
          *  @param v : Vector to swap.
-         *  @note It use a temporary vector to swap data.
+         *  @note It use xor swapping.
         **/
         ////////////////////////////////////////////////////////////
         inline void swap(Vector2<Numeric>& v)
         {
+            /*
             Vector2<Numeric> cpy(v);
             x = v.x;
             y = v.y;
             v = cpy;
+            */
+
+            // Now using xor swap
+            swapNumeric_xor(x, v.x);
+            swapNumeric_xor(y, v.y);
         }
 
     public: // Egality operators
@@ -182,7 +188,7 @@ namespace APro
         }
 
         ////////////////////////////////////////////////////////////
-        /** @brief Set coordinates to given vector.
+        /** @brief Set coordinates to given pair.
         **/
         ////////////////////////////////////////////////////////////
         Vector2<Numeric>& set(const Numeric& n1, const Numeric& n2)
@@ -219,6 +225,34 @@ namespace APro
             y = n;
 
             return *this;
+        }
+
+    public: // Floor / ceil
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Floor the current vector with given one.
+         *
+         *  It takes the minimum value for each coordinate and
+         *  attriutes it to this vector.
+        **/
+        ////////////////////////////////////////////////////////////
+        void floor(const Vector2<Num>& v)
+        {
+            if(v.x < x) x = v.x;
+            if(v.y < y) y = v.y;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Ceil current vector with given one.
+         *
+         *  It takes the maximum value for each coordinate and
+         *  attriutes it to this vector.
+        **/
+        ////////////////////////////////////////////////////////////
+        void ceil(const Vector2<Num>& v)
+        {
+            if(v.x > x) x = v.x;
+            if(v.y > y) y = v.y;
         }
 
     public: // Addition

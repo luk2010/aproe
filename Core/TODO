@@ -1,0 +1,39 @@
+Things to do
+------------
+
+*  What's done for next release (0.01A) :
+
++ Math :
+
+- Vector2     : A vector with 2 components.
+
+*  Have to be done for next release (0.01A) :
+
++ Math :
+
+- Vector3     : A vector with 3 components.
+- Vector4     : A Vector with 4 components.
+- Matrix3x3   : A 3 by 3 matrix.
+- Matrix3x4   : A 3 by 4 matrix.
+- Matrix4x4   : A 4 by 4 matrix.
+- Quaternion  : A rotation store.
+
++ 2D Geo :
+
+- Line        : An infinite line extending in 2 directions.
+- BoundedLine : A segment.
+- Ray         : An inifinte line extending in 1 direction.
+- Circle      : Representation of a circle.
+- Triangle    : A triangle.
+- Polygon     : A 2D polygon in 3D space.
+
++ 3D Geo :
+
+- AABB        : An Axis-Aligned Bounding Box.
+- OBB         : An Oriented Bounding Box.
+- Sphere      : A sphere.
+- Plane       : A plane.
+- Capsule     : Cylinder with spherical end.
+- Polyhedron  : A 3D representation of polygon.
+
+
