@@ -7,6 +7,16 @@ Things to do
 
 - Vector2     : A vector with 2 components.
 
++ Event System :
+
+- EventEmitter : Emitter of Synchronous Event System.
+- EventListener : Listener of the Event System.
+- Event : The base event of the Event System.
+
++ Plugin :
+
+- Added some Plugin Api version checking.
+
 *  Have to be done for next release (0.01A) :
 
 + Math :
@@ -35,5 +45,11 @@ Things to do
 - Plane       : A plane.
 - Capsule     : Cylinder with spherical end.
 - Polyhedron  : A 3D representation of polygon.
+
++ Events System :
+
+- Delete EventReceiver, wich is obsolete and unused.
+- EventUniter : The Asynchronous Event System manager.
+- Adapt engine to the new event system.
 
 

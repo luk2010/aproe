@@ -542,6 +542,8 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Return either x or y.
+         *  @note If i = 0, x is returned, otherweise y is returned
+         *  for any value of i superior to 0.
         **/
         ////////////////////////////////////////////////////////////
         const Numeric& at(size_t i) const
@@ -551,6 +553,8 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Return either x or y.
+         *  @note If i = 0, x is returned, otherweise y is returned
+         *  for any value of i superior to 0.
         **/
         ////////////////////////////////////////////////////////////
         Numeric& at(size_t i)
@@ -644,7 +648,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         Vector2<Numeric>& invert()
         {
-            set(x, y);
+            swapNumeric(x, y);
             return *this;
         }
 
@@ -669,7 +673,7 @@ namespace APro
         }
 
         ////////////////////////////////////////////////////////////
-        /** @brief Return sqaured computed lenght of this vector.
+        /** @brief Return squared computed lenght of this vector.
         **/
         ////////////////////////////////////////////////////////////
         Numeric squaredLenght() const
@@ -795,6 +799,7 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Normalise the vector.
+         *  @return Old lenght of the vector.
         **/
         ////////////////////////////////////////////////////////////
         Numeric normalise()

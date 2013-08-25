@@ -23,11 +23,18 @@
 #   include "Exception.h"
 #endif
 
-class Platform 
+////////////////////////////////////////////////////////////
+/** @class Platform
+ *  @ingroup Global
+ *  @brief Give the current Operating System supported by
+ *  the engine.
+**/
+////////////////////////////////////////////////////////////
+class Platform
 {
 public:
-    
-    enum 
+
+    enum
     {
         Unknown     = 0,
         Windows     = APRO_WINDOWS,
@@ -35,8 +42,8 @@ public:
         Linux       = APRO_LINUX,
         Apple       = APRO_OSX
     };
-    
-    static const int get() 
+
+    static const int get()
     {
 #if APRO_PLATFORM == APRO_WINDOWS
         return (int) Windows;
@@ -49,7 +56,7 @@ public:
 #endif
        return Unknown;
     }
-    
+
     static const char* toString(const int& platform)
     {
         if(platform == Unknown) return "Unknown";

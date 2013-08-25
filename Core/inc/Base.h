@@ -73,9 +73,34 @@
 
 typedef char                Byte;
 typedef long int            Offset;
-// typedef unsigned long int   Id; Defined in IdGenerator.h
+// typedef unsigned long int   Id; // Defined in IdGenerator.h
 
 typedef float               unit_t;
 typedef double              angle_t;
+
+////////////////////////////////////////////////////////////
+/** @def aprodebug(a)
+ *
+ *  Print a message using the console, giving function and
+ *  line.
+ *
+ *  @def aproassert(condition, message)
+ *
+ *  Make an assertion from a condition, and print it if
+ *  false.
+**/
+////////////////////////////////////////////////////////////
+
+#if APRO_DEBUG == APRO_ON
+#   define aprodebug(a) Console::get() << "\n" << __FUNCTION__ << " (" << __LINE__ << ") : " << a
+#else
+#   define aprodebug(a)
+#endif
+
+#if APRO_DEBUG == APRO_ON
+#   define aproassert(condition, message) if(!(condition) ) { Console::get() << "\nAssertion failed ! [\"" << #condition << "\"]" << aprodebug(message); }
+#else
+#   define aproassert(a,b)
+#endif
 
 #endif
