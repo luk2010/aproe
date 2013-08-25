@@ -34,6 +34,7 @@ namespace APro
 
     ////////////////////////////////////////////////////////////
     /** @class Main
+     *  @ingroup Global
      *  @brief Main class for every instance of the Engine.
      *  @details This class let you manage every implementation, plugin,
      *  add-on, etc of the engine. You can access from everywhere
@@ -118,12 +119,12 @@ namespace APro
         bool hasOption(unsigned int option) const;
 
     public:
-        
+
         const IdGenerator& getIdGenerator() const
         {
             return *id_generator;
         }
-        
+
         IdGenerator& getIdGenerator()
         {
             return *id_generator;

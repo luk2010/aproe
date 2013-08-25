@@ -19,26 +19,26 @@ namespace APro
 {
     EventEmitter::EventEmitter()
     {
-        
+
     }
-    
+
     EventEmitter::EventEmitter(const EventEmitter& emitter)
     {
         listeners = emitter.listeners;
         events    = emitter.events;
     }
-    
+
     EventEmitter::~EventEmitter()
     {
-        
+
     }
-    
+
     unsigned int EventEmitter::sendEvent(const EventPtr& e, EventListenerPtr& listener)
     {
         if(!e.isNull())
         {
             unsigned int ret = 0;
-            
+
             if(listener.isNull())
             {
                 // Send to every listeners registered
@@ -56,14 +56,14 @@ namespace APro
                     ret += 1;
                 }
             }
-            
+
             return ret;
         }
-        
+
         Console::get() << "\n[EventEmitter]{sendEvent} Null event tried to be send !";
         return 0;
     }
-    
+
     unsigned int EventEmitter::sendEvent(const EventPtr& e, const String& listener)
     {
         if(!e.isNull())
@@ -94,11 +94,11 @@ namespace APro
                 }
             }
         }
-        
+
         Console::get() << "\n[EventEmitter]{sendEvent} Null event tried to be send !";
         return 0;
     }
-    
+
     unsigned int EventEmitter::sendEvent(const EventPtr& e, const Id& listener)
     {
         if(!e.isNull())
@@ -114,11 +114,11 @@ namespace APro
                 return sendEvent(plistener);
             }
         }
-        
+
         Console::get() << "\n[EventEmitter]{sendEvent} Null event tried to be send !";
         return 0;
     }
-    
+
     unsigned int EventEmitter::sendASynchronousEvent(const EventPtr& e, EventUniter* event_uniter)
     {
         if(!e.isNull())
@@ -127,49 +127,49 @@ namespace APro
             {
                 event_uniter = Main::get().getEventUniter();
             }
-            
+
             return event_uniter->push(e) ? 1 : 0;
         }
-        
+
         Console::get() << "\n[EventEmitter]{sendASynchronousEvent} Null event tried to be send !";
         return 0;
     }
-    
+
     void EventEmitter::documentEvent(const String& event, const String& description)
     {
         events[event] = description;
     }
-    
+
     String EventEmitter::documentation() const
     {
         String ret("[EventEmitter] Events documentation");
         ret   << "\n-----------------------------------"
               << "\n";
-        
+
         for (unsigned int i = 0; i < events.size(); ++i)
         {
             ret << " + " << events.getPair(i).first() << " : " << events.getPair(i).second() << "\n";
         }
-        
+
         ret << "-----------------------------------";
         return ret;
     }
-    
+
     const String EventEmitter::getEventDocumentation(const String& event) const
     {
         events.exists(event) ? return events[event] : return String();
     }
-    
+
     bool EventEmitter::isEventDocumented(const String & event) const
     {
         return events.exists(event);
     }
-    
+
     bool EventEmitter::isEventHandled(const String & event) const
     {
         return events.exists(event);
     }
-    
+
     int EventEmitter::registerListener(const EventListenerPtr& listener)
     {
         if(!listener.isNull())
@@ -191,7 +191,7 @@ namespace APro
             return -1;
         }
     }
-    
+
     int EventEmitter::unregisterListener(const String& name)
     {
         if(!name.isEmpty())
@@ -209,10 +209,28 @@ namespace APro
                 return index;
             }
         }
-        
+
         return -1;
     }
-    
+
+    int EventEmitter::unregisterListener(const Id& id)
+    {
+        EventListenerPtr& _listener = getListener(id);
+        if(_listener.isNull())
+        {
+            Console::get() << "\n[EventEmitter]{unregisterListener} Can't find listener \"" << id << "\".";
+            return -1;
+        }
+        else
+        {
+            int index = listeners.find(_listener);
+            listeners.erase(index);
+            return index;
+        }
+
+        return -1;
+    }
+
     const EventListenerPtr& EventEmitter::getListener(const String& name) const
     {
         if(!name.isEmpty())
@@ -226,7 +244,7 @@ namespace APro
                     return _listener;
                 }
             }
-            
+
             return nullptr;
         }
         else
@@ -234,7 +252,7 @@ namespace APro
             return EventListenerPtr();
         }
     }
-    
+
     EventListenerPtr& EventEmitter::getListener(const String& name)
     {
         if(!name.isEmpty())
@@ -248,7 +266,7 @@ namespace APro
                     return _listener;
                 }
             }
-            
+
             return nullptr;
         }
         else
@@ -256,7 +274,7 @@ namespace APro
             return EventListenerPtr();
         }
     }
-    
+
     const EventListenerPtr& EventEmitter::getListener(const Id& identifier) const
     {
         const EventListenerPtr& plistener;
@@ -268,10 +286,10 @@ namespace APro
                 return plistener;
             }
         }
-        
+
         return nullptr;
     }
-    
+
     EventListenerPtr& EventEmitter::getListener(const Id& identifier)
     {
         EventListenerPtr& plistener;
@@ -283,19 +301,19 @@ namespace APro
                 return plistener;
             }
         }
-        
+
         return nullptr;
     }
-    
+
     EventPtr createAndPopulateEvent(const String& event_type, bool set_target, EventListenerPtr& target) const
     {
         if(!isEventHandled(event_type))
         {
             Console::get() << "\n[Console]{createAndPopulateEvent} Sending not handled event type \"" << event_type << "\" is not recommended !";
         }
-        
+
         EventPtr ret = AProNew(Event) (event_type, this, set_target ? target.getPointer() : nullptr);
-        
+
         if(ret.isNull())
         {
             Console::get() << "\n[Console]{createAndPopulateEvent} Couldn't create event \"" << event_type << "\".";
@@ -304,8 +322,8 @@ namespace APro
         {
             populateEvent(ret);
         }
-        
+
         return ret;
     }
-    
+
 }

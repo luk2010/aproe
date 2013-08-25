@@ -27,15 +27,15 @@ namespace APro
      *  @brief An Event emitter entering the synchronous event
      *  subsystem.
      *
-     *  The Emitters / Listeners system is a synchronous event 
+     *  The Emitters / Listeners system is a synchronous event
      *  system. When the emitter emit the event, he will call
      *  appropriate function to make the listener handle the event.
      *  This has no conflict with threaded systems.
      *  @note The emitter can send event using the Uniter system
-     *  thanks to EventEmitter::sendASynchronousEvent. 
+     *  thanks to EventEmitter::sendASynchronousEvent.
      *
-     *  @note If the event's target is null, the emitter send it to 
-     *  all his listeners. 
+     *  @note If the event's target is null, the emitter send it to
+     *  all his listeners.
      *
      *  The emitter creates the events it has to send. It populates
      *  it with correct datas. The listener just receive it and this
@@ -50,20 +50,20 @@ namespace APro
     class APRO_DLL EventEmitter
     {
     protected:
-        
+
         typedef Map<String, String> EventsList;///< List of events type, with documentation.
-        
+
         List<EventListenerPtr>       listeners;///< List of AutoPointer to listeners.
         EventsList                  events;///< List of events type with documentation, handled correctly by this emitter.
-        
+
     public:
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Constructor.
         **/
         /////////////////////////////////////////////////////////////
         EventEmitter();
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Copy Constructor.
         **/
@@ -75,7 +75,7 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         virtual ~EventEmitter();
-        
+
     public:
 
         /////////////////////////////////////////////////////////////
@@ -83,59 +83,59 @@ namespace APro
          *
          *  @param e : Event to send. If null, nothing is done in this
          *  function.
-         *  @param listener : Listener to send the event to. If null, 
+         *  @param listener : Listener to send the event to. If null,
          *  the emitter will send it to every listener registered.
-         *  @return A value superior or equal to 0, corresponding to 
+         *  @return A value superior or equal to 0, corresponding to
          *  the number of listeners that have handled this event.
         **/
         /////////////////////////////////////////////////////////////
         unsigned int sendEvent(const EventPtr& e, EventListenerPtr& listener = nullptr);
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
-         *  
-         *  @param e : Event to send. If the event is null, nothing is 
+         *
+         *  @param e : Event to send. If the event is null, nothing is
          *  done in this function.
          *  @param name : Name of the registered listener to send the
-         *  event to. You can set this name to "__all" if you want to 
-         *  send it to every listeners. 
-         *  @return A value superior or equal to 0, corresponding to 
+         *  event to. You can set this name to "__all" if you want to
+         *  send it to every listeners.
+         *  @return A value superior or equal to 0, corresponding to
          *  the number of listeners that have handled this event.
         **/
         /////////////////////////////////////////////////////////////
         unsigned int sendEvent(const EventPtr& e, const String& name);
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
-         *  
-         *  @param e : Event to send. If the event is null, nothing is 
+         *
+         *  @param e : Event to send. If the event is null, nothing is
          *  done in this function.
-         *  @param listener : Id of the listener to send. It must 
+         *  @param listener : Id of the listener to send. It must
          *  correspond to an entry in the registered listeners list.
-         *  @return A value superior or equal to 0, corresponding to 
+         *  @return A value superior or equal to 0, corresponding to
          *  the number of listeners that have handled this event.
         **/
         /////////////////////////////////////////////////////////////
         unsigned int sendEvent(const EventPtr& e, const Id& listener);
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
-         *  
-         *  @param e : Event to send. If the event is null, nothing is 
+         *
+         *  @param e : Event to send. If the event is null, nothing is
          *  done in this function.
          *  @param event_uniter : Event uniter to send the event to. If
-         *  null, the global Event Uniter is used. 
+         *  null, the global Event Uniter is used.
          *  @return 0 if the uniter didn't handle the event, 1 otherweise.
         **/
         /////////////////////////////////////////////////////////////
         unsigned int sendASynchronousEvent(const EventPtr& e, EventUniter* event_uniter = nullptr);
-        
+
 
     protected:
 
         /////////////////////////////////////////////////////////////
         /** @brief Document an event.
-         *  
+         *
          *  Use this function to give a description to a specific event
          *  handled by this emitter.
          *
@@ -146,20 +146,20 @@ namespace APro
         void documentEvent(const String& event, const String& description);
 
     public:
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return a String containing every events with their
          *  description.
         **/
         /////////////////////////////////////////////////////////////
         String documentation() const;
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return the documentation for one event.
         **/
         /////////////////////////////////////////////////////////////
         const String getEventDocumentation(const String& event) const;
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Tell if an event is documented.
          *
@@ -167,7 +167,7 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         bool isEventDocumented(const String& event) const;
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Tell if event is handled.
          *
@@ -180,19 +180,19 @@ namespace APro
 
         /////////////////////////////////////////////////////////////
         /** @brief Register a new listener to this emitter.
-         *  
-         *  @param listener : Listener to register. If the listener 
+         *
+         *  @param listener : Listener to register. If the listener
          *  name is already present, -1 is returned.
-         *  @return Negativ if error, superior or equal to 0 otherweise. 
+         *  @return Negativ if error, superior or equal to 0 otherweise.
          *  The exact value when success is the index of the registered
          *  listener in the list in this emitter.
         **/
         /////////////////////////////////////////////////////////////
         int registerListener(const EventListenerPtr& listener);
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Unregister listener.
-         *  
+         *
          *  @param name : Name of the registered listener to remove.
          *  @return The old index in the list of the removed listener.
          *  If value is -1, an error occured, else value is superior
@@ -200,7 +200,18 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         int unregisterListener(const String& name);
-        
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Unregister listener.
+         *
+         *  @param id : id of the registered listener to remove.
+         *  @return The old index in the list of the removed listener.
+         *  If value is -1, an error occured, else value is superior
+         *  or equal to 0.
+        **/
+        /////////////////////////////////////////////////////////////
+        int unregisterListener(const Id& id);
+
         /////////////////////////////////////////////////////////////
         /** @brief Return listener from his name, registered in this
          *  emitter.
@@ -210,10 +221,10 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         const EventListenerPtr& getListener(const String& name) const;
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return listener from his name, registered in this
-         *  emitter. 
+         *  emitter.
          *
          *  @note Only the first encountered listener with given name
          *  is returned. If you have many listeners with same name
@@ -221,14 +232,14 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         EventListenerPtr& getListener(const String& name);
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return listener from his id, registered in this
          *  emitter.
         **/
         /////////////////////////////////////////////////////////////
         const EventListenerPtr& getListener(const Id& identifier) const;
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return listener from his id, registered in this
          *  emitter.
@@ -239,7 +250,7 @@ namespace APro
     public:
 
         /////////////////////////////////////////////////////////////
-        /** @brief Create an event and populate it with correct 
+        /** @brief Create an event and populate it with correct
          *  data.
          *
          *  @param event_type : Type of the event to create. You should
@@ -257,7 +268,7 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         EventPtr createAndPopulateEvent(const String& event_type, bool set_target = false, EventListenerPtr& target = nullptr) const;
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Populate an event from his type.
          *
@@ -270,7 +281,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         virtual void populateEvent(EventPtr& event) const { }
     };
-    
+
     typedef AutoPointer<EventEmitter> EventEmitterPtr;///< AutoPointer to EventEmitter. No need to overload the destruction.
 }
 
