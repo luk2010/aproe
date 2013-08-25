@@ -39,7 +39,7 @@ namespace APro
      *  add-on, etc of the engine. You can access from everywhere
      *  every things in the Engine, like the file system, the window manager,
      *  the console, etc...
-     *  @note This class is autmaticly created in an executable,
+     *  @note This class is automaticly created in an executable,
      *  and automaticly loaded in a library. However, at the end of
      *  your program, you must use the clear() function to "clear"
      *  everything.
@@ -188,7 +188,7 @@ namespace APro
         {
             return *mathManager;
         }
-
+/*
         const ImplementationStore& getImplementationStore() const
         {
             return *impStore;
@@ -198,7 +198,18 @@ namespace APro
         {
             return *impStore;
         }
-
+*/
+        
+        const ImplementationFactory& getImplementations() const
+        {
+            return *impFactory;
+        }
+        
+        ImplementationFactory& getImplementations()
+        {
+            return *impFactory;
+        }
+        
         const FileSystem& getFileSystem() const
         {
             return *fs;
@@ -234,7 +245,8 @@ namespace APro
         IdGenerator* id_generator;
         PointerCollector* sharedpointer_collector;
         ResourceManager* resourceManager;
-        ImplementationStore* impStore;
+//      ImplementationStore* impStore;
+        ImplementationFactory* impFactory;
 //      RendererFactoryManager* rfm; // Not use anymore
         PluginManager* pluginManager;
         MathFunctionManager* mathManager;

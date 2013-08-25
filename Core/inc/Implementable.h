@@ -24,7 +24,8 @@ namespace APro
     {
     public:
 
-        typedef typename T::ptr typeptr;
+//      typedef typename T::ptr typeptr;
+        typedef typename T* typeptr;
 
     protected:
 
@@ -33,6 +34,7 @@ namespace APro
 
         void createImplementation()
         {
+            /* DEPRECATED
             ImplementationStore& impStore = Main::get().getImplementationStore();
             Implementation::ptr impptr = impStore.find(Variant(m_class));
             implement = 0;
@@ -58,10 +60,18 @@ namespace APro
                     implement = NULL;
                 }
             }
+             */
+            
+            typeptr implementation = Main::get().getImplementations().create(String(m_class));
+            if(implementation)
+            {
+                implement = implementation;
+            }
         }
 
         void destroyImplementation()
         {
+            /*
             ImplementationStore& impStore = Main::get().getImplementationStore();
             Implementation::ptr impptr = impStore.find(Variant(m_class));
 
@@ -77,9 +87,16 @@ namespace APro
                     implement._force_set(nullptr);
                 }
             }
+             */
+            
+            if(implement)
+            {
+                ::operator delete((Prototype*) proto);// This call the AProDelete function.
+                implement = nullptr;
+            }
         }
 
-        virtual void initImplementation() = 0;
+//      virtual void initImplementation() = 0;
 
     public:
 

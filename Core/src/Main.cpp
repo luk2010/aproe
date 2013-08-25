@@ -35,7 +35,8 @@ namespace APro
     Main::Main()
     {
         resourceManager = nullptr;
-        impStore = nullptr;
+//      impStore = nullptr;
+        impFactory = nullptr;
         pluginManager = nullptr;
         mathManager = nullptr;
         windowManager = nullptr;
@@ -108,13 +109,25 @@ namespace APro
             getConsole() << "\n[Main] Can't create Resource Manager ! Aborting...";
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
-
+/*
         impStore = AProNew(1, ImplementationStore);
         if(impStore)
             getConsole() << "\n[Main] Implementation Store OK.";
         else
         {
             getConsole() << "\n[Main] Can't create Implementation Store ! Aborting...";
+            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
+        }
+ */
+        
+        impFactory = AProNew(ImplementationFactory) ();
+        if(impFactory)
+        {
+            getConsole() << "\n[Main] Implementation Factory OK.";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't create Implementation Factory ! Aborting...";
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
 
@@ -301,6 +314,7 @@ namespace APro
         }
  */
 
+/*
         if(impStore)
         {
             impStore->clear();
@@ -311,6 +325,19 @@ namespace APro
         else
         {
             getConsole() << "\n[Main] Can't clean Implementation Store because not initialized !";
+        }
+ */
+        
+        if(impFactory)
+        {
+            impFactory->clear();
+            AProDelete(impFactory);
+            impFactory = nullptr;
+            getConsole() << "\n[Main] Implementation Factory cleaned !";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't clean Implementation Factory because not initialized !";
         }
 
         if(resourceManager)

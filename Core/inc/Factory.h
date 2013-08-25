@@ -25,7 +25,7 @@ namespace APro
      *  @ingroup Utils
      *  @brief Object that can be cloned.
      *  @details Every object that can be created by a factory
-     *  must inherits this class, and implement the clone method.
+     *  must inherits this class, and implement the clone metod.
     **/
     /////////////////////////////////////////////////////////////
     class Prototype
@@ -39,13 +39,31 @@ namespace APro
 
         /////////////////////////////////////////////////////////////
         /** @brief Clone this object.
-         *  @internal
          *  @note This function should be used only by a factory.
          *
          *  @return A new instance of this object.
         **/
         /////////////////////////////////////////////////////////////
         virtual Prototype* clone() const = 0;
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Operator to delete.
+         *
+         *  This make sure the correct deletion method is used. 
+         *  In fact, this operator makes sure that the prototype
+         *  will call once the virtual destructor, then the deletion
+         *  system that will free the pointer. 
+         *
+         *  In addition, this function will be called inside the heap
+         *  that provide also the clone function, so everything should
+         *  work fine.
+        **/
+        /////////////////////////////////////////////////////////////
+        void operator delete (Prototype* proto)
+        {
+            proto->~Prototype();
+            AProDelete((void*)proto);
+        }
     };
 
     /////////////////////////////////////////////////////////////
@@ -87,7 +105,7 @@ namespace APro
          *  @return A copy of this object.
         **/
         /////////////////////////////////////////////////////////////
-        PrototypeBase* create(const String& key) const { return prototypes[key] ? prototypes[key]->clone() : nullptr; }
+        PrototypeBase* create(const String& key) const { return prototypes.exists(key) ? prototypes[key]->clone() : nullptr; }
 
         /////////////////////////////////////////////////////////////
         /** @brief Register a prototype to this factory.
@@ -96,6 +114,12 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         void register_prototype(const String& key, PrototypeBase* proto) { if(proto) prototypes[key] = proto; }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if a prototype is registered.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool hasPrototype(const String& key) { return prototypes.exists(key); }
 
         /////////////////////////////////////////////////////////////
         /** @see Printable::print
