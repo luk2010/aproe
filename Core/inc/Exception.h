@@ -1,16 +1,16 @@
+////////////////////////////////////////////////////////////
 /** @file Exception.h
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 24/05/2012
+ *  @date 21/05/2012 - 30/08/2013
  *
- *  @addtogroup Global
- *  @addtogroup Memory
- *
- *  This file defines the basics Exceptions used in the engine.
+ *  Defines the basics Exceptions used in the engine.
  *
 **/
+////////////////////////////////////////////////////////////
 #ifndef APROEXCEPTION_H
 #define APROEXCEPTION_H
 
@@ -18,97 +18,90 @@
 
 #if APRO_EXCEPTION == APRO_ON
 
-#include <string>
+#include <exception>
 
 namespace APro
 {
+    ////////////////////////////////////////////////////////////
     /** @class Exception
+     *  @ingroup Core
+     *  @brief A standard Exception class with line, file and
+     *  function management.
      *
-     *  @addtogroup Global
-     *  @addtogroup Exception
-     *
-     *  @version 0.1A
-     *
-     *  This class can be used to describe a simple Exception. It can be thrown using the macro APRO_THROW or using
-     *  the throw function.
-     *  You must initialize each component with the throw function, whereas you just have to set Type, Message and Class
-     *  with the APRO_THROW macro.
-     *
-     *  @addtogroup Global
-     *  @addtogroup Memory
-     *
-     *  @note
-     *  This class isn't std-free, it use std::string.
-     *
-     *  @remarks
-     *  Exceptions doesn't have any real "type" : these are just the "name" of the Exception. You are indeed able to throw
-     *  any kind of exception. More, you can't throw data in subclasing the Exception class.
-     *
-     *  @remarks
-     *  You can modify the getFullDescription function in subclassing this class.
-     *
+     *  Overwrite this class to create your own exceptions, as in
+     *  the FatalException example. The Exception stores always
+     *  the line of the error, thhe file and the function where
+     *  it has been thrown.
     **/
-    class APRO_DLL Exception
+    ////////////////////////////////////////////////////////////
+    class Exception : public std::exception
     {
+    private:
+        long        line;///< Line where the exception has been thrown.
+        const char* file;///< File where the exception has been thrown.
+        const char* func;///< Function where the exception has been thrown.
+
     public:
+        Exception(long l, const char* fi, const char* fu) : line(l), file(fi), func(fu) {}
+        virtual ~Exception() throw() {}
 
-        /** Public constructor.
-         *
-         *  @param _type : Type of the Exception.
-         *  @param msg : Description of the Exception.
-         *  @param _class : Classe of the source.
-         *  @param _func : Function of the source.
-         *  @param _line : Line in the file.
-         *
-         *  @note
-         *  most of the times, _func and _line are PreProcessor-processed.
+        long getLine() const throw() { return line; }
+        const char* getFile() const throw() { return file; }
+        const char* getFunction() const throw() { return func; }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the description of this exception.
         **/
-        Exception(const char* _type, const char* msg, const char* _class, const char* _func, int _line);
-        Exception(const Exception & e);
-        virtual ~Exception();
+        ////////////////////////////////////////////////////////////
+        virtual const char* what() const throw() { return "Unkown."; }
 
-        /** Return the type of the Exception. */
-        const std::string & getType() const;
-        /** Return the description of the Exception. */
-        const std::string & getMessage() const;
-        /** Return the class from where the exception was thrown. */
-        const std::string & getClass() const;
-        /** Return the function from where the exception was thrown. */
-        const std::string & getFunction() const;
-        /** Return the line in the file where the excpetion was thrown. */
-        int getLine() const;
-
-        /** Tell if some field is empty. */
-        bool isNull() const;
-
-        /** Return the Complete description of the Exception. */
-        virtual std::string getFullDescription() const;
-
-    protected:
-
-        std::string type;
-        std::string message;
-        std::string class_;
-        std::string func_;
-        int         line;
     };
 
-    /** Throw a simple exception. */
-    #define APRO_THROW(type, msg, class) throw APro::Exception(type, msg, class, __FUNCTION__, __LINE__)
+    /** @def APRO_MAKE_EXCEPTION(class)
+     *
+     *  Make the exception constructor for a given class. Use it to create your
+     *  own exceptions.
+    **/
+    #define APRO_MAKE_EXCEPTION(class) public: class(long l, const char* fi, const char* fu) : Exception(l,fi,fu) { }
 
-    /** Assert a simple condition. */
-    #define APRO_ASSERT(condition, message, class)  \
-    if(!condition)                                  \
-    {                                               \
-        APRO_THROW("Assertion", message, class);    \
-    }
+    /** Throw a simple exception. */
+    #define aprothrow(Except) throw Except (__LINE__, __FILE__, __FUNCTION__) ;
 }
 
 #else
 
-#define APRO_THROW
-#define APRO_ASSERT(a, b, c)
+#define aprothrow
+#define APRO_MAKE_EXCEPTION
+
+namespace APro
+{
+    class Exception
+    {
+    public:
+        Exception() {}
+        ~Exception() {}
+    };
+}
 
 #endif
+
+namespace APro
+{
+    ////////////////////////////////////////////////////////////
+    /** @class FatalException
+     *  @ingroup Core
+     *  @brief A Fatal Error exception.
+     *
+     *  It can be launched if a very rare error is encountered,
+     *  without needing some special description.
+    **/
+    ////////////////////////////////////////////////////////////
+    class FatalException : public Exception
+    {
+        APRO_MAKE_EXCEPTION(FatalException)
+
+        const char* what() const throw() { return "A fatal error has been thrown. See the program's provider for more support."; }
+    };
+}
 
 #endif

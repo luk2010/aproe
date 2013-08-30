@@ -25,21 +25,21 @@ namespace APro
      *  @ingroup Utils
      *  @brief Defines a regular first-in first-out queue.
      *  @details The concept of the queue is a classic first-in
-     *  first-out object. You stores one by one every objects, 
+     *  first-out object. You stores one by one every objects,
      *  and then you access them in the same order as you pushed
      *  them.
     **/
     /////////////////////////////////////////////////////////////
-    template<typename T> 
+    template<typename T>
     class Queue : public Copyable<QUeue>,
                   public Printable
     {
     protected:
-        
+
         Array<T> m_queue;
-        
+
     public:
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Constructor.
          *
@@ -52,20 +52,20 @@ namespace APro
             if(capacity)
                 m_queue.reserve(capacity);
         }
-        
+
         /////////////////////////////////////////////////////////////
-        /** @brief Constructor from classic array. 
+        /** @brief Constructor from classic array.
         **/
         /////////////////////////////////////////////////////////////
         explicit Queue(const Array<T>& other)
         {
             m_queue = other;
         }
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Constructor for copy.
          *
-         *  This function use the regular Array copy function, so copy 
+         *  This function use the regular Array copy function, so copy
          *  constructors are not called.
         **/
         /////////////////////////////////////////////////////////////
@@ -73,11 +73,11 @@ namespace APro
         {
             m_queue = other.m_queue;
         }
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Constructor from a C style array.
          *
-         *  @param c_queue : pointer to the first element of the 
+         *  @param c_queue : pointer to the first element of the
          *  queue.
          *  @param sz : Size of the queue.
         **/
@@ -86,7 +86,7 @@ namespace APro
         {
             m_queue.append(c_queue, sz);
         }
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Destructor.
         **/
@@ -95,20 +95,20 @@ namespace APro
         {
             m_queue.clear();
         }
-        
+
     public: // Print
-        
+
         /////////////////////////////////////////////////////////////
         /** @see Printable::print
         **/
         /////////////////////////////////////////////////////////////
         void print(Console& console) const
         {
-            console << "Queue { size : " << m_queue.getSize() << ", capacity : " << m_queue.getPhysicalSize() << " }";
+            console << "Queue <" << className<T>() << "> { size : " << m_queue.getSize() << ", capacity : " << m_queue.getPhysicalSize() << " }";
         }
-        
+
     public: // Copyable
-        
+
         /////////////////////////////////////////////////////////////
         /** @see Copyable::copyFrom
         **/
@@ -117,18 +117,18 @@ namespace APro
         {
             m_queue = other.m_queue;
         }
-        
+
         /////////////////////////////////////////////////////////////
         /** @see Copyable::operator==
         **/
         /////////////////////////////////////////////////////////////
-        bool operator == (const Queue<T>& other) const 
+        bool operator == (const Queue<T>& other) const
         {
             return m_queue == other;
         }
-        
+
     public:
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Add an object at the beginning of the queue.
          *
@@ -140,7 +140,7 @@ namespace APro
         {
             m_queue.prepend(object);
         }
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Remove the firts object in the queue.
         **/
@@ -149,7 +149,7 @@ namespace APro
         {
             m_queue.erase(m_queue.getSize() - 1);
         }
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Clear the whole queue.
         **/
@@ -158,9 +158,9 @@ namespace APro
         {
             m_queue.clear();
         }
-        
+
     public:
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return the size of the queue.
         **/
@@ -169,7 +169,7 @@ namespace APro
         {
             return m_queue.getSize();
         }
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return the capacity of the queue.
         **/
@@ -178,18 +178,18 @@ namespace APro
         {
             return m_queue.getPhysicalSize();
         }
-        
+
     public:
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return the current first object in the queue.
         **/
         /////////////////////////////////////////////////////////////
-        T& get() 
+        T& get()
         {
             return m_queue.at(m_queue.getSize() - 1);
         }
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return the current first object in the queue.
         **/
@@ -198,20 +198,20 @@ namespace APro
         {
             return m_queue.at(m_queue.getSize() - 1);
         }
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return the last object and remove it from the queue.
-         * 
+         *
          *  The object given is so a copy of the original object.
         **/
         /////////////////////////////////////////////////////////////
-        T popg() 
+        T popg()
         {
             T ret(get());
             pop();
             return ret;
         }
-        
+
     };
 }
 

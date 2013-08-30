@@ -18,15 +18,15 @@
 namespace APro
 {
     Window::Window()
-        : Implementable(String("APro::Window"))
+        : Implementable()
     {
         context = 0;
     }
 
     Window::Window(const String& name, const String & title, const String & sz)
-        : ParametedObject(), Implementable(String("APro::Window"))
+        : ParametedObject(), Implementable()
     {
-        createImplementation();
+        imp();
 
         setParam(String("Name"), Variant(name), String("Name of the Window Object."));
         setParam(String("Title"), Variant(title), String("Title of the Window."));
@@ -47,9 +47,10 @@ namespace APro
     }
 
     Window::Window(const Window& other)
-        : ParametedObject(other), EventEmitter(), Implementable(String("APro::Window"))
+        : ParametedObject(other), EventEmitter(), Implementable()
     {
-        createImplementation();
+        imp();
+
         String nnae = other.getParam(String("Name")).to<String>();
         nnae.append("_copy");
         setParam(String("Name"), Variant(nnae));

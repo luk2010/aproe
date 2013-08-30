@@ -16,23 +16,23 @@
 
 #include <Platform.h>
 #include <Queue.h>
-#include <Event.h
+#include <Event.h>
 
-namespace APro 
+namespace APro
 {
     class APRO_DLL EventUniter
     {
     protected:
-        
-        Queue<EventAPtr> event_queue;
-        
+
+        Queue<EventPtr> event_queue;
+
     public:
-        
+
         EventUniter();
         ~EventUniter();
-        
+
     public:
-        
+
         void addEvent(
     };
 }

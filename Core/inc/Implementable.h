@@ -1,16 +1,16 @@
+/////////////////////////////////////////////////////////////
 /** @file Implementable.h
+ *  @ingroup Implementations
  *
  *  @author Luk2010
  *  @version 0.1A
  *
  *  @date 20/03/2013
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the Implementable class.
+ *  Defines the Implementable class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #ifndef APRO_IMPLEMENTABLE_H
 #define APRO_IMPLEMENTABLE_H
 
@@ -19,19 +19,53 @@
 
 namespace APro
 {
+    /////////////////////////////////////////////////////////////
+    /** @class Implementable
+     *  @ingroup Implementations
+     *  @brief A structure that describe a class containing an
+     *  implementation.
+     *
+     *  An implementable object is an object that can have an
+     *  implementation, loaded from the Implementation Factory.
+     *
+     *  The implementation doesn't have to be inited or destroyed,
+     *  this is in charge of the implementable object to call
+     *  correct functions, as it is his object.
+     *
+     *  The implementation can do any of his destruction in his
+     *  destructor as it will be called in ::destroyImplementation
+     *  before to be deallocated by the same heap it was allocated.
+     *  @see Prototype::operator delete().
+    **/
+    /////////////////////////////////////////////////////////////
     template <typename T>
     class Implementable
     {
     public:
 
 //      typedef typename T::ptr typeptr;
-        typedef typename T* typeptr;
+        typedef typename T* typeptr;///< Pointer to the implementation.
 
     protected:
 
-        typeptr implement;
-        String m_class;
+        typeptr implement;///< Pointer to the implementation.
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Create the implementation from the factory.
+         *
+         *  The implementation is created using the Factory Design
+         *  Pattern, so a base object copies itself in a newly
+         *  allocated one.
+         *
+         *  The implementation is gotten by looking for the class name
+         *  in the Implementation Factory, so the Implementation's
+         *  provider must register his implementation using the
+         *  className() function to be sure the same result will be
+         *  given.
+         *
+         *  On error, a debug string is written.
+        **/
+        ////////////////////////////////////////////////////////////
         void createImplementation()
         {
             /* DEPRECATED
@@ -61,14 +95,22 @@ namespace APro
                 }
             }
              */
-            
-            typeptr implementation = Main::get().getImplementations().create(String(m_class));
+
+            typeptr implementation = Main::get().getImplementations().create(String(className<T>()));
             if(implementation)
             {
                 implement = implementation;
             }
+            else
+            {
+                aprodebug("Can't create implementation !");
+            }
         }
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Destroys the implementation if previously created.
+        **/
+        ////////////////////////////////////////////////////////////
         void destroyImplementation()
         {
             /*
@@ -88,7 +130,7 @@ namespace APro
                 }
             }
              */
-            
+
             if(implement)
             {
                 ::operator delete((Prototype*) proto);// This call the AProDelete function.
@@ -98,15 +140,36 @@ namespace APro
 
 //      virtual void initImplementation() = 0;
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the implementation and if none exists, try
+         *  try to create one.
+         *
+         *  @note You should always use this function to get the
+         *  implementation from the superclass.
+        **/
+        ////////////////////////////////////////////////////////////
+        T* imp()
+        {
+            if(!implement)
+                createImplementation();
+            return implement;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return a pointer to the implementation.
+         *
+         *  @note You should always use this function to get the
+         *  implementation from the superclass.
+        **/
+        ////////////////////////////////////////////////////////////
+        const T* imp() const
+        {
+            return implement;
+        }
+
     public:
 
         Implementable()
-        {
-
-        }
-
-        Implementable(const String& mclss)
-            : m_class(mclss)
         {
 
         }
@@ -118,7 +181,12 @@ namespace APro
 
         T* getImplementationPtr()
         {
-            return implement.getPtr();
+            return implement;
+        }
+
+        const T* getImplementationPtr() const
+        {
+            return implement;
         }
 
     };

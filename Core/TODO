@@ -12,6 +12,7 @@ Things to do
 - EventEmitter : Emitter of Synchronous Event System.
 - EventListener : Listener of the Event System.
 - Event : The base event of the Event System.
+- Delete EventReceiver, wich is obsolete and unused.
 
 + Plugin :
 
@@ -48,7 +49,6 @@ Things to do
 
 + Events System :
 
-- Delete EventReceiver, wich is obsolete and unused.
 - EventUniter : The Asynchronous Event System manager.
 - Adapt engine to the new event system.
 

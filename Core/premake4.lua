@@ -1,3 +1,22 @@
+newoption {
+	trigger 	= "with-exceptions",
+	description	= "Set on debug mode only, allow throwing of exceptions."
+}
+
+newoption {
+	trigger 	= "threadsapi",
+	value		= "API",
+	description	= "Choose if engine must use plugin or pthread thread API.",
+	allowed		= {
+		{ "plugin", "Thread API is given by a plugin implementation." },
+		{ "pthread", "Thread API is provided natively by pthread. This is the quickest and efficientest method." }
+	}
+}
+
+if not _OPTIONS["threadsapi"]
+	_OPTIONS["threadsapi"] = "pthread"
+end
+
 solution "aproe"
 	configurations { "Debug", "Release" }
 	
@@ -11,6 +30,9 @@ project("core")
 
 	configuration "windows"
 		defines {"WIN32"}
+
+	configuration "Xbox360"
+		defines {"_XBOX360_"}
 	
 	configuration "linux"
 		defines {"LINUX"}
@@ -20,11 +42,16 @@ project("core")
 		defines {"_PS3_"}
 		defines {"_HAVE_POSIX_"}
 
-	configuration "Xbox360"
-		defines {"_XBOX360_"}
-
 	configuration "macosx"
 		defines {"_MACOSX_"}
+		defines {"_HAVE_POSIX_"}
+
+	configuration "with-exceptions"
+		defines {"_HAVE_EXCEPTIONS_"}
+	
+	configuration "pthread"
+		defines {"_COMPILE_WITH_PTHREAD_"}
+		links   {"pthread"}
 
 	configuration "debug"
 		defines {"_HAVE_DEBUG_MODE_"}

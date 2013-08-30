@@ -19,6 +19,7 @@
 
 namespace APro
 {
+    /* DEPRECATED
     class APRO_DLL EventReceiver
     {
         APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(EventReceiver)
@@ -56,6 +57,7 @@ namespace APro
         List<String> eventProcessed;
         List<EventListener::ptr> listeners;
     };
+    */
 }
 
 #endif

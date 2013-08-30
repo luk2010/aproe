@@ -23,14 +23,6 @@
 /** Set if the C++0X should be used. */
 #define APRO_USECPLUSPLUS0X APRO_ON
 
-/** Set if we must use Exception. */
-#define APRO_EXCEPTION APRO_ON
-
-/** Defines the Max Buffer Size in Exception. */
-#if APRO_EXCEPTION == APRO_ON
-#   define APRO_EXCEPTIONMAXBUFFERSIZE 4096
-#endif
-
 /** Defines if we use the Memory tracker. */
 #define APRO_MEMORYTRACKER APRO_ON
 
@@ -50,6 +42,15 @@
 #   define APRO_DEBUG APRO_ON
 #else
 #   define APRO_DEBUG APRO_OFF
+#endif
+
+#if APRO_DEBUG == APRO_ON
+#   if _HAVE_EXCEPTIONS_
+        /** Set if we must use Exception. */
+#       define APRO_EXCEPTION APRO_ON
+        /** Defines the Max Buffer Size in Exception. */
+#       define APRO_EXCEPTIONMAXBUFFERSIZE 4096
+#   endif
 #endif
 
 /** Set DLL config to export. */
@@ -102,5 +103,20 @@ typedef double              angle_t;
 #else
 #   define aproassert(a,b)
 #endif
+
+/** @def TOTEXT(a)
+ *  Transform something into text.
+**/
+#define TOTEXT(a) #a
+
+////////////////////////////////////////////////////////////
+/** @brief Return the name of a given class.
+**/
+////////////////////////////////////////////////////////////
+template<typename T>
+const char* className()
+{
+    return TOTEXT(T);
+}
 
 #endif
