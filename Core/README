@@ -11,6 +11,7 @@ This folder contains
 *  TODO         : A file that describes what's left to do. Ideas can add features.
 *  TOCOMMIT     : File that describes what has to be commited on next release.
 *  Doxyfile     : A doxy-prepared file to generate documentations.
+*  LICENSE      : Contains the GPL Gnu license.
 
 How to use these files
 ----------------------
