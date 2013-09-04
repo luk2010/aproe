@@ -1,17 +1,17 @@
+////////////////////////////////////////////////////////////
 /** @file Memory.cpp
+ *  @ingroup Memory
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 22/05/2012
+ *  @date 21/05/2012 - 04/09/2013
  *
- *  @addtogroup Global
- *  @addtogroup Memory
- *
- *  This file implements basic memory function, like malloc, realloc, free. It is usefull when the engine
+ *  Implements basic memory function, like malloc, realloc, free. It is usefull when the engine
  *  use the Memory Tracker.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "Memory.h"
 
 #if APRO_MEMORYTRACKER == APRO_ON
@@ -22,6 +22,14 @@
 
 namespace APro
 {
+
+    class NotEnoughMemoryException : public Exception
+    {
+        APRO_MAKE_EXCEPTION(NotEnoughMemoryException)
+
+        const char* what() const throw() { return "Not enough RAM accessible !"; }
+    };
+
     void* allocate(size_t byte, const char* func_, const char* file_, int line_)
     {
         if(byte == 0)
@@ -34,18 +42,9 @@ namespace APro
             void* ptr = malloc(byte);
             if(ptr == nullptr)
             {
-#if APRO_EXCEPTION == APRO_ON
-
-                char buffer[APRO_EXCEPTIONMAXBUFFERSIZE];
-                sprintf(buffer, "Allocation of %li bytes failed in file %s at line %d", byte, file_, line_);
-
-                APRO_THROW("Allocation Failed", buffer, "Memory");
-
-#else
-
+                aprodebug("Can't allocate ") << byte << " bytes ! Call from \"" << func_ << "\" in file \"" << file_ << "\" and line " << line_ << ".";
+                aprothrow(NotEnoughMemoryException);
                 return nullptr;
-
-#endif
             }
 
 #if APRO_MEMORYTRACKER == APRO_ON
@@ -78,18 +77,9 @@ namespace APro
                 void* new_ptr = realloc(ptr, byte);
                 if(new_ptr == nullptr)
                 {
-#if APRO_EXCEPTION == APRO_ON
-
-                    char buffer[APRO_EXCEPTIONMAXBUFFERSIZE];
-                    sprintf(buffer, "Reallocation of %li bytes failed in file %s at line %d", byte, file_, line_);
-
-                    APRO_THROW("Reallocation Failed", buffer, "Memory");
-
-#else
-
+                    aprodebug("Can't reallocate ") << byte << " bytes ! Call from \"" << func_ << "\" in file \"" << file_ << "\" and line " << line_ << ".";
+                    aprothrow(NotEnoughMemoryException);
                     return nullptr;
-
-#endif
                 }
 
 #if APRO_MEMORYTRACKER == APRO_ON
@@ -108,6 +98,7 @@ namespace APro
     {
         if(ptr == nullptr)
         {
+            aprodebug("Trying to delete null-pointer ! Call from \"") << func_ << "\" in file \"" << file_ << "\" and line " << line_ << ".";
             return;
         }
 

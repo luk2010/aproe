@@ -65,7 +65,7 @@ namespace APro
     #define APRO_MAKE_EXCEPTION(class) public: class(long l, const char* fi, const char* fu) : Exception(l,fi,fu) { }
 
     /** Throw a simple exception. */
-    #define aprothrow(Except) throw Except (__LINE__, __FILE__, __FUNCTION__) ;
+    #define aprothrow(Except) throw Except (__LINE__, __FILE__, __FUNCTION__)
 }
 
 #else

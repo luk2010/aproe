@@ -1,14 +1,12 @@
 /** @file Base.h
+ *  @ingroup Global
  *
  *  @author Luk2010
  *  @version 0.1A
  *
  *  @date 29/05/2012
  *
- *  @addtogroup Global
- *  @addtogroup Memory
- *
- *  This file defines some constants to be used on different platform. This constants are universal.
+ *  Defines some constants to be used on different platform. This constants are universal.
  *
 **/
 #ifndef APROBASE_H
@@ -22,14 +20,6 @@
 
 /** Set if the C++0X should be used. */
 #define APRO_USECPLUSPLUS0X APRO_ON
-
-/** Defines if we use the Memory tracker. */
-#define APRO_MEMORYTRACKER APRO_ON
-
-/** Defines the Max Buffer Size in MemoryTracker. */
-#if APRO_MEMORYTRACKER == APRO_ON
-#   define APRO_MEMORYTRACKERMAXBUFFERSIZE 16384
-#endif
 
 /** Set if we can use the Standard Library. */
 #define APRO_USESTDLIB APRO_OFF
@@ -51,6 +41,16 @@
         /** Defines the Max Buffer Size in Exception. */
 #       define APRO_EXCEPTIONMAXBUFFERSIZE 4096
 #   endif
+
+#   if _HAVE_MEMORYTRACKER_
+        /** Defines if we use the Memory tracker. */
+#       define APRO_MEMORYTRACKER APRO_ON
+#   endif
+#endif
+
+/** Defines the Max Buffer Size in MemoryTracker. */
+#if APRO_MEMORYTRACKER == APRO_ON
+#   define APRO_MEMORYTRACKERMAXBUFFERSIZE 16384
 #endif
 
 /** Set DLL config to export. */
@@ -84,6 +84,7 @@ typedef double              angle_t;
  *
  *  Print a message using the console, giving function and
  *  line.
+ *  @note Console must be included.
  *
  *  @def aproassert(condition, message)
  *

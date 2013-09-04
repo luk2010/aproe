@@ -4,6 +4,16 @@ newoption {
 }
 
 newoption {
+	trigger 	= "with-memorytracker",
+	description	= "Set on debug mode only, allow memory tracking."
+}
+
+newoption {
+	trigger 	= "wall",
+	description	= "Set on debug mode only, allow everything you can."
+}
+
+newoption {
 	trigger 	= "threadsapi",
 	value		= "API",
 	description	= "Choose if engine must use plugin or pthread thread API.",
@@ -13,8 +23,8 @@ newoption {
 	}
 }
 
-if not _OPTIONS["threadsapi"]
-	_OPTIONS["threadsapi"] = "pthread"
+if not _OPTIONS["threadsapi"] then
+  _OPTIONS["threadsapi"] = "pthread"
 end
 
 solution "aproe"
@@ -48,6 +58,13 @@ project("core")
 
 	configuration "with-exceptions"
 		defines {"_HAVE_EXCEPTIONS_"}
+
+	configuration "with-memorytracker"
+		defines {"_HAVE_MEMORYTRACKER_"}
+
+	configuration "wall"
+		defines {"_HAVE_EXCEPTIONS_"}
+		defines {"_HAVE_MEMORYTRACKER_"}
 	
 	configuration "pthread"
 		defines {"_COMPILE_WITH_PTHREAD_"}

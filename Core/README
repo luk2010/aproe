@@ -19,20 +19,22 @@ How to use these files
 ### Installation
 
 1. Verify that you have premake4 installed. See extra/README for more details.
-2. Run premake4 [plat] where plat is the desired platform.
+2. Run premake4 [plat] --wall where plat is the desired platform, and --wall active every "--with" options.
 3. Use the generated build files to build the library.
 
 This process will generate the Core lirary, without any plugins or examples.
+For help on premake4 script options, type "premake4 --help".
 
 ### Cleaning
 
 Just run 'premake4 clean' to clean every unused files. You will have to re-run the initial premake4
 script to get the makefiles again.
+'html' folder created by Doxygen isn' destroyed during cleaning, so you'll have to remove it manually.
 
 ### Working on the sources
 
 You can work on the source simply by creating the IDE's files you like ( as 'premake4 codeblocks' for
-example ) and then work on the source. Think to run 'premake4 clean' before any push.
+example ) and then work on the source. Think to clean your folder before any push.
 
 ### Documentation
 
