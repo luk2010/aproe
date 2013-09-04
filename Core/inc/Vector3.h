@@ -1094,6 +1094,69 @@ namespace APro
 
     public: // Reflect / Refract
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns this vector reflected about a plane with
+         *  the given normal.
+         *
+         *  By convention, both this and the reflected vector point
+         *  away from the plane with the given normal.
+         *
+         *  @see refract()
+        **/
+        ////////////////////////////////////////////////////////////
+        Vector3<Num> reflect(const Vector3<Num>& normal) const
+        {
+            return 2 * *this->projectToNorm(normal) - *this;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Refracts this vector about a plane with the given
+         *  normal.
+         *
+         *  By convention, the this vector points towards the plane,
+         *  and the returned vector points away from the plane.
+         *  When the ray is going from a denser material to a lighter
+         *  one, total internal reflection can occur. In this case,
+         *  this function will just return a reflected vector from a
+         *  call to Reflect().
+         *
+         *  @param normal : Specifies the plane normal direction.
+         *  @param negativSideRefractionIndex : The refraction index of
+         *  the material we are exiting.
+         *  @param positiveSideRefractionIndex : The refraction index of
+         *  the material we are entering.
+         *
+         *  @see reflect()
+        **/
+        ////////////////////////////////////////////////////////////
+        Vector3<Num> refract(const Vector3<Num>& normal, float negativSideRefractionIndex, float positiveSideRefractionIndex) const
+        {
+            // Duplicate from Vector2::refract
+            float n = negativSideRefractionIndex / positiveSideRefractionIndex;
+            float cosI = this->dotProduct(normal);
+            float sinT2 = n*n*(1.f - cosI * cosI);
+            if(sinT2 > 1.f)
+                return (-(*this)).reflect(normal);
+            return n * *this - (n + Sqrt(1.f - sinT2)) * normal;
+        }
+
+    public: // Projection
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Projects this vector onto the given unnormalized
+         *  direction vector.
+         *
+         *  @param direction The direction vector to project this vector
+         *  onto. This function will normalize this vector, so you can
+         *  pass in an unnormalized vector.
+         *
+         *  @see projectToNorm().
+        **/
+        ////////////////////////////////////////////////////////////
+        Vector3<Num> projectTo(const Vector3<Num>& direction) const
+        {
+            return direction * this->dot(direction) / direction.squaredLenght();
+        }
 
 
         double angleBetween(const Vector3<Num>& v)
@@ -1111,7 +1174,7 @@ namespace APro
 
         inline friend Console& operator << (Console& c, const Vector3<Num>& v)
         {
-            c << "Vector3<" << typeid(Num).name() << ">( " << v.x << ", " << v.y << ", " << v.z << " )";
+            c << "Vector3<" << className<Vector3<Num> >() << ">( " << v.x << ", " << v.y << ", " << v.z << " )";
             return c;
         }
     };
