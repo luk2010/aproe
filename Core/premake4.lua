@@ -9,7 +9,7 @@ newoption {
 }
 
 newoption {
-	trigger 	= "wall",
+	trigger 	= "with-all",
 	description	= "Set on debug mode only, allow everything you can."
 }
 
@@ -62,7 +62,7 @@ project("core")
 	configuration "with-memorytracker"
 		defines {"_HAVE_MEMORYTRACKER_"}
 
-	configuration "wall"
+	configuration "with-all"
 		defines {"_HAVE_EXCEPTIONS_"}
 		defines {"_HAVE_MEMORYTRACKER_"}
 	
