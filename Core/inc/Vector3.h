@@ -1158,23 +1158,254 @@ namespace APro
             return direction * this->dot(direction) / direction.squaredLenght();
         }
 
-
-        double angleBetween(const Vector3<Num>& v)
+        ////////////////////////////////////////////////////////////
+        /** @brief Projects this vector onto the given normalized
+         *  direction vector.
+         *
+         *  @param direction The direction vector to project this vector
+         *  onto. This vector must be normalized.
+         *
+         *  @see projectTo()
+        **/
+        ////////////////////////////////////////////////////////////
+        Vector3<Num> projectToNorm(const Vector3<Num>& direction) const
         {
-            Num len = lenght() * v.lenght();
+            return direction * this->dot(direction);
+        }
 
-            if(len < 1e-06)
-                len = 1e-06;
+        ////////////////////////////////////////////////////////////
+        /** @brief Computes the angle between this vector and the
+         *  specified vector, in radians.
+         *
+         *  This function takes into account that this vector or the
+         *  other vector can be unnormalized, and normalizes the computations.
+         *  If you are computing the angle between two normalized vectors,
+         *  it is better to use angleBetweenNorm().
+         *
+         *  @see angleBetweenNorm()
+        **/
+        ////////////////////////////////////////////////////////////
+        Num angleBetween(const Vector3<Num>& other) const
+        {
+            float cosa = (float) (dot(other) / Sqrt(squaredLenght() * other.squaredLenght()));
+            if (cosa >= 1.f)
+                return (Num) 0.f;
+            else if (cosa <= -1.f)
+                return (Num) Math::PI_32;
+            else
+                return (Num) ACos(cosa);
+        }
 
-            Num f = dotProduct(v) / len;
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns the angle between this vector and the
+         *  specified normalized vector, in radians.
+         *
+         *  This vector must be normalized to call this function.
+         *
+         *  @param normalizedVector : The direction vector to compute
+         *  the angle against. This vector must be normalized.
+         *
+         *  @see angleBetween()
+        **/
+        ////////////////////////////////////////////////////////////
+        Num angleBetweenNorm(const Vector3<Num>& normalizedVector) const
+        {
+            float cosa = (float) dot(other);
+            if (cosa >= 1.f)
+                return (Num) 0.f;
+            else if (cosa <= -1.f)
+                return (Num) Math::PI_32;
+            else
+                return (Num) ACos(cosa);
+        }
 
-            f = Clamp(f, (Real)-1.0, (Real)1.0);
-			return ACos(f);
+        ////////////////////////////////////////////////////////////
+        /** @brief Breaks this vector down into parallel and perpendicular
+         *  components with respect to the given direction.
+         *
+         *  @param direction : The direction the decomposition is to
+         *  be computed. This vector must be normalized.
+		 *  @param outParallel [out] : Receives the part of this vector
+		 *  that is parallel to the given direction vector.
+		 *  @param outPerpendicular [out] : Receives the part of this
+		 *  vector that is perpendicular to the given direction vector.
+        **/
+        ////////////////////////////////////////////////////////////
+        void decompose(const Vector3<Num>& direction, Vector3<Num>& outParallel, Vector3<Num>& outPerpendicular) const
+        {
+            outParallel = this>projectToNorm(direction);
+            outPerpendicular = *this - outParallel;
+        }
+
+    public: // Linear interpolation
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Linearly interpolates between this and the vector
+         *  b.
+         *
+         *  @param b : The target endpoint.
+         *  @param t : The interpolation weight, in range [0, 1].
+         *
+         *  @return (b, 0) returns this vector, (b, 1) returns b.
+        **/
+        ////////////////////////////////////////////////////////////
+        Vector3<Num> linearInterpolate(const Vector3<Num>& b, float t) const
+        {
+            Clamp(t, 0.0f, 1.0f);
+            return (1.f - t) * *this + t * b;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Identical to a.linearInterpolate(b, t).
+        **/
+        ////////////////////////////////////////////////////////////
+        static Vector3<Num> LinearInterpolate(const Vector3<Num>& a, const Vector3<Num>& b, float t)
+        {
+            return a.linearInterpolate(b, t);
+        }
+
+    public: // Ortho
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Makes the given vectors linearly independent.
+         *
+         *  This function directly follows the Gram-Schmidt procedure
+         *  on the input vectors. The vector a is kept unmodified, and
+         *  vector b is modified to be perpendicular to a.
+        **/
+        ////////////////////////////////////////////////////////////
+        static void Orthogonalize(const Vector3<Num>& a, Vector3<Num>& b)
+        {
+            if (!a.isZero())
+                b -= b.projectTo(a);
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Makes the given vectors linearly independent.
+         *
+         *  This function directly follows the Gram-Schmidt procedure
+         *  on the input vectors. The vector a is kept unmodified, and
+         *  vector b is modified to be perpendicular to a.
+         *
+         *  The vector c is adjusted to be perpendicular to a and b.
+        **/
+        ////////////////////////////////////////////////////////////
+        static void Orthogonalize(const Vector3<Num>& a, Vector3<Num>& b, Vector3<Num>& c)
+        {
+            if (!a.isZero())
+            {
+                b -= b.projectTo(a);
+                c -= c.projectTo(a);
+            }
+
+            if (!b.IsZero())
+                c -= c.projectTo(b);
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the given vectors are orthogonal
+         *  to each other.
+        **/
+        ////////////////////////////////////////////////////////////
+        static bool AreOrthogonal(const Vector3<Num>& a, const Vector3<Num>& b, float epsilon = 1e-3f)
+        {
+            return a.isPerpendicular(b, epsilon);
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the given vectors are orthogonal
+         *  to each other.
+        **/
+        ////////////////////////////////////////////////////////////
+        static bool AreOrthogonal(const Vector3<Num>& a, const Vector3<Num>& b, const Vector3<Num>& c, float epsilon = 1e-3f)
+        {
+            return a.isPerpendicular(b, epsilon) &&
+                   a.isPerpendicular(c, epsilon) &&
+                   b.isPerpendicular(c, epsilon);
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Makes the given vectors linearly independent and
+         *  normalized in length.
+         *
+         *  This function directly follows the Gram-Schmidt procedure
+         *  on the input vectors. The vector a is first normalized,
+         *  and vector b is modified to be perpendicular to a, and also
+         *  normalized.
+         *
+         *  @return False if one of the given vectors is zero, true
+         *  if they can be orthonormalized.
+        **/
+        ////////////////////////////////////////////////////////////
+        static bool Orthonormalize(Vector3<Num>& a, Vector3<Num>& b)
+        {
+            if(a.isZero() || b.isZero())
+                return false;
+
+            a.normalize();
+            b -= b.projectTo(a);
+            b.normalize();
+            return true;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Makes the given vectors linearly independent and
+         *  normalized in length.
+         *
+         *  This function directly follows the Gram-Schmidt procedure
+         *  on the input vectors. The vector a is first normalized,
+         *  and vector b is modified to be perpendicular to a, and also
+         *  normalized.
+         *
+         *  The vector c is adjusted to be perpendicular to a and b,
+         *  and normalized.
+         *
+         *  @return False if one of the given vectors is zero, true
+         *  if they can be orthonormalized.
+        **/
+        ////////////////////////////////////////////////////////////
+        static bool Orthonormalize(Vector3<Num>& a, Vector3<Num>& b, Vector3<Num>& c)
+        {
+            if(a.isZero() || b.isZero() || c.isZero())
+                return false;
+
+            a.normalize();
+            b -= b.projectTo(a);
+            b.normalize();
+            c -= c.projectTo(a);
+            c -= c.projectTo(b);
+            c.normalize();
+            return true;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the given vectors are orthogonal
+         *  to each other and normalized.
+        **/
+        ////////////////////////////////////////////////////////////
+        static bool AreOrthonormal(const Vector3<Num>& a, const Vector3<Num>& b, float epsilon = 1e-3f)
+        {
+            return a.isPerpendicular(b, epsilon) && a.isNormalized(epsilon*epsilon) && b.isNormalized(epsilon*epsilon);
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the given vectors are orthogonal
+         *  to each other and normalized.
+        **/
+        ////////////////////////////////////////////////////////////
+        static bool AreOrthonormal(const Vector3<Num>& a, const Vector3<Num>& b, const Vector3<Num>& c, float epsilon = 1e-3f)
+        {
+            return a.isPerpendicular(b, epsilon) &&
+                   a.isPerpendicular(c, epsilon) &&
+                   b.isPerpendicular(c, epsilon) &&
+                   a.isNormalized(epsilon*epsilon) &&
+                   b.isNormalized(epsilon*epsilon) &&
+                   c.isNormalized(epsilon*epsilon);
         }
 
         inline friend Console& operator << (Console& c, const Vector3<Num>& v)
         {
-            c << "Vector3<" << className<Vector3<Num> >() << ">( " << v.x << ", " << v.y << ", " << v.z << " )";
+            c << "Vector3<" << className<Num>() << ">( " << v.x << ", " << v.y << ", " << v.z << " )";
             return c;
         }
     };
