@@ -25,7 +25,7 @@ namespace APro
      *  @ingroup Utils
      *  @brief Defines a regular first-in first-out queue.
      *  @details The concept of the queue is a classic first-in
-     *  first-out object. You stores one by one every objects,
+     *  first-out container. You stores one by one every objects,
      *  and then you access them in the same order as you pushed
      *  them.
     **/

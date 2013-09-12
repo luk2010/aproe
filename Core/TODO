@@ -6,6 +6,7 @@ Things to do
 + Math :
 
 - Vector2     : A vector with 2 components.
+- Vector3     : A vector with 3 components.
 
 + Event System :
 
@@ -22,7 +23,6 @@ Things to do
 
 + Math :
 
-- Vector3     : A vector with 3 components.
 - Vector4     : A Vector with 4 components.
 - Matrix3x3   : A 3 by 3 matrix.
 - Matrix3x4   : A 3 by 4 matrix.

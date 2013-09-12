@@ -25,14 +25,13 @@ namespace APro
      *  @brief A vector of form (x, y, z).
     **/
     ////////////////////////////////////////////////////////////
-    template <typename Num>
     class Vector3
     {
     public:
 
-        Num x;///< X Component.
-        Num y;///< Y Component.
-        Num z;///< Z Component.
+        Real x;///< X Component.
+        Real y;///< Y Component.
+        Real z;///< Z Component.
 
     public: // Constructors
 
@@ -41,59 +40,41 @@ namespace APro
          *  @details Set coordinates to (0,0,0).
         **/
         ////////////////////////////////////////////////////////////
-        Vector3() : x (0), y (0), z (0)
-        {
-
-        }
+        Vector3();
 
         ////////////////////////////////////////////////////////////
         /** @brief Copy Constructor.
          *  @details Set coordinates to (v.x, v.y, v.z).
         **/
         ////////////////////////////////////////////////////////////
-        Vector3(const Vector3<Num>& v) : x (v.x), y(v.y), z(v.z)
-        {
-
-        }
+        Vector3(const Vector3& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor.
          *  @details Set coordinates to (n1, n2, n3).
         **/
         ////////////////////////////////////////////////////////////
-        Vector3(Num n1, Num n2, Num n3) : x(n1), y(n2), z(n3)
-        {
-
-        }
+        Vector3(Real n1, Real n2, Real n3);
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor.
          *  @details Set coordinates to (n, n, n).
         **/
         ////////////////////////////////////////////////////////////
-        explicit Vector3(Num n) : x(n), y(n), z(n)
-        {
-
-        }
+        explicit Vector3(Real n);
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor from array.
          *  @details Set coordinates to (n[0], n[1], n[2]).
         **/
         ////////////////////////////////////////////////////////////
-        explicit Vector3(const Num v[3]) : x(v[0]), y(v[1]), z(v[2])
-        {
-
-        }
+        explicit Vector3(const Real v[3]);
 
         ////////////////////////////////////////////////////////////
         /** @brief Destructor.
         **/
         ////////////////////////////////////////////////////////////
-        ~Vector3()
-        {
-
-        }
+        ~Vector3() {}
 
     public: // Swap
 
@@ -103,12 +84,7 @@ namespace APro
          *  @note It use xor swapping.
         **/
         ////////////////////////////////////////////////////////////
-        void swap(Vector3<Num>& v)
-        {
-            swapNumeric_xor(x, v.x);
-            swapNumeric_xor(y, v.y);
-            swapNumeric_xor(z, v.z);
-        }
+        void swap(Vector3& v);
 
     public: // Egality operators
 
@@ -116,40 +92,34 @@ namespace APro
         /** @brief Tell if 2 vectors are equals.
         **/
         ////////////////////////////////////////////////////////////
-        bool equals(const Vector3<Num>& v) const
-        {
-            return *this == v;
-        }
+        bool equals(const Vector3& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Tell if vector is equal to 2 given numerics.
         **/
         ////////////////////////////////////////////////////////////
-        bool equals(const Num& n1, const Num& n2) const
-        {
-            return n1 == x && n2 == y;
-        }
+        bool equals(const Real& n1, const Real& n2) const;
 
-        inline bool operator == (const Vector3<Num>& v) const
+        inline bool operator == (const Vector3& v) const
         {
             return x == v.x && y == v.y && z == v.z;
         }
 
-        inline bool operator != (const Vector3<Num>& v) const
+        inline bool operator != (const Vector3& v) const
         {
             return !(*this == v);
         }
 
     public: // Superior / inferior strict operators
 
-        bool operator < ( const Vector3<Num>& rhs ) const
+        bool operator < ( const Vector3& rhs ) const
         {
             if( x < rhs.x && y < rhs.y && z < rhs.z )
                 return true;
             return false;
         }
 
-        bool operator > ( const Vector3<Num>& rhs ) const
+        bool operator > ( const Vector3& rhs ) const
         {
             if( x > rhs.x && y > rhs.y && z > rhs.z )
                 return true;
@@ -158,14 +128,14 @@ namespace APro
 
     public: // Superior / inferior operators
 
-        bool operator <= ( const Vector3<Num>& rhs ) const
+        bool operator <= ( const Vector3& rhs ) const
         {
             if( x <= rhs.x && y <= rhs.y && z <= rhs.z )
                 return true;
             return false;
         }
 
-        bool operator >= ( const Vector3<Num>& rhs ) const
+        bool operator >= ( const Vector3& rhs ) const
         {
             if( x >= rhs.x && y >= rhs.y && z >= rhs.z )
                 return true;
@@ -178,39 +148,21 @@ namespace APro
         /** @brief Set coordinates to given vector.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& set(const Vector3<Num>& other)
-        {
-            x = other.x;
-            y = other.y;
-            z = other.z;
-            return *this;
-        }
+        Vector3& set(const Vector3& other);
 
         ////////////////////////////////////////////////////////////
         /** @brief Set coordinates to given pair.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& set(const Num& n1, const Num& n2, const Num& n3)
-        {
-            x = n1;
-            y = n2;
-            z = n3;
-            return *this;
-        }
+        Vector3& set(const Real& n1, const Real& n2, const Real& n3);
 
         ////////////////////////////////////////////////////////////
         /** @brief Set coordinates to given numeric.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& set(const Num& n)
-        {
-            x = n;
-            y = x;
-            z = x;
-            return *this;
-        }
+        Vector3& set(const Real& n);
 
-        Vector3<Num>& operator = (const Vector3<Num>& other)
+        Vector3& operator = (const Vector3& other)
         {
             x = other.x;
             y = other.y;
@@ -219,7 +171,7 @@ namespace APro
             return *this;
         }
 
-        Vector3<Num>& operator = (const Num& other)
+        Vector3& operator = (const Real& other)
         {
             x = other;
             y = other;
@@ -237,12 +189,7 @@ namespace APro
          *  attriutes it to this vector.
         **/
         ////////////////////////////////////////////////////////////
-        void floor(const Vector3<Num>& other)
-        {
-            if(other.x < x) x = other.x;
-            if(other.y < y) y = other.y;
-            if(other.z < z) z = other.z;
-        }
+        void floor(const Vector3& other);
 
         ////////////////////////////////////////////////////////////
         /** @brief Ceil current vector with given one.
@@ -251,12 +198,7 @@ namespace APro
          *  attriutes it to this vector.
         **/
         ////////////////////////////////////////////////////////////
-        void ceil(const Vector3<Num>& other)
-        {
-            if(other.x > x) x = other.x;
-            if(other.y > y) y = other.y;
-            if(other.z > z) z = other.z;
-        }
+        void ceil(const Vector3& other);
 
     public: // Addition
 
@@ -265,13 +207,7 @@ namespace APro
          *  @param v : Vector to add.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& add(const Vector3<Num>& v)
-        {
-            x += v.x;
-            y += v.y;
-            z += v.z;
-            return *this;
-        }
+        Vector3& add(const Vector3& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Add a numeric to this one.
@@ -279,25 +215,14 @@ namespace APro
          *  @return (x + n, y + n, z + n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& add(const Num& n)
-        {
-            x += n;
-            y += n;
-            z += n;
-            return *this;
-        }
+        Vector3& add(const Real& n);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector when adding given one.
          *  @param v : Vector to add.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> added(const Vector3<Num>& v) const
-        {
-            return Vector3<Num>(x + v.x,
-                                y + v.y,
-                                z + v.z);
-        }
+        Vector3 added(const Vector3& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector when adding given numeric.
@@ -305,29 +230,24 @@ namespace APro
          *  @return (x + n, y + n, z + n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> added(const Num& n) const
-        {
-            return Vector3<Num>(x + n,
-                                y + n,
-                                z + n);
-        }
+        Vector3 added(const Real& n) const;
 
-        Vector3<Num>& operator += (const Vector3<Num>& n)
+        Vector3& operator += (const Vector3& n)
         {
             return add(n);
         }
 
-        Vector3<Num>& operator += (const Num n)
+        Vector3& operator += (const Real& n)
         {
             return add(n);
         }
 
-        Vector3<Num> operator + (const Vector3<Num>& v) const
+        Vector3 operator + (const Vector3& v) const
         {
             return added(v);
         }
 
-        Vector3<Num> operator + (const Num lhs) const
+        Vector3 operator + (const Real& lhs) const
         {
             return added(lhs);
         }
@@ -339,14 +259,7 @@ namespace APro
          *  @param v : Vector to substract.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& sub(const Vector3<Num>& v)
-        {
-            x -= v.x;
-            y -= v.y;
-            z -= v.z;
-
-            return *this;
-        }
+        Vector3& sub(const Vector3& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Substract a numeric to this vector.
@@ -354,24 +267,14 @@ namespace APro
          *  @return (x - n, y - n, z - n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& sub(const Num& n)
-        {
-            x -= n;
-            y -= n;
-            z -= n;
-
-            return *this;
-        }
+        Vector3& sub(const Real& n);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector when substracting given one.
          *  @param v : Vector to substract.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> subbed(const Vector3<Num>& v) const
-        {
-            return Vector3<Num>(x - v.x, y - v.y, z - v.z);
-        }
+        Vector3 subbed(const Vector3& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector when substracting given numeric.
@@ -379,29 +282,24 @@ namespace APro
          *  @return (x - n, y + n, z - n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> subbed(const Num& n) const
-        {
-            return Vector3<Num>(x - n,
-                                y - n,
-                                z - n);
-        }
+        Vector3 subbed(const Real& n) const;
 
-        Vector3<Num>& operator -= (const Vector3<Num>& v)
+        Vector3& operator -= (const Vector3& v)
         {
             return sub(v);
         }
 
-        Vector3<Num>& operator -= (const Num& n)
+        Vector3& operator -= (const Real& n)
         {
             return sub(n);
         }
 
-        Vector3<Num> operator - (const Vector3<Num>& v) const
+        Vector3 operator - (const Vector3& v) const
         {
             return subbed(v);
         }
 
-        Vector3<Num> operator - (const Num& v) const
+        Vector3 operator - (const Real& v) const
         {
             return subbed(v);
         }
@@ -413,14 +311,7 @@ namespace APro
          *  @param v : Vector to Multiply.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& multiply(const Vector3<Num>& v)
-        {
-            x *= v.x;
-            y *= v.y;
-            z *= v.z;
-
-            return *this;
-        }
+        Vector3& multiply(const Vector3& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Multiply a numeric to this one.
@@ -428,14 +319,7 @@ namespace APro
          *  @return (x * n, y * n, z * n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& multiply(const Num& n)
-        {
-            x *= n;
-            y *= n;
-            z *= n;
-
-            return *this;
-        }
+        Vector3& multiply(const Real& n);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector if a multiplication was applied
@@ -443,12 +327,7 @@ namespace APro
          *  @param v : Vector to Multiply.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> multiplied(const Vector3<Num>& v) const
-        {
-            return Vector3<Num>(x *= v.x,
-                                y *= v.y,
-                                z *= v.z);
-        }
+        Vector3 multiplied(const Vector3& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector if a multiplication was applied
@@ -456,29 +335,24 @@ namespace APro
          *  @param n : Numeric to multiply.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> multiplied(const Num& n) const
-        {
-            return Vector3<Num>(x *= n,
-                                y *= n,
-                                z *= n);
-        }
+        Vector3 multiplied(const Real& n) const;
 
-        Vector3<Num>& operator *= (const Vector3<Num>& v)
+        Vector3& operator *= (const Vector3& v)
         {
             return multiply(v);
         }
 
-        Vector3<Num>& operator *= (const Num& n)
+        Vector3& operator *= (const Real& n)
         {
             return multiply(n);
         }
 
-        Vector3<Num> operator * (const Vector3<Num>& v) const
+        Vector3 operator * (const Vector3& v) const
         {
             return multiplied(v);
         }
 
-        Vector3<Num> operator * (const Num& n) const
+        Vector3 operator * (const Real& n) const
         {
             return multiplied(n);
         }
@@ -490,14 +364,7 @@ namespace APro
          *  @param v : Vector to divide.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& divide(const Vector3<Num>& v)
-        {
-            x /= v.x;
-            y /= v.y;
-            z /= v.z;
-
-            return *this;
-        }
+        Vector3& divide(const Vector3& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Divide a numeric to this one.
@@ -505,14 +372,7 @@ namespace APro
          *  @return (x / n, y / n, z / n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& divide(const Num& n)
-        {
-            x /= n;
-            y /= n;
-            z /= n;
-
-            return *this;
-        }
+        Vector3& divide(const Real& n);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector if a division was applied
@@ -520,12 +380,7 @@ namespace APro
          *  @param v : Vector to divide.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> divided(const Vector3<Num>& v) const
-        {
-            return Vector3<Num>(x / v.x,
-                                y / v.y,
-                                z / v.z);
-        }
+        Vector3 divided(const Vector3& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector if a division was applied
@@ -533,29 +388,24 @@ namespace APro
          *  @param n : Numeric to divide.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> divided(const Num& n) const
-        {
-            return Vector3<Num>(x / n,
-                                y / n,
-                                z / n);
-        }
+        Vector3 divided(const Real& n) const;
 
-        Vector3<Num>& operator /= (const Vector3<Num>& v)
+        Vector3& operator /= (const Vector3& v)
         {
             return divide(v);
         }
 
-        Vector3<Num>& operator /= (const Num& n)
+        Vector3& operator /= (const Real& n)
         {
             return divide(n);
         }
 
-        Vector3<Num> operator / (const Vector3<Num>& v) const
+        Vector3 operator / (const Vector3& v) const
         {
             return divided(v);
         }
 
-        Vector3<Num> operator / (const Num& n) const
+        Vector3 operator / (const Real& n) const
         {
             return divided(n);
         }
@@ -569,10 +419,7 @@ namespace APro
          *  if i is superior strict to 1, z is always returned.
         **/
         ////////////////////////////////////////////////////////////
-        const Num& at(size_t i) const
-        {
-            return i == 0 ? x : i == 1 ? y : z;
-        }
+        const Real& at(size_t i) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return x, y or z.
@@ -581,17 +428,14 @@ namespace APro
          *  if i is superior strict to 1, z is always returned.
         **/
         ////////////////////////////////////////////////////////////
-        Num& at(size_t i)
-        {
-            return i == 0 ? x : i == 1 ? y : z;
-        }
+        Real& at(size_t i);
 
-        const Num& operator [] (size_t i) const
+        const Real& operator [] (size_t i) const
         {
             return at(i);
         }
 
-        Num& operator [] (size_t i)
+        Real& operator [] (size_t i)
         {
             return at(i);
         }
@@ -600,73 +444,49 @@ namespace APro
         /** @brief Return a pointer to data.
         **/
         ////////////////////////////////////////////////////////////
-        const Num* ptr() const
-        {
-            return &x;
-        }
+        const Real* ptr() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a pointer to data.
         **/
         ////////////////////////////////////////////////////////////
-        Num* ptr()
-        {
-            return &x;
-        }
+        Real* ptr();
 
     public: // Absolute, Negation
 
-        inline Vector3<Numeric> operator + () const
+        inline Vector3 operator + () const
         {
             return *this;
         }
 
-        inline Vector3<Numeric> operator - () const
+        inline Vector3 operator - () const
         {
-            return Vector3<Numeric>(-x, -y, -z);
+            return Vector3(-x, -y, -z);
         }
 
         ////////////////////////////////////////////////////////////
         /** @brief Negate coordinates and return the vector.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Numeric>& negate()
-        {
-            x = -x;
-            y = -y;
-            z = -z;
-            return -this;
-        }
+        Vector3& negate();
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a vector from negated one.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Numeric> negated() const
-        {
-            return Vector3<Numeric>(-x, -y, -z);
-        }
+        Vector3 negated() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a vector from abs coordinates.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Numeric> absoluted() const
-        {
-            return Vector3<Numeric>(abs_(x), abs_(y), abs_(z));
-        }
+        Vector3 absoluted() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Absolute coordinates of this vector and return it.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Numeric>& absolute()
-        {
-            x = abs_(x);
-            y = abs_(y);
-            z = abs_(z);
-            return *this;
-        }
+        Vector3& absolute();
 
     public: // Lenght
 
@@ -674,19 +494,13 @@ namespace APro
         /** @brief Return computed lenght of this vector.
         **/
         ////////////////////////////////////////////////////////////
-        Num lenght() const
-        {
-            return Sqrt(squaredLenght());
-        }
+        Real lenght() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return squared computed lenght of this vector.
         **/
         ////////////////////////////////////////////////////////////
-        Num squaredLenght() const
-        {
-            return x * x + y * y + z * z;
-        }
+        Real squaredLenght() const;
 
     public: // Distance
 
@@ -703,10 +517,7 @@ namespace APro
          *  @see squaredDistance()
         **/
         ////////////////////////////////////////////////////////////
-        Num distance(const Vector3<Num>& v) const
-        {
-            return Sqrt(squaredDistance(v));
-        }
+        Real distance(const Vector3& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Computes the squared distance between this and the
@@ -723,14 +534,7 @@ namespace APro
 		 *  @see distance()
         **/
         ////////////////////////////////////////////////////////////
-        Num squaredDistance(const Vector3<Num>& v) const
-        {
-            float dx = x - v.x;
-            float dy = y - v.y;
-            float dz = z - v.z;
-
-            return dx*dx + dy*dy + dz*dz;
-        }
+        Real squaredDistance(const Vector3& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Returns the oint in the exact middle of the segment
@@ -741,13 +545,7 @@ namespace APro
          *  this point is returned.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> midPoint(const Vector3<Num>& other) const
-        {
-            return Vector3<Num>(
-                ( x + other.x ) * 0.5f,
-                ( y + other.y ) * 0.5f,
-                ( z + other.z ) * 0.5f );
-        }
+        Vector3 midPoint(const Vector3& other) const;
 
     public: // Spherical Coordinates
 
@@ -774,13 +572,7 @@ namespace APro
          *  toSphericalCoordinates(), toSphericalCoordinatesNormalized()
         **/
         ////////////////////////////////////////////////////////////
-        void setFromSphericalCoordinates(float azimuth, float inclinaison, float radius = 1.0f)
-        {
-            float cx = Cos(inclinaison);
-            x = cx * Sin(azimuth) * radius;
-            y = -Sin(inclinaison) * radius;
-            z = cx * Cos(azimuth) * radius;
-        }
+        void setFromSphericalCoordinates(Radian azimuth, Radian inclinaison, Real radius = 1.0f);
 
         ////////////////////////////////////////////////////////////
         /** @brief Converts the given vector represented in spherical
@@ -792,10 +584,7 @@ namespace APro
          *  toSphericalCoordinates(), toSphericalCoordinatesNormalized()
         **/
         ////////////////////////////////////////////////////////////
-        void setFromSphericalCoordinates(const Vector3<Num>& spherical)
-        {
-            setFromSphericalCoordinates(spherical.x, spherical.y, spherical.z);
-        }
+        void setFromSphericalCoordinates(const Vector3& spherical);
 
         ////////////////////////////////////////////////////////////
         /** @brief Computes given spherical coordinates to an euclidean
@@ -820,12 +609,7 @@ namespace APro
          *  toSphericalCoordinates(), toSphericalCoordinatesNormalized()
         **/
         ////////////////////////////////////////////////////////////
-        static Vector3<Num> FromSphericalCoordinates(float azimuth, float inclinaison, float radius = 1.0f)
-        {
-            Vector3<Num> ret;
-            ret.setFromSphericalCoordinates(azimuth, inclinaison, radius);
-            return ret;
-        }
+        static Vector3 FromSphericalCoordinates(Radian azimuth, Radian inclinaison, Real radius = 1.0f);
 
         ////////////////////////////////////////////////////////////
         /** @brief Computes given spherical coordinates to an euclidean
@@ -837,12 +621,7 @@ namespace APro
          *  toSphericalCoordinates(), toSphericalCoordinatesNormalized()
         **/
         ////////////////////////////////////////////////////////////
-        static Vector3<Num> FromSphericalCoordinates(const Vector3<Num>& spherical)
-        {
-            Vector3<Num> ret;
-            ret.setFromSphericalCoordinates(spherical);
-            return ret;
-        }
+        static Vector3 FromSphericalCoordinates(const Vector3& spherical);
 
         ////////////////////////////////////////////////////////////
         /** @brief Converts this euclidean (x,y,z) vector3 to spherical
@@ -854,17 +633,7 @@ namespace APro
          *  zero vector.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> toSphericalCoordinates() const
-        {
-            Vector3<Num> v = *this;
-
-            Num l = v.normalize();
-            if((float) l <= 1e-5f)
-                return ::Zero();
-            Num azimuth = ATan2(v.x, v.z);
-            Num inclinaison = ASin(-v.y);
-            return Vector3<Num>(azimuth, inclinaison, l);
-        }
+        Vector3 toSphericalCoordinates() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Converts this normalized euclidean (x,y,z) vector3 to
@@ -877,12 +646,7 @@ namespace APro
          *  normalized in advance.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> toSphericalCoordinatesNormalized() const
-        {
-            Num azimuth = ATan2(x, z);
-            Num inclinaison = ASin(-y);
-            return Vector3<Num>(azimuth, inclinaison, 1.0f);
-        }
+        Vector3 toSphericalCoordinatesNormalized() const;
 
     public: // Lenght operations
 
@@ -894,21 +658,7 @@ namespace APro
          *  @return The old lenght of the vector.
         **/
         ////////////////////////////////////////////////////////////
-        Num normalize()
-        {
-            float len = (float) lenght();
-            if(len > 1e-6f)
-            {
-                *this *= 1.f / len;
-                return len;
-            }
-            else
-            {
-                aprodebug("Vector lenght is too short ! Normalization failed.");
-                set(1,0,0);
-                return 0;
-            }
-        }
+        Real normalize();
 
         ////////////////////////////////////////////////////////////
         /** @brief Returns a normalized copy of this vector.
@@ -917,10 +667,10 @@ namespace APro
          *  and error message is printed.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num>& normalized() const
+        Vector3& normalized() const
         {
-            Vector3<Num> copy = *this;
-            float oldLen = copy.normalize();
+            Vector3 copy = *this;
+            Real oldLen = copy.normalize();
             aproassert(oldLen > 0, "Cannot normalize vector !");
             return copy;
         }
@@ -936,23 +686,7 @@ namespace APro
          *  with given lenght is producted, but 0 is returned.
         **/
         ////////////////////////////////////////////////////////////
-        Num scale(const Num& new_lenght)
-        {
-            Num len = squaredLenght();
-            if((float) len < 1e-6f)
-            {
-                aprodebug("Vector lenght is too short ! Scale failed.");
-                set(new_lenght, 0,0);
-                return 0;
-            }
-            else
-            {
-                len = Sqrt(len);
-                Num scalar = new_lenght / len;
-                *this *= scalar;
-                return len;
-            }
-        }
+        Real scale(const Real& new_lenght);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a scaled copy of this vector.
@@ -961,12 +695,7 @@ namespace APro
          *  with given lenght is producted.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> scaled(const Num& new_lenght) const
-        {
-            Vector3<Num> copy = *this;
-            copy.scale(new_lenght);
-            return copy;
-        }
+        Vector3 scaled(const Real& new_lenght) const;
 
     public: // Boolean operations
 
@@ -975,40 +704,28 @@ namespace APro
          *  the given epsilon.
         **/
         ////////////////////////////////////////////////////////////
-        bool isNormalized(float epsilon = 1e-6f) const
-        {
-            return abs_(squaredLenght() - 1) <= epsilon;
-        }
+        bool isNormalized(Real epsilon = 1e-6f) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Tests if the length of this vector is zero, up to
          *  the given epsilon.
         **/
         ////////////////////////////////////////////////////////////
-        bool isZero(float epsilon = 1e-6f) const
-        {
-            return abs_(squaredLenght) <= epsilon;
-        }
+        bool isZero(Real epsilon = 1e-6f) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Tests if this vector is perpendicular to given
          *  one.
         **/
         ////////////////////////////////////////////////////////////
-        bool isPerpendicular(const Vector3<Num>& other, float epsilon = 1e-3f) const
-        {
-            return abs_(dot(other)) <= epsilon * length() * other.length();
-        }
+        bool isPerpendicular(const Vector3& other, Real epsilon = 1e-3f) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Tells if the points p1, p2 and p3 lie on a straight
          *  line, up to the given epsilon.
         **/
         ////////////////////////////////////////////////////////////
-        static bool AreCollinear(const Vector3<Num>& p1, const Vector3<Num>& p2, const Vector3<Num>& p3, float espilon = 1e-4f)
-        {
-            return (p2-p1).cross(p3-p1).squaredLenght() <= epsilon;
-        }
+        static bool AreCollinear(const Vector3& p1, const Vector3& p2, const Vector3& p3, Real espilon = 1e-4f);
 
     public: // others
 
@@ -1022,20 +739,14 @@ namespace APro
          *  of a projection of one vector to another.
         **/
         ////////////////////////////////////////////////////////////
-        Num dot(const Vector3<Num>& other) const
-        {
-            return x * other.x + y * other.y + z * other.z;
-        }
+        Real dot(const Vector3& other) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Computes an absoluted dot product between this
          *  vector and given one.
         **/
         ////////////////////////////////////////////////////////////
-        Num dotabs(const Vector3<Num>& other) const
-        {
-            return *this.absoluted().dot(other.absoluted());
-        }
+        Real dotabs(const Vector3& other) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Coputes the cross product between this vector and
@@ -1046,13 +757,7 @@ namespace APro
          *  both vectors.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> cross(const Vector3<Num>& other) const
-        {
-            return Vector3<Num>(
-                y * other.z - z * other.y,
-                z * other.x - x * other.z,
-                x * other.y - y * other.x);
-        }
+        Vector3 cross(const Vector3& other) const;
 
     public: // Perpendicular
 
@@ -1064,15 +769,7 @@ namespace APro
          *  null is returned instead.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> perpendicular(const Vector3<Num>& hint) const
-        {
-            Vector3<Num> v = this->cross(hint);
-            Num len = v.normalize();
-            if(len == 0)
-                return Vector3<Num>(0,0,0);
-            else
-                return v;
-        }
+        Vector3 perpendicular(const Vector3& hint) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Computes another normalized direction vector that is
@@ -1085,12 +782,7 @@ namespace APro
          *  forms a right-handed normalized 3D basis.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> anotherPerpendicular(const Vector3<Num>& hint) const
-        {
-            Vector3<Num> first = this->perpendicular(hint);
-            Vector3<Num> v = this->cross(first);
-            return v.normalized();
-        }
+        Vector3 anotherPerpendicular(const Vector3& hint) const;
 
     public: // Reflect / Refract
 
@@ -1104,10 +796,7 @@ namespace APro
          *  @see refract()
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> reflect(const Vector3<Num>& normal) const
-        {
-            return 2 * *this->projectToNorm(normal) - *this;
-        }
+        Vector3 reflect(const Vector3& normal) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Refracts this vector about a plane with the given
@@ -1129,16 +818,7 @@ namespace APro
          *  @see reflect()
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> refract(const Vector3<Num>& normal, float negativSideRefractionIndex, float positiveSideRefractionIndex) const
-        {
-            // Duplicate from Vector2::refract
-            float n = negativSideRefractionIndex / positiveSideRefractionIndex;
-            float cosI = this->dotProduct(normal);
-            float sinT2 = n*n*(1.f - cosI * cosI);
-            if(sinT2 > 1.f)
-                return (-(*this)).reflect(normal);
-            return n * *this - (n + Sqrt(1.f - sinT2)) * normal;
-        }
+        Vector3 refract(const Vector3& normal, Real negativSideRefractionIndex, Real positiveSideRefractionIndex) const;
 
     public: // Projection
 
@@ -1153,10 +833,7 @@ namespace APro
          *  @see projectToNorm().
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> projectTo(const Vector3<Num>& direction) const
-        {
-            return direction * this->dot(direction) / direction.squaredLenght();
-        }
+        Vector3 projectTo(const Vector3& direction) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Projects this vector onto the given normalized
@@ -1168,10 +845,7 @@ namespace APro
          *  @see projectTo()
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> projectToNorm(const Vector3<Num>& direction) const
-        {
-            return direction * this->dot(direction);
-        }
+        Vector3 projectToNorm(const Vector3& direction) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Computes the angle between this vector and the
@@ -1185,16 +859,7 @@ namespace APro
          *  @see angleBetweenNorm()
         **/
         ////////////////////////////////////////////////////////////
-        Num angleBetween(const Vector3<Num>& other) const
-        {
-            float cosa = (float) (dot(other) / Sqrt(squaredLenght() * other.squaredLenght()));
-            if (cosa >= 1.f)
-                return (Num) 0.f;
-            else if (cosa <= -1.f)
-                return (Num) Math::PI_32;
-            else
-                return (Num) ACos(cosa);
-        }
+        Radian angleBetween(const Vector3& other) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Returns the angle between this vector and the
@@ -1208,16 +873,7 @@ namespace APro
          *  @see angleBetween()
         **/
         ////////////////////////////////////////////////////////////
-        Num angleBetweenNorm(const Vector3<Num>& normalizedVector) const
-        {
-            float cosa = (float) dot(other);
-            if (cosa >= 1.f)
-                return (Num) 0.f;
-            else if (cosa <= -1.f)
-                return (Num) Math::PI_32;
-            else
-                return (Num) ACos(cosa);
-        }
+        Radian angleBetweenNorm(const Vector3& normalizedVector) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Breaks this vector down into parallel and perpendicular
@@ -1231,11 +887,7 @@ namespace APro
 		 *  vector that is perpendicular to the given direction vector.
         **/
         ////////////////////////////////////////////////////////////
-        void decompose(const Vector3<Num>& direction, Vector3<Num>& outParallel, Vector3<Num>& outPerpendicular) const
-        {
-            outParallel = this>projectToNorm(direction);
-            outPerpendicular = *this - outParallel;
-        }
+        void decompose(const Vector3& direction, Vector3& outParallel, Vector3& outPerpendicular) const;
 
     public: // Linear interpolation
 
@@ -1249,20 +901,13 @@ namespace APro
          *  @return (b, 0) returns this vector, (b, 1) returns b.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3<Num> linearInterpolate(const Vector3<Num>& b, float t) const
-        {
-            Clamp(t, 0.0f, 1.0f);
-            return (1.f - t) * *this + t * b;
-        }
+        Vector3 linearInterpolate(const Vector3& b, Real t) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Identical to a.linearInterpolate(b, t).
         **/
         ////////////////////////////////////////////////////////////
-        static Vector3<Num> LinearInterpolate(const Vector3<Num>& a, const Vector3<Num>& b, float t)
-        {
-            return a.linearInterpolate(b, t);
-        }
+        static Vector3 LinearInterpolate(const Vector3& a, const Vector3& b, Real t);
 
     public: // Ortho
 
@@ -1274,11 +919,7 @@ namespace APro
          *  vector b is modified to be perpendicular to a.
         **/
         ////////////////////////////////////////////////////////////
-        static void Orthogonalize(const Vector3<Num>& a, Vector3<Num>& b)
-        {
-            if (!a.isZero())
-                b -= b.projectTo(a);
-        }
+        static void Orthogonalize(const Vector3& a, Vector3& b);
 
         ////////////////////////////////////////////////////////////
         /** @brief Makes the given vectors linearly independent.
@@ -1290,39 +931,21 @@ namespace APro
          *  The vector c is adjusted to be perpendicular to a and b.
         **/
         ////////////////////////////////////////////////////////////
-        static void Orthogonalize(const Vector3<Num>& a, Vector3<Num>& b, Vector3<Num>& c)
-        {
-            if (!a.isZero())
-            {
-                b -= b.projectTo(a);
-                c -= c.projectTo(a);
-            }
-
-            if (!b.IsZero())
-                c -= c.projectTo(b);
-        }
+        static void Orthogonalize(const Vector3& a, Vector3& b, Vector3& c);
 
         ////////////////////////////////////////////////////////////
         /** @brief Returns true if the given vectors are orthogonal
          *  to each other.
         **/
         ////////////////////////////////////////////////////////////
-        static bool AreOrthogonal(const Vector3<Num>& a, const Vector3<Num>& b, float epsilon = 1e-3f)
-        {
-            return a.isPerpendicular(b, epsilon);
-        }
+        static bool AreOrthogonal(const Vector3& a, const Vector3& b, Real epsilon = 1e-3f);
 
         ////////////////////////////////////////////////////////////
         /** @brief Returns true if the given vectors are orthogonal
          *  to each other.
         **/
         ////////////////////////////////////////////////////////////
-        static bool AreOrthogonal(const Vector3<Num>& a, const Vector3<Num>& b, const Vector3<Num>& c, float epsilon = 1e-3f)
-        {
-            return a.isPerpendicular(b, epsilon) &&
-                   a.isPerpendicular(c, epsilon) &&
-                   b.isPerpendicular(c, epsilon);
-        }
+        static bool AreOrthogonal(const Vector3& a, const Vector3& b, const Vector3& c, Real epsilon = 1e-3f);
 
         ////////////////////////////////////////////////////////////
         /** @brief Makes the given vectors linearly independent and
@@ -1337,16 +960,7 @@ namespace APro
          *  if they can be orthonormalized.
         **/
         ////////////////////////////////////////////////////////////
-        static bool Orthonormalize(Vector3<Num>& a, Vector3<Num>& b)
-        {
-            if(a.isZero() || b.isZero())
-                return false;
-
-            a.normalize();
-            b -= b.projectTo(a);
-            b.normalize();
-            return true;
-        }
+        static bool Orthonormalize(Vector3& a, Vector3& b);
 
         ////////////////////////////////////////////////////////////
         /** @brief Makes the given vectors linearly independent and
@@ -1364,55 +978,55 @@ namespace APro
          *  if they can be orthonormalized.
         **/
         ////////////////////////////////////////////////////////////
-        static bool Orthonormalize(Vector3<Num>& a, Vector3<Num>& b, Vector3<Num>& c)
-        {
-            if(a.isZero() || b.isZero() || c.isZero())
-                return false;
-
-            a.normalize();
-            b -= b.projectTo(a);
-            b.normalize();
-            c -= c.projectTo(a);
-            c -= c.projectTo(b);
-            c.normalize();
-            return true;
-        }
+        static bool Orthonormalize(Vector3& a, Vector3& b, Vector3& c);
 
         ////////////////////////////////////////////////////////////
         /** @brief Returns true if the given vectors are orthogonal
          *  to each other and normalized.
         **/
         ////////////////////////////////////////////////////////////
-        static bool AreOrthonormal(const Vector3<Num>& a, const Vector3<Num>& b, float epsilon = 1e-3f)
-        {
-            return a.isPerpendicular(b, epsilon) && a.isNormalized(epsilon*epsilon) && b.isNormalized(epsilon*epsilon);
-        }
+        static bool AreOrthonormal(const Vector3& a, const Vector3& b, Real epsilon = 1e-3f);
 
         ////////////////////////////////////////////////////////////
         /** @brief Returns true if the given vectors are orthogonal
          *  to each other and normalized.
         **/
         ////////////////////////////////////////////////////////////
-        static bool AreOrthonormal(const Vector3<Num>& a, const Vector3<Num>& b, const Vector3<Num>& c, float epsilon = 1e-3f)
-        {
-            return a.isPerpendicular(b, epsilon) &&
-                   a.isPerpendicular(c, epsilon) &&
-                   b.isPerpendicular(c, epsilon) &&
-                   a.isNormalized(epsilon*epsilon) &&
-                   b.isNormalized(epsilon*epsilon) &&
-                   c.isNormalized(epsilon*epsilon);
-        }
+        static bool AreOrthonormal(const Vector3& a, const Vector3& b, const Vector3& c, Real epsilon = 1e-3f);
 
-        inline friend Console& operator << (Console& c, const Vector3<Num>& v)
+    public: // Other
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return true if every entries are finite.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool isFinite() const;
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the Vector2 part of this Vector3.
+        **/
+        ////////////////////////////////////////////////////////////
+        Vector2& toVec2();
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the Vector2 part of this Vector3.
+        **/
+        ////////////////////////////////////////////////////////////
+        const Vector2& toVec2() const;
+
+        inline friend Console& operator << (Console& c, const Vector3& v)
         {
-            c << "Vector3<" << className<Num>() << ">( " << v.x << ", " << v.y << ", " << v.z << " )";
+            c << "Vector3( " << v.x << ", " << v.y << ", " << v.z << " )";
             return c;
         }
-    };
 
-    typedef Vector3<float> Vector3F;
-    typedef Vector3<double> Vector3D;
-    typedef Vector3<unit_t> Vector3U;
+        static const Vector3 Zero;
+        static const Vector3 UnitX;
+        static const Vector3 UnitY;
+        static const Vector3 UnitZ;
+        static const Vector3 Nan;
+        static const Vector3 Inf;
+    };
 }
 
 #endif

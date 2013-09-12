@@ -13,9 +13,13 @@
 **/
 #include "Maths.h"
 #include <math.h>
+#include <limits.h>
 
 namespace APro
 {
+    const Math::_real_nan = std::numeric_limits<Real>::quiet_NaN();
+    const Math::_real_inf = std::numeric_limits<Real>::infinity();
+
     int Sqrt (int v)
     {
         return static_cast <int> (sqrt(static_cast<double>(v)));

@@ -27,19 +27,30 @@ namespace APro
         const float RADTODEG = 180.0f/PI_32;
         const double DEGTORAD64 = PI_64/180.0;
         const double RADTODEG64 = 180.0/PI_64;
+
+        static const _real_nan;
+        static const _real_inf;
     }
 
-    typedef double Real;
-
-    inline bool egal32(float a, float b, float error = 0.0f)
+    namespace Math
     {
-        return (a + error >= b) && (a - error <= b);
+        inline bool egal32(float a, float b, float error = 0.0f)
+        {
+            return (a + error >= b) && (a - error <= b);
+        }
+
+        inline bool egal64(double a, double b, double error = 0.0)
+        {
+            return (a + error >= b) && (a - error <= b);
+        }
+
+        bool equal_real(Real a, Real b, Real epsilon = 0.f)
+        {
+            return (a + epsilon >= b) && (a - epsilon <= b);
+        }
     }
 
-    inline bool egal64(double a, double b, double error = 0.0)
-    {
-        return (a + error >= b) && (a - error <= b);
-    }
+
 
     inline float toRadian32(float deg)
     {
@@ -202,6 +213,23 @@ namespace APro
             }
         }
     }
+
+    /// Returns true if the given value is not an inf or a nan.
+    template<typename T> bool IsFinite(T /*value*/) { return true; }
+
+    template<> bool IsFinite<float>(float f) { return (ReinterpretAsU32(f) << 1) < 0xFF000000u; }
+    template<> bool IsFinite<double>(double d) { return (ReinterpretAsU64(d) << 1) < 0xFFE0000000000000ULL; }
+    template<> bool IsFinite<long double>(long double value) { return IsFinite<double>((double)value); }
+
+    /// Returns true if the given value is a not-a-number.
+    bool IsNan(float f) { return (ReinterpretAsU32(f) << 1) > 0xFF000000u; }
+    bool IsNan(double d) { return (ReinterpretAsU64(d) << 1) > 0xFFE0000000000000ULL; }
+    bool IsNan(long double value) { return IsNan((double)value); }
+
+    /// Returns true if the given value is +inf or -inf.
+    bool IsInf(float f) { return (ReinterpretAsU32(f) << 1) == 0xFF000000u; }
+    bool IsInf(double d) { return (ReinterpretAsU64(d) << 1) == 0xFFE0000000000000ULL; }
+    bool IsInf(long double value) { return IsInf((double)value); }
 }
 
 #endif

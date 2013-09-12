@@ -24,17 +24,14 @@ namespace APro
     ////////////////////////////////////////////////////////////
     /** @class Vector2
      *  @ingroup Maths
-     *  @note You should use numerical types that have floating
-     *  points, as float, double, unit_t.
     **/
     ////////////////////////////////////////////////////////////
-    template<typename Numeric>
     class Vector2
     {
     public:
 
-        Numeric x;///< X value of this vector.
-        Numeric y;///< Y value of this vector.
+        Real x;///< X value of this vector.
+        Real y;///< Y value of this vector.
 
     public: // Constructors
 
@@ -43,59 +40,41 @@ namespace APro
          *  @details Set coordinates to (0,0).
         **/
         ////////////////////////////////////////////////////////////
-        Vector2() : x(0), y(0)
-        {
-
-        }
+        Vector2();
 
         ////////////////////////////////////////////////////////////
         /** @brief Copy Constructor.
          *  @details Set coordinates to (v.x, v.y).
         **/
         ////////////////////////////////////////////////////////////
-        Vector2(const Vector2<Numeric>& v) : x(v.x), y(v.y)
-        {
-
-        }
+        Vector2(const Vector2& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor.
          *  @details Set coordinates to (n1, n2).
         **/
         ////////////////////////////////////////////////////////////
-        Vector2(Numeric n1, Numeric n2) : x(n1), y(n2)
-        {
-
-        }
+        Vector2(const Real& n1, const Real& n2);
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor.
          *  @details Set coordinates to (n, n).
         **/
         ////////////////////////////////////////////////////////////
-        explicit Vector2(Numeric n) : x(n), y(n)
-        {
-
-        }
+        explicit Vector2(const Real& n);
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor from array.
          *  @details Set coordinates to (n[0], n[1]).
         **/
         ////////////////////////////////////////////////////////////
-        explicit Vector2(const Numeric n[2]) : x(n[0]), y(n[1])
-        {
-
-        }
+        explicit Vector2(const Real n[2]);
 
         ////////////////////////////////////////////////////////////
         /** @brief Destructor.
         **/
         ////////////////////////////////////////////////////////////
-        ~Vector2()
-        {
-
-        }
+        ~Vector2();
 
     public: // Swap function
 
@@ -105,19 +84,7 @@ namespace APro
          *  @note It use xor swapping.
         **/
         ////////////////////////////////////////////////////////////
-        inline void swap(Vector2<Numeric>& v)
-        {
-            /*
-            Vector2<Numeric> cpy(v);
-            x = v.x;
-            y = v.y;
-            v = cpy;
-            */
-
-            // Now using xor swap
-            swapNumeric_xor(x, v.x);
-            swapNumeric_xor(y, v.y);
-        }
+        inline void swap(Vector2& v);
 
     public: // Egality operators
 
@@ -125,53 +92,26 @@ namespace APro
         /** @brief Tell if 2 vectors are equals.
         **/
         ////////////////////////////////////////////////////////////
-        bool equals(const Vector2<Numeric>& v) const
-        {
-            return *this == v;
-        }
+        bool equals(const Vector2& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Tell if vector is equal to 2 given numerics.
         **/
         ////////////////////////////////////////////////////////////
-        bool equals(const Numeric& n1, const Numeric& n2) const
-        {
-            return x == n1 && y == n2;
-        }
+        bool equals(const Real& n1, const Real& n2) const;
 
-        bool operator == (const Vector2<Numeric>& v) const
-        {
-            return x == v.x && y == v.y;
-        }
-
-        bool operator != (const Vector2<Numeric>& v) const
-        {
-            return ! (*this == v);
-        }
+        bool operator == (const Vector2& v) const;
+        bool operator != (const Vector2& v) const;
 
     public: // Superior / inferior strict operators
 
-        bool operator > (const Vector2<Numeric>& v) const
-        {
-            return x > v.x && y > v.y;
-        }
-
-        bool operator < (const Vector2<Numeric>& v) const
-        {
-            return x < v.x && y < v.y;
-        }
+        bool operator > (const Vector2& v) const;
+        bool operator < (const Vector2& v) const;
 
     public: // Superior / inferior operators
 
-        bool operator >= (const Vector2<Numeric>& v) const
-        {
-            return x >= v.x && y >= v.y;
-        }
-
-        bool operator <= (const Vector2<Numeric>& v) const
-        {
-            return x <= v.x && y <= v.y;
-        }
+        bool operator >= (const Vector2& v) const;
+        bool operator <= (const Vector2& v) const;
 
     public: // Assignment operators
 
@@ -179,53 +119,22 @@ namespace APro
         /** @brief Set coordinates to given vector.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& set(const Vector2<Numeric>& v)
-        {
-            x = v.x;
-            y = v.y;
-
-            return *this;
-        }
+        Vector2& set(const Vector2& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Set coordinates to given pair.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& set(const Numeric& n1, const Numeric& n2)
-        {
-            x = n1;
-            y = n2;
-
-            return *this;
-        }
+        Vector2& set(const Real& n1, const Real& n2);
 
         ////////////////////////////////////////////////////////////
         /** @brief Set coordinates to given numeric.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& set(const Numeric& n)
-        {
-            x = n;
-            y = n;
+        Vector2& set(const Real& n);
 
-            return *this;
-        }
-
-        Vector2<Numeric>& operator = (const Vector2<Numeric>& v)
-        {
-            x = v.x;
-            y = v.y;
-
-            return *this;
-        }
-
-        Vector2<Numeric>& operator = (const Numeric& n)
-        {
-            x = n;
-            y = n;
-
-            return *this;
-        }
+        Vector2& operator = (const Vector2& v);
+        Vector2& operator = (const Real& n);
 
     public: // Floor / ceil
 
@@ -236,11 +145,7 @@ namespace APro
          *  attriutes it to this vector.
         **/
         ////////////////////////////////////////////////////////////
-        void floor(const Vector2<Num>& v)
-        {
-            if(v.x < x) x = v.x;
-            if(v.y < y) y = v.y;
-        }
+        void floor(const Vector2& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Ceil current vector with given one.
@@ -249,11 +154,7 @@ namespace APro
          *  attriutes it to this vector.
         **/
         ////////////////////////////////////////////////////////////
-        void ceil(const Vector2<Num>& v)
-        {
-            if(v.x > x) x = v.x;
-            if(v.y > y) y = v.y;
-        }
+        void ceil(const Vector2& v);
 
     public: // Addition
 
@@ -262,10 +163,7 @@ namespace APro
          *  @param v : Vector to add.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& add(const Vector2<Numeric>& v)
-        {
-            return *this += v;
-        }
+        Vector2& add(const Vector2& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Add a numeric to this one.
@@ -273,20 +171,14 @@ namespace APro
          *  @return (x + n, y + n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& add(const Numeric& n)
-        {
-            return *this += n;
-        }
+        Vector2& add(const Real& n);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector when adding given one.
          *  @param v : Vector to add.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> added(const Vector2<Numeric>& v) const
-        {
-            return *this + v;
-        }
+        Vector2 added(const Vector2& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector when adding given numeric.
@@ -294,36 +186,12 @@ namespace APro
          *  @return (x + n, y + n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> added(const Numeric& n) const
-        {
-            return *this += n;
-        }
+        Vector2 added(const Real& n) const;
 
-        Vector2<Numeric>& operator += (const Vector2<Numeric>& v)
-        {
-            x += v.x;
-            y += v.y;
-            return *this;
-        }
-
-        Vector2<Numeric>& operator += (const Numeric& n)
-        {
-            x += n;
-            y += n;
-            return *this;
-        }
-
-        Vector2<Numeric> operator + (const Vector2<Numeric>& v) const
-        {
-            return Vector2<Numeric>(x + v.x,
-                                    y + v.y);
-        }
-
-        Vector2<Numeric> operator + (const Numeric& n) const
-        {
-            return Vector2<Numeric>(x + n,
-                                    y + n);
-        }
+        Vector2& operator += (const Vector2& v);
+        Vector2& operator += (const Real& n);
+        Vector2  operator +  (const Vector2& v) const;
+        Vector2  operator +  (const Real& n)    const;
 
     public: // Substraction
 
@@ -332,10 +200,7 @@ namespace APro
          *  @param v : Vector to substract.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& substract(const Vector2<Numeric>& v)
-        {
-            return *this -= v;
-        }
+        Vector2& substract(const Vector2& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Substract a numeric to this one.
@@ -343,10 +208,7 @@ namespace APro
          *  @return (x - n, y - n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& substract(const Numeric& n)
-        {
-            return *this -= n;
-        }
+        Vector2& substract(const Real& n);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector if a substraction was applied
@@ -354,10 +216,7 @@ namespace APro
          *  @param v : Vector to substract.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> substracted(const Vector2<Numeric>& v) const
-        {
-            return *this - v;
-        }
+        Vector2 substracted(const Vector2& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector if a substraction was applied
@@ -365,36 +224,12 @@ namespace APro
          *  @param n : Numeric to substract.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> substracted(const Numeric& n) const
-        {
-            return *this - n;
-        }
+        Vector2 substracted(const Real& n) const;
 
-        Vector2<Numeric>& operator -= (const Vector2<Numeric>& v)
-        {
-            x -= v.x;
-            y -= v.y;
-            return *this;
-        }
-
-        Vector2<Numeric>& operator -= (const Numeric& n)
-        {
-            x -= n;
-            y -= n;
-            return *this;
-        }
-
-        Vector2<Numeric> operator - (const Vector2<Numeric>& v) const
-        {
-            return Vector2<Numeric>(x - v.x,
-                                    y - v.y);
-        }
-
-        Vector2<Numeric> operator - (const Numeric& n) const
-        {
-            return Vector2<Numeric>(x - n,
-                                    y - n);
-        }
+        Vector2& operator -= (const Vector2& v);
+        Vector2& operator -= (const Real& n);
+        Vector2  operator -  (const Vector2& v)  const;
+        Vector2  operator -  (const Real& n)     const;
 
     public: // Multiplication
 
@@ -403,10 +238,7 @@ namespace APro
          *  @param v : Vector to Multiply.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& multiply(const Vector2<Numeric>& v)
-        {
-            return *this *= v;
-        }
+        Vector2& multiply(const Vector2& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Multiply a numeric to this one.
@@ -414,10 +246,7 @@ namespace APro
          *  @return (x * n, y * n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& multiply(const Numeric& n)
-        {
-            return *this *= n;
-        }
+        Vector2& multiply(const Real& n);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector if a multiplication was applied
@@ -425,10 +254,7 @@ namespace APro
          *  @param v : Vector to Multiply.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> multiplied(const Vector2<Numeric>& v) const
-        {
-            return *this * v;
-        }
+        Vector2 multiplied(const Vector2& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector if a multiplication was applied
@@ -436,36 +262,12 @@ namespace APro
          *  @param n : Numeric to multiply.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> multiplied(const Numeric& n) const
-        {
-            return *this * n;
-        }
+        Vector2 multiplied(const Real& n) const;
 
-        Vector2<Numeric>& operator *= (const Vector2<Numeric>& v)
-        {
-            x *= v.x;
-            y *= v.y;
-            return *this;
-        }
-
-        Vector2<Numeric>& operator *= (const Numeric& n)
-        {
-            x *= n;
-            y *= n;
-            return *this;
-        }
-
-        Vector2<Numeric> operator * (const Vector2<Numeric>& v) const
-        {
-            return Vector2<Numeric>(x * v.x,
-                                    y * v.y);
-        }
-
-        Vector2<Numeric> operator * (const Numeric& n) const
-        {
-            return Vector2<Numeric>(x * n,
-                                    y * n);
-        }
+        Vector2& operator *= (const Vector2& v);
+        Vector2& operator *= (const Real& n);
+        Vector2  operator *  (const Vector2& v) const;
+        Vector2  operator *  (const Real& n)    const;
 
     public: // Division
 
@@ -474,10 +276,7 @@ namespace APro
          *  @param v : Vector to divide.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& divide(const Vector2<Numeric>& v)
-        {
-            return *this /= v;
-        }
+        Vector2& divide(const Vector2& v);
 
         ////////////////////////////////////////////////////////////
         /** @brief Divide a numeric to this one.
@@ -485,10 +284,7 @@ namespace APro
          *  @return (x / n, y / n)
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& divide(const Numeric& n)
-        {
-            return *this /= n;
-        }
+        Vector2& divide(const Real& n);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector if a division was applied
@@ -496,10 +292,7 @@ namespace APro
          *  @param v : Vector to divide.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> divided(const Vector2<Numeric>& v) const
-        {
-            return *this / v;
-        }
+        Vector2 divided(const Vector2& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the vector if a division was applied
@@ -507,36 +300,13 @@ namespace APro
          *  @param n : Numeric to divide.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> divided(const Numeric& n) const
-        {
-            return *this / n;
-        }
+        Vector2 divided(const Real& n) const;
 
-        Vector2<Numeric>& operator /= (const Vector2<Numeric>& v)
-        {
-            x /= v.x;
-            y /= v.y;
-            return *this;
-        }
+        Vector2& operator /= (const Vector2& v);
+        Vector2& operator /= (const Real& n);
 
-        Vector2<Numeric>& operator /= (const Numeric& n)
-        {
-            x /= n;
-            y /= n;
-            return *this;
-        }
-
-        Vector2<Numeric> operator / (const Vector2<Numeric>& v) const
-        {
-            return Vector2<Numeric>(x / v.x,
-                                    y / v.y);
-        }
-
-        Vector2<Numeric> operator / (const Numeric& n) const
-        {
-            return Vector2<Numeric>(x / n,
-                                    y / n);
-        }
+        Vector2 operator / (const Vector2& v) const;
+        Vector2 operator / (const Real& n)    const;
 
     public: // Access
 
@@ -546,10 +316,7 @@ namespace APro
          *  for any value of i superior to 0.
         **/
         ////////////////////////////////////////////////////////////
-        const Numeric& at(size_t i) const
-        {
-            return i == 0 ? x : y;
-        }
+        const Real& at(size_t i) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return either x or y.
@@ -557,109 +324,63 @@ namespace APro
          *  for any value of i superior to 0.
         **/
         ////////////////////////////////////////////////////////////
-        Numeric& at(size_t i)
-        {
-            return i == 0 ? x : y;
-        }
+        Real& at(size_t i);
 
-        const Numeric& operator[](size_t i) const
-        {
-            return i == 0 ? x : y;
-        }
-
-        Numeric& operator[](size_t i)
-        {
-            return i == 0 ? x : y;
-        }
+        const Real& operator[](size_t i) const;
+        Real& operator[](size_t i);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a pointer to data.
         **/
         ////////////////////////////////////////////////////////////
-        const Numeric* ptr() const
-        {
-            return &x;
-        }
+        const Real* ptr() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a pointer to data.
         **/
         ////////////////////////////////////////////////////////////
-        Numeric* ptr()
-        {
-            return &x;
-        }
+        Real* ptr();
 
     public: // Absolute, Negation
 
-        inline Vector2<Numeric> operator + () const
-        {
-            return *this;
-        }
-
-        inline Vector2<Numeric> operator - () const
-        {
-            return Vector2<Numeric>(-x, -y);
-        }
+        inline Vector2 operator + () const;
+        inline Vector2 operator - () const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Negate coordinates and return the vector.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& negate()
-        {
-            x = -x;
-            y = -y;
-            return -this;
-        }
+        Vector2& negate();
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a vector from negated one.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> negated() const
-        {
-            return Vector2<Numeric>(-x, -y);
-        }
+        Vector2 negated() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a vector from abs coordinates.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> absoluted() const
-        {
-            return Vector2<Numeric>(abs_(x), abs_(y));
-        }
+        Vector2 absoluted() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Absolute coordinates of this vector and return it.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& absolute()
-        {
-            x = abs_(x);
-            y = abs_(y);
-            return *this;
-        }
+        Vector2& absolute();
 
         ////////////////////////////////////////////////////////////
         /** @brief Invert coordinates.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& invert()
-        {
-            swapNumeric(x, y);
-            return *this;
-        }
+        Vector2& invert();
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a vector with inverted coordinates.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& inverted() const
-        {
-            return Vector2<Numeric>(y, x);
-        }
+        Vector2& inverted() const;
 
     public: // Lenght
 
@@ -667,19 +388,13 @@ namespace APro
         /** @brief Return computed lenght of this vector.
         **/
         ////////////////////////////////////////////////////////////
-        Numeric lenght() const
-        {
-            return Sqrt(x * x + y * y);
-        }
+        Real lenght() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return squared computed lenght of this vector.
         **/
         ////////////////////////////////////////////////////////////
-        Numeric squaredLenght() const
-        {
-            return x * x + y * y;
-        }
+        Real squaredLenght() const;
 
     public: // Distance
 
@@ -687,29 +402,19 @@ namespace APro
         /** @brief Return the distance between 2 Vectors.
         **/
         ////////////////////////////////////////////////////////////
-        Numeric distance(const Vector2<Numeric>& v) const
-        {
-            return (*this - v).lenght();
-        }
+        Real distance(const Vector2& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the squared distance between 2 vectors.
         **/
         ////////////////////////////////////////////////////////////
-        Numeric squaredDistance(const Vector2<Numeric>& v) const
-        {
-            return (*this - v).squaredLenght();
-        }
+        Real squaredDistance(const Vector2& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the point at middle between 2 Vectors.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> midPoint(const Vector2<Numeric>& v) const
-        {
-            return Vector2<Numeric>((x + v.x) * 0.5f,
-                                    (y + v.y) * 0.5f);
-        }
+        Vector2 midPoint(const Vector2& v) const;
 
     public: // Polar coordinates
 
@@ -717,65 +422,37 @@ namespace APro
         /** @brief Set coordinates from polar ones.
         **/
         ////////////////////////////////////////////////////////////
-        void setFromPolarCoordinates(const Numeric& theta, const Numeric& len)
-        {
-            x = Cos(theta) * len;
-            y = Sin(theta) * len;
-        }
+        void setFromPolarCoordinates(const Radian& theta, const Real& len);
 
         ////////////////////////////////////////////////////////////
         /** @brief Set coordinates from polar vector.
         **/
         ////////////////////////////////////////////////////////////
-        void setFromPolarCoordinates(const Vector2<Numeric>& polar)
-        {
-            setFromPolarCoordinate(polar.x, polar.y);
-        }
+        void setFromPolarCoordinates(const Vector2& polar);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a vector from polars coordinates.
         **/
         ////////////////////////////////////////////////////////////
-        static Vector2<Numeric> FromPolarCoordinates(const Numeric& theta, const Numeric& len)
-        {
-            Vector2<Numeric> euclidean;
-            euclidean.setFromPolarCoordinates(theta, len);
-            return euclidean;
-        }
+        static Vector2 FromPolarCoordinates(const Radian& theta, const Real& len);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a vector from polar vector.
         **/
         ////////////////////////////////////////////////////////////
-        static Vector2<Numeric> FromPolarCoordinates(const Vector2<Numeric>& polar)
-        {
-            return Vector2<Numeric>::FromPolarCoordinates(polar.x, polar.y);
-        }
+        static Vector2 FromPolarCoordinates(const Vector2& polar);
 
         ////////////////////////////////////////////////////////////
         /** @brief Get polar coordinates from euclidean ones.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> toPolarCoordinates() const
-        {
-            Numeric l = lenght();
-            if(l > 1e-4f)
-                return Vector2<Numeric>(ATan2(y, x), l);
-            else
-                return Vector2<Numeric>::Zero();
-        }
+        Vector2 toPolarCoordinates() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the angle in polar coordinates.
         **/
         ////////////////////////////////////////////////////////////
-        Numeric aimedAngle() const
-        {
-            if(!isZero())
-                return ATan2(y, x);
-            else
-                return 0;
-        }
+        Radian aimedAngle() const;
 
     public: // Other
 
@@ -783,59 +460,33 @@ namespace APro
         /** @brief Return the dot product with another vector.
         **/
         ////////////////////////////////////////////////////////////
-        Numeric dotProduct(const Vector2<Numeric>& v) const
-        {
-            return (x * v.x) + (y * v.y);
-        }
+        Real dotProduct(const Vector2& v) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the cross product with another vector.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> crossProduct(const Vector2<Numeric>& v) const
-        {
-            return x * v.y - y * v.x;
-        }
+        Vector2 crossProduct(const Vector2& v) const;
 
         ////////////////////////////////////////////////////////////
-        /** @brief Normalise the vector.
+        /** @brief Normalize the vector.
          *  @return Old lenght of the vector.
         **/
         ////////////////////////////////////////////////////////////
-        Numeric normalise()
-        {
-            Numeric l = lenght();
-
-            if((double) l > 1e-08)
-            {
-                Numeric invLenght = 1 / l;
-                x *= invLenght;
-                y *= invLenght;
-            }
-
-            return l;
-        }
+        Real normalize();
 
         ////////////////////////////////////////////////////////////
-        /** @brief Return a normalised copy of this vector.
+        /** @brief Return a normalized copy of this vector.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> normalised() const
-        {
-            Vector2<Numeric> v(*this);
-            v.normalise();
-            return v;
-        }
+        Vector2 normalized() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a vector perpendicular to this one,
          *  after a 90 counter clock-wise rotation.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> perpendicular() const
-        {
-            return Vector2<Numeric>(-y, x);
-        }
+        Vector2 perpendicular() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return this vector reflected about a plane with
@@ -847,10 +498,7 @@ namespace APro
          *  @see refract()
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> reflect(const Vector2<Numeric>& normal) const
-        {
-            return 2.f * this->projectToNorm(normal) - this;
-        }
+        Vector2 reflect(const Vector2& normal) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Refracts this vector about a plane with the given
@@ -872,15 +520,7 @@ namespace APro
 		 *  @see reflect()
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> refract(const Vector2<Numeric>& normal, float negativSideRefractionIndex, float positiveSideRefractionIndex) const
-        {
-            float n = negativSideRefractionIndex / positiveSideRefractionIndex;
-            float cosI = this->dotProduct(normal);
-            float sinT2 = n*n*(1.f - cosI * cosI);
-            if(sinT2 > 1.f)
-                return (-(*this)).reflect(normal);
-            return n * *this - (n + Sqrt(1.f - sinT2)) * normal;
-        }
+        Vector2 refract(const Vector2& normal, Real negativSideRefractionIndex, Real positiveSideRefractionIndex) const;
 
     public: // Rotation
 
@@ -892,13 +532,7 @@ namespace APro
          *  upwards.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& rotate90CW()
-        {
-            Numeric tmp = x;
-            x = y;
-            y = -tmp;
-            return *this;
-        }
+        Vector2& rotate90CW();
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a vector perpendicular to this one (rotated
@@ -907,10 +541,7 @@ namespace APro
          *  @note Identical to perpendicular().
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> rotated90CW() const
-        {
-            return perpendicular();
-        }
+        Vector2 rotated90CW() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Rotates this vector 90 degrees Counter clock-wise.
@@ -920,23 +551,14 @@ namespace APro
          *  upwards.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric>& rotate90CCW()
-        {
-            Numeric tmp = x;
-            x = -y;
-            y = tmp;
-            return *this;
-        }
+        Vector2& rotate90CCW();
 
         ////////////////////////////////////////////////////////////
         /** @brief Return a vector perpendicular to this one (rotated
          *  90 degrees clock-wise).
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> rotated90CCW() const
-        {
-            return Vector2<Numeric>(-y, x);
-        }
+        Vector2 rotated90CCW() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Tell if given triangle a,b,c is oriented Counter
@@ -946,10 +568,7 @@ namespace APro
 		 *  of the directed line AB.
         **/
         ////////////////////////////////////////////////////////////
-        static bool isOrientedCCW(const Vector2<Numeric>& a, const Vector2<Numeric>& b, const Vector2<Numeric>& c)
-        {
-            return (a.x-c.x)*(b.y-c.y) - (a.y-c.y)*(b.x-c.x) >= 0.f;
-        }
+        static bool isOrientedCCW(const Vector2& a, const Vector2& b, const Vector2& c);
 
     public: // Projection
 
@@ -962,10 +581,7 @@ namespace APro
          *  process so you can pass unnormalized ones.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> projectTo(const vector2<Numeric>& direction) const
-        {
-            return direction * this->dotProduct(direction) / direction.squaredLenght();
-        }
+        Vector2 projectTo(const Vector2& direction) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Project this vector onto the normalized direction
@@ -975,10 +591,7 @@ namespace APro
          *  vector onto. This vector must be normalized.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> projectToNorm(const Vector2<Numeric>& direction) const
-        {
-            return direction * this->dotProduct(direction);
-        }
+        Vector2 projectToNorm(const Vector2& direction) const;
 
     public: // Angle
 
@@ -992,10 +605,7 @@ namespace APro
          *  instead.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> angleBetween(const Vector2<Numeric>& other) const
-        {
-            return ACos(dotProduct(other)) / Sqrt(squaredLenght() * other.squaredLenght());
-        }
+        Vector2 angleBetween(const Vector2& other) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the angle between this vector and the given
@@ -1004,10 +614,7 @@ namespace APro
          *  @note This vector must be normalized to call this function.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> angleBetweenNorm(const Vector2<Numeric>& other) const
-        {
-            return ACos(dotProduct(other));
-        }
+        Vector2 angleBetweenNorm(const Vector2& other) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Breaks this vector down into parallel and
@@ -1022,11 +629,7 @@ namespace APro
          *  vector that is perpendicular to given direction.
         **/
         ////////////////////////////////////////////////////////////
-        void decompose(const Vector2<Numeric>& direction, Vector2<Numeric>& outParalell, Vector2<Numeric>& outPerpendicular) const
-        {
-            outParalell = this->dotProduct(direction) * direction;
-            outPerpendicular = *this - outParalell;
-        }
+        void decompose(const Vector2& direction, Vector2& outParalell, Vector2& outPerpendicular) const;
 
     public: // Interpolation
 
@@ -1040,20 +643,13 @@ namespace APro
          *  @return (b, 0) returns this vector, (b, 1) returns b.
         **/
         ////////////////////////////////////////////////////////////
-        Vector2<Numeric> linearInterpolate(const Vector2<Numeric>& b, float t) const
-        {
-            Clamp(t, 0.0f, 1.0f);
-            return (1.f - t) * *this + t * b;
-        }
+        Vector2 linearInterpolate(const Vector2& b, Real t) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Identical to a.linearInterpolate(b, t).
         **/
         ////////////////////////////////////////////////////////////
-        static Vector2<Numeric> LinearInterpolate(const Vector2<Numeric>& a, const Vector2<Numeric>& b, float t)
-        {
-            return a.linearInterpolate(b, t);
-        }
+        static Vector2 LinearInterpolate(const Vector2& a, const Vector2& b, Real t);
 
     public: // Orthogonality
 
@@ -1066,21 +662,13 @@ namespace APro
          *  @note none of the given vectors can be 0.
         **/
         ////////////////////////////////////////////////////////////
-        static void Orthogonalize(const Vector2<Numeric>& a, Vector2<Numeric>& b)
-        {
-            if(a.isZero()) return;
-
-            b -= a.dotProduct(b) / a.lenght() * a;
-        }
+        static void Orthogonalize(const Vector2& a, Vector2& b);
 
         ////////////////////////////////////////////////////////////
         /** @brief Tell if 2 vectors are perpendicular.
         **/
         ////////////////////////////////////////////////////////////
-        static bool AreOrthogonal(const Vector2<Numeric>& a, const Vector2<Numeric>& b, float epsilon = 1e-3f)
-        {
-            return a.isPerpendicular(b, epsilon);
-        }
+        static bool AreOrthogonal(const Vector2& a, const Vector2& b, Real epsilon = 1e-3f);
 
         ////////////////////////////////////////////////////////////
         /** @brief Makes given vectors linearly independent and
@@ -1088,26 +676,7 @@ namespace APro
          *  @see Orthogonalize().
         **/
         ////////////////////////////////////////////////////////////
-        static void Orthonormalize(Vector2<Numeric>& a, Vector2<Numeric>& b)
-        {
-            a.normalise();
-            b -= a.dotProduct(b) * a;
-        }
-
-    protected: // SortByPolarAngle class
-
-        class SortByPolarAngle
-        {
-        public:
-            Vector2<Numeric> perspective;
-
-            int operator () (const Vector2<Numeric>& a, const Vector2<Numeric>& b) const
-            {
-                Vector2<Numeric> A = a - perspective;
-                Vector2<Numeric> B = b - perspective;
-                return A.x*B.y - B.x*A.y;
-            }
-        };
+        static void Orthonormalize(Vector2& a, Vector2& b);
 
     public: // Convex Hull Computing
 
@@ -1116,16 +685,7 @@ namespace APro
          *  set.
         **/
         ////////////////////////////////////////////////////////////
-        static void ConvexHull(const Vector2<Numeric>* pointArray, size_t numPoints, Array<Vector2<Numeric> >& outConvexHull)
-        {
-            outConvexHull.clear();
-            if(numPoints == 0)
-                return;
-
-            outConvexHull.append(pointArray, numPoints);
-            int convexhullsize = ConvexHullInPlace(&outConvexHull[0], outConvexHull.getSize());
-            outConvexHull.resize((size_t) convexhullsize);
-        }
+        static void ConvexHull(const Vector2* pointArray, size_t numPoints, Array<Vector2>& outConvexHull);
 
         ////////////////////////////////////////////////////////////
         /** @brief Computes the 2D convex hull of the given point
@@ -1133,84 +693,7 @@ namespace APro
          *  @return The number of points in the convex hull.
         **/
         ////////////////////////////////////////////////////////////
-        static int ConvexHullInPlace(Vector2<Numeric>* pointArray, size_t nPoints)
-        {
-            if(nPoints <= 3)
-                return nPoints;
-
-            // Lowest point of the set
-            Vector2<Numeric>* lowest = &pointArray[0];
-            for(int i = 1; i < nPoints; ++i)
-            {
-                if(lowest->y > pointArray[i].y)
-                    lowest = &pointArray[i];
-            }
-
-            lowest->swap(pointArray[0]);
-            SortByPolarAngle pred;
-            pred.perspective = pointArray[0];
-            quicksort(pointArray + 1, nPoints - 1, pred);
-            int nPointsInHull = 2;
-            for(int i = 2; i < nPoints; ++i)
-            {
-                Vector2<Numeric> lineA = pointArray[nPointsInHull - 1] - pointArray[nPointsInHull - 2];
-                Vector2<Numeric> lineB = pointArray[i] - pointArray(nPointsInHull - 2);
-                Numeric lineAlen = lineA.lenght();
-                Numeric lineBlen = lineB.lenght();
-                bool dropLastPointFromHull = false;
-                if(lineAlen >= 1e-5f)
-                    lineA /= Sqrt(lineAlen);
-                else
-                    dropLastPointFromHull = true;
-                if(lineBlen >= 1e-5f)
-                    lineB /= Sqrt(lineBlen);
-
-                Vector2<Numeric> normal(-lineA.y, lineA.x);
-                if(dropLastPointFromHull || normal.dotProduct(lineB) > 0.f || (normal.dotProduct(lineB) > -1e-4f && lineBlen >= lineAlen))
-                {
-                    if(nPointsInHull > 2)
-                    {
-                        --nPointsInHull;
-                        --i;
-                    }
-                    else
-                    {
-                        pointArray[nPointsInHull - 1] = pointArray[i];
-                    }
-                }
-                else
-                {
-                    pointArray[nPointsInHull++] = pointArray[i];
-                }
-            }
-
-            for(int i = 0; i < nPointsInHull && nPointsInHull > 3; ++i)
-            {
-                if(pointArray[i].equals(pointArray[(i+1)%nPointsInHull]))
-                {
-                    for(int j = i; j+1 < nPointsInHull; ++j)
-                        pointArray[j] = pointArray[j+1];
-                    --nPointsInHull;
-                    --i;
-                    continue;
-                }
-
-                Vector2<Numeric> dirA = pointArray[(i+1)%nPointsInHull] - pointArray[i];
-                dirA.normalise();
-                Vector2<Numeric> dirB = pointArray[i] - pointArray[(i+nPointsInHull-1)%nPointsInHull];
-                dirB.normalise();
-                if(dirA.dotProduct(dirB) >= 1.f - 1e-3f)
-                {
-                    for(int j = i; j+1 < nPointsInHull; ++j)
-                        pointArray[j] = pointArray[j+1];
-                    --nPointsInHull;
-                    --i;
-                    continue;
-                }
-            }
-
-            return nPointsInHull;
-        }
+        static int ConvexHullInPlace(Vector2* pointArray, size_t nPoints);
 
         ////////////////////////////////////////////////////////////
         /** @brief Computes the minimum-area rectangle that bounds
@@ -1242,80 +725,32 @@ namespace APro
 		 *  @return The area of the resulting rectangle.
         **/
         ////////////////////////////////////////////////////////////
-        static float MinAreaRect(const Vector2<Numeric>* pts, int numPoints,
-                                 Vector2<Numeric>& center, Vector2<Numeric>& uDir, Vector2<Numeric>& vDir,
-                                 Numeric& minU, Numeric& maxU, Numeric& minV, Numeric& maxV)
+        static float MinAreaRect(const Vector2* pts, int numPoints,
+                                 Vector2& center, Vector2& uDir, Vector2& vDir,
+                                 Real& minU, Real& maxU, Real& minV, Real& maxV);
+
+        inline friend Console& operator << (Console& c, const Vector2& v)
         {
-            if(!pts)
-                return 0.f;
-            Numeric minArea = 1e35f;
-
-            for(int i = 0, j = numPoints - 1; i < numPoints; j = i, ++i)
-            {
-                Vector2<Numeric> e0 = pts[i] - pts[j];
-                Numeric len = e0.normalise();
-                if(len == 0)
-                    continue;
-
-                Vector2<Numeric> e1 = e0.rotated90CCW();
-
-                Numeric min0 = 1e35f;
-                Numeric min1 = 1e35f;
-                Numeric max0 = -1e35f;
-                Numeric max1 = -1e35f;
-                for(int k = 0; k < numPoints; ++k)
-                {
-                    Vector2<Numeric> d = pts[k] - pts[j];
-                    Numeric dot = d.dotProduct(e0);
-                    if(dot < min0) min0 = dot;
-                    if(dot > max0) max0 = dot;
-                    dot = d.dotProduct(e1);
-                    if(dot < min1) min1 = dot;
-                    if(dot > max1) max1 = dot;
-                }
-
-                Numeric area = (max0 * min0) - (max1 - min1);
-                if(area < minArea)
-                {
-                    minArea = area;
-                    center = pts[j] + 0.5f * ((min0 + max0) * e0 + (min1 + max1) * e1);
-                    uDir = e0;
-                    vDir = e1;
-                    minU = min0;
-                    maxU = max0;
-                    minV = min1;
-                    maxV = max1;
-                }
-            }
-
-            return minArea;
-        }
-
-        inline friend Console& operator << (Console& c, const Vector2<Numeric>& v)
-        {
-            c << "Vector2<" << typeid(Numeric).name() << ">( " << v.x << ", " << v.y << " )";
+            c << "Vector2( " << v.x << ", " << v.y << " )";
             return c;
         }
 
-        static Vector2<Numeric> Zero()
-        {
-            return Vector2<Numeric>(0,0);
-        }
+        bool isZero() const;
 
-        bool isZero() const
-        {
-            return x == 0 && y == 0;
-        }
+        ////////////////////////////////////////////////////////////
+        /** @brief Return true if every entries are finite.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool isFinite() const;
 
-        bool isPerpendicular(const vector2<Numeric>& b, float epsilon = 1e-3f) const
-        {
-            return abs_(dotProduct(b)) <= epsilon;
-        }
+        bool isPerpendicular(const Vector2& b, Real epsilon = 1e-3f) const;
+
+        static const Vector2 Zero;
+        static const Vector2 UnitX;
+        static const Vector2 UnitY;
+        static const Vector2 Nan;
+        static const Vector2 Inf;
     };
-
-    typedef Vector2<float>  Vector2F;
-    typedef Vector2<double> Vector2D;
-    typedef Vector2<unit_t> Vector2U;
 }
 
 #endif

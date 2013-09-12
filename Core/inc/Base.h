@@ -72,12 +72,77 @@
 
 #include "System.h"
 
-typedef char                Byte;
-typedef long int            Offset;
+#if defined _USE_DOUBLEREAL_
+#   define REAL_TYPE double
+#else
+#   define REAL_TYPE float
+#endif
+
+#if defined _USE_DOUBLEANGLE_
+#   define ANGLE_TYPE double
+#else
+#   define ANGLE_TYPE float
+#endif
+
+typedef char                Byte;       ///< Represents a byte (8 bits).
+typedef long int            Offset;     ///< Represents an adress offset.
 // typedef unsigned long int   Id; // Defined in IdGenerator.h
 
-typedef float               unit_t;
-typedef double              angle_t;
+typedef REAL_TYPE           unit_t;     ///< Represents the system unit measure.
+typedef unit_t              Real;       ///< Represents a number in the system unit measure.
+
+typedef ANGLE_TYPE           angle_t;    ///< Represents an angle in the system unit measure.
+typedef angle_t             Radian;     ///< Represents a Radian angle measure.
+typedef angle_t             Degree;     ///< Represents a Degree angle measure.
+
+typedef uint8_t             u8;
+typedef uint16_t            u16;
+typedef uint32_t            u32;
+typedef uint64_t            u64;
+
+union FloatIntReinterpret
+{
+    float f;
+    u32   i;
+};
+
+/// Returns the bit pattern of the given float as a u32.
+u32 ReinterpretAsU32(float& f)
+{
+    FloatIntReinterpret fi;
+    fi.f = f;
+    return fi.i;
+}
+
+/// Converts the bit pattern specified by the given integer to a floating point (this is a binary conversion, not numeral!).
+float ReinterpretAsFloat(u32& i)
+{
+    FloatIntReinterpret fi;
+    fi.i = i;
+    return fi.f;
+}
+
+union DoubleIntReinterpret
+{
+    double d;
+    u64    i;
+};
+
+/// Returns the bit pattern of the given double as a u64.
+u64 ReinterpretAsU64(double& d)
+{
+    DoubleIntReinterpret di;
+    di.d = d;
+    return di.i;
+}
+
+/// Converts the bit pattern specified by the given integer to a double (this is a binary conversion, not numeral!).
+double ReinterpretAsDouble(u64& i)
+{
+    DoubleIntReinterpret di;
+    di.i = i;
+    return di.d;
+}
 
 ////////////////////////////////////////////////////////////
 /** @def aprodebug(a)

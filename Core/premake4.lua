@@ -14,6 +14,16 @@ newoption {
 }
 
 newoption {
+	trigger 	= "double-real",
+	description	= "Set real type to double, instead of float by default."
+}
+
+newoption {
+	trigger 	= "double-angle",
+	description	= "Set angle type to double, instead of float by default."
+}
+
+newoption {
 	trigger 	= "threadsapi",
 	value		= "API",
 	description	= "Choose if engine must use plugin or pthread thread API.",
@@ -65,6 +75,12 @@ project("core")
 	configuration "with-all"
 		defines {"_HAVE_EXCEPTIONS_"}
 		defines {"_HAVE_MEMORYTRACKER_"}
+
+	configuration "double-real"
+		defines {"_USE_DOUBLEREAL_"}
+
+	configuration "double-angle"
+		defines {"_USE_DOUBLEANGLE_"}
 	
 	configuration "pthread"
 		defines {"_COMPILE_WITH_PTHREAD_"}
