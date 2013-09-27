@@ -114,4 +114,18 @@ namespace APro
             free(ptr);
         }
     }
+
+    namespace Memory
+    {
+        void Copy(void* target, const void* source, size_t sz)
+        {
+            memcpy(target, source, sz);
+        }
+
+        void Set(void* target, int value, size_t num)
+        {
+            memset(target, value, num);
+        }
+
+    }
 }

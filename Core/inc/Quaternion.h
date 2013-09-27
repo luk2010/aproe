@@ -829,8 +829,8 @@ namespace APro
 		    return LookAt(sourceDirection, targetDirection, sourceDirection2, targetDirection2);
 		}
 
-		static const Quaternion identity;
-		static const Quaternion nan;
+		static const Quaternion Identity;
+		static const Quaternion Nan;
 
     };
 }

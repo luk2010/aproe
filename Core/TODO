@@ -7,6 +7,8 @@ Things to do
 
 - Vector2     : A vector with 2 components.
 - Vector3     : A vector with 3 components.
+- Matrix3x3   : A 3 by 3 matrix.
+- Quaternion  : A rotation store.
 
 + Event System :
 
@@ -24,10 +26,8 @@ Things to do
 + Math :
 
 - Vector4     : A Vector with 4 components.
-- Matrix3x3   : A 3 by 3 matrix.
 - Matrix3x4   : A 3 by 4 matrix.
 - Matrix4x4   : A 4 by 4 matrix.
-- Quaternion  : A rotation store.
 
 + 2D Geo :
 

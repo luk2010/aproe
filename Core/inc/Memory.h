@@ -83,6 +83,12 @@ namespace APro
     ////////////////////////////////////////////////////////////
     /** @} **/
     ////////////////////////////////////////////////////////////
+
+    namespace Memory
+    {
+        APRO_DLL void Copy(void* target, const void* source, size_t sz);
+        APRO_DLL void Set (void* target, int value, size_t num);
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -146,6 +152,7 @@ template <typename T> void AProDelete(T* ptr, const char* func_, const char* fil
 
 #endif
 
+    ptr->~T();// Should fix the destructor with placement new problem.
     delete[] ptr;
 }
 

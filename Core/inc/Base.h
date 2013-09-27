@@ -165,7 +165,13 @@ double ReinterpretAsDouble(u64& i)
 #endif
 
 #if APRO_DEBUG == APRO_ON
-#   define aproassert(condition, message) if(!(condition) ) { Console::get() << "\nAssertion failed ! [\"" << #condition << "\"]" << aprodebug(message); }
+
+#   define aproassert(condition, message) \
+if(!(condition) ) \
+{ \
+    Console::get() << "\nAssertion failed ! [\"" << #condition << "\"](\"" << __FUNCTION__ << "\") " << aprodebug(message); \
+}
+
 #else
 #   define aproassert(a,b)
 #endif

@@ -53,9 +53,11 @@ namespace APro
         return *this == v;
     }
 
-    bool Vector3::equals(const Real& n1, const Real& n2) const
+    bool Vector3::equals(const Real& n1, const Real& n2, const Real& n3, Real epsilon) const
     {
-        return n1 == x && n2 == y;
+        return Math::equalErr<Real>(x, n1, epsilon)
+            && Math::equalErr<Real>(y, n2, epsilon)
+            && Math::equalErr<Real>(z, n3, epsilon);
     }
 
     Vector3& Vector3::set(const Vector3& other)

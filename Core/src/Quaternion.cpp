@@ -766,7 +766,7 @@ namespace APro
         return Quaternion(axis, angle);
     }
 
-    const Quaternion Quaternion::identity = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-    const Quaternion Quaternion::nan      = Quaternion(Math::_real_nan, Math::_real_nan, Math::_real_nan, Math::_real_nan);
+    const Quaternion Quaternion::Identity = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
+    const Quaternion Quaternion::Nan      = Quaternion(Math::_real_nan, Math::_real_nan, Math::_real_nan, Math::_real_nan);
 
 }

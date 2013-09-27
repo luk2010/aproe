@@ -95,14 +95,15 @@ namespace APro
         bool equals(const Vector3& v) const;
 
         ////////////////////////////////////////////////////////////
-        /** @brief Tell if vector is equal to 2 given numerics.
+        /** @brief Tell if vector is equal to 3 given numerics, given to
+         *  epsilon.
         **/
         ////////////////////////////////////////////////////////////
-        bool equals(const Real& n1, const Real& n2) const;
+        bool equals(const Real& n1, const Real& n2, const Real& n3, Real epsilon = 1e-3f) const;
 
         inline bool operator == (const Vector3& v) const
         {
-            return x == v.x && y == v.y && z == v.z;
+            return equals(v.x, v.y, v.z);
         }
 
         inline bool operator != (const Vector3& v) const
