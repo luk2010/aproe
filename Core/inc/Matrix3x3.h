@@ -978,6 +978,46 @@ namespace APro
 
     public:
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Decomposes this matrix to rotate and scale parts.
+         *
+         *  This function decomposes this matrix M to a form M = R * S,
+         *  where R a rotation matrix and S a scale matrix.
+         *
+         *  @note Remember that in the convention of this class, transforms
+         *  are applied in the order M * v, so scale is applied first, then
+         *  rotation, and finally the translation last.
+         *
+         *  @param rotation [out] : This object receives the rotation part
+         *  of this transform.
+		 *  @param scale [out] : This vector receives the scaling along the
+		 *  local (before transformation by R) X, Y and Z axes performed by
+		 *  this matrix.
+        **/
+        ////////////////////////////////////////////////////////////
+        void decompose(Quaternion& rotation, Vector3& scale) const;
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Decomposes this matrix to rotate and scale parts.
+         *
+         *  This function decomposes this matrix M to a form M = R * S,
+         *  where R a rotation matrix and S a scale matrix.
+         *
+         *  @note Remember that in the convention of this class, transforms
+         *  are applied in the order M * v, so scale is applied first, then
+         *  rotation, and finally the translation last.
+         *
+         *  @param rotation [out] : This object receives the rotation part
+         *  of this transform.
+		 *  @param scale [out] : This vector receives the scaling along the
+		 *  local (before transformation by R) X, Y and Z axes performed by
+		 *  this matrix.
+        **/
+        ////////////////////////////////////////////////////////////
+        void decompose(Matrix3x3& rotation, Vector3& scale) const;
+
+    public:
+
         static const Matrix3x3 Zero;
         static const Matrix3x3 Identity;
         static const Matrix3x3 Nan;

@@ -1055,6 +1055,32 @@ namespace APro
         return m2;
     }
 
+    void Matrix3x3::decompose(Quaternion& rotation, Vector3& scale) const
+    {
+        aproassert(this->isColOrthogonal(), "Matrix is not column orthogonal !");
+
+        Matrix3x3 r;
+        decompose(r, scale);
+        rotation = Quaternion(r);
+    }
+
+    void Matrix3x3::decompose(Matrix3x3& rotation, Vector3& scale) const
+    {
+        aproassert(this->isColOrthogonal(), "Matrix is not column orthogonal !");
+
+        rotation = *this;
+        scale.x = rotation.getCol(0).lenght();
+        scale.y = rotation.getCol(1).lenght();
+        scale.z = rotation.getCol(2).lenght();
+
+        if(!Math::equalErr<Real>(scale.x, 0))
+            rotation.scaleCol(0, 1.f / scale.x);
+        if(!Math::equalErr<Real>(scale.y, 0))
+            rotation.scaleCol(1, 1.f / scale.y);
+        if(!Math::equalErr<Real>(scale.z, 0))
+            rotation.scaleCol(2, 1.f / scale.z);
+    }
+
     const Matrix3x3 Matrix3x3::Zero     = Matrix3x3(0,0,0, 0,0,0, 0,0,0);
     const Matrix3x3 Matrix3x3::Identity = Matrix3x3(1,0,0, 0,1,0, 0,0,1);
     const Matrix3x3 Matrix3x3::Nan      = Matrix3x3(Math::_real_nan, Math::_real_nan, Math::_real_nan,
