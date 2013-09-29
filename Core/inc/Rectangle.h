@@ -144,8 +144,8 @@ namespace APro
         }
         Intersection::_ intersects(const Rectangle<T>& rect) const
         {
-            Vector2<T> Start(max_2(origin.x, rect.origin.x), max_2(origin.y, rect.origin.y));
-            Vector2<T> End(min_2(end.x, rect.end.x), min_2(end.y, rect.end.y));
+            Vector2<T> Start(Numeric::Max(origin.x, rect.origin.x), Numeric::Max(origin.y, rect.origin.y));
+            Vector2<T> End(Numeric::Min(end.x, rect.end.x), Numeric::Min(end.y, rect.end.y));
             Rectangle<T> Overlap(Start, End - Start);
 
             if ((Start.x > End.x) || (Start.y > End.y))

@@ -19,13 +19,13 @@ namespace APro
     Variant MathFunctionCos(const List<Variant>& args)
     {
         double arg1 = args.at(0).to<double>();
-        return Variant(Cos(arg1));
+        return Variant(Angle::Cos(arg1));
     }
 
     Variant MathFunctionSin(const List<Variant>& args)
     {
         double arg1 = args.at(0).to<double>();
-        return Variant(Sin(arg1));
+        return Variant(Angle::Sin(arg1));
     }
 
     MathFunctionManager::MathFunctionManager()

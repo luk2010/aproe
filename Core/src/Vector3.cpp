@@ -55,9 +55,9 @@ namespace APro
 
     bool Vector3::equals(const Real& n1, const Real& n2, const Real& n3, Real epsilon) const
     {
-        return Math::equalErr<Real>(x, n1, epsilon)
-            && Math::equalErr<Real>(y, n2, epsilon)
-            && Math::equalErr<Real>(z, n3, epsilon);
+        return Math::EqualsAbs(x, n1, epsilon)
+            && Math::EqualsAbs(y, n2, epsilon)
+            && Math::EqualsAbs(z, n3, epsilon);
     }
 
     Vector3& Vector3::set(const Vector3& other)
@@ -257,20 +257,20 @@ namespace APro
 
     Vector3 Vector3::absoluted() const
     {
-        return Vector3(abs_(x), abs_(y), abs_(z));
+        return Vector3(Math::Abs(x), Math::Abs(y), Math::Abs(z));
     }
 
     Vector3& Vector3::absolute()
     {
-        x = abs_(x);
-        y = abs_(y);
-        z = abs_(z);
+        x = Math::Abs(x);
+        y = Math::Abs(y);
+        z = Math::Abs(z);
         return *this;
     }
 
     Real Vector3::lenght() const
     {
-        return Sqrt(squaredLenght());
+        return Math::Sqrt(squaredLenght());
     }
 
     Real Vector3::squaredLenght() const
@@ -280,7 +280,7 @@ namespace APro
 
     Real Vector3::distance(const Vector3& v) const
     {
-        return Sqrt(squaredDistance(v));
+        return Math::Sqrt(squaredDistance(v));
     }
 
     Real Vector3::squaredDistance(const Vector3& v) const
@@ -302,10 +302,10 @@ namespace APro
 
     void Vector3::setFromSphericalCoordinates(Radian azimuth, Radian inclinaison, Real radius)
     {
-        Real cx = Cos(inclinaison);
-        x = cx * Sin(azimuth) * radius;
-        y = -Sin(inclinaison) * radius;
-        z = cx * Cos(azimuth) * radius;
+        Real cx = Angle::Cos(inclinaison);
+        x = cx * Angle::Sin(azimuth) * radius;
+        y = -Angle::Sin(inclinaison) * radius;
+        z = cx * Angle::Cos(azimuth) * radius;
     }
 
     void Vector3::setFromSphericalCoordinates(const Vector3& spherical)
@@ -334,15 +334,15 @@ namespace APro
         Real l = v.normalize();
         if((float) l <= 1e-5f)
             return ::Zero();
-        Radian azimuth = ATan2(v.x, v.z);
-        Radian inclinaison = ASin(-v.y);
+        Radian azimuth = Angle::ATan2(v.x, v.z);
+        Radian inclinaison = Angle::ASin(-v.y);
         return Vector3((Real)azimuth, (Real)inclinaison, l);
     }
 
     Vector3 Vector3::toSphericalCoordinatesNormalized() const
     {
-        Radian azimuth = ATan2(x, z);
-        Radian inclinaison = ASin(-y);
+        Radian azimuth = Angle::ATan2(x, z);
+        Radian inclinaison = Angle::ASin(-y);
         return Vector3((Real)azimuth, (Real)inclinaison, 1.0f);
     }
 
@@ -381,7 +381,7 @@ namespace APro
         }
         else
         {
-            len = Sqrt(len);
+            len = Math::Sqrt(len);
             Real scalar = new_lenght / len;
             *this *= scalar;
             return len;
@@ -397,17 +397,17 @@ namespace APro
 
     bool Vector3::isNormalized(Real epsilon) const
     {
-        return abs_(squaredLenght() - 1) <= epsilon;
+        return Math::Abs(squaredLenght() - 1) <= epsilon;
     }
 
     bool Vector3::isZero(Real epsilon) const
     {
-        return abs_(squaredLenght) <= epsilon;
+        return Math::Abs(squaredLenght) <= epsilon;
     }
 
     bool Vector3::isPerpendicular(const Vector3& other, Real epsilon) const
     {
-        return abs_(dot(other)) <= epsilon * length() * other.length();
+        return Math::Abs(dot(other)) <= epsilon * length() * other.length();
     }
 
     bool Vector3::AreCollinear(const Vector3& p1, const Vector3& p2, const Vector3& p3, Real espilon)
@@ -463,7 +463,7 @@ namespace APro
         Real sinT2 = n*n*(1.f - cosI * cosI);
         if(sinT2 > 1.f)
             return (-(*this)).reflect(normal);
-        return n * *this - (n + Sqrt(1.f - sinT2)) * normal;
+        return n * *this - (n + Math::Sqrt(1.f - sinT2)) * normal;
     }
 
     Vector3 Vector3::projectTo(const Vector3& direction) const
@@ -478,13 +478,13 @@ namespace APro
 
     Radian Vector3::angleBetween(const Vector3& other) const
     {
-        Real cosa = dot(other) / Sqrt(squaredLenght() * other.squaredLenght());
+        Real cosa = dot(other) / Math::Sqrt(squaredLenght() * other.squaredLenght());
         if (cosa >= 1.f)
             return (Radian) 0.f;
         else if (cosa <= -1.f)
             return (Radian) Math::PI_32;
         else
-            return (Radian) ACos(cosa);
+            return (Radian) Angle::ACos(cosa);
     }
 
     Radian Vector3::angleBetweenNorm(const Vector3& normalizedVector) const
@@ -495,7 +495,7 @@ namespace APro
         else if (cosa <= -1.f)
             return (Radian) Math::PI_32;
         else
-            return (Radian) ACos(cosa);
+            return (Radian) Angle::ACos(cosa);
     }
 
     void Vector3::decompose(const Vector3& direction, Vector3& outParallel, Vector3& outPerpendicular) const
@@ -506,7 +506,7 @@ namespace APro
 
     Vector3 Vector3::linearInterpolate(const Vector3& b, Real t) const
     {
-        Clamp(t, 0.0f, 1.0f);
+        Math::Clamp(t, 0.0f, 1.0f);
         return (1.f - t) * *this + t * b;
     }
 

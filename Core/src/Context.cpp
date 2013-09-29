@@ -193,10 +193,10 @@ namespace APro
 
             if(result == Intersection::Between)
             {
-                viewport->setCurrentZone(RectangleF(min_2(zone.left(), zonev.left()),
-                                                          min_2(zone.top(), zonev.top()),
-                                                          min_2(zone.width(), zonev.width()),
-                                                          min_2(zone.height(), zonev.height())));
+                viewport->setCurrentZone(RectangleF(Numeric::Min(zone.left(), zonev.left()),
+                                                    Numeric::Min(zone.top(), zonev.top()),
+                                                    Numeric::Min(zone.width(), zonev.width()),
+                                                    Numeric::Min(zone.height(), zonev.height())));
                 viewport->setVisible(true);
             }
             else if(result == Intersection::Out)

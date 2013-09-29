@@ -32,15 +32,15 @@ namespace APro
         {
             Matrix inversed = Matrix::Identity; // will contain the inverse matrix
 
-            for(int column = 0; column < min_2<int>(Matrix::Rows, Matrix::Cols); ++column)
+            for(int column = 0; column < Numeric::Min(Matrix::Rows, Matrix::Cols); ++column)
             {
                 // find the row i with i >= j such that M has the largest absolute value.
                 int greatest = column;
                 for(int i = column; i < Matrix::Rows; i++)
-                    if (abs_<Real>(mat[i][column]) > abs_<Real>(mat[greatest][column]))
+                    if (Math::Abs(mat[i][column]) > Math::Abs(mat[greatest][column]))
                         greatest = i;
 
-                if (Math::equal_real(mat[greatest][column], 0, epsilon))
+                if (Math::EqualsAbs(mat[greatest][column], 0, epsilon))
                 {
                     mat = inversed;
                     return false;
@@ -54,7 +54,7 @@ namespace APro
                 }
 
                 // multiply rows
-                aproassert(!Math::equal_real(mat[column][column], 0.f, epsilon), "Error in Matrix Inversion !");
+                aproassert(!Math::EqualsAbs(mat[column][column], 0.f, epsilon), "Error in Matrix Inversion !");
                 inversed.scaleRow(column, 1.f / mat[column][column]);
                 mat.scaleRow(column, 1.f / mat[column][column]);
 

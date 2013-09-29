@@ -1,16 +1,16 @@
+////////////////////////////////////////////////////////////
 /** @file Maths.h
+ *  @ingroup Maths
  *
  *  @author Luk2010
  *  @version 0.1A
  *
  *  @date 26/09/2012
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the Maths functions.
+ *  Defines the Maths basics functions.
  *
 **/
+////////////////////////////////////////////////////////////
 #ifndef APROMATHS_H
 #define APROMATHS_H
 
@@ -18,148 +18,415 @@
 
 namespace APro
 {
+    /// @ingroup Maths
+    /// @brief Performs basics comparaison and functions to every numeric types.
+    ///
+    /// You might uses these functions on other types than Real.
+    namespace Numeric
+    {
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if two Numerics are equals.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename N>
+        bool Equals(const N& a, const N& b)
+        {
+            return a == b;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if three Numerics are equals.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename N>
+        bool Equals3(const N& a, const N& b, const N& c)
+        {
+            return a == b
+                && a == c;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if two Numerics are differents.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename N>
+        bool AreDifferent(const N& a, const N& b)
+        {
+            return !(Equals(a, b));
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if three Numerics are differents.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename N>
+        bool AreDifferent3(const N& a, const N& b, const N& c)
+        {
+            return AreDifferent(a, b)
+                && AreDifferent(a, c)
+                && AreDifferent(b, c);
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if a Numeric is in given [min, max] range.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename N>
+        bool IsInRange(const N& a, const N& min, const N& max)
+        {
+            return a >= min
+                && a <= max;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Clamp given real to given range.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename N>
+        void Clamp(N& a, const N& min, const N& max)
+        {
+            if(a < min) a = min;
+            else if(a > max) a = max;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return minimum value of given numerics.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename N>
+        N Min(const N& a, const N& b)
+        {
+            if(a < b) return a;
+            else return b;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return minimum value of given numerics.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename N>
+        N Min3(const N& a, const N& b, const N& c)
+        {
+            return Min(Min(a, b), c);
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return maximum value of given numerics.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename N>
+        N Max(const N& a, const N& b)
+        {
+            if(a > b) return a;
+            else return b;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return maximum value of given numerics.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename N>
+        N Max3(const N& a, const N& b, const N& c)
+        {
+            return Max(Max(a, b), c);
+        }
+    }
+
+    /// @ingroup Maths
+    /// @brief A namespace that groups every Math-specific functions and constants.
+    ///
+    /// Use these functions for Real type.
     namespace Math
     {
-        const float PI_32 = 3.14159265359f;
-        const double PI_64 = 3.1415926535897932384626433832795028841971693993751;
+        static const Real PI;///< PI constant in Real terms.
 
-        const float DEGTORAD = PI_32/180.0f;
-        const float RADTODEG = 180.0f/PI_32;
-        const double DEGTORAD64 = PI_64/180.0;
-        const double RADTODEG64 = 180.0/PI_64;
+        static const Real _real_nan;///< Not a Number constant.
+        static const Real _real_inf;///< Infinite constant.
 
-        static const _real_nan;
-        static const _real_inf;
+        static const Real epsilon_default;///< Basic epsilon for compare functions.
     }
 
     namespace Math
     {
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if two Reals are numerically equal, and with
+         *  no errors.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool Equals(const Real& a, const Real& b);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if two Reals are numerically different, and with
+         *  no errors.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool AreDifferent(const Real& a, const Real& b);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if three Reals are numerically different, and with
+         *  no errors.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool AreDifferent3(const Real& a, const Real& b, const Real& c);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if two Reals are numerically equal, compared
+         *  to the given epsilon.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool EqualsAbs(const Real& a, const Real& b, Real epsilon = Math::epsilon_default);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if two Reals are numerically different, compared
+         *  to the given epsilon.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool AreDifferentAbs(const Real& a, const Real& b, Real epsilon = Math::epsilon_default);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if three Reals are numerically different, compared
+         *  to the given epsilon.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool AreDifferentAbs3(const Real& a, const Real& b, const Real& c, Real epsilon = Math::epsilon_default);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if a Real is in given [min, max] range, without
+         *  errors.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool IsInRange(const Real& a, const Real& min, const Real& max);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tell if a Real is in given [min, max] range, compared
+         *  to given epsilon.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool IsInRangeAbs(const Real& a, const Real& min, const Real& max, Real epsilon = Math::epsilon_default);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Clamp given real to given range, without errors.
+        **/
+        ////////////////////////////////////////////////////////////
+        void Clamp(Real& a, const Real& min, const Real& max);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Clamp given real to given range, compared to given
+         *  epsilon.
+         *
+         *  @note If Clamp detect not-in-range value, Real is clamped
+         *  exactly to minimum or maximum, not to the epsiloned one.
+        **/
+        ////////////////////////////////////////////////////////////
+        void ClampAbs(Real& a, const Real& min, const Real& max, Real epsilon = Math::epsilon_default);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return absolute value of given real.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Abs(const Real& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return minimum value of given reals.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Min(const Real& a, const Real& b);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return minimum value of given reals.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Min3(const Real& a, const Real& b, const Real& c);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return maximum value of given reals.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Max(const Real& a, const Real& b);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return maximum value of given reals.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Max3(const Real& a, const Real& b, const Real& c);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return square root of given Real.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Sqrt(const Real& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Rounds x upward, returning the smallest integral
+         *  value that is not less than x.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Ceil(const Real& x);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Rounds x downward, returning the largest integral
+         *  value that is not greater than x.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Floor(const Real& x);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Breaks x into Fractionnal and Integral parts.
+         *
+         *  @param x : Real to breaks.
+         *  @param frac [out] : Fractionnal part of x.
+         *  @param intPart [out] : Integral part of x.
+        **/
+        ////////////////////////////////////////////////////////////
+        void Modf(const Real& x, Real& frac, Real& intPart);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns the hypotenuse of a right-angled triangle
+         *  whose legs are x and y.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Hypotenuse(const Real& x, const Real& y);
+    }
+
+    /// @ingroup Maths
+    /// @brief Regroups every Angle related functions.
+    namespace Angle
+    {
+        static const angle_t DEGTORAD;///< Constant to convert degree to radian.
+        static const angle_t RADTODEG;///< Constant to convert radian to degree.
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return radian value of given degree angle.
+        **/
+        ////////////////////////////////////////////////////////////
+        Radian toRadian(const Degree& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return degree value of given radian angle.
+        **/
+        ////////////////////////////////////////////////////////////
+        Degree toDegree(const Radian& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the minimum Radian angle value from given
+         *  one.
+         *
+         *  Exemple : if your radian angle make 3,5 turns, i.e. 9 PI,
+         *  it will return % 2PI so PI, 0.5 turns.
+        **/
+        ////////////////////////////////////////////////////////////
+        Radian MinAngle(const Radian& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the cosinus of given Radian angle.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Cos(const Radian& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the sinus of given Radian angle.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Sin(const Radian& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the tangent of given Radian angle.
+        **/
+        ////////////////////////////////////////////////////////////
+        Real Tan(const Radian& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the arc cosinus of given Real, in Radian.
+        **/
+        ////////////////////////////////////////////////////////////
+        Radian ACos(const Real& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the arc non-negative hyperbolic cosinus of
+         *  given Real, in Radian.
+        **/
+        ////////////////////////////////////////////////////////////
+        Radian ACosh(const Real& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the arc sinus of given Real, in Radian.
+        **/
+        ////////////////////////////////////////////////////////////
+        Radian ASin(const Real& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the arc non-negative hyperbolic sinus of
+         *  given Real, in Radian.
+        **/
+        ////////////////////////////////////////////////////////////
+        Radian ASinh(const Real& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the arc tangent of given Real, in Radian.
+        **/
+        ////////////////////////////////////////////////////////////
+        Radian ATan(const Real& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the arc non-negative hyperbolic tangent of
+         *  given Real, in Radian.
+        **/
+        ////////////////////////////////////////////////////////////
+        Radian ATanh(const Real& a);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the arc tangent of two Reals, in Radian.
+        **/
+        ////////////////////////////////////////////////////////////
+        Radian ATan2(const Real& x, const Real& y);
+    }
+
+    /// @ingroup Maths
+    /// @brief Use these functions to perform Bits calculs.
+    namespace Bits
+    {
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the given bit of the given data.
+         *  @param data : Data to get.
+         *  @param wich : Number of the bit to get.
+         *  @note You should use this function on types that have
+         *  bits-to-bits operators.
+        **/
+        ////////////////////////////////////////////////////////////
         template<typename T>
-        bool equalErr(T a, T b, T epsilon = 0)
+        u8 get(T data, u32 wich)
         {
-            return (a + epsilon >= b) && (a - epsilon <= b);
+            u32 bitcount = sizeof(data) * 8;
+            u32 revbit = bitcount - wich;
+            return (u8) (data << revbit >> (bitcount - 1));
         }
 
-        inline bool egal32(float a, float b, float error = 0.0f)
-        {
-            return (a + error >= b) && (a - error <= b);
-        }
-
-        inline bool egal64(double a, double b, double error = 0.0)
-        {
-            return (a + error >= b) && (a - error <= b);
-        }
-
-        bool equal_real(Real a, Real b, Real epsilon = 0.f)
-        {
-            return (a + epsilon >= b) && (a - epsilon <= b);
-        }
-
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the high bit of the given data.
+         *  @param data : Data to get.
+         *  @note You should use this function on types that have
+         *  bits-to-bits operators.
+        **/
+        ////////////////////////////////////////////////////////////
         template<typename T>
-        bool are_different(T a, T b, T c, T epsilon = 0)
+        u8 getHigh(T data)
         {
-            return (!equalErr<T>(a, b, epsilon) &&
-                    !equalErr<T>(a, c, epsilon) &&
-                    !equalErr<T>(b, c, epsilon));
+            return Bits::get(data, sizeof(data) * 8);
         }
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the low bit of the given data.
+         *  @param data : Data to get.
+         *  @note You should use this function on types that have
+         *  bits-to-bits operators.
+        **/
+        ////////////////////////////////////////////////////////////
         template<typename T>
-        inline bool is_in_range(T a, T _min, T _max)
+        u8 getLow(T data)
         {
-            return a >= _min && a <= _max;
+            return Bits::get(data, 0);
         }
     }
-
-    Real Abs(Real a)
-    {
-        return abs_(a);
-    }
-
-    inline float toRadian32(float deg)
-    {
-        return Math::DEGTORAD * deg;
-    }
-
-    inline double toRadian64(double deg)
-    {
-        return Math::DEGTORAD64 * deg;
-    }
-
-    inline float toDegree32(float rad)
-    {
-        return Math::RADTODEG * rad;
-    }
-
-    inline double toDegree64(double rad)
-    {
-        return Math::RADTODEG64 * rad;
-    }
-
-    template<typename T> T max_2(T value1, T value2)
-    {
-        return (value1 > value2) ? value1 : value2 ;
-    }
-
-    template<typename T> T max_3(T value1, T value2, T value3)
-    {
-        if(max_2(value1,value2) > max_2(value2,value3))
-            return max_2(value1,value2);
-        else if(max_2(value1,value2) == max_2(value2,value3))
-            return max_2(value1,value2);
-        else
-            return max_2(value2,value3);
-    }
-
-    template<typename T> T min_2(T value1, T value2)
-    {
-        return (value1 > value2) ? value2 : value1;
-    }
-
-    template<typename T> T min_3(T value1, T value2, T value3)
-    {
-        if(min_2(value1,value2) < min_2(value2,value3))
-            return max_2(value1,value2);
-        else if(max_2(value1,value2) == max_2(value2,value3))
-            return max_2(value1,value2);
-        else
-            return max_2(value2,value3);
-    }
-
-    template<typename T> T abs_(T v)
-    {
-        return v > 0 ? v : -v;
-    }
-
-    template<typename T> unsigned char getBit(T numericdata, int bitnumber)
-    {
-        int bitcount = sizeof(numericdata) * 8;
-        int revbit = bitcount - bitnumber;
-
-        return (unsigned char) (numericdata << revbit >> (bitcount - 1 ));
-    }
-
-    template<typename T> unsigned char getHighBit(T numericdata)
-    {
-        return getBit<T>(numericdata, sizeof(numericdata) * 8);
-    }
-
-    template<typename T> unsigned char getLowBit(T numericdata)
-    {
-        return getBit<T>(numericdata, 0);
-    }
-
-    APRO_DLL int    Sqrt (int v);
-    APRO_DLL float  Sqrt (float v);
-    APRO_DLL double Sqrt (double v);
-
-    APRO_DLL double Cos(double v);
-    APRO_DLL double Sin(double v);
-    APRO_DLL double Tan(double v);
-
-    APRO_DLL double ACos(double v);
-    APRO_DLL double ASin(double v);
-    APRO_DLL double ATan(double v);
-    APRO_DLL double ATan2(double v, double v2);
 
     template <typename T> void swapNumeric(T& num1, T& num2)
     {
@@ -175,14 +442,6 @@ namespace APro
             num1 ^= num2;
         }
     }
-
-    template <typename T> T Clamp(const T& value, const T min, const T max)
-    {
-        return max_2(min_2(value, max), min);
-    }
-
-    APRO_DLL float min_angle_32(float a);
-    APRO_DLL double min_angle_64(double a);
 
     unsigned char colorvaluefromfloat(float v);
     float         floatfromcolorvalue(unsigned char c);
@@ -276,7 +535,7 @@ namespace APro
 /// @param v1 A vector of type Vector3, or a C array of three elements.
 /// @param v2 A vector of type Vector3, or a C array of three elements.
 /// @see DOT3(), DOT3_xyz(), DOT3STRIDED().
-#define ABSDOT3(v1, v2) (Abs((v1)[0] * (v2)[0]) + Abs((v1)[1] * (v2)[1]) + Abs((v1)[2] * (v2)[2]))
+#define ABSDOT3(v1, v2) (Math::Abs((v1)[0] * (v2)[0]) + Abs((v1)[1] * (v2)[1]) + Abs((v1)[2] * (v2)[2]))
 
 /// Computes the dot product of a Vector3 and another vector given by three floats.
 /// @param v1 A vector of type Vector3, or a C array of three elements.

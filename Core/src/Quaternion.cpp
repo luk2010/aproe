@@ -121,12 +121,12 @@ namespace APro
             Real fTyy = fTy*m_y;
             Real fTzz = fTz*m_z;
 
-            return ATan2(fTxy+fTwz, 1.0f-(fTyy+fTzz));
+            return Angle::ATan2(fTxy+fTwz, 1.0f-(fTyy+fTzz));
 
         }
         else
         {
-            return ATan2(2*(m_x*m_y + m_w*m_z), m_w*m_w + m_x*m_x - m_y*m_y - m_z*m_z);
+            return Angle::ATan2(2*(m_x*m_y + m_w*m_z), m_w*m_w + m_x*m_x - m_y*m_y - m_z*m_z);
         }
     }
 
@@ -142,11 +142,11 @@ namespace APro
             Real fTyz = fTz*m_y;
             Real fTzz = fTz*m_z;
 
-            return ATan2(fTyz+fTwx, 1.0f-(fTxx+fTzz));
+            return Angle::ATan2(fTyz+fTwx, 1.0f-(fTxx+fTzz));
         }
         else
         {
-            return ATan2(2*(m_y*m_z + m_w*m_x), m_w*m_w - m_x*m_x - m_y*m_y + m_z*m_z);
+            return Angle::ATan2(2*(m_y*m_z + m_w*m_x), m_w*m_w - m_x*m_x - m_y*m_y + m_z*m_z);
         }
     }
 
@@ -162,11 +162,11 @@ namespace APro
             Real fTxz = fTz*m_x;
             Real fTyy = fTy*m_y;
 
-            return ATan2(fTxz+fTwy, 1.0f-(fTxx+fTyy));
+            return Angle::ATan2(fTxz+fTwy, 1.0f-(fTxx+fTyy));
         }
         else
         {
-            return ASin(-2*(m_x*m_z - m_w*m_y));
+            return Angle::ASin(-2*(m_x*m_z - m_w*m_y));
         }
     }
 
@@ -181,12 +181,12 @@ namespace APro
 
     Radian Quaternion::getAngle() const
     {
-        return ACos(m_w) * 2;
+        return Angle::ACos(m_w) * 2;
     }
 
     Real lenght() const
     {
-        return Sqrt(squaredLenght());
+        return Math::Sqrt(squaredLenght());
     }
 
     Real Quaternion::squaredLenght() const
@@ -244,8 +244,8 @@ namespace APro
 
     void Quaternion::setFromAxisAngle(const Vector3& axis, const Radian& angle)
     {
-        Real cosz = Cos(angle/2.f);
-        Real sinz = Sin(angle/2.f);
+        Real cosz = Angle::Cos(angle/2.f);
+        Real sinz = Angle::Sin(angle/2.f);
         m_x = axis.x * sinz;
         m_y = axis.y * sinz;
         m_z = axis.z * sinz;
@@ -254,9 +254,9 @@ namespace APro
 
     void Quaternion::toAxisAngle(Vector3& axis, Radian& angle) const
     {
-        angle = Acos(m_w) * 2.f;
-        Real sinz = Sin(angle/2.f);
-        if (abs_(sinz) > 1e-4f)
+        angle = Angle::Acos(m_w) * 2.f;
+        Real sinz = Angle::Sin(angle/2.f);
+        if (Math::Abs(sinz) > 1e-4f)
         {
             sinz = 1.f / sinz;
             axis = Vector3(m_x * sinz, m_y * sinz, m_z * sinz);
@@ -345,7 +345,7 @@ namespace APro
         if ( fTrace > 0.0 )
         {
             // |w| > 1/2, may as well choose w > 1/2
-            fRoot = Sqrt(fTrace + 1.0f);  // 2w
+            fRoot = Math::Sqrt(fTrace + 1.0f);  // 2w
             m_w = 0.5f * fRoot;
 
             fRoot = 0.5f/fRoot;  // 1/(4w)
@@ -366,7 +366,7 @@ namespace APro
             size_t j = s_iNext[i];
             size_t k = s_iNext[j];
 
-            fRoot = Sqrt(m[i][i] - m[j][j] - m[k][k] + 1.0f);
+            fRoot = Math::Sqrt(m[i][i] - m[j][j] - m[k][k] + 1.0f);
 
             Real* apkQuat[3] = { &m_x, &m_y, &m_z };
             *apkQuat[i] = 0.5f*fRoot;
@@ -392,7 +392,7 @@ namespace APro
         // Above, r == 3 - 4(x^2+y^2+z^2) == 4(1-x^2-y^2-z^2) - 1 == 4*w^2 - 1.
         if (r > 0) // In this case, |w| > 1/2.
         {
-            q.m_w = Sqrt(r + 1.f) * 0.5f; // We have two choices for the sign of w, arbitrarily pick the positive.
+            q.m_w = Math::Sqrt(r + 1.f) * 0.5f; // We have two choices for the sign of w, arbitrarily pick the positive.
             Real inv4w = 1.f / (4.f * m_w);
             q.m_x = (m[2][1] - m[1][2]) * inv4w;
             q.m_y = (m[0][2] - m[2][0]) * inv4w;
@@ -400,7 +400,7 @@ namespace APro
         }
         else if (m[0][0] > m[1][1] && m[0][0] > m[2][2]) // If |q.x| is larger than |q.y| and |q.z|, extract it first. This gives
         {                                                // best stability, and we know below x can't be zero.
-            q.m_x = Sqrt(1.f + m[0][0] - m[1][1] - m[2][2]) * 0.5f; // We have two choices for the sign of x, arbitrarily pick the positive.
+            q.m_x = Math::Sqrt(1.f + m[0][0] - m[1][1] - m[2][2]) * 0.5f; // We have two choices for the sign of x, arbitrarily pick the positive.
             const Real x4 = 1.f / (4.f * m_x);
             q.m_y = (m[0][1] + m[1][0]) * x4;
             q.m_z = (m[0][2] + m[2][0]) * x4;
@@ -408,7 +408,7 @@ namespace APro
         }
         else if (m[1][1] > m[2][2]) // |q.y| is larger than |q.x| and |q.z|
         {
-            q.m_y = Sqrt(1.f + m[1][1] - m[0][0] - m[2][2]) * 0.5f; // We have two choices for the sign of y, arbitrarily pick the positive.
+            q.m_y = Math::Sqrt(1.f + m[1][1] - m[0][0] - m[2][2]) * 0.5f; // We have two choices for the sign of y, arbitrarily pick the positive.
             const Real y4 = 1.f / (4.f * m_y);
             q.m_x = (m[0][1] + m[1][0]) * y4;
             q.m_z = (m[1][2] + m[2][1]) * y4;
@@ -416,7 +416,7 @@ namespace APro
         }
         else // |q.z| is larger than |q.x| or |q.y|
         {
-            q.m_z = Sqrt(1.f + m[2][2] - m[0][0] - m[1][1]) * 0.5f; // We have two choices for the sign of z, arbitrarily pick the positive.
+            q.m_z = Math::Sqrt(1.f + m[2][2] - m[0][0] - m[1][1]) * 0.5f; // We have two choices for the sign of z, arbitrarily pick the positive.
             const Real z4 = 1.f / (4.f * m_z);
             q.m_x = (m[0][2] + m[2][0]) * z4;
             q.m_y = (m[1][2] + m[2][1]) * z4;
@@ -476,7 +476,7 @@ namespace APro
 
     bool Quaternion::isNormalized(Real epsilon) const
     {
-        return Math::equal_real(squaredLenght(), 1.f, epsilon);
+        return Math::EqualsAbs(squaredLenght(), 1.f, epsilon);
     }
 
     bool Quaternion::isInvertible(Real epsilon) const
@@ -494,10 +494,10 @@ namespace APro
 
     bool Quaternion::equals(const Quaternion& other, Real epsilon = 1e-3f) const
     {
-        return Math::equal_real(m_x, other.m_x, epsilon) &&
-               Math::equal_real(m_y, other.m_y, epsilon) &&
-               Math::equal_real(m_z, other.m_z, epsilon) &&
-               Math::equal_real(m_w, other.m_w, epsilon);
+        return Math::EqualsAbs(m_x, other.m_x, epsilon) &&
+               Math::EqualsAbs(m_y, other.m_y, epsilon) &&
+               Math::EqualsAbs(m_z, other.m_z, epsilon) &&
+               Math::EqualsAbs(m_w, other.m_w, epsilon);
     }
 
     Quaternion& Quaternion::multiply(const Quaternion& other)
@@ -622,13 +622,13 @@ namespace APro
 
     Quaternion Quaternion::linearInterpolate(const Quaternion& target, Real t) const
     {
-        Clamp(t, 0.f, 1.f);
+        Math::Clamp(t, 0.f, 1.f);
         return *this * (1.f - t)  + target * t;
     }
 
     Quaternion Quaternion::sphericalInterpolate(const Quaternion& target, Real t, bool shortestPath) const
     {
-        Clamp(t, 0.f, 1.f);
+        Math::Clamp(t, 0.f, 1.f);
 
         Real fCos = this->dot(target);
         Quaternion rkT;
@@ -644,14 +644,14 @@ namespace APro
             rkT = target;
         }
 
-        if (abs_(fCos) < 1 - 1e-3f)
+        if (Math::Abs(fCos) < 1 - 1e-3f)
         {
             // Standard case (slerp)
-            Real   fSin    = Sqrt(1 - (fCos * fCos));
-            Radian fAngle  = ATan2(fSin, fCos);
+            Real   fSin    = Math::Sqrt(1 - (fCos * fCos));
+            Radian fAngle  = Angle::ATan2(fSin, fCos);
             Real   fInvSin = 1.0f / fSin;
-            Real   fCoeff0 = Sin((1.0f - t) * fAngle) * fInvSin;
-            Real   fCoeff1 = Sin(t * fAngle) * fInvSin;
+            Real   fCoeff0 = Angle::Sin((1.0f - t) * fAngle) * fInvSin;
+            Real   fCoeff1 = Angle::Sin(t * fAngle) * fInvSin;
             return fCoeff0 * (*this) + fCoeff1 * rkT;
         }
         else

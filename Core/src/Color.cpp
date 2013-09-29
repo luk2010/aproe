@@ -160,7 +160,7 @@ namespace APro
     float Color::lightness() const
     {
         const unsigned char* c = (const unsigned char*) &color;
-        return 0.5f + (max_3(c[0], c[1], c[2]) + min_3(c[0], c[1], c[2]));
+        return 0.5f + (Numeric::Max3(c[0], c[1], c[2]) + Numeric::Min3(c[0], c[1], c[2]));
     }
 
     float Color::luminance() const

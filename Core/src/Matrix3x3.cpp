@@ -111,8 +111,8 @@ namespace APro
 
     void Matrix3x3::setRotatePartX(const Radian& a)
     {
-        const float cosz = Cos(a);
-        const float sinz = Sin(a);
+        const float cosz = Angle::Cos(a);
+        const float sinz = Angle::Sin(a);
 
         v[0][0] = 1.f; v[0][1] =  0.f; v[0][2] =   0.f;
         v[1][0] = 0.f; v[1][1] = cosz; v[1][2] = -sinz;
@@ -121,8 +121,8 @@ namespace APro
 
     void Matrix3x3::setRotatePartY(const Radian& a)
     {
-        const float cosz = Cos(a);
-        const float sinz = Sin(a);
+        const float cosz = Angle::Cos(a);
+        const float sinz = Angle::Sin(a);
 
         v[0][0] =  cosz; v[0][1] = 0.f; v[0][2] = sinz;
         v[1][0] =   0.f; v[1][1] = 1.f; v[1][2] =  0.f;
@@ -131,8 +131,8 @@ namespace APro
 
     void Matrix3x3::setRotatePartZ(const Radian& a)
     {
-        const float cosz = Cos(a);
-        const float sinz = Sin(a);
+        const float cosz = Angle::Cos(a);
+        const float sinz = Angle::Sin(a);
 
         v[0][0] = cosz; v[0][1] = -sinz; v[0][2] = 0.f;
         v[1][0] = sinz; v[1][1] =  cosz; v[1][2] = 0.f;
@@ -324,7 +324,7 @@ namespace APro
 
     void Matrix3x3::swapRow(size_t row1, size_t row2)
     {
-        aproassert(Math::is_in_range(row1, 0, Rows) && Math::is_in_range(row2, 0, Rows), "Bad rows values !");
+        aproassert(Numeric::IsInRange(row1, 0, Rows) && Numeric::IsInRange(row2, 0, Rows), "Bad rows values !");
         swapNumeric(v[row1][0], v[row2][0]);
         swapNumeric(v[row1][1], v[row2][1]);
         swapNumeric(v[row1][2], v[row2][2]);
@@ -332,7 +332,7 @@ namespace APro
 
     void Matrix3x3::swapCol(size_t col1, size_t col2)
     {
-        aproassert(Math::is_in_range(col1, 0, Cols) && Math::is_in_range(col2, 0, Cols), "Bad Columns values !");
+        aproassert(Numeric::IsInRange(col1, 0, Cols) && Numeric::IsInRange(col2, 0, Cols), "Bad Columns values !");
         swapNumeric(v[0][col1], v[0][col2]);
         swapNumeric(v[1][col1], v[1][col2]);
         swapNumeric(v[2][col1], v[2][col2]);
@@ -421,7 +421,7 @@ namespace APro
         // Compute the inverse directly using Cramer's rule.
         // Warning: This method is numerically very unstable!
         float d = determinant();
-        if (Math::equal_real(d, 0.f, epsilon))
+        if (Math::EqualsAbs(d, 0.f, epsilon))
             return false;
 
         d = 1.f / d;
@@ -521,7 +521,7 @@ namespace APro
         const Real be_dc = b*e - d*c;
 
         Real det = a * df_ee + b * ce_bf + c * be_dc; // = DeterminantSymmetric();
-        if (Math::equal_real(det, 0.f))
+        if (Math::EqualsAbs(det, 0.f))
             return false;
         det = 1.f / det;
 
@@ -580,9 +580,9 @@ namespace APro
         Real v12 = v[1][2];
         Real v22 = v[2][2];
 
-        Real av00 = abs_(v00);
-        Real av10 = abs_(v10);
-        Real av20 = abs_(v20);
+        Real av00 = Math::Abs(v00);
+        Real av10 = Math::Abs(v10);
+        Real av20 = Math::Abs(v20);
 
         // Find which item in first column has largest absolute value.
         if (av10 >= av00 && av10 >= av20)
@@ -604,7 +604,7 @@ namespace APro
            d e f | y
            g h i | z , where |a| >= |d| && |a| >= |g| */
 
-        if (Math::equal_real(v00, 0.f))
+        if (Math::EqualsAbs(v00, 0.f))
             return false;
 
         // Scale row so that leading element is one.
@@ -632,14 +632,14 @@ namespace APro
            0 h i | z */
 
         // Pivotize again.
-        if (abs_(v21) > abs_(v11))
+        if (Math::Abs(v21) > Math::Abs(v11))
         {
             swapNumeric(v11, v21);
             swapNumeric(v12, v22);
             swapNumeric(b[1], b[2]);
         }
 
-        if (Math::equal_real(v11, 0.f))
+        if (Math::EqualsAbs(v11, 0.f))
             return false;
 
         /* 1 b c | x
@@ -662,7 +662,7 @@ namespace APro
            0 1 f | y
            0 0 i | z */
 
-        if (Math::equal_real(v22, 0.f))
+        if (Math::EqualsAbs(v22, 0.f))
             return false;
 
         x[2] = b[2] / v22;
@@ -679,7 +679,7 @@ namespace APro
 
     void Matrix3x3::orthonormalize(size_t c0, size_t c1, size_t c2)
     {
-        aproassert(Math::are_different(c0, c1, c2), "Three columns must be different !");
+        aproassert(Numeric::AreDifferent3(c0, c1, c2), "Three columns must be different !");
         aproassert(c0 < Cols && c1 < Cols && c2 < Cols, "The columns are invalid !");
 
         Vector3 v0 = getCol(c0);
@@ -885,7 +885,7 @@ namespace APro
     Matrix3x3& Matrix3x3::operator /= (const Real& scalar)
     {
         aproassert(IsFinite(scalar), "Scalar not finite !");
-        aproassert(!(Math::equalErr<Real>(scalar, 0.f)), "Scalar is zero ! Can't divide by zero.");
+        aproassert(Math::AreDifferent(scalar, 0), "Scalar is zero ! Can't divide by zero.");
 
         Real invScalar = 1.f / scalar;
         for(int i = 0; i < Rows; ++i)
@@ -933,38 +933,38 @@ namespace APro
 
     bool Matrix3x3::isLowerTriangular(Real epsilon) const
     {
-        return Math::equalErr<Real>(v[0][1], 0.f, epsilon)
-            && Math::equalErr<Real>(v[0][2], 0.f, epsilon)
-            && Math::equalErr<Real>(v[1][2], 0.f, epsilon);
+        return Math::EqualsAbs(v[0][1], 0.f, epsilon)
+            && Math::EqualsAbs(v[0][2], 0.f, epsilon)
+            && Math::EqualsAbs(v[1][2], 0.f, epsilon);
     }
 
     bool Matrix3x3::isUpperTriangular(Real epsilon) const
     {
-        return Math::equalErr<Real>(v[1][0], 0.f, epsilon)
-            && Math::equalErr<Real>(v[2][0], 0.f, epsilon)
-            && Math::equalErr<Real>(v[2][1], 0.f, epsilon);
+        return Math::EqualsAbs(v[1][0], 0.f, epsilon)
+            && Math::EqualsAbs(v[2][0], 0.f, epsilon)
+            && Math::EqualsAbs(v[2][1], 0.f, epsilon);
     }
 
     bool Matrix3x3::isInvertible(Real epsilon) const
     {
-        return Math::equalErr<Real>(determinant(), 0.f, epsilon);
+        return Math::EqualsAbs(determinant(), 0.f, epsilon);
     }
 
     bool Matrix3x3::isSymmetric(Real epsilon) const
     {
-        return Math::equalErr<Real>(v[0][1], v[1][0], epsilon)
-            && Math::equalErr<Real>(v[0][2], v[2][0], epsilon)
-            && Math::equalErr<Real>(v[1][2], v[2][1], epsilon);
+        return Math::EqualsAbs(v[0][1], v[1][0], epsilon)
+            && Math::EqualsAbs(v[0][2], v[2][0], epsilon)
+            && Math::EqualsAbs(v[1][2], v[2][1], epsilon);
     }
 
     bool Matrix3x3::isSkewSymmetric(Real epsilon) const
     {
-        return Math::equalErr<Real>(v[0][0], 0.f, epsilon)
-            && Math::equalErr<Real>(v[1][1], 0.f, epsilon)
-            && Math::equalErr<Real>(v[2][2], 0.f, epsilon)
-            && Math::equalErr<Real>(v[0][1], -v[1][0], epsilon)
-            && Math::equalErr<Real>(v[0][2], -v[2][0], epsilon)
-            && Math::equalErr<Real>(v[1][2], -v[2][1], epsilon);
+        return Math::EqualsAbs(v[0][0], 0.f, epsilon)
+            && Math::EqualsAbs(v[1][1], 0.f, epsilon)
+            && Math::EqualsAbs(v[2][2], 0.f, epsilon)
+            && Math::EqualsAbs(v[0][1], -v[1][0], epsilon)
+            && Math::EqualsAbs(v[0][2], -v[2][0], epsilon)
+            && Math::EqualsAbs(v[1][2], -v[2][1], epsilon);
     }
 
     bool Matrix3x3::hasUnitaryScale(Real epsilon) const
@@ -981,8 +981,8 @@ namespace APro
     bool Matrix3x3::hasUniformScale(Real epsilon) const
     {
         Vector3 scale = this->extractScale();
-        return Math::equalErr<Real>(scale.x, scale.y, epsilon)
-            && Math::equalErr<Real>(scale.x, scale.z, epsilon);
+        return Math::EqualsAbs(scale.x, scale.y, epsilon)
+            && Math::EqualsAbs(scale.x, scale.z, epsilon);
     }
 
     bool Matrix3x3::isRowOrthogonal(Real epsilon) const
@@ -1011,7 +1011,7 @@ namespace APro
     {
         for(int i = 0; i < Rows; ++i)
             for(int j = 0; j < Cols; ++j)
-                if(!Math::equalErr<Real>(v[i][j], rhs[i][j], epsilon))
+                if(!Math::EqualsAbs(v[i][j], rhs[i][j], epsilon))
                     return false;
         return true;
     }
@@ -1073,11 +1073,11 @@ namespace APro
         scale.y = rotation.getCol(1).lenght();
         scale.z = rotation.getCol(2).lenght();
 
-        if(!Math::equalErr<Real>(scale.x, 0))
+        if(!Math::EqualsAbs(scale.x, 0))
             rotation.scaleCol(0, 1.f / scale.x);
-        if(!Math::equalErr<Real>(scale.y, 0))
+        if(!Math::EqualsAbs(scale.y, 0))
             rotation.scaleCol(1, 1.f / scale.y);
-        if(!Math::equalErr<Real>(scale.z, 0))
+        if(!Math::EqualsAbs(scale.z, 0))
             rotation.scaleCol(2, 1.f / scale.z);
     }
 

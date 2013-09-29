@@ -398,13 +398,13 @@ namespace APro
 
     Vector2 Vector2::absoluted() const
     {
-        return Vector2(abs_(x), abs_(y));
+        return Vector2(Math::Abs(x), Math::Abs(y));
     }
 
     Vector2& Vector2::absolute()
     {
-        x = abs_(x);
-        y = abs_(y);
+        x = Math::Abs(x);
+        y = Math::Abs(y);
         return *this;
     }
 
@@ -421,7 +421,7 @@ namespace APro
 
     Real Vector2::lenght() const
     {
-        return Sqrt(x * x + y * y);
+        return Math::Sqrt(x * x + y * y);
     }
 
     Real Vector2::squaredLenght() const
@@ -447,8 +447,8 @@ namespace APro
 
     void Vector2::setFromPolarCoordinates(const Radian& theta, const Real& len)
     {
-        x = Cos(theta) * len;
-        y = Sin(theta) * len;
+        x = Angle::Cos(theta) * len;
+        y = Angle::Sin(theta) * len;
     }
 
     void Vector2::setFromPolarCoordinates(const Vector2& polar)
@@ -472,7 +472,7 @@ namespace APro
     {
         Real l = lenght();
         if(l > 1e-4f)
-            return Vector2(ATan2(y, x), l);
+            return Vector2(Angle::ATan2(y, x), l);
         else
             return Vector2::Zero;
     }
@@ -480,7 +480,7 @@ namespace APro
     Radian Vector2::aimedAngle() const
     {
         if(!isZero())
-            return ATan2(y, x);
+            return Angle::ATan2(y, x);
         else
             return 0;
     }
@@ -534,7 +534,7 @@ namespace APro
 
         if(sinT2 > 1.f)
             return (-(*this)).reflect(normal);
-        return n * *this - (n + Sqrt(1.f - sinT2)) * normal;
+        return n * *this - (n + Math::Sqrt(1.f - sinT2)) * normal;
     }
 
     Vector2& Vector2::rotate90CW()
@@ -580,12 +580,12 @@ namespace APro
 
     Vector2 Vector2::angleBetween(const Vector2& other) const
     {
-        return ACos(dotProduct(other)) / Sqrt(squaredLenght() * other.squaredLenght());
+        return Angle::ACos(dotProduct(other)) / Math::Sqrt(squaredLenght() * other.squaredLenght());
     }
 
     Vector2 Vector2::angleBetweenNorm(const Vector2& other) const
     {
-        return ACos(dotProduct(other));
+        return Angle::ACos(dotProduct(other));
     }
 
     void Vector2::decompose(const Vector2& direction, Vector2& outParalell, Vector2& outPerpendicular) const
@@ -596,7 +596,7 @@ namespace APro
 
     Vector2 Vector2::linearInterpolate(const Vector2& b, Real t) const
     {
-        Clamp(t, 0.0f, 1.0f);
+        Math::Clamp(t, 0.0f, 1.0f);
         return (1.f - t) * *this + t * b;
     }
 
@@ -660,11 +660,11 @@ namespace APro
             Real lineBlen = lineB.lenght();
             bool dropLastPointFromHull = false;
             if(lineAlen >= 1e-5f)
-                lineA /= Sqrt(lineAlen);
+                lineA /= Math::Sqrt(lineAlen);
             else
                 dropLastPointFromHull = true;
             if(lineBlen >= 1e-5f)
-                lineB /= Sqrt(lineBlen);
+                lineB /= Math::Sqrt(lineBlen);
 
             Vector2 normal(-lineA.y, lineA.x);
             if(dropLastPointFromHull || normal.dotProduct(lineB) > 0.f || (normal.dotProduct(lineB) > -1e-4f && lineBlen >= lineAlen))
@@ -774,7 +774,7 @@ namespace APro
 
     bool Vector2::isPerpendicular(const Vector2& b, Real epsilon = 1e-3f) const
     {
-        return abs_(dotProduct(b)) <= epsilon;
+        return Math::Abs(dotProduct(b)) <= epsilon;
     }
 
     const Vector2 Vector2::Zero = Vector2(0,0);
