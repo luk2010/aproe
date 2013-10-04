@@ -482,7 +482,7 @@ namespace APro
         if (cosa >= 1.f)
             return (Radian) 0.f;
         else if (cosa <= -1.f)
-            return (Radian) Math::PI_32;
+            return (Radian) Math::PI;
         else
             return (Radian) Angle::ACos(cosa);
     }
@@ -493,7 +493,7 @@ namespace APro
         if (cosa >= 1.f)
             return (Radian) 0.f;
         else if (cosa <= -1.f)
-            return (Radian) Math::PI_32;
+            return (Radian) Math::PI;
         else
             return (Radian) Angle::ACos(cosa);
     }

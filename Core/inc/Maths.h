@@ -18,6 +18,22 @@
 
 namespace APro
 {
+    /// Returns true if the given value is not an inf or a nan.
+    template<typename T> bool IsFinite(T /*value*/) { return true; }
+    template<> bool IsFinite<float>(float f) { return (ReinterpretAsU32(f) << 1) < 0xFF000000u; }
+    template<> bool IsFinite<double>(double d) { return (ReinterpretAsU64(d) << 1) < 0xFFE0000000000000ULL; }
+    template<> bool IsFinite<long double>(long double value) { return IsFinite<double>((double)value); }
+
+    /// Returns true if the given value is a not-a-number.
+    bool IsNan(float f) { return (ReinterpretAsU32(f) << 1) > 0xFF000000u; }
+    bool IsNan(double d) { return (ReinterpretAsU64(d) << 1) > 0xFFE0000000000000ULL; }
+    bool IsNan(long double value) { return IsNan((double)value); }
+
+    /// Returns true if the given value is +inf or -inf.
+    bool IsInf(float f) { return (ReinterpretAsU32(f) << 1) == 0xFF000000u; }
+    bool IsInf(double d) { return (ReinterpretAsU64(d) << 1) == 0xFFE0000000000000ULL; }
+    bool IsInf(long double value) { return IsInf((double)value); }
+
     /// @ingroup Maths
     /// @brief Performs basics comparaison and functions to every numeric types.
     ///
@@ -286,6 +302,24 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         Real Hypotenuse(const Real& x, const Real& y);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the given real is finite.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool IsFinite(Real r);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the given real is NotANumber.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool IsNan(Real r);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the given real is Infinite.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool IsInf(Real r);
     }
 
     /// @ingroup Maths
@@ -495,26 +529,6 @@ namespace APro
             }
         }
     }
-
-    /// Returns true if the given value is not an inf or a nan.
-    template<typename T> bool IsFinite(T /*value*/) { return true; }
-
-    template<> bool IsFinite<float>(float f) { return (ReinterpretAsU32(f) << 1) < 0xFF000000u; }
-    template<> bool IsFinite<double>(double d) { return (ReinterpretAsU64(d) << 1) < 0xFFE0000000000000ULL; }
-    template<> bool IsFinite<long double>(long double value) { return IsFinite<double>((double)value); }
-    template<> bool IsFinite<Real>(Real r) { return sizeof(Real) == sizeof(float) ? IsFinite<float>((float)r) : IsFinite<double>((double)r); }
-
-    /// Returns true if the given value is a not-a-number.
-    bool IsNan(float f) { return (ReinterpretAsU32(f) << 1) > 0xFF000000u; }
-    bool IsNan(double d) { return (ReinterpretAsU64(d) << 1) > 0xFFE0000000000000ULL; }
-    bool IsNan(long double value) { return IsNan((double)value); }
-    bool IsNan(Real r) { return sizeof(Real) == sizeof(float) ? IsNan((float)r) : IsNan((double)r); }
-
-    /// Returns true if the given value is +inf or -inf.
-    bool IsInf(float f) { return (ReinterpretAsU32(f) << 1) == 0xFF000000u; }
-    bool IsInf(double d) { return (ReinterpretAsU64(d) << 1) == 0xFFE0000000000000ULL; }
-    bool IsInf(long double value) { return IsInf((double)value); }
-    bool IsInf(Real r) { return sizeof(Real) == sizeof(float) ? IsInf((float)r) : IsInf((double)r); }
 
 // Macros defining some inline utilities
 // See MathGeoLib, MathFunc.h

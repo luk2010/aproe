@@ -141,6 +141,27 @@ namespace APro
         {
             return hypot(x, y);
         }
+
+        bool IsFinite(Real r)
+        {
+            return sizeof(Real) == sizeof(float) ?
+                IsFinite<float>((float)r) :
+                IsFinite<double>((double)r);
+        }
+
+        bool IsNan(Real r)
+        {
+            return sizeof(Real) == sizeof(float) ?
+                IsNan((float)r) :
+                IsNan((double)r);
+        }
+
+        bool IsInf(Real r)
+        {
+            return sizeof(Real) == sizeof(float) ?
+                IsInf((float)r) :
+                IsInf((double)r);
+        }
     }
 
     namespace Angle
