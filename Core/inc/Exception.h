@@ -66,11 +66,15 @@ namespace APro
 
     /** Throw a simple exception. */
     #define aprothrow(Except) throw Except (__LINE__, __FILE__, __FUNCTION__)
+
+    /** Throw a Custom exception. */
+    #define aprothrow_ce(msg) throw CustomException(msg, __LINE__, __FILE__, __FUNCTION__)
 }
 
 #else
 
 #define aprothrow
+#define aprothrow_ce
 #define APRO_MAKE_EXCEPTION
 
 namespace APro
@@ -101,6 +105,28 @@ namespace APro
         APRO_MAKE_EXCEPTION(FatalException)
 
         const char* what() const throw() { return "A fatal error has been thrown. See the program's provider for more support."; }
+    };
+
+    ////////////////////////////////////////////////////////////
+    /** @class CustomException
+     *  @ingroup Core
+     *  @brief A Custom Error exception.
+     *
+     *  Can be used to launch an error without creating a new class
+     *  if we just want to draw a message.
+    **/
+    ////////////////////////////////////////////////////////////
+    class CustomException : public Exception
+    {
+    public:
+
+        CustomException(const char* msg, long l, const char* fi, const char* fu);
+
+        const char* what() const throw() { return buffer; }
+
+    private:
+
+        char buffer[512];
     };
 }
 

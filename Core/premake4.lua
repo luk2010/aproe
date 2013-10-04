@@ -9,6 +9,11 @@ newoption {
 }
 
 newoption {
+	trigger		= "with-exceptassert",
+	description = "If set with '--with-exceptions' and on debug mode, failing assertions will throw an exception."
+}
+
+newoption {
 	trigger 	= "with-all",
 	description	= "Set on debug mode only, allow everything you can."
 }
@@ -72,9 +77,13 @@ project("core")
 	configuration "with-memorytracker"
 		defines {"_HAVE_MEMORYTRACKER_"}
 
+	configuration "with-exceptassert"
+		defines {"_HAVE_EXCEPT_ON_ASSERT_"}
+
 	configuration "with-all"
 		defines {"_HAVE_EXCEPTIONS_"}
 		defines {"_HAVE_MEMORYTRACKER_"}
+		defines {"_HAVE_EXCEPT_ON_ASSERT_"}
 
 	configuration "double-real"
 		defines {"_USE_DOUBLEREAL_"}

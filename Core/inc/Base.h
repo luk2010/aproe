@@ -12,6 +12,11 @@
 #ifndef APROBASE_H
 #define APROBASE_H
 
+/** @def TOTEXT(a)
+ *  Transform something into text.
+**/
+#define TOTEXT(a) #a
+
 /** Define the OFF state to another define. */
 #define APRO_OFF 0
 
@@ -154,7 +159,7 @@ double ReinterpretAsDouble(u64& i)
  *  @def aproassert(condition, message)
  *
  *  Make an assertion from a condition, and print it if
- *  false.
+ *  false, or throw an exception if setted.
 **/
 ////////////////////////////////////////////////////////////
 
@@ -165,21 +170,19 @@ double ReinterpretAsDouble(u64& i)
 #endif
 
 #if APRO_DEBUG == APRO_ON
-
-#   define aproassert(condition, message) \
+#   if defined(_HAVE_EXCEPT_ON_ASSERT_) && defined(_HAVE_EXCEPTIONS_)
+#       include "Assert.h"
+#       define aproassert(condition, message) __assert_with_except(condition, message, TOTEXT(condition))
+#   else
+#       define aproassert(condition, message) \
 if(!(condition) ) \
 { \
     Console::get() << "\nAssertion failed ! [\"" << #condition << "\"](\"" << __FUNCTION__ << "\") " << aprodebug(message); \
 }
-
+#   endif
 #else
 #   define aproassert(a,b)
 #endif
-
-/** @def TOTEXT(a)
- *  Transform something into text.
-**/
-#define TOTEXT(a) #a
 
 ////////////////////////////////////////////////////////////
 /** @brief Return the name of a given class.
