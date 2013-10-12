@@ -37,6 +37,6 @@ namespace APro
 
     SharedPointer<Resource> NullLoader::loadResource(const String& filename)
     {
-        return SharedPointer<Resource>(AProNew(1, NullResource) (String(), filename));
+        return SharedPointer<Resource>(AProNew(NullResource, String(), filename));
     }
 }

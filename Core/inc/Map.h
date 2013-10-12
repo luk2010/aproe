@@ -35,20 +35,20 @@ namespace APro
 
             Pair()
             {
-                obj = AProNew(1, T1) ();
-                obj2 = AProNew(1, T2) ();
+                obj = AProNew(T1);
+                obj2 = AProNew(T2);
             }
 
             Pair(const T1& first, const T2& second)
             {
-                obj = AProNew(1, T1) (first);
-                obj2 = AProNew(1, T2) (second);
+                obj = AProNew(T1, first);
+                obj2 = AProNew(T2, second);
             }
 
             Pair(const Pair& other)
             {
-                obj = AProNew(1, T1) (other.first());
-                obj2 = AProNew(1, T2) (other.second());
+                obj = AProNew(T1, other.first());
+                obj2 = AProNew(T2, other.second());
             }
 
             ~Pair()
@@ -84,7 +84,7 @@ namespace APro
                 if(obj != nullptr)
                     AProDelete(obj);
 
-                obj = AProNew(1, T1) (obj_);
+                obj = AProNew(T1, obj_);
             }
 
             void setSecond(const T2& obj_)
@@ -92,7 +92,7 @@ namespace APro
                 if(obj2 != nullptr)
                     AProDelete(obj2);
 
-                obj2 = AProNew(1, T2) (obj_);
+                obj2 = AProNew(T2, obj_);
             }
 
             bool operator == (const Pair& other)
@@ -126,7 +126,7 @@ namespace APro
                 push(pair.first(), pair.second());
             }
         }
-        
+
         Map<T1, T2> & operator = (const Map<T1, T2>& other)
         {
             clear();
@@ -144,7 +144,7 @@ namespace APro
 
         void push(const T1& key, const T2& value)
         {
-            pairs.push_back(AProNew(1, Pair) (key, value));
+            pairs.push_back(AProNew(Pair, key, value));
         }
 
         void pop(const T1& key)

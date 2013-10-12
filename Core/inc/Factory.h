@@ -21,52 +21,6 @@
 namespace APro
 {
     /////////////////////////////////////////////////////////////
-    /** @class Prototype
-     *  @ingroup Utils
-     *  @brief Object that can be cloned.
-     *  @details Every object that can be created by a factory
-     *  must inherits this class, and implement the clone metod.
-    **/
-    /////////////////////////////////////////////////////////////
-    class Prototype
-    {
-    public:
-        /////////////////////////////////////////////////////////////
-        /** @brief Destructor.
-        **/
-        /////////////////////////////////////////////////////////////
-        virtual ~Prototype() {}
-
-        /////////////////////////////////////////////////////////////
-        /** @brief Clone this object.
-         *  @note This function should be used only by a factory.
-         *
-         *  @return A new instance of this object.
-        **/
-        /////////////////////////////////////////////////////////////
-        virtual Prototype* clone() const = 0;
-        
-        /////////////////////////////////////////////////////////////
-        /** @brief Operator to delete.
-         *
-         *  This make sure the correct deletion method is used. 
-         *  In fact, this operator makes sure that the prototype
-         *  will call once the virtual destructor, then the deletion
-         *  system that will free the pointer. 
-         *
-         *  In addition, this function will be called inside the heap
-         *  that provide also the clone function, so everything should
-         *  work fine.
-        **/
-        /////////////////////////////////////////////////////////////
-        void operator delete (Prototype* proto)
-        {
-            proto->~Prototype();
-            AProDelete((void*)proto);
-        }
-    };
-
-    /////////////////////////////////////////////////////////////
     /** @class Factory
      *  @ingroup Utils
      *  @brief A factory class that implements the Factory Design
@@ -113,8 +67,8 @@ namespace APro
          *  @param proto : Prototype to store.
         **/
         /////////////////////////////////////////////////////////////
-        void register_prototype(const String& key, PrototypeBase* proto) { if(proto) prototypes[key] = proto; }
-        
+        void register_prototype(const String& key, PrototypeBase* proto) { if(proto) { prototypes[key] = proto; proto->fact = this; } }
+
         ////////////////////////////////////////////////////////////
         /** @brief Tell if a prototype is registered.
         **/
@@ -127,8 +81,36 @@ namespace APro
         /////////////////////////////////////////////////////////////
         void print(Console& console) const
         {
-            console << "Factory { Prototypes = \"" << typeid(PrototypeBase).name() << "\", Prototypes Number = " << prototypes.size() << " }";
+            console << "Factory { Prototypes = \"" << className<PrototypeBase>() << "\", Prototypes Number = " << prototypes.size() << " }";
         }
+    };
+
+    /////////////////////////////////////////////////////////////
+    /** @class Prototype
+     *  @ingroup Utils
+     *  @brief Object that can be cloned.
+     *  @details Every object that can be created by a factory
+     *  must inherits this class, and implement the clone and destroy
+     *  methods.
+    **/
+    /////////////////////////////////////////////////////////////
+    class Prototype
+    {
+    public:
+        /////////////////////////////////////////////////////////////
+        /** @brief Destructor.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual ~Prototype() {}
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Clone this object.
+         *  @note This function should be used only by a factory.
+         *
+         *  @return A new instance of this object.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual Prototype* clone() const = 0;
     };
 }
 

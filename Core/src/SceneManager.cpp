@@ -47,7 +47,7 @@ namespace APro
 
     Scene::ptr SceneManager::createScene(const String& scene_name) const
     {
-        return Scene::ptr(AProNew3(Scene) (scene_name));
+        return Scene::ptr(AProNew(Scene, scene_name));
     }
 
     Scene::ptr SceneManager::createAndAddScene(const String& scene_name)

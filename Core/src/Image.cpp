@@ -129,12 +129,12 @@ namespace APro
 
     SharedPointer<Image> Image::subRect(const Rectangle<size_t>& rect) const
     {
-        SharedPointer<Image> img = AProNew(1, Image) (getName() + "_sub_" + String::toString((unsigned int) rect.left()) + "_" +
+        SharedPointer<Image> img = AProNew(Image, getName() + "_sub_" + String::toString((unsigned int) rect.left()) + "_" +
                                                                        String::toString((unsigned int) rect.top()) + "_" +
                                                                        String::toString((unsigned int) rect.right()) + "_" +
                                                                        String::toString((unsigned int) rect.bottom()),
 
-                                                      getFilename() + "_sub_" + String::toString((unsigned int) rect.left()) + "_" +
+                                                  getFilename() + "_sub_" + String::toString((unsigned int) rect.left()) + "_" +
                                                                            String::toString((unsigned int) rect.top()) + "_" +
                                                                            String::toString((unsigned int) rect.right()) + "_" +
                                                                            String::toString((unsigned int) rect.bottom()));

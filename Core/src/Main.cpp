@@ -84,7 +84,7 @@ namespace APro
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
 
-        sharedpointer_collector = AProNew3(PointerCollector) (String("Global"));
+        sharedpointer_collector = AProNew(PointerCollector, String("Global"));
         if(sharedpointer_collector)
         {
             getConsole() << "\n[Main] Global Pointer Collector OK.";
@@ -95,12 +95,12 @@ namespace APro
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
 
-        resourceManager = AProNew(1, ResourceManager);
+        resourceManager = AProNew(ResourceManager);
         if(resourceManager)
         {
             // Add default loader here.
-            resourceManager->addLoader(ResourceLoader::ptr(AProNew(1, DynamicLibraryLoader)));
-            resourceManager->addLoader(ResourceLoader::ptr(AProNew(1, NullLoader)));
+            resourceManager->addLoader(ResourceLoader::ptr(AProNew(DynamicLibraryLoader)));
+            resourceManager->addLoader(ResourceLoader::ptr(AProNew(NullLoader)));
 
             getConsole() << "\n[Main] Resource Manager OK.";
         }
@@ -110,7 +110,7 @@ namespace APro
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
 /*
-        impStore = AProNew(1, ImplementationStore);
+        impStore = AProNew(ImplementationStore);
         if(impStore)
             getConsole() << "\n[Main] Implementation Store OK.";
         else
@@ -119,8 +119,8 @@ namespace APro
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
  */
-        
-        impFactory = AProNew(ImplementationFactory) ();
+
+        impFactory = AProNew(ImplementationFactory);
         if(impFactory)
         {
             getConsole() << "\n[Main] Implementation Factory OK.";
@@ -142,7 +142,7 @@ namespace APro
         }
 */
 
-        pluginManager = AProNew(1, PluginManager) ();
+        pluginManager = AProNew(PluginManager);
         if(pluginManager)
         {
             getConsole() << "\n[Main] Plugin Manager OK. Loading plugins and implementations in directory \"plugins\".";
@@ -154,11 +154,11 @@ namespace APro
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
 
-        tmanager = AProNew3(ThreadManager);
+        tmanager = AProNew(ThreadManager);
         if(tmanager)
         {
             // Create memorytracker mutex
-            char* buffer = AProNew(1, char);
+            char* buffer = AProNew(char);
             AProDelete(buffer);
             getConsole() << "\n[Main] Thread Manager OK.";
         }
@@ -168,7 +168,7 @@ namespace APro
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
 
-        mathManager = AProNew(1, MathFunctionManager) ();
+        mathManager = AProNew(MathFunctionManager);
         if(mathManager)
             getConsole() << "\n[Main] Math Function Manager OK.";
         else
@@ -177,7 +177,7 @@ namespace APro
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
 
-        windowManager = AProNew(1, WindowManager) ();
+        windowManager = AProNew(WindowManager);
         if(windowManager)
             getConsole() << "\n[Main] Window Manager OK.";
         else
@@ -186,7 +186,7 @@ namespace APro
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
 
-        fs = AProNew2(FileSystem, workingdir, fs);
+        fs = AProNew(FileSystem, workingdir, fs);
         if(fs)
         {
             getConsole() << "\n[Main] File System OK. Base Path is : \"" << workingdir << "\".";
@@ -197,7 +197,7 @@ namespace APro
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
 
-        abstract_object_factory = AProNew(1, AbstractObjectFactory);
+        abstract_object_factory = AProNew(AbstractObjectFactory);
         if(abstract_object_factory)
         {
             getConsole() << "\n[Main] Object Factory OK.";
@@ -280,7 +280,7 @@ namespace APro
         {
             tmanager->stopAllThreads();
             tmanager->clear();
-            AProDelete3(tmanager);
+            AProDelete(tmanager);
             tmanager = nullptr;
             ThreadManager::currentThreadManager = NULL;
             getConsole() << "\n[Main] Thread Manager cleaned !";
@@ -327,7 +327,7 @@ namespace APro
             getConsole() << "\n[Main] Can't clean Implementation Store because not initialized !";
         }
  */
-        
+
         if(impFactory)
         {
             impFactory->clear();
@@ -354,7 +354,7 @@ namespace APro
 
         if(sharedpointer_collector)
         {
-            AProDelete3(sharedpointer_collector);
+            AProDelete(sharedpointer_collector);
             sharedpointer_collector = nullptr;
             getConsole() << "\n[Main] Global Pointer Collector cleaned !";
         }
@@ -362,7 +362,7 @@ namespace APro
         {
             getConsole() << "\n[Main] Can't clean Global Pointer Collector because not initialized !";
         }
-        
+
         if(id_generator)
         {
             AProDelete(id_generator);

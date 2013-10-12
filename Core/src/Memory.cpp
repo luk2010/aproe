@@ -13,10 +13,7 @@
 **/
 ////////////////////////////////////////////////////////////
 #include "Memory.h"
-
-#if APRO_MEMORYTRACKER == APRO_ON
-#   include "MemoryTracker.h"
-#endif
+#include "MemoryTracker.h"
 
 #include <stdio.h>
 
@@ -27,7 +24,7 @@ namespace APro
     {
         APRO_MAKE_EXCEPTION(NotEnoughMemoryException)
 
-        const char* what() const throw() { return "Not enough RAM accessible !"; }
+        const char* what() const throw() { return "Not enough Memory accessible !"; }
     };
 
     void* allocate(size_t byte, const char* func_, const char* file_, int line_)
@@ -39,20 +36,18 @@ namespace APro
 
         else
         {
+            // Using the malloc function to allocate memory.
+            /// @todo Make it more customizable.
             void* ptr = malloc(byte);
             if(ptr == nullptr)
             {
                 aprodebug("Can't allocate ") << byte << " bytes ! Call from \"" << func_ << "\" in file \"" << file_ << "\" and line " << line_ << ".";
-                aprothrow(NotEnoughMemoryException);
+                aprothrow(NotEnoughMemoryException);// Throw an exception if available.
                 return nullptr;
             }
 
-#if APRO_MEMORYTRACKER == APRO_ON
-
+            Memory::Set(ptr, 0, byte);
             MemoryManager::get().reportAllocation(ptr, byte, func_, file_, line_);
-
-#endif
-
             return ptr;
         }
     }
@@ -82,12 +77,7 @@ namespace APro
                     return nullptr;
                 }
 
-#if APRO_MEMORYTRACKER == APRO_ON
-
                 MemoryManager::get().reportReallocation(ptr, new_ptr, byte, func_, file_, line_);
-
-#endif
-
                 ptr = new_ptr;
                 return new_ptr;
             }
@@ -105,12 +95,7 @@ namespace APro
         else
         {
 
-#if APRO_MEMORYTRACKER == APRO_ON
-
             MemoryManager::get().reportDeallocation(ptr, func_, file_, line_);
-
-#endif
-
             free(ptr);
         }
     }

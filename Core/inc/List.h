@@ -35,13 +35,13 @@ namespace APro
 
             Node(const T& other)
             {
-                element = AProNew(1, T) (other);
+                element = AProNew(T, other);
                 next = previous = nullptr;
             }
 
             Node(const Node& other)
             {
-                element = AProNew(1, T) (other.element);
+                element = AProNew(T, other.element);
                 next = previous = nullptr;
             }
 
@@ -445,7 +445,7 @@ namespace APro
                 }
             }
 
-            Node* newNode = AProNew(1, Node) (obj);
+            Node* newNode = AProNew(Node, obj);
             newNode->previous = rlastNode;
             newNode->next = &lastNode;
 
@@ -494,7 +494,7 @@ namespace APro
                 }
             }
 
-            Node* newNode = AProNew(1, Node) (obj);
+            Node* newNode = AProNew(Node, obj);
             newNode->previous = &firstNode;
             newNode->next = rfirstNode;
 
@@ -553,7 +553,7 @@ namespace APro
             Node* nextNode = (begin() + before).node;
             Node* previousNode = nextNode->previous;
 
-            Node* newNode = AProNew(1, Node) (obj);
+            Node* newNode = AProNew(Node, obj);
             newNode->previous = previousNode;
             newNode->next = nextNode;
 
@@ -656,7 +656,7 @@ namespace APro
         {
             return at(index);
         }
-        
+
         int lastIndex() const
         {
             return msize ? msize - 1 : 0;

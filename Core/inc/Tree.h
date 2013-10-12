@@ -39,19 +39,19 @@ namespace APro
         template <typename TypeData>
         virtual Node_base* createNode_internal(const TypeData& data, Node_base* parent)
         {
-            return AProNew3(NodeType) (data, parent, this);
+            return AProNew(NodeType, data, parent, this);
         }
 
         virtual Node_base* createRootNode()
         {
-            return static_cast<Node_base*>(AProNew3(NodeType) ());
+            return static_cast<Node_base*>(AProNew(NodeType));
         }
 
     protected:
 
         virtual void deallocate_node_internal(Node_base* node)
         {
-            AProDelete3(reinterpret_cast<NodeType*>(node));
+            AProDelete(reinterpret_cast<NodeType*>(node));
         }
 
     public:

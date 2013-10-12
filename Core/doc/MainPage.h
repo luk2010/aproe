@@ -18,11 +18,27 @@
     @section Downloads
 
     You can download the latest source of the Engine on our Github repository.
-    See <a href="https://github.com/luk2010/aproe">GitHub</a> for more informations or the \link Installation \endlink page.
+    See <a href="https://github.com/luk2010/aproe">GitHub</a> for more informations or the \link Downloading \endlink page.
 
-    @section Helps
+    @section Cleaning
 
-    You should read the README file given with the download to understand how to compile, modify and use the sources.
+    Just run @code premake4 clean @endcode to clean every unused files. You will have to re-run the initial premake4
+    script to get the makefiles again.
+    'html' folder created by Doxygen isn't destroyed during cleaning, so you'll have to remove it manually.
+
+    @note If you generate Codeblocks project files, 'core.layout' file won't be destroyed because it was not made by the
+    premake process.
+
+    @section Works Working on the sources
+
+    You can work on the source simply by creating the IDE's files you like ( as 'premake4 codeblocks' for
+    example ) and then work on the source. Think to clean your folder before any push.
+
+    @section Documentation
+
+    You can build the doc if you have doxygen. Simply run doxygen in this directory. Documentation will output
+    by default in the 'html' directory.
+    Then open the 'index.html' file in the 'html' directory with your favorite browser.
 **/
 ////////////////////////////////////////////////////////////
 
@@ -39,10 +55,6 @@
     hasn't any dependancy.
 
     @defgroup Global Global
-
-    @defgroup Memory Memory
-    @addtogroup Memory
-    @brief Memory management class, and containers.
 
     @defgroup Rendering Rendering
     @addtogroup Rendering

@@ -214,7 +214,7 @@ namespace APro
 
     void Context::initDefaultViewPort()
     {
-        ViewPort::ptr defaultv = AProNew(1, ViewPort) (String("Default"));
+        ViewPort::ptr defaultv = AProNew(ViewPort, String("Default"));
         defaultv->setVisible(true);
 
         addViewPort(defaultv);

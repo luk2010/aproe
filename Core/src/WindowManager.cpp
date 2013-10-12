@@ -58,8 +58,7 @@ namespace APro
         SharedPointer<Window> ret = getWindow(name);
         if(ret.isNull())
         {
-            ret = AProNew3(Window) (name, title, size);
-            ret.setDeletionMethod(DeletionMethod::Delete3);
+            ret = AProNew(Window, name, title, size);
             ret->fullscreen(fullscreen);
             if(fullscreen)
             {

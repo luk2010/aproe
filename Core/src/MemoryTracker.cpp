@@ -1,27 +1,21 @@
 /** @file MemoryTracker.cpp
+ *  @ingroup Memory
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 22/05/2012 - 26/05/2012
+ *  @date 22/05/2012
  *
- *  @addtogroup Memory
- *
- *  This file implements the Memory Tracker.
+ *  Implements the Memory Tracker.
  *
 **/
 #include "MemoryTracker.h"
 #include "Console.h"
 #include "ThreadManager.h"
 
-#if APRO_MEMORYTRACKER == APRO_ON
-
 #include <sstream>
 #include <cstdio>
 #include <iostream>
-
-#undef new
-#undef  delete
 
 namespace APro
 {
@@ -72,12 +66,14 @@ namespace APro
         memstats.bytesfreed      = 0;
         memstats.blocksallocated = 0;
         memstats.blocksfreed     = 0;
-        m_opeDump                = false;
     }
 
     MemoryManager::~MemoryManager()
     {
 
+#if APRO_MEMORYTRACKER == APRO_ON
+
+        // Clear every Operation if we can.
         for(unsigned int i = 0; i < operations.size(); ++i)
         {
             Operation* op = operations.at(i);
@@ -99,18 +95,11 @@ namespace APro
         }
 
         operations.clear();
+
+#endif // APRO_MEMORYTRACKER
+
         blocks.clear();
 
-    }
-
-    bool MemoryManager::areOperationsDumped() const
-    {
-        return m_opeDump;
-    }
-
-    void MemoryManager::setOperationsDumping(bool opdmp)
-    {
-        m_opeDump = opdmp;
     }
 
     void MemoryManager::reportAllocation(void* ptr, size_t byte, const char* func, const char* file, int line)
@@ -130,11 +119,16 @@ namespace APro
                 block.size = byte;
                 blocks[ptr] = block;
 
+#if APRO_MEMORYTRACKER == APRO_ON
+
                 // Ajout d'un nouveau operation
                 AllocationOperation* ope = new AllocationOperation;
                 ope->block = block;
                 ope->ptr   = ptr;
                 operations.push_back(ope);
+
+#endif // APRO_MEMORYTRACKER
+
             }
             else
             {
@@ -144,11 +138,16 @@ namespace APro
                 it->second.line = line;
                 it->second.size = byte;
 
+#if APRO_MEMORYTRACKER == APRO_ON
+
                 // Ajout d'un nouveau operation
                 AllocationOperation* ope = new AllocationOperation;
                 ope->block = it->second;
                 ope->ptr   = ptr;
                 operations.push_back(ope);
+
+#endif // APRO_MEMORYTRACKER
+
             }
 
             memstats.blocksallocated++;
@@ -183,6 +182,8 @@ namespace APro
                 block.size = byte;
                 blocks[new_ptr] = block;
 
+#if APRO_MEMORYTRACKER == APRO_ON
+
                 // On ajout l'operation Reallocation
                 ReallocationOperation* ope = new ReallocationOperation;
                 ope->block    = oldblock;
@@ -190,6 +191,9 @@ namespace APro
                 ope->newblock = block;
                 ope->new_ptr  = new_ptr;
                 operations.push_back(ope);
+
+#endif // APRO_MEMORYTRACKER
+
             }
             else
             {
@@ -201,12 +205,17 @@ namespace APro
                 block.size = byte;
                 blocks[new_ptr] = block;
 
+#if APRO_MEMORYTRACKER == APRO_ON
+
                 // On ajout l'operation Reallocation
                 ReallocationOperation* ope = new ReallocationOperation;
                 ope->block.size = 0;
                 ope->newblock   = block;
                 ope->ptr        = ptr;
                 operations.push_back(ope);
+
+#endif // APRO_MEMORYTRACKER
+
             }
 
             memstats.blocksallocated++;
@@ -231,6 +240,8 @@ namespace APro
                 // On efface l'ancien
                 blocks.erase(it);
 
+#if APRO_MEMORYTRACKER == APRO_ON
+
                 // On cree un nouveau block
                 MemoryBlock deblock;
                 deblock.file = file;
@@ -244,6 +255,8 @@ namespace APro
                 ope->ptr   = ptr;
                 operations.push_back(ope);
 
+#endif // APRO_MEMORYTRACKER
+
                 memstats.blocksfreed++;
                 memstats.bytesfreed += oldblock.size;
             }
@@ -252,6 +265,8 @@ namespace APro
         }
     }
 
+#if APRO_MEMORYTRACKER == APRO_ON
+
     const MemoryManager::Operation* MemoryManager::getLastOperation()
     {
         if(operations.size() > 0)
@@ -259,6 +274,8 @@ namespace APro
         else
             return NULL;
     }
+
+#endif // APRO_MEMORYTRACKER
 
     MemoryManager::Statistics MemoryManager::getStats()
     {
@@ -273,17 +290,18 @@ namespace APro
             fprintf(file, "\nMemoryManager Report Dump File");
             fprintf(file, "\n------------------------------");
 
-            if(m_opeDump)
-            {
-                fprintf(file, "\n\nReporting every operations.\n");
+#if APRO_MEMORYTRACKER == APRO_ON
 
-                for(unsigned int i = 0; i < operations.size(); ++i)
-                {
-                    Operation* ope = operations[i];
-                    fprintf(file, "%s", writeOperation(ope).c_str());
-                    fflush(file);
-                }
+            fprintf(file, "\n\nReporting every operations.\n");
+
+            for(unsigned int i = 0; i < operations.size(); ++i)
+            {
+                Operation* ope = operations[i];
+                fprintf(file, "%s", writeOperation(ope).c_str());
+                fflush(file);
             }
+
+#endif // APRO_MEMORYTRACKER
 
             fprintf(file, "\n\nReporting stats.\n");
             fprintf(file, "\nTotal bytes allocated : %lu bytes.", memstats.bytesallocated);
@@ -297,6 +315,8 @@ namespace APro
         }
 
     }
+
+#if APRO_MEMORYTRACKER == APRO_ON
 
     std::string MemoryManager::writeOperation(Operation* ope)
     {
@@ -337,6 +357,14 @@ namespace APro
             return "";
         }
     }
-}
 
-#endif
+#endif // APRO_MEMORYTRACKER
+
+    const MemoryManager::MemoryBlock* MemoryManager::retrieveMemoryBlock(ptr_t ptr) const
+    {
+        if(blocks.find(ptr) != blocks.end())
+            return blocks[ptr];
+
+        return nullptr;
+    }
+}

@@ -65,7 +65,7 @@ namespace APro
 
             virtual holder* clone() const
             {
-                return AProNew(1, RHolder<ValueType>) (value);
+                return AProNew(RHolder<ValueType>, value);
             }
 
         public:
@@ -85,7 +85,7 @@ namespace APro
         }
 
         template <typename ValueType>
-        explicit Variant(const ValueType & value) : content(AProNew(1, RHolder<ValueType>) (value))
+        explicit Variant(const ValueType & value) : content(AProNew(RHolder<ValueType>, value))
         {
 
         }
@@ -141,7 +141,7 @@ namespace APro
             if(content)
                 clear();
 
-            content = AProNew(1, RHolder<ValueType>) (obj);
+            content = AProNew(RHolder<ValueType>, obj);
         }
 
         void set(const Variant& other)

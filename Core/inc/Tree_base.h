@@ -125,7 +125,7 @@ namespace APro
         template <typename TypeData>
         virtual Node_base* createNode_internal(const TypeData& data, Node_base* parent)
         {
-            return /* AProNew3(Node_base) (parent, this);*/ nullptr;
+            return nullptr;
         }
 
     public:
@@ -175,7 +175,7 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Deallocate a node.
-         *  @details You shall use the AProDelete3 system, with the AProNew3 one.
+         *  @details You shall use the AProDelete system, with the AProNew one.
          *  You shall also correctly cast the node to appropriate type
          *  to avoid bad type deallocation.
          *

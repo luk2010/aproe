@@ -41,7 +41,7 @@ namespace APro
                                                               this property to take effect."));
         setParam(String("Status"), Variant(Status::Null), String("Status of the Window. If Null, the window hasn't been created yet."));
 
-        keyboard = AProNew(1, Keyboard) ();
+        keyboard = AProNew(Keyboard);
         context = 0;
         documentEvents();
     }

@@ -56,7 +56,7 @@ namespace APro
 
     Node_t* Tree_base::createRootNode()
     {
-        return /* AProNew3(Node_base) ();*/ nullptr;
+        return nullptr;
     }
 
     void destroyNode(Node_base* node)
@@ -70,7 +70,7 @@ namespace APro
 
     void deallocate_node_internal(Node_base* node)
     {
-        AProDelete3(node);
+        AProDelete(node);
     }
 
     void clear()

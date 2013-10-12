@@ -8,7 +8,7 @@ This folder contains
 How to use these files
 ----------------------
 
-  First, verify thatyou correctly have premake4 installed. Run "premake4 --version" and see if version
+  First, verify that you correctly have premake4 installed. Run "premake4 --version" and see if version
 is superior or equal to 4.4 .
   If version is not correct, run the install premake4 script that will install the 4.4 beta4 version of premake4
 in your bin/ directory.

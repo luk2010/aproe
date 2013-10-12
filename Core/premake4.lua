@@ -5,7 +5,7 @@ newoption {
 
 newoption {
 	trigger 	= "with-memorytracker",
-	description	= "Set on debug mode only, allow memory tracking."
+	description	= "Set on debug mode only, allow memory tracing. Note that the MemoryManager will still be available."
 }
 
 newoption {

@@ -58,14 +58,14 @@ namespace APro
             }
             else
             {
-                ret = AProNew(1, PluginHandle) (name, lib);
+                ret = AProNew(PluginHandle, name, lib);
                 Manager<PluginHandle>::push(ret);
-                
+
                 if(isOutdated(ret))
                 {
                     Console::get() << "\n[PluginManager]{addPluginHandle} Warning : Plugin " << name << " is outdated !";
                 }
-                
+
                 return ret;
             }
         }
@@ -82,18 +82,18 @@ namespace APro
         {
             if(lib.isNull() || !lib.isLoaded())
             {
-                return AProNew(1, PluginHandle) (name);
+                return AProNew(PluginHandle, name);
             }
             else
             {
-                ret = AProNew(1, PluginHandle) (name, lib);
+                ret = AProNew(PluginHandle, name, lib);
                 Manager<PluginHandle>::push(ret);
-                
+
                 if(isOutdated(ret))
                 {
                     Console::get() << "\n[PluginManager]{addPluginHandle} Warning : Plugin " << name << " is outdated !";
                 }
-                
+
                 return ret;
             }
         }
@@ -109,7 +109,7 @@ namespace APro
         if(!rm.isNull())
         {
             Manager<PluginHandle>::pop(rm);
-            
+
             rm->end();
             rm.release();// We release the pointer just to be sure.
         }
@@ -127,7 +127,7 @@ namespace APro
             return nullptr;
         }
     }
-    
+
     const PluginApiVersion PluginManager::getCurrentApiVersion() const
     {
         PluginApiVersion av;
@@ -205,18 +205,18 @@ namespace APro
 
         return 0;
     }
-    
+
     bool PluginManager::hasValidApiVersion(const PluginHandle::ptr& plugin) const
     {
         bool ret = false;
-        
+
         if(!plugin->isNull())
         {
             PluginInfo* info = plugin->getPluginInfo();
             if(info)
             {
                 const PluginApiVersion current = getCurrentApiVersion();
-                
+
                 if(info->apiversion.major <= current.major && info->apiversion.minor <= current.minor)
                 {
                     ret = true;
@@ -227,10 +227,10 @@ namespace APro
                 }
             }
         }
-        
+
         return ret;
     }
-    
+
     bool PluginManager::isOutdated(const PluginHandle::ptr& plugin) const
     {
         bool ret = false;
@@ -240,7 +240,7 @@ namespace APro
             {
                 const PluginApiVersion current = getCurrentApiVersion();
                 PluginInfo* info = plugin->getPluginInfo();
-                
+
                 if(info->apiversion.build < current.build)
                 {
                     ret = true;
@@ -251,7 +251,7 @@ namespace APro
                 }
             }
         }
-        
+
         return ret;
     }
 }

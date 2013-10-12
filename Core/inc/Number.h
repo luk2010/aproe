@@ -58,32 +58,32 @@ namespace APro
 
             virtual holder* clone() const
             {
-                return AProNew(1, NumRHolder) (held);
+                return AProNew(NumRHolder, held);
             }
 
             virtual holder* add(holder* h)
             {
-                return AProNew(1, NumRHolder) (held + static_cast<NumRHolder*>(h)->held);
+                return AProNew(NumRHolder, held + static_cast<NumRHolder*>(h)->held);
             }
 
             virtual holder* substract(holder* h)
             {
-                return AProNew(1, NumRHolder) (held - static_cast<NumRHolder*>(h)->held);
+                return AProNew(NumRHolder, held - static_cast<NumRHolder*>(h)->held);
             }
 
             virtual holder* multiply(holder* h)
             {
-                return AProNew(1, NumRHolder) (held * static_cast<NumRHolder*>(h)->held);
+                return AProNew(NumRHolder, held * static_cast<NumRHolder*>(h)->held);
             }
 
             virtual holder* multiply(double h)
             {
-                return AProNew(1, NumRHolder) (held * h);
+                return AProNew(NumRHolder, held * h);
             }
 
             virtual holder* divide(holder* h)
             {
-                return AProNew(1, NumRHolder) (held / static_cast<NumRHolder*>(h)->held);
+                return AProNew(NumRHolder, held / static_cast<NumRHolder*>(h)->held);
             }
         };
 
@@ -96,7 +96,7 @@ namespace APro
 
         template <typename ValueType> explicit Number(const ValueType& v)
         {
-            content = AProNew(1, NumRHolder<ValueType>) (v);
+            content = AProNew(NumRHolder<ValueType>, v);
         }
 
         Number(const Number& other)

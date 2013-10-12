@@ -75,17 +75,17 @@ namespace APro
 
     public:
 
-        SharedPointer() : ptr(nullptr), counter(nullptr), dmethod(DeletionMethod::Delete)
+        SharedPointer() : ptr(nullptr), counter(nullptr)
         {
 
         }
 
-        SharedPointer(T* ptr_) : ptr(ptr_), counter(nullptr), dmethod(DeletionMethod::Delete)
+        SharedPointer(T* ptr_) : ptr(ptr_), counter(nullptr)
         {
             bind();
         }
 
-        SharedPointer(const SharedPointer<T>& other) : ptr(other.ptr), counter(nullptr), dmethod(other.dmethod)
+        SharedPointer(const SharedPointer<T>& other) : ptr(other.ptr), counter(nullptr)
         {
             if(other.ptr)
             {
@@ -95,7 +95,7 @@ namespace APro
         }
 
         template<typename Y>
-        SharedPointer(SharedPointer<Y>& other) : ptr(other.getPtr()), counter(nullptr), dmethod(other.getDeletionMethod())
+        SharedPointer(SharedPointer<Y>& other) : ptr(other.getPtr()), counter(nullptr)
         {
             if(other.getPtr())
             {
@@ -168,16 +168,6 @@ namespace APro
             destroy();
         }
 
-        void setDeletionMethod(DeletionMethod::t dm)
-        {
-            dmethod = dm;
-        }
-
-        DeletionMethod::t getDeletionMethod() const
-        {
-            return dmethod;
-        }
-
         SharedPointer<T>& operator = (const SharedPointer<T>& other)
         {
             destroy();
@@ -187,8 +177,6 @@ namespace APro
             counter = other.counter;
             if(counter)
                 counter->push();
-
-            dmethod = other.dmethod;
 
             return *this;
         }
@@ -222,7 +210,7 @@ namespace APro
 
             if(ptr)
             {
-                counter = AProNew(1, Counter) ;
+                counter = AProNew(Counter) ;
                 counter->push();
             }
         }
@@ -265,23 +253,12 @@ namespace APro
             {
                 AProDelete(ptr);
             }
-
-            if(dmethod == DeletionMethod::Delete2)
-            {
-                AProDelete2(ptr);
-            }
-
-            if(dmethod == DeletionMethod::Delete3)
-            {
-                AProDelete3(ptr);
-            }
         }
 
     private:
 
         T* ptr;
         Counter* counter;
-        DeletionMethod::t dmethod;
     };
 
     template<typename ValueType, typename ValueType2>

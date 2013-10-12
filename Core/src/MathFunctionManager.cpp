@@ -30,16 +30,16 @@ namespace APro
 
     MathFunctionManager::MathFunctionManager()
     {
-        MathModule::ptr stdModule( AProNew(1, MathModule) (String("Std"), String("Standard Module.")) );
+        MathModule::ptr stdModule( AProNew(MathModule, String("Std"), String("Standard Module.")) );
 
-        MathFunction::ptr cosFunction ( AProNew(1, MathFunction) (String("Cos"),
+        MathFunction::ptr cosFunction ( AProNew(MathFunction, String("Cos"),
                                                                String("double:double"),
                                                                String("Cosinus of an angle, in radian."),
                                                                MathFunctionCos));
 
         stdModule->pushFunction(cosFunction);
 
-        MathFunction::ptr sinFunction ( AProNew(1, MathFunction) (String("Sin"),
+        MathFunction::ptr sinFunction ( AProNew(MathFunction, String("Sin"),
                                                                String("double:double"),
                                                                String("Sinus of an angle, in radian."),
                                                                MathFunctionSin));

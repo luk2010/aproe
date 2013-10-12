@@ -72,7 +72,7 @@ namespace APro
     {
         //if(exists(path))
         {
-            return File::ptr(AProNew(1, File) (path));
+            return File::ptr(AProNew(File, path));
         }
 
         return File::ptr();
@@ -224,7 +224,7 @@ namespace APro
     {
 
     }
-    
+
     String FileSystem::getWorkingDirectory()
     {
         char working_dir[256];
@@ -234,7 +234,7 @@ namespace APro
         else
             return String();
     }
-    
+
     bool FileSystem::setWorkingDirectory(const String& working_directory)
     {
         return chdir(working_directory.toCstChar()) == 0;

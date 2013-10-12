@@ -312,7 +312,7 @@ namespace APro
             Console::get() << "\n[Console]{createAndPopulateEvent} Sending not handled event type \"" << event_type << "\" is not recommended !";
         }
 
-        EventPtr ret = AProNew(Event) (event_type, this, set_target ? target.getPointer() : nullptr);
+        EventPtr ret = AProNew(Event, event_type, this, set_target ? target.getPointer() : nullptr);
 
         if(ret.isNull())
         {

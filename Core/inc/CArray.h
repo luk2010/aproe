@@ -60,7 +60,7 @@ namespace APro
                     _deallocate_array();
                 }
 
-                m_array = AProNew(m_size, Type);
+                m_array = AProNewA(Type, m_size);
 
                 if(!m_array)
                 {

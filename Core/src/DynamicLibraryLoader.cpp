@@ -43,7 +43,7 @@ namespace APro
 
     SharedPointer<Resource> DynamicLibraryLoader::loadResource(const String& filename)
     {
-        SharedPointer<DynamicLibrary> dynlib = AProNew(1, DynamicLibrary) (String(), filename);
+        SharedPointer<DynamicLibrary> dynlib = AProNew(DynamicLibrary, String(), filename);
 
         if(dynlib->isLoaded())
             return SharedPointer<Resource>(dynlib);

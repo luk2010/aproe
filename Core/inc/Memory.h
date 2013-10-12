@@ -18,6 +18,32 @@
 #include "Platform.h"
 #include "MemoryTracker.h"
 
+/// @defgroup Memory Memory
+/// @addtogroup Memory
+/// @brief Memory management class, and containers.
+///
+/// The memory system is composed of some functions and class very
+/// helpful making memory tracking much easier for the user.
+///
+/// ### The allocation / deallocation system
+///
+/// You can manage memory space using AProAllocate, AProReallocate or
+/// AProDeallocate macros. This will always track the memory you allocated
+/// or deallocated.
+///
+/// Keep in mind that memory space allocated is returned uninitialized,
+/// and zeroed. No constructors can be called by these functions.
+///
+/// ### The AProNew / AProDelete system
+///
+/// Three macros make everything easier :
+/// - AProNew : Constructs an object.
+/// - AProNewA : Constructs an array of object.
+/// - AProDelete : Destroys an object or an aray of objects.
+///
+/// These functions ensure correct calling of constructors and destructors,
+/// and are optimized for void pointers too.
+
 namespace APro
 {
     ////////////////////////////////////////////////////////////
@@ -31,8 +57,10 @@ namespace APro
      *
      *  @return A pointer to allocated bytes.
      *
-     *  @note
-     *  To allocate space for arrays, you should use the Allocator class.
+     *  @note To allocate space for arrays, you should use the
+     *  Allocator class.
+     *  @note This function always initialize memory space to
+     *  zero.
     **/
     ////////////////////////////////////////////////////////////
     APRO_DLL void* allocate(size_t byte, const char* func_, const char* file_, int line_);
@@ -92,14 +120,11 @@ namespace APro
 }
 
 ////////////////////////////////////////////////////////////
-/** @brief Allocates one or more objects using placement
- *  new.
+/** @brief Allocates one or more objects.
  *
- *  This function does not construct the object, it only
- *  reserve allocated space for it. Every objects you allocate
- *  with it is considered as an array, even for one object
- *  because it can be constructed more easily using the
- *  AProNew macro.
+ *  @warning This function does not call the constructor of
+ *  these objects. You should use the AProNew macro to use
+ *  constructors args.
  *
  *  @param n : Number of objects to allocate.
  *  @param func_ : Function calling this one.
@@ -112,31 +137,26 @@ namespace APro
 ////////////////////////////////////////////////////////////
 template <typename T> T* AProNew (size_t n, const char* func_, const char* file_, int line_)
 {
-    T* ptr = (T*) new (sizeof(T) * n);
-
-#if APRO_MEMORYTRACKER == APRO_ON
-
-    APro::MemoryManager::get().reportAllocation(ptr, sizeof(T) * n, func_, file_, line_);
-
-#endif
-
-    return ptr;
+    // Allocation of memory.
+    size_t sz = n * sizeof(T);
+    return (T*) APro::allocate(sz, func_, file_, line_);
 }
 
 ////////////////////////////////////////////////////////////
-/** @brief Typed deletion of given pointer.
+/** @brief Delete the given pointer.
  *
- *  Use it with AProDelete macro to delete your pointers
- *  previously allocated using AProNew macro.
+ *  @note In the contrary of AProNew, AProDelete calls destructors
+ *  for each objects in the array from the given pointer.
+ *  The number of objects is known from the MemoryManager which
+ *  keep trace of the memory block allocated previously using
+ *  AProNew or APro::allocate.
+ *  @note If you allocate memory with APro::allocate and
+ *  left it uninitialized, you may have some destructors calling
+ *  problems if you try to destroy it using AProDelete and you so
+ *  should use APro::deallocate or AProDelete with void* .
  *
- *  Destructors are called in this function, but only
- *  destructors of the given resolved type.
- *  @see Prototype::operator delete for more explanation
- *  about destruction and destructors.
- *
- *  @note Calling AProDelete on a void pointer only deallocate
- *  the previously allocated memory, and do not call any
- *  destructors.
+ *  @note If you delete a void pointer, it will only free the occupied
+ *  memory.
  *
  *  @param ptr : Pointer to destroy.
  *  @param func_ : Function calling this one.
@@ -146,62 +166,55 @@ template <typename T> T* AProNew (size_t n, const char* func_, const char* file_
 ////////////////////////////////////////////////////////////
 template <typename T> void AProDelete(T* ptr, const char* func_, const char* file_, int line_)
 {
-#if APRO_MEMORYTRACKER == APRO_ON
+    if(!ptr) return;
 
-    APro::MemoryManager::get().reportDeallocation(ptr, func_, file_, line_);
+    size_t sz_t = sizeof(T);
 
-#endif
+    // Looking for Block.
+    const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((ptr_t) ptr);
+    if(mblock && mblock->size >= sz_t)
+    {
+        // If block is valid, we determine how many objects there are in.
+        size_t n = (size_t) mblock->size / sz_t;
+        while(n)
+            ptr[--n]->~T();// Destroy each one in descending order to preserv cannonical destruction order of C++.
+    }
 
-    ptr->~T();// Should fix the destructor with placement new problem.
-    delete[] ptr;
+    // Destroying the pointer.
+    APro::deallocate(ptr, func_, file_, line_);
 }
 
-////////////////////////////////////////////////////////////
-/** @brief Allocate one object.
- *  @deprecated
-**/
-////////////////////////////////////////////////////////////
-template <typename T> T* AProNew_alone(const char* func_, const char* file_, int line_)
+/** void type specialisation of AProDelete. */
+template <> void AProDelete<void>(void* ptr, const char* func_, const char* file_, int line_)
 {
-    T* ptr = new T;
+    if(!ptr) return;
 
-#if APRO_MEMORYTRACKER == APRO_ON
+    // As it is a specialisation for the void type, we will not call destructors nor
+    // look for number of objects as void is not a real type.
 
-    APro::MemoryManager::get().reportAllocation(ptr, sizeof(T), func_, file_, line_);
-
-#endif
-
-    return ptr;
+    // Destroying the pointer.
+    APro::deallocate(ptr, func_, file_, line_);
 }
 
-////////////////////////////////////////////////////////////
-/** @brief Deallocate one object.
- *  @deprecated
-**/
-////////////////////////////////////////////////////////////
-template <typename T> void AProDelete_alone(T* ptr, const char* func_, const char* file_, int line_)
-{
-#if APRO_MEMORYTRACKER == APRO_ON
+/// Constructs a new object with given argues.
+/// @ingroup Memory
+/// @param T : Type of object.
+/// @see AProNewA, AProDelete
+#define AProNew(T, ...) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T[1] (__VA_ARGS__)
 
-    APro::MemoryManager::get().reportDeallocation(ptr, func_, file_, line_);
+/// Constructs a new array of objects of given size and argues.
+/// @ingroup Memory
+/// @param T : Type of objects.
+/// @param N : Size of array (in number of elements).
+/// @see AProNew, AProDelete
+#define AProNewA(T, N, ...) new (AProNew<T>(N, __FUNCTION__, __FILE__, __LINE__)) T[N] (__VA_ARGS__)
 
-#endif
-
-    delete ptr;
-}
-
-// Use for arrays
-#define AProNew(T) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T[1]
-#define AProNew(n, T) new (AProNew<T>(n, __FUNCTION__, __FILE__, __LINE__)) T[n]
-
-#define AProDelete(ptr) AProDelete(ptr, __FUNCTION__, __FILE__, __LINE__)
-
-// Use for placement new with memory manager and 1 argue
-#define AProNew2(T, arg, ptr) new T ( arg ); APro::MemoryManager::get().reportAllocation(ptr, sizeof(T), __FUNCTION__, __FILE__, __LINE__);
-#define AProDelete2(ptr) APro::MemoryManager::get().reportDeallocation(ptr, __FUNCTION__, __FILE__, __LINE__); delete ptr
-
-// Use for 1 object and argues
-#define AProNew3(T) new(AProNew_alone<T>(__FUNCTION__, __FILE__, __LINE__)) T
-#define AProDelete3(ptr) AProDelete_alone(ptr, __FUNCTION__, __FILE__, __LINE__)
+/// Destroys an array of objects and call destructor if possible.
+/// @ingroup Memory
+/// @note If type is void, or if object block cannot be found, no destructors is called
+/// and you may experience troubles.
+/// @param P : Pointer to destroy.
+/// @see AProNew, AProNewA
+#define AProDelete(P) AProDelete(ptr, __FUNCTION__, __FILE__, __LINE__)
 
 #endif

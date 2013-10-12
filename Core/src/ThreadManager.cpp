@@ -40,8 +40,7 @@ namespace APro
     {
         if(!threadExists(name))
         {
-            Thread::ptr new_thread = AProNew3(Thread) (name);
-            new_thread.setDeletionMethod(DeletionMethod::Delete3);
+            Thread::ptr new_thread = AProNew(Thread, name);
             if(!new_thread.isNull())
             {
                 Console::get() << "\n[ThreadManager]{createThread} Created new Thread with name \"" << name << "\".";
@@ -73,8 +72,7 @@ namespace APro
         Id id = generateID();
         if(id > 0)
         {
-            ThreadCondition::ptr new_condition = AProNew3(ThreadCondition) (id);
-            new_condition.setDeletionMethod(DeletionMethod::Delete3);
+            ThreadCondition::ptr new_condition = AProNew(ThreadCondition, id);
             if(!new_condition.isNull())
             {
                 /* Enter lock section */
@@ -105,8 +103,7 @@ namespace APro
         Id id = generateID();
         if(id > 0)
         {
-            ThreadMutex::ptr new_mutex = AProNew3(ThreadMutex) (id);
-            new_mutex.setDeletionMethod(DeletionMethod::Delete3);
+            ThreadMutex::ptr new_mutex = AProNew(ThreadMutex, id);
             if(!new_mutex.isNull())
             {
                 /* Enter lock section */
@@ -541,8 +538,7 @@ namespace APro
     {
         if(thread_mutex.isNull())
         {
-            thread_mutex = AProNew3(ThreadMutex) (0);
-            thread_mutex.setDeletionMethod(DeletionMethod::Delete3);
+            thread_mutex = AProNew(ThreadMutex, 0);
             if(thread_mutex.isNull())
             {
                 Console::get() << "\n[ThreadManager]{create_mutexs} Can't create thread_mutex !";
@@ -551,8 +547,7 @@ namespace APro
 
         if(condition_mutex.isNull())
         {
-            condition_mutex = AProNew3(ThreadMutex) (0);
-            condition_mutex.setDeletionMethod(DeletionMethod::Delete3);
+            condition_mutex = AProNew(ThreadMutex, 0);
             if(condition_mutex.isNull())
             {
                 Console::get() << "\n[ThreadManager]{create_mutexs} Can't create condition_mutex !";
@@ -561,8 +556,7 @@ namespace APro
 
         if(mutex_mutex.isNull())
         {
-            mutex_mutex = AProNew3(ThreadMutex) (0);
-            mutex_mutex.setDeletionMethod(DeletionMethod::Delete3);
+            mutex_mutex = AProNew(ThreadMutex, 0);
             if(mutex_mutex.isNull())
             {
                 Console::get() << "\n[ThreadManager]{create_mutexs} Can't create mutex_mutex !";

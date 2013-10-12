@@ -16,7 +16,12 @@
 
 namespace APro
 {
-    /** Throw an exception if _succeeded condition is false. */
+    /** Throw an exception if _succeeded condition is false.
+     *
+     *  @note This function is used only by aproassert macro when
+     *  options --with-exceptions and --with-exceptassert are set
+     *  in debug mode.
+    **/
     APRO_DLL void __assert_with_except(bool _succeeded, const char* _msg, const char* _condition);
 }
 
