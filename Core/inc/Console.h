@@ -269,7 +269,7 @@ namespace APro
          *  @param foreground : text's foreground color.
          *  @param background : text's backgrouund color.
          *  @param bold : Bold state.
-         *  @param blink : Blinnk state.
+         *  @param blink : Blink state.
          *  @return The console.
         **/
         ////////////////////////////////////////////////////////////

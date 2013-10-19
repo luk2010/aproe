@@ -422,13 +422,14 @@ namespace APro
     #define APRO_THREAD_MUTEX_UNLOCK(m)    ThreadManager::get().unlock(m)                           ///< Unlock a mutex.
 
     ////////////////////////////////////////////////////////////
-    /** Lock a mutex if exists. Otherwise, creates one.
+    /** @brief Lock a mutex if exists. Otherwise, creates one and
+     *  locks it if creation successfull.
     **/
     ////////////////////////////////////////////////////////////
     void APRO_THREAD_MUTEX_SAFELOCK(ThreadMutex::ptr& mutex);
 
     ////////////////////////////////////////////////////////////
-    /** Unlock a mutex if exists. Otherwise, creates one.
+    /** @brief Unlock a mutex if exists. Otherwise, creates one.
     **/
     ////////////////////////////////////////////////////////////
     void APRO_THREAD_MUTEX_SAFEUNLOCK(ThreadMutex::ptr& mutex);

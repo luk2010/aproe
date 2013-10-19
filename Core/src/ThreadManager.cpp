@@ -522,7 +522,11 @@ namespace APro
             APRO_THREAD_MUTEX_LOCK(mutex);
         else
             if(ThreadManager::currentThreadManager)
+            {
                 APRO_THREAD_MUTEX_CREATE(mutex);
+                if(!mutex.isNull())
+                    APRO_THREAD_MUTEX_LOCK(mutex);
+            }
     }
 
     void APRO_THREAD_MUTEX_SAFEUNLOCK(ThreadMutex::ptr& mutex)

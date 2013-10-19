@@ -1,6 +1,7 @@
-/////////////////////////////////////////////////////////////
+/////
+////////////////////////////////////////////////////////
 /** @file Array.h
- *  @ingroup Memory
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
@@ -15,649 +16,632 @@
 #define APROARRAY_H
 
 #include "Platform.h"
-#include "Exception.h"
-#include "Allocator.h"
-
-#include <cstdio>
-#include <cstring>
+#include "Memory.h"
 
 namespace APro
 {
     ////////////////////////////////////////////////////////////
     /** @class Array
-     *  @brief Represents a linear Array.
+     *  @ingroup Utils
+     *  @brief A dynamicly managed array.
      *
-     *  @details This array is a linear array, as an Array in C. It doesn't use the new and delete system for each block,
-     *  so we recommend you to use this array only for types that doesn't need to be constructed, i.e. types that
-     *  can be memcpy-ed easily like int, doube, char, ...
+     *  Every elements are in a contiguous memory area, so you
+     *  can access it as a normal C-style array.
      *
-     *  @note If you need to have the new and delete system for each node, use List instead.
+     *  Size is managed with a reserved space management. Because
+     *  reallocation is very time-consuming, you can reserve space
+     *  before pushing objects, so they will just be added as quick
+     *  as a simple copy.
      *
-     *  @details Example use of Arrays :
-     *  @code
-     *  Array<int> my_array(10);// Reserv 10 places to avoid memory reallocation time.
-     *  my_array.append(5);
-     *  my_array.prepend(4);
-     *  my_array.erase(1);
-     *  @endcode
+     *  @note Constructors and destructors are called during every
+     *  process. When you push an object, you copy this object and
+     *  so the copy constructor will be called. If none found, or
+     *  if object is not copy-constructible, only a basic memory
+     *  copy will be performed.
     **/
     ////////////////////////////////////////////////////////////
     template <typename T>
     class Array
     {
-    private:
+    protected:
 
-        size_t      physicalSize;///< Physical size.
-        size_t      size; ///< Logical size.
-        T*          first;///< Pointer to the array.
+        T* ptr;
+
+        size_t logical_size;
+        size_t physical_size;
 
     public:
 
         ////////////////////////////////////////////////////////////
-        /** Default Constructor.
+        /** @brief Constructs an empty array.
         **/
         ////////////////////////////////////////////////////////////
-        Array() : physicalSize(0), size(0), first(NULL)
-        {
-
-        }
+        Array() : ptr(nullptr), logical_size(0), physical_size(0) {}
 
         ////////////////////////////////////////////////////////////
-        /** Constructor with reserve size.
+        /** @brief Constructs an empty array and allocate some
+         *  uninitialized space.
          *
-         *  @param reserve_ : Memory to reserve. Use it to avoid memory reallocation
-         *  while filling the array.
+         *  Use this constructor to benefit from big allocation to
+         *  prevent numerous reallocation, that are slow.
          *
+         *  @param r : Size to reserve, in number of elements.
         **/
         ////////////////////////////////////////////////////////////
-        Array(size_t reserve_) : physicalSize(0), size(0), first(NULL)
-        {
-            if(reserve_ > 0)
-            {
-                first = Allocator<T>::allocateArray(reserve_);
-                physicalSize = reserve_;
-                size = 0;
-            }
-        }
+        Array(size_t r) : ptr(nullptr), logical_size(0), physical_size(0) { reserve(r); }
 
         ////////////////////////////////////////////////////////////
-        /** Constructor with an array.
+        /** @brief Constructs an Array from C-style array.
          *
-         *  @details You must specify the size of the array.
-         *  This function can be used to convert quickly an array to APro::Array,
-         *  because it use memcpy in one block.
-         *
-         *  @param a : Array to copy.
-         *  @param sz : Size of the Array.
+         *  Use this function to copy big array. But think that
+         *  constructors will always be called for constructible objects.
         **/
         ////////////////////////////////////////////////////////////
-        Array(const T* a, size_t sz) : physicalSize(0), size(0), first(NULL)
+        Array(const T* a, size_t sz) : ptr(nullptr), logical_size(0), physical_size(0)
         {
-            if(a)
+            if(a && sz)
             {
                 reserve(sz);
-                if(first)
-                {
-                    memcpy(first, a, sz * sizeof(T));
-                    size = sz;
-                }
+                __assign_array(a, sz);
             }
         }
 
         ////////////////////////////////////////////////////////////
-        /** Constructor by copy.
-         *
-         *  @detais It also use memcpy in one block, so it's a quite quick function.
-         *
-         *  @param other : Array to copy.
-         *
+        /** @brief Constructs an Array from another one.
         **/
         ////////////////////////////////////////////////////////////
-        Array(const Array<T> & other) : physicalSize(0), size(0), first(NULL)
+        Array(const Array<T>& rhs) : ptr(nullptr), logical_size(0), physical_size(0)
         {
-            if(!other.isEmpty())
+            if(rhs.size() > 0)
             {
-                reserve(other.getPhysicalSize());
-                if(first != NULL)
-                {
-                    memcpy(first, other.first, sizeof(T) * other.getPhysicalSize());
-                    size = other.getSize();
-                }
+                reserve(rhs.size());
+                __assign_array(rhs.pointer(), rhs.size());
             }
         }
 
-        ////////////////////////////////////////////////////////////
-        /** Destructor.
-        **/
-        ////////////////////////////////////////////////////////////
         ~Array()
         {
             clear();
         }
 
+    private:
+
         ////////////////////////////////////////////////////////////
-        /** Set the content of the array with a C-style array.
-         *
-         *  @param a : Array to copy.
-         *  @param sz : Size of the array.
+        /** @brief Assign an array of fixed size to this array.
+         *  @internal
         **/
         ////////////////////////////////////////////////////////////
-        void set(const T* a, size_t sz)
+        void __assign_array(const T* a, size_t sz)
         {
-            clear();
-
-            if(a)
+            if(ptr && physical_size >= sz)
             {
-                reserve(sz);
-                if(first)
+                if(Types::IsCopyConstructible<T>())
                 {
-                    memcpy(first, a, sz * sizeof(T));
-                    size = sz;
+                    for(unsigned int i = 0; i < sz; ++i)
+                    {
+                        // Construct each object by copy.
+                        AProConstructedCopy(&(ptr[i]), a[i], T);
+                    }
                 }
-            }
-        }
-
-        ////////////////////////////////////////////////////////////
-        /** Set the content of the array with a APro::Array.
-         *
-         *  @param other : Array to copy.
-        **/
-        ////////////////////////////////////////////////////////////
-        void set(const Array<T>& other)
-        {
-            clear();
-
-            if(!other.isEmpty())
-            {
-                reserve(other.getPhysicalSize());
-                if(first != NULL)
+                else
                 {
-                    memcpy(first, other.first, sizeof(T) * other.getPhysicalSize());
-                    size = other.getSize();
+                    // Performs a Memory copy.
+                    Memory::Copy(ptr, a, sz * sizeof(T));
                 }
+
+                logical_size = sz;
             }
         }
 
         ////////////////////////////////////////////////////////////
-        /** Return the real size of the array, in number of elements.
-         *
-         *  @details The real size of the array can be different to 
-         *  the logical size because it use a 'reserve' system that 
-         *  allow him to reserve space for futur reallocations to be 
-         *  faster.
-         *
-         *  @return Real size of the array.
+        /** @brief Copy an object to given array entry.
+         *  @internal
         **/
         ////////////////////////////////////////////////////////////
-        size_t getPhysicalSize() const
+        void __copy_object(const T& o, size_t index)
         {
-            return physicalSize;
-        }
-
-        ////////////////////////////////////////////////////////////
-        /** Return the logical size of the array.
-         *  @return Logical size.
-         *  @remarks The logical size correspond to the number of
-         *  elements in the array.
-        **/
-        ////////////////////////////////////////////////////////////
-        size_t getSize() const
-        {
-            return size;
-        }
-
-        ////////////////////////////////////////////////////////////
-        /** Tell if the array is empty.
-         *
-         *  @note Return if the number of element is 0.
-         *  @return Is array empty ?
-        **/
-        ////////////////////////////////////////////////////////////
-        bool isEmpty() const
-        {
-            return size == 0;
-        }
-
-        ////////////////////////////////////////////////////////////
-        /** Copy an element to the end of the array.
-         *
-         *  @param obj : Object to append.
-        **/
-        ////////////////////////////////////////////////////////////
-        void append(const T& obj)
-        {
-            if(physicalSize == size)
+            if(Types::IsCopyConstructible<T>())
             {
-                reserve(physicalSize + 1);
+                AProConstructedCopy(ptr + index, o, T);
             }
-
-            memcpy(first + size, &obj, sizeof(T));
-            size += 1;
+            else
+            {
+                // Performs a Memory copy.
+                Memory::Copy(ptr + index, &o, sizeof(T));
+            }
         }
 
         ////////////////////////////////////////////////////////////
-        /** Push an object to the end of the array.
-         *  @see append .
-         *  @param obj : Object to append.
+        /** @brief Destruct the array.
+         *  @internal
+        **/
+        ////////////////////////////////////////////////////////////
+        void __destroy_array()
+        {
+            if(ptr && logical_size)
+            {
+                // First call destructors on logical size.
+                AProDestructObject<T>(ptr, logical_size, true);
+
+                // Then release the array. The void* operator will use only the APro::Deallocate function.
+                AProDelete((void*) ptr);
+            }
+        }
+
+    public:
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Push an object to the end of the array.
+         *
+         *  @note The object is copied if possible, or only Byte
+         *  copied.
         **/
         ////////////////////////////////////////////////////////////
         void push_back(const T& obj)
         {
-            append(obj);
+            reserve(logical_size + 1);
+            __copy_object(obj, logical_size);
+            logical_size++;
         }
 
         ////////////////////////////////////////////////////////////
-        /** Append an array to the end of this one.
-         *  @param array : Array to copy.
+        /** @brief Push an object to the end of the array.
+         *
+         *  @note The object is copied if possible, or only Byte
+         *  copied.
         **/
         ////////////////////////////////////////////////////////////
-        void append(const Array<T>& array)
+        void append(const T& obj)
         {
-            if(physicalSize < size + array.getSize())
-            {
-                reserve(size + array.getSize());
-            }
+            push_back(obj);
+        }
 
-            memcpy(first + size, array.first, sizeof(T) * array.getSize());
-            size += array.getSize();
+        Array& operator << (const T& obj)
+        {
+            push_back(obj);
+            return *this;
         }
 
         ////////////////////////////////////////////////////////////
-        /** Append an array to the end of this one.
-         *  @see append
-         *  @param array : Array to append.
-        **/
-        ////////////////////////////////////////////////////////////
-        void push_back(const Array<T>& array)
-        {
-            append(array);
-        }
-
-        ////////////////////////////////////////////////////////////
-        /** Append a C-style array at the end.
-         *  @param array : Pointer to the array.
-         *  @param sz : Number of element.
-        **/
-        ////////////////////////////////////////////////////////////
-        void append(const T* array, size_t sz)
-        {
-            if(array != NULL && sz > 0)
-            {
-                if(physicalSize < size + sz)
-                {
-                    reserve(size + sz);
-                }
-
-                memcpy(first + size, array, sizeof(T) * sz);
-                size += sz;
-            }
-        }
-
-        ////////////////////////////////////////////////////////////
-        /** Append a C-style array at the end.
-         *  @see append
-         *  @param array : Pointer to the array.
-         *  @param sz : Number of element.
-        **/
-        ////////////////////////////////////////////////////////////
-        void push_back(const T* array, size_t sz)
-        {
-            append(array, sz);
-        }
-
-        ////////////////////////////////////////////////////////////
-        /** Prepend an object.
-         *  @param obj : Object to prepend.
-        **/
-        ////////////////////////////////////////////////////////////
-        void prepend(const T& obj)
-        {
-            insert(0, obj);
-        }
-
-        ////////////////////////////////////////////////////////////
-        /** Prepend an object.
-         *  @see prepend
-         *  @param obj : Object to prepend.
+        /** @brief Push an object to the begin of the array.
+         *
+         *  This function might be long as it performs 2 Memory copy
+         *  of the whole array (to move it to the right).
+         *
+         *  @note The object is copied if possible, or only Byte
+         *  copied.
         **/
         ////////////////////////////////////////////////////////////
         void push_front(const T& obj)
         {
-            prepend(obj);
+            reserve(logical_size + 1);
+
+            // Moving memory to the right.
+            Memory::CopyInterlaced(ptr + 1, ptr, logical_size * sizeof(T));
+
+            // Now first block is empty, copying object.
+            __copy_object(obj, 0);
+            logical_size++;
         }
 
         ////////////////////////////////////////////////////////////
-        /** Prepend an array to this one.
-         *  @param array : Array to copy.
-         *  @note On big arrays, this function is slow.
+        /** @brief Push an object to the begin of the array.
+         *
+         *  This function might be long as it performs 2 Memory copy
+         *  of the whole array (to move it to the right).
+         *
+         *  @note The object is copied if possible, or only Byte
+         *  copied.
         **/
         ////////////////////////////////////////////////////////////
-        void prepend(const Array<T>& array)
+        void prepend(const T& obj)
         {
-            if(physicalSize < size + array.getSize())
-            {
-                reserve(size + array.getSize());
-            }
-
-            for(unsigned int i = 0; i < array.getSize(); ++i)
-            {
-                insert(0 + i, array.at(i));
-            }
+            push_front(obj);
         }
 
-        ////////////////////////////////////////////////////////////
-        /** Prepend an array to this one.
-         *  @see prepend
-         *  @param array : Array to copy.
-         *  @note On big arrays, this function is slow.
-        **/
-        ////////////////////////////////////////////////////////////
-        void push_front(const Array<T>& array)
-        {
-            prepend(array);
-        }
+    public:
 
         ////////////////////////////////////////////////////////////
-        /** Prepend a C-style array.
-         *  @param array : Pointer to the array.
-         *  @param sz : Number of element.
+        /** @brief Push an array to the end of this array.
         **/
         ////////////////////////////////////////////////////////////
-        void prepend(const T* array, size_t sz)
+        void push_back(const Array<T>& a)
         {
-            if(array != NULL && sz > 0)
+            if(a.size())
             {
-                if(physicalSize < size + sz)
+                reserve(a.size());
+                for(unsigned int i = 0; i < a.size(); ++i)
                 {
-                    reserve(size + sz);
+                    push_back(a[i]);
                 }
+            }
+        }
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Push an array to the end of this array.
+        **/
+        ////////////////////////////////////////////////////////////
+        void append(const Array<T>& a) { push_back(a); }
+
+        Array& operator << (const Array<T>& a)
+        {
+            push_back(a);
+            return *this;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Push an array to the begin of this array.
+         *
+         *  A big move to the right of the memory is performed during
+         *  this process.
+        **/
+        ////////////////////////////////////////////////////////////
+        void push_front(const Array<T>& a)
+        {
+            push_front(a.pointer(), a.size());
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Push an array to the begin of this array.
+         *
+         *  A big move to the right of the memory is performed during
+         *  this process.
+        **/
+        ////////////////////////////////////////////////////////////
+        void prepend(const Array<T>& a)
+        {
+            push_front(a);
+        }
+
+    public:
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Push an array to the end of this array.
+        **/
+        ////////////////////////////////////////////////////////////
+        void push_back(const T* a, size_t sz)
+        {
+            if(sz && a)
+            {
+                reserve(sz);
                 for(unsigned int i = 0; i < sz; ++i)
                 {
-                    insert(0 + i, array[i]);
+                    push_back(a[i]);
                 }
             }
         }
 
-        /** @brief As prepend(T*, size_t) . */
-        void push_front(const T* array, size_t sz)
+        ////////////////////////////////////////////////////////////
+        /** @brief Push an array to the end of this array.
+        **/
+        ////////////////////////////////////////////////////////////
+        void append(const T* a, size_t sz) { push_back(a, sz); }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Push an array to the begin of this array.
+         *
+         *  A big move to the right of the memory is performed during
+         *  this process.
+        **/
+        ////////////////////////////////////////////////////////////
+        void push_front(const T* a, size_t sz)
         {
-            prepend(array, sz);
+            if(!a || !sz) return;
+
+            reserve(logical_size + sz);
+
+            // Moving memory to the right.
+            Memory::CopyInterlaced(ptr + sz, ptr, logical_size * sizeof(T));
+
+            // Now block is empty, copying object.
+            for(unsigned int i = 0; i < sz; ++i)
+                __copy_object(obj, i);
+
+            logical_size += sz;
         }
 
-        /** @brief Insert an object before given position.
+        ////////////////////////////////////////////////////////////
+        /** @brief Push an array to the begin of this array.
          *
-         *  @param before : Position to insert before.
-         *  @param obj : Object to copy.
-         *  @param number : Number of copy.
-         */
-        void insert(size_t before, const T& obj, size_t number = 1)
+         *  A big move to the right of the memory is performed during
+         *  this process.
+        **/
+        ////////////////////////////////////////////////////////////
+        void prepend(const T* a, size_t sz)
         {
-            if(physicalSize < size + number)
-            {
-                reserve(size + number);
-            }
-
-            for(int i = size - 1; i >= (int) before; i--)
-            {
-                memcpy(first + i + number, first + i, sizeof(T));
-            }
-
-            for(int i = (int) before; i < (int) (before + number); i++)
-            {
-                memcpy(first + i, &obj, sizeof(T));
-            }
-
-            size += number;
+            push_front(a, sz);
         }
 
-        /** @brief Reserve space for the array
-         *
-         *  You can use it to reserve space before a big insertion, so the array won't need
-         *  to reallocate many times.
-         *
-         *  @note
-         *  This space does not count on Size.
-         *
-         *  @param physicalNewSize : Size of the reserved space (entirely), in number of element.
-         */
-        void reserve(size_t physicalNewSize)
+    public:
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the number of object in this array.
+        **/
+        ////////////////////////////////////////////////////////////
+        size_t size() const
         {
-            if(physicalNewSize > physicalSize)
+            return logical_size;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the number of space available without
+         *  reallocation in this array.
+        **/
+        ////////////////////////////////////////////////////////////
+        size_t reservedSpaceAvailable() const { return physical_size - logical_size; }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return a pointer to this array.
+        **/
+        ////////////////////////////////////////////////////////////
+        T* pointer() { return ptr; }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return a pointer to this array.
+        **/
+        ////////////////////////////////////////////////////////////
+        const T* pointer() { return ptr; }
+
+    public:
+
+        typedef T* iterator;
+        typedef const T* const_iterator;
+
+        iterator begin() { return pointer(); }
+        const_iterator begin() const { return pointer(); }
+
+        iterator end() { return begin() + logical_size; }
+        const_iterator end() const { return begin() + logical_size; }
+
+        iterator last() { return begin() + logical_size - 1; }
+        const_iterator last() const { return begin() + logical_size - 1; }
+
+    public:
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Reserve space for this array.
+         *
+         *  The reserved space take in account the logical size of
+         *  the array. Use reservedSpaceAvailable() to know how much
+         *  reserved space the array has.
+         *
+         *  If wanted reserved space is inferior to 2 times the physical
+         *  size, the array will be reducted to that size even if objects
+         *  are in this range, and will be destroyed.
+        **/
+        ////////////////////////////////////////////////////////////
+        void reserve(size_t new_physical_size)
+        {
+            if(ptr)
             {
-                if(first == nullptr)
+                if(new_physical_size > physical_size)
                 {
-                    first = Allocator<T>::allocateArray(physicalNewSize);
-                    physicalSize = physicalNewSize;
-                    size = 0;
+                    // Reallocation of array.
+                    T* tmp_array = (T*) AProAllocate(new_physical_size * sizeof(T));
+
+                    Memory::Copy(tmp_array, ptr, logical_size * sizeof(T));
+                    AProDeallocate(ptr);
+
+                    ptr = tmp_array;
+                    physical_size = new_physical_size;
+                }
+                else if(new_physical_size == 0)
+                {
+                    // Destruction of array
+                    clear();
+                }
+                else if(new_physical_size <= physical_size)
+                {
+                    // Erase object only if logical_size > new_physical_size so they will
+                    // be destroyed and available if new_physical_size * 2 > physical_size.
+                    if(new_physical_size < logical_size)
+                    {
+                        erase(begin() + new_physical_size, end());
+                        logical_size = new_physical_size;
+                    }
+                }
+            }
+            else
+            {
+                // Allocate memory for the array.
+                ptr = (T*) AProAllocate(new_physical_size * sizeof(T));
+                physical_size = new_physical_size;
+            }
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Resize this array to fit given size, and fill
+         *  new entries with given object.
+        **/
+        ////////////////////////////////////////////////////////////
+        void resize(size_t new_size, const T& _cpy = T())
+        {
+            if(new_size > logical_size)
+            {
+                size_t old_size = logical_size;
+                reserve(new_size);
+
+                for(unsigned int i = old_size; i < new_size; ++i)
+                {
+                    push_back(_cpy);
+                }
+            }
+            else if(new_size < logical_size)
+            {
+                if(new_size == 0)
+                {
+                    clear();
                 }
                 else
                 {
-                    first = Allocator<T>::reallocateArray(first, physicalNewSize);
-                    physicalSize = physicalNewSize;
+                    erase(begin() + new_size, end());
                 }
             }
         }
 
-        /** @brief Erase objects from positio given to other position.
+    public:
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Destruct the element at the given position and move
+         *  the memory to the left by reducing the size by 1.
+        **/
+        ////////////////////////////////////////////////////////////
+        void erase(iterator position)
+        {
+            aproassert(position && position != end(), "Given position invalid !");
+
+            // Destruct the object and set the size down of 1.
+            if(ptr && logical_size)
+            {
+                AProDestructObject<T>(position, 1, false);
+                Memory::CopyInterlaced(position, position + 1, (size_t) (end() - position + 1));
+
+                logical_size -= 1;
+            }
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Destruct the elements in the range [first, last[.
          *
-         *  @note
-         *  Index given are included in the deletion.
+         *  This function call destructors for each entry in the range
+         *  from first wich is included to last <b>wich is not included</b>.
          *
-         *  @param firstIndex : Position to start deletion.
-         *  @param lastIndex : Position to end deletion.
-         */
-        void erase(size_t firstIndex, size_t lastIndex = 0)
+         *  @note You should use the end() function to erase from somewhere
+         *  to the end of the array.
+        **/
+        ////////////////////////////////////////////////////////////
+        void erase(iterator first, iterator last)
         {
-            if(lastIndex == 0)
-            {
-                lastIndex = firstIndex;
-            }
+            aproassert(first && last && first != end() && first != last, "Given positions invalid !");
 
-            if(firstIndex > lastIndex)
-            {
-                Allocator<size_t>::swap(&firstIndex, &lastIndex, 1);
-            }
-
-            if(size <= firstIndex)
-            {
-                APRO_THROW("Out of range", "Array::erase has detected out of range index !", "Array");
-            }
-
-            if(size <= lastIndex)
-            {
-                lastIndex = size - 1;
-            }
-
-            size_t sizedeleted = lastIndex - firstIndex + 1;
-            size_t sizemoved = sizeof(T) * (size - lastIndex + 1);
-            memcpy(first + firstIndex, first + lastIndex + 1, sizemoved);
-
-            size -= sizedeleted;
-        }
-
-        /** @brief Clear the array. */
-        void clear()
-        {
-            if(first != nullptr)
-            {
-                Allocator<T>::deallocatePtr(first);
-                first = nullptr;
-            }
-
-            size = 0;
-            physicalSize = 0;
-        }
-
-        /** @brief Return the object at given index. */
-        T& at(size_t index)
-        {
-            assertIndex(index);
-            return *(first + index);
-        }
-
-        /** @brief Return the object at given index. */
-        const T& at(size_t index) const
-        {
-            assertIndex(index);
-            return *(first + index);
-        }
-
-        /** @brief Return the object at given index. */
-        T& operator [] (size_t index)
-        {
-            assertIndex(index);
-            return *(first + index);
-        }
-
-        /** @brief Return the object at given index. */
-        const T& operator [] (size_t index) const
-        {
-            assertIndex(index);
-            return *(first + index);
-        }
-
-        /** @brief Return last object in the array. */
-        size_t lastIndex() const
-        {
-            return size - 1;
-        }
-
-        /** @brief Throw an exception if index is not in correct range. */
-        bool assertIndex(size_t index) const
-        {
-            if(index < size)
-                return true;
-            else
-            {
-#if APRO_EXCEPTION == APRO_ON
-
-                char buffer[APRO_EXCEPTIONMAXBUFFERSIZE];
-
-                sprintf(buffer, "Array::assertIndex has detected out of range index ! Index was : %d.", (int) index);
-
-                APRO_THROW("Out of range", buffer, "Array");
-
-#endif
-
-                return false;
-            }
-        }
-
-        /** @brief Append an object to the array. */
-        Array<T>& operator << (const T& obj)
-        {
-            append(obj);
-            return *this;
-        }
-
-        /** @brief Append an array to this one. */
-        Array<T>& operator << (const Array<T>& array)
-        {
-            append(array);
-            return *this;
-        }
-
-        /** @brief Set the content of this array to given one. */
-        Array<T>& operator = (const Array<T>& array)
-        {
-            clear();
-            append(array);
-            return *this;
-        }
-
-        /** @brief Tell if array is same as given. */
-        bool operator == (const Array<T>& array) const
-        {
-            if(getSize() != array.getSize())
-                return false;
-
-            /*
-
-            for(size_t i = 0; i < getSize(); i++)
-            {
-                if(at(i) != array.at(i))
-                    return false;
-            }
-
-            */
-
-            return memcmp(first, array.first, getSize()) == 0;
-        }
-
-        /** @brief Contrary of operator == . */
-        bool operator != (const Array<T>& array) const
-        {
-            return !(*this == array);
-        }
-
-        /** @brief Find the index of an object in the array.
-         *  @note Might return -1 if not found.
-         *  @warning Object must have a == operator.
-         */
-        int find(const T& obj) const
-        {
-            for(size_t i = 0; i < size; i++)
-            {
-                if(at(i) == obj)
-                    return i;
-            }
-
-            return -1;
-        }
-
-        /** @brief Return an array of object from given position. */
-        Array<T> extractArray(size_t position, size_t sz)
-        {
-            Array<T> ret;
-
-            if(position >= size)
-                return ret;
-
-            if(position + sz > size)
-                sz = size - position;
-
-            ret.append(first + position, sz);
-        }
-
-        void resize(size_t new_size)
-        {
-            if(new_size == 0)
+            if(first == begin() && last == end())
             {
                 clear();
                 return;
             }
 
-            if(first)
-            {
-                if(new_size > size)
-                {
-                    reserve(new_size);
-                    for(i = 0; i < new_size - size; ++i)
-                        push_back(T());
-                }
-                else if(new_size < size)
-                {
-                    if(new_size * 2 < size)
-                    {
-                        size_t size_to_erase = size - new_size * 2;
-                        erase(new_size * 2 - 1, size - 1);
-                    }
+            // Destruct objects between first and last and reduce the size.
+            size_t number_of_elements = (size_t) last - first;// Number of elements in bytes.
+            number_of_elements /= sizeof(T);                  // Number of elements in objects.
 
-                    size = new_size;
-                }
-            }
-            else
+            AProDestructObject<T>(first, number_of_elements, true);
+            if(last != end())
+                Memory::CopyInterlaced(first, last, (size_t) (end() - last));
+
+            if(!reservedSpaceAvailable())
             {
-                reserve(new_size);
-                for(i = 0; i < new_size; ++i)
-                    push_back(T());
+                // Allocate just a new array of less big size.
+                T* buffer = (T*) AProAllocate((logical_size - number_of_elements) * sizeof(T));
+                Memory::Copy(buffer, ptr, (logical_size - number_of_elements) * sizeof(T));
+
+                AProDeallocate(ptr);
+                ptr = buffer;
+            }
+
+            logical_size -= number_of_elements;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Destroy the array.
+         *
+         *  Equivalent to erase(begin(), end()).
+        **/
+        ////////////////////////////////////////////////////////////
+        void clear()
+        {
+            __destroy_array();
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Erase the reserved free space available.
+        **/
+        ////////////////////////////////////////////////////////////
+        void clearReserve()
+        {
+            if(logical_size > 0)
+            {
+                T* tmp_array = (T*) AProAllocate(sizeof(T) * logical_size);
+                Memory::Copy(tmp_array, ptr, sizeof(T) * logical_size);
+
+                AProDeallocate(ptr);
+                ptr = tmp_array;
+                physical_size = logical_size;
             }
         }
 
-    };
+    public:
 
-    typedef Array<Byte> ByteArray;
+        T& at(size_t index) { return *(begin() + index); }
+        const T& at(size_t index) const { return *(begin() + index); }
+
+        T& operator [] (size_t index) { return at(index); }
+        const T& operator [] const (size_t index) { return at(index); }
+
+        size_t toIndex(const_iterator& it) const { return ((size_t)(it - begin())) / sizeof(T); }
+
+    public:
+
+        bool isEmpty() const { return logical_size == 0; }
+
+    public:
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Insert an object before the given position.
+        **/
+        ////////////////////////////////////////////////////////////
+        void insert(iterator position, const T& obj)
+        {
+            if(position != end())
+            {
+                if(position == begin())
+                {
+                    push_front(obj);
+                }
+                else
+                {
+                    // Reserve space
+                    reserve(logical_size + 1);
+
+                    // Move memory to the right.
+                    Memory::CopyInterlaced(position + 1, position, end() - position);
+
+                    // Copy object
+                    __copy_object(obj, toIndex(position));
+                }
+            }
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Insert numerous copy of objects before the given
+         *  position.
+         *
+         *  @todo Performs a specialized CopyInterlaced instead of
+         *  repeated Memory::Copy.
+        **/
+        ////////////////////////////////////////////////////////////
+        void insert(iterator position, size_t n, const T& obj)
+        {
+            for(unsigned int i = 0; i < n; ++i)
+                insert(position + i, obj);
+        }
+
+    public:
+
+        Array<T>& operator = (const Array<T>& rhs)
+        {
+            clear();
+
+            if(rhs.size())
+            {
+                reserve(rhs.size());
+                __assign_array(rhs.pointer(), rhs.size());
+            }
+
+            return *this;
+        }
+
+
+    };
 }
 
 #endif

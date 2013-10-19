@@ -94,7 +94,6 @@ namespace APro
 
         else
         {
-
             MemoryManager::get().reportDeallocation(ptr, func_, file_, line_);
             free(ptr);
         }
@@ -105,6 +104,13 @@ namespace APro
         void Copy(void* target, const void* source, size_t sz)
         {
             memcpy(target, source, sz);
+        }
+
+        void CopyInterlaced(void* target, const void* source, size_t sz)
+        {
+            char buffer[sz];
+            Copy(buffer, source, sz);
+            Copy(target, buffer, sz);
         }
 
         void Set(void* target, int value, size_t num)

@@ -17,6 +17,7 @@
 
 #include "Platform.h"
 #include "MemoryTracker.h"
+#include "Types.h"
 
 /// @defgroup Memory Memory
 /// @addtogroup Memory
@@ -115,6 +116,10 @@ namespace APro
     namespace Memory
     {
         APRO_DLL void Copy(void* target, const void* source, size_t sz);
+
+        /** Use a temporary buffer to copy 2 interlaced data streams. */
+        APRO_DLL void CopyInterlaced(void* target, const void* source, size_t sz);
+
         APRO_DLL void Set (void* target, int value, size_t num);
     }
 }
@@ -143,13 +148,19 @@ template <typename T> T* AProNew (size_t n, const char* func_, const char* file_
 }
 
 ////////////////////////////////////////////////////////////
-/** @brief Delete the given pointer.
+/** @brief Delete the given pointer and call destructors if
+ *  possible.
  *
  *  @note In the contrary of AProNew, AProDelete calls destructors
  *  for each objects in the array from the given pointer.
  *  The number of objects is known from the MemoryManager which
  *  keep trace of the memory block allocated previously using
  *  AProNew or APro::allocate.
+ *
+ *  If pointer is not an array, this functioin will detect it
+ *  as the size of this memory block won't be suffisant to destroy
+ *  more than 1 object.
+ *
  *  @note If you allocate memory with APro::allocate and
  *  left it uninitialized, you may have some destructors calling
  *  problems if you try to destroy it using AProDelete and you so
@@ -168,16 +179,26 @@ template <typename T> void AProDelete(T* ptr, const char* func_, const char* fil
 {
     if(!ptr) return;
 
-    size_t sz_t = sizeof(T);
-
-    // Looking for Block.
-    const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((ptr_t) ptr);
-    if(mblock && mblock->size >= sz_t)
+    // We can call destructors only if type is destructible.
+    // This feature is available only since C++11 so we must have a correct C++11 compiler.
+    if(APro::Types::IsDestructible<T>())
     {
-        // If block is valid, we determine how many objects there are in.
-        size_t n = (size_t) mblock->size / sz_t;
-        while(n)
-            ptr[--n]->~T();// Destroy each one in descending order to preserv cannonical destruction order of C++.
+        size_t sz_t = sizeof(T);
+
+        // Looking for Block.
+        const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((ptr_t) ptr);
+        if(mblock && mblock->size >= sz_t * 2)
+        {
+            // If block is valid and it is an array (# of objects superior or equal to 2), we determine how many objects there are in.
+            size_t n = (size_t) mblock->size / sz_t;
+            while(n)
+                ptr[--n].~T();// Destroy each one in descending order to preserv cannonical destruction order of C++.
+        }
+        else
+        {
+            // Block is not in the MemoryTracker, or it isnt an array. We call the destructor as delete would have done it.
+            ptr->~T();
+        }
     }
 
     // Destroying the pointer.
@@ -200,14 +221,14 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
 /// @ingroup Memory
 /// @param T : Type of object.
 /// @see AProNewA, AProDelete
-#define AProNew(T, ...) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T[1] (__VA_ARGS__)
+#define AProNew(T, ...) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T[1] ( ## __VA_ARGS__)
 
 /// Constructs a new array of objects of given size and argues.
 /// @ingroup Memory
 /// @param T : Type of objects.
 /// @param N : Size of array (in number of elements).
 /// @see AProNew, AProDelete
-#define AProNewA(T, N, ...) new (AProNew<T>(N, __FUNCTION__, __FILE__, __LINE__)) T[N] (__VA_ARGS__)
+#define AProNewA(T, N, ...) new (AProNew<T>(N, __FUNCTION__, __FILE__, __LINE__)) T[N] ( ## __VA_ARGS__)
 
 /// Destroys an array of objects and call destructor if possible.
 /// @ingroup Memory
@@ -216,5 +237,37 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
 /// @param P : Pointer to destroy.
 /// @see AProNew, AProNewA
 #define AProDelete(P) AProDelete(ptr, __FUNCTION__, __FILE__, __LINE__)
+
+/// Constructs an object by calling the copy constructor and placement new.
+/// @ingroup Utils
+/// @param to : Pointer to a memory space that may contain the copy.
+/// @param from : Constant Reference to an object that will be copied.
+/// @param Type : Type of the objects.
+#define AProConstructedCopy(to, from, Type) new (to) Type(from)
+
+////////////////////////////////////////////////////////////
+/** @brief Call object destructor if possible.
+ *
+ *  If object is array, destructors for every object will
+ *  be called.
+**/
+////////////////////////////////////////////////////////////
+template<typename T> void AProDestructObject(T* object, size_t sz, bool _is_array = false)
+{
+    if(APro::Types::IsDestructible<T>())
+    {
+        if(_is_array && sz)
+        {
+            // If it is an array, call destructor for each entry.
+            while (sz)
+                object[--sz].~T();
+        }
+        else
+        {
+            // Else call the destructor.
+            ptr->~T();
+        }
+    }
+}
 
 #endif

@@ -25,12 +25,12 @@ namespace APro
         bool mutex_created = false;
         bool mutex_creating = false;
 
-        void create_global_mutex()
+        void create_and_lock_global_mutex()
         {
             mutex_creating = true;
             APRO_THREAD_MUTEX_SAFELOCK(global_mutex);
             if(!global_mutex.isNull())
-                mutex_created = true;
+                mutex_created = true;// Mutex is created but is also locked.
             mutex_creating = false;
         }
 
@@ -41,7 +41,7 @@ namespace APro
             if(mutex_created)
                 APRO_THREAD_MUTEX_SAFELOCK(global_mutex);
             else
-                create_global_mutex();
+                create_and_lock_global_mutex();
         }
 
         void unlock_global_mutex()
@@ -51,7 +51,11 @@ namespace APro
             if(mutex_created)
                 APRO_THREAD_MUTEX_SAFEUNLOCK(global_mutex);
             else
-                create_global_mutex();
+            {
+                create_and_lock_global_mutex();
+                if(mutex_created)
+                    APRO_THREAD_MUTEX_SAFEUNLOCK(global_mutex);
+            }
         }
     }
 
@@ -293,6 +297,7 @@ namespace APro
 #if APRO_MEMORYTRACKER == APRO_ON
 
             fprintf(file, "\n\nReporting every operations.\n");
+            lock_global_mutex();
 
             for(unsigned int i = 0; i < operations.size(); ++i)
             {
@@ -300,6 +305,8 @@ namespace APro
                 fprintf(file, "%s", writeOperation(ope).c_str());
                 fflush(file);
             }
+
+            unlock_global_mutex();
 
 #endif // APRO_MEMORYTRACKER
 

@@ -23,15 +23,6 @@
 /** Define the ON state to another define. */
 #define APRO_ON 1
 
-/** Set if the C++0X should be used. */
-#define APRO_USECPLUSPLUS0X APRO_ON
-
-/** Set if we can use the Standard Library. */
-#define APRO_USESTDLIB APRO_OFF
-
-/** Set ON if you want to use Strict Memory Allocator System (No error will be tolered). */
-#define APRO_ALLOCATORSTRICT APRO_ON
-
 /** Defines Debug or Release compilation. */
 #if _HAVE_DEBUG_MODE_
 #   define APRO_DEBUG APRO_ON
@@ -69,10 +60,6 @@
 #   define APRO_DLL APRO_BUILDDLLEXPORT
 #else
 #   define APRO_DLL APRO_BUILDDLLIMPORT
-#endif
-
-#if APRO_USECPLUSPLUS0X == APRO_OFF
-#   define nullptr NULL
 #endif
 
 #include "System.h"
