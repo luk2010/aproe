@@ -118,5 +118,10 @@ namespace APro
             memset(target, value, num);
         }
 
+        int Cmp(const void * s1, const void * s2,size_t n)
+        {
+            return memcmp(s1, s2, n);
+        }
+
     }
 }

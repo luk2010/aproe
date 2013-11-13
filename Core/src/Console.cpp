@@ -21,6 +21,7 @@ namespace APro
 {
 
     APRO_IMPLEMENT_SINGLETON(Console)
+    APRO_IMPLEMENT_SINGLETON(EmptyConsole)
 
     Console::Console()
         : ThreadSafe()

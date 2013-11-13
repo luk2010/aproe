@@ -104,7 +104,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         void print(Console& console) const
         {
-            console << "Queue <" << className<T>() << "> { size : " << m_queue.getSize() << ", capacity : " << m_queue.getPhysicalSize() << " }";
+            console << "Queue <" << className<T>() << "> { size : " << m_queue.size() << ", reserve : " << m_queue.reservedSpaceAvailable() << " }";
         }
 
     public: // Copyable
@@ -147,7 +147,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         void pop()
         {
-            m_queue.erase(m_queue.getSize() - 1);
+            m_queue.erase(m_queue.size() - 1);
         }
 
         /////////////////////////////////////////////////////////////
@@ -167,7 +167,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         unsigned int size() const
         {
-            return m_queue.getSize();
+            return m_queue.size();
         }
 
         /////////////////////////////////////////////////////////////
@@ -187,7 +187,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         T& get()
         {
-            return m_queue.at(m_queue.getSize() - 1);
+            return m_queue.at(m_queue.size() - 1);
         }
 
         /////////////////////////////////////////////////////////////
@@ -196,7 +196,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         const T& get() const
         {
-            return m_queue.at(m_queue.getSize() - 1);
+            return m_queue.at(m_queue.size() - 1);
         }
 
         /////////////////////////////////////////////////////////////

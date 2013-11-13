@@ -157,10 +157,31 @@ namespace APro
 
         static String fromDouble(double d);
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Performs a standard hash.
+         *
+         *  Same strings will return the same hash, but each strings
+         *  has a unique hash.
+        **/
+        ////////////////////////////////////////////////////////////
+        HashType hash() const;
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Performs a standard hash.
+         *
+         *  Same strings will return the same hash, but each strings
+         *  has a unique hash.
+        **/
+        ////////////////////////////////////////////////////////////
+        static HashType Hash(const char* str);
+
     protected:
 
         void assertFinal();
     };
+
+    typedef Array<String> StringArray;
+    typedef List<String>  StringList;
 }
 
 #endif

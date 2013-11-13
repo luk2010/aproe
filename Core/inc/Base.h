@@ -87,6 +87,8 @@ typedef ANGLE_TYPE           angle_t;    ///< Represents an angle in the system 
 typedef angle_t             Radian;     ///< Represents a Radian angle measure.
 typedef angle_t             Degree;     ///< Represents a Degree angle measure.
 
+typedef unsigned int        HashType; ///< A standard hash type.
+
 typedef uint8_t             u8;
 typedef uint16_t            u16;
 typedef uint32_t            u32;
@@ -153,7 +155,7 @@ double ReinterpretAsDouble(u64& i)
 #if APRO_DEBUG == APRO_ON
 #   define aprodebug(a) Console::get() << "\n" << __FUNCTION__ << " (" << __LINE__ << ") : " << a
 #else
-#   define aprodebug(a)
+#   define aprodebug(a) EmptyConsole::get()
 #endif
 
 #if APRO_DEBUG == APRO_ON

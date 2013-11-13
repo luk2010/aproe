@@ -17,35 +17,25 @@
 
 namespace APro
 {
-    void Context::processEvent(const SharedPointer<Event>& e)
-    {
-        if(isLoaded() && e->type() == String("WindowClosingEvent"))
-        {
-            setWindow(nullptr);
-        }
+    APRO_REGISTER_EVENT_NOCONTENT(ContextBindedEvent);
+    APRO_REGISTER_EVENT_NOCONTENT(ContextUnbindedEvent);
 
-        if(e->type() == String("WindowResizedEvent") && isLoaded() && hasViewPorts())
-        {
-            updateViewPorts(e);
-        }
-    }
-
-    Context::Context()
-        : EventReceiver(), window(nullptr) /*, renderer(nullptr) */, loaded(false) /*, rendererLoaded(false) */
+    Context::Context(Window* _window)
+        : EventReceiver(), EventEmitter(), window(_window), loaded(false)
     {
-        addEventProcessed(String("WindowClosingEvent"));
-        addEventProcessed(String("WindowResizedEvent"));
+        // Events Emitted
+        documentEvent(ContextBindedEvent::Hash, String("Context is binded."));
+        documentEvent(ContextUnbindedEvent::Hash, String("Context is unbinded."));
+
+        // Events Listened
+        addEventProcessed(WindowResizedEvent::Hash);
 
         initDefaultViewPort();
-    }
 
-    Context::Context(const Context & /* other */)
-        : EventReceiver(), window(nullptr) /*, renderer(nullptr) */, loaded(false) /*, rendererLoaded(false) */
-    {
-        addEventProcessed(String("WindowClosingEvent"));
-        addEventProcessed(String("WindowResizedEvent"));
-
-        initDefaultViewPort();
+        if(!_window)
+        {
+            Console::get() << "\n[Context]{Constructor} Warning : Constructed context without window.";
+        }
     }
 
     Context::~Context()
@@ -53,24 +43,12 @@ namespace APro
 
     }
 
-    void Context::setWindow(Window* w)
+    Window* Context::getWindow()
     {
-        if(window)
-        {
-            window->detachContext();
-            window = nullptr;
-            setLoaded(true);
-        }
-
-        if(w)
-        {
-            w->attachContext(this);
-            window = w;
-            setLoaded(false);
-        }
+        return window;
     }
 
-    Window* Context::getWindow()
+    const Window* Context::getWindow() const
     {
         return window;
     }
@@ -85,6 +63,42 @@ namespace APro
         return binded;
     }
 
+    bool Context::bind()
+    {
+        if(window)
+        {
+            if(window->context_bind())
+            {
+                setBinded(true);
+                sendEvent(createAndPopulateEvent(ContextBindedEvent::Hash));
+                return true;
+            }
+            else
+            {
+                Console::get() << "\n[Context]{bind} Warning : Could not bind Context.";
+                return false;
+            }
+        }
+    }
+
+    void Context::unbind()
+    {
+        if(window && isBinded())
+        {
+            if(window->context_unbind())
+            {
+                setBinded(false);
+                sendEvent(createAndPopulateEvent(ContextUnbindedEvent::Hash));
+                return true;
+            }
+            else
+            {
+                Console::get() << "\n[Context]{unbind} Warning : Could not unbind Context.";
+                return false;
+            }
+        }
+    }
+
     void Context::setLoaded(bool l)
     {
         loaded = l;
@@ -95,98 +109,149 @@ namespace APro
         binded = b;
     }
 
-    void Context::reset()
+    void Context::addViewPort(const ViewPortPtr& viewport)
     {
-
-    }
-
-    void Context::addViewPort(const ViewPort::ptr& viewport)
-    {
-        ViewPort::ptr v = getViewPort(viewport->getName());
-        if(!v.isNull())
+        if(!viewport.isNull())
         {
-            Main::get().getConsole() << "\n[Context] Can't add a viewport with name=" << viewport->getName()
-            << " because it already exist in this context !";
-            return;
+            if(!hasViewPort(viewport->getName()))
+            {
+                viewports.push_back(viewport);
+                aprodebug("Added Viewport \"") << viewport->getName() << "\" to viewports list.";
+            }
+            else
+            {
+                Console::get() << "\n[Context]{addViewport} Can't add Viewport \"" << viewport->getName() << "\" to list because another one exists.";
+            }
         }
-/*
-        if(viewport->isPrioritary())
-        {
-            viewports.prepend(viewport);
-        }
-        else
-*/
-        {
-            viewports.append(viewport);
-        }
-    }
-
-    const ViewPort::ptr Context::getViewPort(const String & name) const
-    {
-        if(name.isEmpty()) return ViewPort::ptr();
-
-        for(size_t i = 0; i < viewports.size(); ++i)
-        {
-            if(viewports.at(i)->getName() == name)
-                return viewports.at(i);
-        }
-
-        return ViewPort::ptr();
-    }
-
-    ViewPort::ptr Context::getViewPort(const String & name)
-    {
-        if(name.isEmpty()) return ViewPort::ptr();
-
-        for(size_t i = 0; i < viewports.size(); ++i)
-        {
-            if(viewports.at(i)->getName() == name)
-                return viewports.at(i);
-        }
-
-        return ViewPort::ptr();
     }
 
     void Context::removeViewPort(const String& name)
     {
-        ViewPort::ptr v = getViewPort(name);
-
-        if(v.isNull())
+        Array<ViewPortPtr>::iterator it = getViewPortIterator(name);
+        if(it == viewports.end() || (*it).isNull())
         {
-            Main::get().getConsole() << "\n[Context] Can't find context " << name << " to destroy it !";
+            Console::get() << "\n[Context]{removeViewPort} Can't find ViewPort \"" << name << "\".";
             return;
         }
-
-        size_t index = viewports.find(v);
-        viewports.erase(index);
-        v.release();
+        viewports.erase(it);
     }
 
-    bool Context::hasViewPorts() const
+    const ViewPortPtr Context::getViewPort(const String& name) const
     {
-        return viewports.size() > 0;
+        if(name.isEmpty())
+            return ViewPortPtr();
+
+        Array<ViewPortPtr>::const_iterator e = viewports.end();
+        for(Array<ViewPortPtr>::const_iterator it = viewports.begin(): it != e; it++)
+        {
+            if(!(*it).isNull() &&
+               (*it)->getName() == name)
+                return (*it);
+        }
+
+        return ViewPortPtr();
     }
 
-    ViewPort::ptr Context::getDefaultViewPort() const
+    ViewPortPtr Context::getViewPort(const String & name)
+    {
+        if(name.isEmpty())
+            return ViewPortPtr();
+
+        Array<ViewPortPtr>::const_iterator e = viewports.end();
+        for(Array<ViewPortPtr>::iterator it = viewports.begin(): it != e; it++)
+        {
+            if(!(*it).isNull() &&
+               (*it)->getName() == name)
+                return (*it);
+        }
+
+        return ViewPortPtr();
+    }
+
+    const ViewPortPtr Context::getDefaultViewPort() const
     {
         return getViewPort(String("Default"));
     }
 
-    void Context::updateViewPorts(const Event::ptr& e)
+    Array<ViewPortPtr>::const_iterator Context::getViewPortIterator(const String& name) const
     {
-        if(e->type() != String("WindowResizedEvent"))
+        if(name.isEmpty())
+            return ViewPortPtr();
+
+        Array<ViewPortPtr>::const_iterator e = viewports.end();
+        for(Array<ViewPortPtr>::const_iterator it = viewports.begin(): it != e; it++)
         {
-            return;
+            if(!(*it).isNull() &&
+               (*it)->getName() == name)
+                return it;
         }
 
-        Pair<size_t, size_t> newsize = e->getParam(String("Size")).to<Pair<size_t, size_t> >();
+        return ViewPortPtr();
+    }
+
+    Array<ViewPortPtr>::iterator Context::getViewPortIterator(const String& name)
+    {
+        if(name.isEmpty())
+            return ViewPortPtr();
+
+        Array<ViewPortPtr>::const_iterator e = viewports.end();
+        for(Array<ViewPortPtr>::iterator it = viewports.begin(): it != e; it++)
+        {
+            if(!(*it).isNull() &&
+               (*it)->getName() == name)
+                return it;
+        }
+
+        return ViewPortPtr();
+    }
+
+    bool Context::hasViewPort(const String& name) const
+    {
+        return getViewPortIterator(name) != viewports.end();
+    }
+
+    bool Context::hasViewPorts(const StringArray& names) const
+    {
+        if(names.isEmpty())
+            return false;
+
+        StringArray::const_iterator e = names.end();
+        for(StringArray::const_iterator it = names.begin(); it != names.end(); it++)
+        {
+            if(!hasViewPort((*it)))
+                return false;
+        }
+
+        return true;
+    }
+
+    size_t Context::getNumViewPorts() const
+    {
+        return viewports.size();
+    }
+
+    void Context::initDefaultViewPort()
+    {
+        ViewPortPtr defaultv = AProNew(ViewPort, String("Default"));
+        defaultv->setVisible(true);
+
+        addViewPort(defaultv);
+        setLoaded(true);
+    }
+
+    void Context::updateViewPorts(WindowResizedEvent* e)
+    {
+        if(!isLoaded())
+            return;
+
+        Pair<size_t, size_t> newsize = e->getNewSize();
         RectangleF zone(0, 0, newsize.first(), newsize.second());
 
         getDefaultViewPort()->setZone(zone);
 
         for(size_t i = 0; i < viewports.size(); ++i)
         {
-            ViewPort::ptr& viewport = viewports.at(i);
+            ViewPortPtr& viewport = viewports.at(i);
             RectangleF& zonev = viewport->getZone();
 
             Intersection::_ result = zone.intersects(zonev);
@@ -212,45 +277,41 @@ namespace APro
         }
     }
 
-    void Context::initDefaultViewPort()
-    {
-        ViewPort::ptr defaultv = AProNew(ViewPort, String("Default"));
-        defaultv->setVisible(true);
-
-        addViewPort(defaultv);
-        setLoaded(true);
-    }
-
-    size_t Context::getNumViewPorts() const
-    {
-        return viewports.size();
-    }
-
-    ViewPort::ptr& Context::getViewPort(size_t index)
+    ViewPortPtr& Context::getViewPort(size_t index)
     {
         return viewports.at(index);
     }
 
-    const ViewPort::ptr& Context::getViewPort(size_t index) const
+    const ViewPortPtr& Context::getViewPort(size_t index) const
     {
         return viewports.at(index);
     }
 
-    void Context::bind()
+    bool Context::handle(EventPtr& event)
     {
-        if(window)
+        if(event->type() == WindowResizedEvent::Hash)
         {
-            window->context_bind();
-            setBinded(true);
+            updateViewPorts(event->getPointer());
+            return true;
         }
     }
 
-    void Context::unbind()
+    EventPtr Context::createEvent(const HashType& e_type) const
     {
-        if(window && isBinded())
+        switch (e_type)
         {
-            window->context_unbind();
-            setBinded(false);
+        case ContextBindedEvent::Hash:
+            EventPtr ret = (Event*) AProNew(ContextBindedEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        case ContextUnbindedEvent::Hash:
+            EventPtr ret = (Event*) AProNew(ContextUnbindedEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        default:
+            return EventEmitter::createEvent(e_type);
         }
     }
 }

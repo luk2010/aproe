@@ -33,109 +33,153 @@ namespace APro
 
     }
 
-    unsigned int EventEmitter::sendEvent(const EventPtr& e, EventListenerPtr& listener)
+    bool EventEmitter::sendEvent(EventPtr& e)
     {
-        if(!e.isNull())
+        if(e.isNull() || ! e->isValid())
         {
-            unsigned int ret = 0;
-
-            if(listener.isNull())
-            {
-                // Send to every listeners registered
-                for(unsigned int i = 0; i < listeners.size(); ++i)
-                {
-                    EventListenerPtr& _listener = listeners.at(i);
-                    ret += sendEvent(e, _listener);
-                }
-            }
-            else
-            {
-                // Send to given listener
-                if(listener->receive(e))
-                {
-                    ret += 1;
-                }
-            }
-
-            return ret;
+            aprodebug("Incorrect event given.");
+            return false;
         }
 
-        Console::get() << "\n[EventEmitter]{sendEvent} Null event tried to be send !";
-        return 0;
-    }
-
-    unsigned int EventEmitter::sendEvent(const EventPtr& e, const String& listener)
-    {
-        if(!e.isNull())
+        if(e->must_stop)
         {
-            EventListenerPtr& _listener = getListener(listener);
-            if(!_listener.isNull())
-            {
-                return sendEvent(e, _listener);
-            }
-            else
-            {
-                if(listener == "__all")
-                {
-                    return sendEvent(e, nullptr);
-                }
-                else
-                {
-                    if(listener.isEmpty())
-                    {
-                        Console::get() << "\n[EventEmitter]{sendEvent} No listener provided ! Send \"__all\" if you don't want to set one specific.";
-                        return 0;
-                    }
-                    else
-                    {
-                        Console::get() << "\n[EventEmitter]{sendEvent} Can't find listener \"" << listener << "\".";
-                        return 0;
-                    }
-                }
-            }
+            aprodebug("Event hhas stop flag setted.");
+            return false;
         }
 
-        Console::get() << "\n[EventEmitter]{sendEvent} Null event tried to be send !";
-        return 0;
-    }
-
-    unsigned int EventEmitter::sendEvent(const EventPtr& e, const Id& listener)
-    {
-        if(!e.isNull())
+        bool tmp = false;
+        ListenersList::const_iterator e = listeners.end();
+        for(ListenersList::iterator it = listeners.begin(); it != e && !(e->must_stop); it++)
         {
-            EventListenerPtr& plistener = getListener(listener);
-            if(plistener.isNull())
-            {
-                Console::get() << "\n[EventEmitter]{sendEvent} Listener's id \"" << listener << "\" not registered !";
-                return 0;
-            }
-            else
-            {
-                return sendEvent(plistener);
-            }
+            if((*it)->receive(e))
+                tmp = true;
         }
 
-        Console::get() << "\n[EventEmitter]{sendEvent} Null event tried to be send !";
-        return 0;
+        return tmp;
     }
 
-    unsigned int EventEmitter::sendASynchronousEvent(const EventPtr& e, EventUniter* event_uniter)
+    bool EventEmitter::sendEvent(EventPtr& e, EventListenerPtr& listener)
+    {
+        if(e.isNull() || ! e->isValid())
+        {
+            aprodebug("Incorrect event given.");
+            return false;
+        }
+
+        if(e->must_stop)
+        {
+            aprodebug("Event has stop flag setted.");
+            return false;
+        }
+
+        if(!listener.isNull())
+        {
+            return listener->receive(e);
+        }
+        else
+        {
+            aprodebug("Incorrect listener given to EventEmitter. Sending event to every listeners registered.");
+            return sendEvent(e);
+        }
+    }
+
+    bool EventEmitter::sendEvent(EventPtr& e, const String& listener)
+    {
+        EventListenerPtr& ptr = getListener(listener);
+
+        if(ptr.isNull())
+        {
+            aprodebug("Listener \"") << listener << "\" given not found.";
+            return false;
+        }
+
+        return sendEvent(e, listener);
+    }
+
+    bool EventEmitter::sendEvent(EventPtr& e, const Id& listener)
+    {
+        EventListenerPtr& ptr = getListener(listener);
+
+        if(ptr.isNull())
+        {
+            aprodebug("Listener \"") << listener << "\" given not found.";
+            return false;
+        }
+
+        return sendEvent(e, listener);
+    }
+
+    void EventEmitter::sendASynchronousEvent(EventPtr& e, EventUniter* event_uniter)
     {
         if(!e.isNull())
         {
             if(!event_uniter)
+                event_uniter = Main::get().getEventUniterPtr();
+
+            if(!event_uniter)
             {
-                event_uniter = Main::get().getEventUniter();
+                aprodebug("No EventUniter detected.");
+                return;
             }
 
-            return event_uniter->push(e) ? 1 : 0;
+            ListenersList::const_iterator e = listeners.end();
+            for(ListenersList::iterator it = listeners.begin(); it != e; it++)
+            {
+                event_uniter->push(e, it);
+            }
         }
-
-        Console::get() << "\n[EventEmitter]{sendASynchronousEvent} Null event tried to be send !";
-        return 0;
     }
 
-    void EventEmitter::documentEvent(const String& event, const String& description)
+    void EventEmitter::sendAsynchronousEvent(EventPtr& e, EventListenerPtr& listener, EventUniter* event_uniter)
+    {
+        if(listener.isNull())
+        {
+            aprodebug("Null listener given.");
+            return;
+        }
+
+        if(!e.isNull())
+        {
+            if(!event_uniter)
+                event_uniter = Main::get().getEventUniterPtr();
+
+            if(!event_uniter)
+            {
+                aprodebug("No EventUniter detected.");
+                return;
+            }
+
+            event_uniter->push(e, listener);
+        }
+    }
+
+    void EventEmitter::sendAsynchronousEvent(EventPtr& e, const String& name, EventUniter* event_uniter)
+    {
+        EventListenerPtr& ptr = getListener(name);
+
+        if(ptr.isNull())
+        {
+            aprodebug("Listener \"") << name << "\" given not found.";
+            return;
+        }
+
+        sendAsynchronousEvent(e, ptr, event_uniter);
+    }
+
+    void EventEmitter::sendAsynchronousEvent(EventPtr& e, const Id& listener, EventUniter* event_uniter)
+    {
+        EventListenerPtr& ptr = getListener(listener);
+
+        if(ptr.isNull())
+        {
+            aprodebug("Listener \"") << listener << "\" given not found.";
+            return;
+        }
+
+        sendAsynchronousEvent(e, ptr, event_uniter);
+    }
+
+    void EventEmitter::documentEvent(const HashType& event, const String& description)
     {
         events[event] = description;
     }
@@ -155,17 +199,17 @@ namespace APro
         return ret;
     }
 
-    const String EventEmitter::getEventDocumentation(const String& event) const
+    const String& EventEmitter::getEventDocumentation(const HashType& event) const
     {
         events.exists(event) ? return events[event] : return String();
     }
 
-    bool EventEmitter::isEventDocumented(const String & event) const
+    bool EventEmitter::isEventDocumented(const HashType& event) const
     {
         return events.exists(event);
     }
 
-    bool EventEmitter::isEventHandled(const String & event) const
+    bool EventEmitter::isEventHandled(const HashType& event) const
     {
         return events.exists(event);
     }
@@ -305,7 +349,7 @@ namespace APro
         return nullptr;
     }
 
-    EventPtr createAndPopulateEvent(const String& event_type, bool set_target, EventListenerPtr& target) const
+    EventPtr EventEmitter::createAndPopulateEvent(const String& event_type, bool set_target, EventListenerPtr& target) const
     {
         if(!isEventHandled(event_type))
         {
@@ -323,6 +367,14 @@ namespace APro
             populateEvent(ret);
         }
 
+        return ret;
+    }
+
+    EventPtr EventEmitter::createEvent(const HashType& e_type) const
+    {
+        aprodebug("Creating default NullEvent because no overwritten function is available.");
+        EventPtr ret = AProNew(NullEvent);
+        ret->m_emitter = this;
         return ret;
     }
 

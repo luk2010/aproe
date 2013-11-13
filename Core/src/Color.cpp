@@ -87,9 +87,7 @@ namespace APro
         }
         else
         {
-#if APRO_EXCEPTION == APRO_ON
-            APRO_THROW("WrongEnum", "Wrong Color enum given to function set !", "Color");
-#endif
+            aprothrow_ce("Wrong Color enum given to function set !");
         }
     }
 

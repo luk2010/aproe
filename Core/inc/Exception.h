@@ -67,7 +67,7 @@ namespace APro
     /** Throw a simple exception. */
     #define aprothrow(Except) throw Except (__LINE__, __FILE__, __FUNCTION__)
 
-    /** Throw a Custom exception. */
+    /** Throw a Custom exception. Use this function to easily throw an exception with a message. */
     #define aprothrow_ce(msg) throw CustomException(msg, __LINE__, __FILE__, __FUNCTION__)
 }
 

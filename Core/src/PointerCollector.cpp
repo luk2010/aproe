@@ -17,7 +17,7 @@ namespace APro
     PointerCollector::PointerCollector(const String& collector_name)
         : name(collector_name)
     {
-        pointers_utility.reserve(1000);
+        pointers_utility.reserve(100);
     }
 
     PointerCollector::~PointerCollector()

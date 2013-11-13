@@ -1,5 +1,4 @@
-/////
-////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 /** @file Array.h
  *  @ingroup Utils
  *
@@ -38,6 +37,10 @@ namespace APro
      *  so the copy constructor will be called. If none found, or
      *  if object is not copy-constructible, only a basic memory
      *  copy will be performed.
+     *
+     *  @note If reserved space isn't set, and/or physical size of the
+     *  array is equal to logical size, then erasing objects will reduce
+     *  the size of it and will give a reallocation of the memory space.
     **/
     ////////////////////////////////////////////////////////////
     template <typename T>
@@ -484,6 +487,8 @@ namespace APro
         ////////////////////////////////////////////////////////////
         /** @brief Destruct the element at the given position and move
          *  the memory to the left by reducing the size by 1.
+         *
+         *  @note This function add a reserved space of 1 block.
         **/
         ////////////////////////////////////////////////////////////
         void erase(iterator position)
@@ -622,7 +627,7 @@ namespace APro
         void insert(iterator position, size_t n, const T& obj)
         {
             for(unsigned int i = 0; i < n; ++i)
-                insert(position + i, obj);
+                insert(position, obj);
         }
 
     public:
@@ -640,8 +645,57 @@ namespace APro
             return *this;
         }
 
+    public:
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Tells if an aray is equal to this one.
+         *
+         *  @note Objects must have a correct equality operator to
+         *  performs this function.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool equals(const Array<T>& a) const
+        {
+            if (a.size() != size()) return false;
+            else
+            {
+                for(unsigned int i = 0; i < size(); ++i)
+                {
+                    if(at(i) != a.at(i))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        bool operator == (const Array<T>& rhs) const { return equals(rhs); }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return an iterator if given object is found in this
+         *  array.
+         *
+         *  Objects must have a correct comparison function.
+        **/
+        ////////////////////////////////////////////////////////////
+        const_iterator find(const T& obj) const
+        {
+            const_iterator it = begin();
+            const_iterator it_e = end();
+
+            while(it != it_e)
+                if((*it) == obj)
+                    return it;
+                else
+                    it++;
+
+            return it_e;
+        }
 
     };
+
+    typedef Array<HashType> HashArray;///< An array of HashType.
+    typedef Array<Byte>     ByteArray;///< An array of Byte.
 }
 
 #endif

@@ -34,7 +34,7 @@ namespace APro
     {
         type = "Image";
 
-        if(data.width + data.height != 0 && data.colors.getSize() == 0)
+        if(data.width + data.height != 0 && data.colors.size() == 0)
         {
             fill(Color((unsigned char) 255, 255, 255, 255));
         }
@@ -62,7 +62,7 @@ namespace APro
 
     unsigned char* Image::rawColors()
     {
-        if(data.colors.getSize() > 0)
+        if(data.colors.size() > 0)
             return data.colors[0];
         else
             return nullptr;
@@ -70,7 +70,7 @@ namespace APro
 
     const unsigned char* Image::rawColors() const
     {
-        if(data.colors.getSize() > 0)
+        if(data.colors.size() > 0)
             return data.colors[0];
         else
             return nullptr;
@@ -78,7 +78,7 @@ namespace APro
 
     void Image::set(size_t x, size_t y, const Color& c)
     {
-        if(x + y * data.width < data.colors.getSize())
+        if(x + y * data.width < data.colors.size())
         {
             data.colors[x + y * data.width] = c;
         }
@@ -86,7 +86,7 @@ namespace APro
 
     void Image::fill(const Color& c)
     {
-        for(size_t i = 0; i < data.colors.getSize(); ++i)
+        for(size_t i = 0; i < data.colors.size(); ++i)
         {
             data.colors[i] = c;
         }

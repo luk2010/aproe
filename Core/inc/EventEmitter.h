@@ -51,10 +51,11 @@ namespace APro
     {
     protected:
 
-        typedef Map<String, String> EventsList;///< List of events type, with documentation.
+        typedef Map<HashType, String>  EventsList;   ///< List of events type, with documentation.
+        typedef List<EventListenerPtr> ListenersList;///< List of listeners pointer.
 
-        List<EventListenerPtr>       listeners;///< List of AutoPointer to listeners.
-        EventsList                  events;///< List of events type with documentation, handled correctly by this emitter.
+        ListenersList   listeners;///< List of AutoPointer to listeners.
+        EventsList      events;   ///< List of events type with documentation, handled correctly by this emitter.
 
     public:
 
@@ -81,15 +82,29 @@ namespace APro
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
          *
+         *  Send given event to every listeners registered in this
+         *  emitter. Process can be stop if listener receiving the event
+         *  set 'stop' event flag to true.
+         *
+         *  @param e : Event to send. If null, nothing is done in this
+         *  function.
+         *  @return True if event has been handled at least one time.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool sendEvent(EventPtr& e);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Send an event using the Synchronous Event System.
+         *
          *  @param e : Event to send. If null, nothing is done in this
          *  function.
          *  @param listener : Listener to send the event to. If null,
-         *  the emitter will send it to every listener registered.
-         *  @return A value superior or equal to 0, corresponding to
-         *  the number of listeners that have handled this event.
+         *  the emitter will send it to every listener registered, but
+         *  it shall not be as the function sendEvent(EventPtr) exists.
+         *  @return True if event has been handled.
         **/
         /////////////////////////////////////////////////////////////
-        unsigned int sendEvent(const EventPtr& e, EventListenerPtr& listener = nullptr);
+        bool sendEvent(EventPtr& e, EventListenerPtr& listener);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
@@ -97,13 +112,11 @@ namespace APro
          *  @param e : Event to send. If the event is null, nothing is
          *  done in this function.
          *  @param name : Name of the registered listener to send the
-         *  event to. You can set this name to "__all" if you want to
-         *  send it to every listeners.
-         *  @return A value superior or equal to 0, corresponding to
-         *  the number of listeners that have handled this event.
+         *  event to.
+         *  @return True if event has been handled.
         **/
         /////////////////////////////////////////////////////////////
-        unsigned int sendEvent(const EventPtr& e, const String& name);
+        bool sendEvent(EventPtr& e, const String& name);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
@@ -112,23 +125,70 @@ namespace APro
          *  done in this function.
          *  @param listener : Id of the listener to send. It must
          *  correspond to an entry in the registered listeners list.
-         *  @return A value superior or equal to 0, corresponding to
-         *  the number of listeners that have handled this event.
+         *  @return True if event has been handled.
         **/
         /////////////////////////////////////////////////////////////
-        unsigned int sendEvent(const EventPtr& e, const Id& listener);
+        bool sendEvent(EventPtr& e, const Id& listener);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
+         *
+         *  Every listeners registered in this Emitter will receive the
+         *  event. The pointer is duplicated with different receiver
+         *  (listener) in the Uniter Queue.
          *
          *  @param e : Event to send. If the event is null, nothing is
          *  done in this function.
          *  @param event_uniter : Event uniter to send the event to. If
          *  null, the global Event Uniter is used.
-         *  @return 0 if the uniter didn't handle the event, 1 otherweise.
         **/
         /////////////////////////////////////////////////////////////
-        unsigned int sendASynchronousEvent(const EventPtr& e, EventUniter* event_uniter = nullptr);
+        void sendASynchronousEvent(EventPtr& e, EventUniter* event_uniter = nullptr);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Send an event using the Asynchronous Event System.
+         *
+         *  The event will be send using the Uniter to the given
+         *  listener.
+         *
+         *  @param e : Event to send. If the event is null, nothing is
+         *  done in this function.
+         *  @param listener : Listener to send the event to.
+         *  @param event_uniter : Event uniter to send the event to. If
+         *  null, the global Event Uniter is used.
+        **/
+        /////////////////////////////////////////////////////////////
+        void sendAsynchronousEvent(EventPtr& e, EventListenerPtr& listener, EventUniter* event_uniter = nullptr);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Send an event using the Asynchronous Event System.
+         *
+         *  The event will be send using the Uniter to the given
+         *  listener.
+         *
+         *  @param e : Event to send. If the event is null, nothing is
+         *  done in this function.
+         *  @param name : Listener to send the event to.
+         *  @param event_uniter : Event uniter to send the event to. If
+         *  null, the global Event Uniter is used.
+        **/
+        /////////////////////////////////////////////////////////////
+        void sendAsynchronousEvent(EventPtr& e, const String& name, EventUniter* event_uniter = nullptr);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Send an event using the Asynchronous Event System.
+         *
+         *  The event will be send using the Uniter to the given
+         *  listener.
+         *
+         *  @param e : Event to send. If the event is null, nothing is
+         *  done in this function.
+         *  @param listener : Listener to send the event to.
+         *  @param event_uniter : Event uniter to send the event to. If
+         *  null, the global Event Uniter is used.
+        **/
+        /////////////////////////////////////////////////////////////
+        void sendAsynchronousEvent(EventPtr& e, const Id& listener, EventUniter* event_uniter = nullptr);
 
 
     protected:
@@ -143,13 +203,17 @@ namespace APro
          *  @param description : Documentation of the event.
         **/
         /////////////////////////////////////////////////////////////
-        void documentEvent(const String& event, const String& description);
+        void documentEvent(const HashType& event, const String& description);
 
     public:
 
         /////////////////////////////////////////////////////////////
         /** @brief Return a String containing every events with their
          *  description.
+         *  @deprecated
+         *  @note Due to HashType in events name, this function no more
+         *  returns Events name. See class documentation for events
+         *  emitting.
         **/
         /////////////////////////////////////////////////////////////
         String documentation() const;
@@ -158,7 +222,7 @@ namespace APro
         /** @brief Return the documentation for one event.
         **/
         /////////////////////////////////////////////////////////////
-        const String getEventDocumentation(const String& event) const;
+        const String& getEventDocumentation(const HashType& event) const;
 
         /////////////////////////////////////////////////////////////
         /** @brief Tell if an event is documented.
@@ -166,7 +230,7 @@ namespace APro
          *  @see isEventHandled , wich is equivalent.
         **/
         /////////////////////////////////////////////////////////////
-        bool isEventDocumented(const String& event) const;
+        bool isEventDocumented(const HashType& event) const;
 
         /////////////////////////////////////////////////////////////
         /** @brief Tell if event is handled.
@@ -174,7 +238,7 @@ namespace APro
          *  @see isEventDocumented , wich is equivalent.
         **/
         /////////////////////////////////////////////////////////////
-        bool isEventHandled(const String& event) const;
+        bool isEventHandled(const HashType& event) const;
 
     public:
 
@@ -247,39 +311,17 @@ namespace APro
         /////////////////////////////////////////////////////////////
         EventListenerPtr& getListener(const Id& identifier);
 
-    public:
+    protected:
 
         /////////////////////////////////////////////////////////////
-        /** @brief Create an event and populate it with correct
-         *  data.
+        /** @brief Create an event recognized by his hash type.
          *
-         *  @param event_type : Type of the event to create. You should
-         *  set it to a natively handled event by this emitter.
-         *  @param set_target : Set to true if you want to set the target
-         *  field of the event. @see Event for more.
-         *  @param target : Target of the event.
-         *
-         *  @return A pointer to the created event.
-         *
-         *  This function also call a virtual custom populating function
-         *  that helps the emitter to set correct data into the event.
-         *  You can overload it in subclasses.
-         *  @see ::populateEvent
+         *  It creates an event and fill every needed informations. By
+         *  default, this function return a NullEvent because no event
+         *  are handled.
         **/
         /////////////////////////////////////////////////////////////
-        EventPtr createAndPopulateEvent(const String& event_type, bool set_target = false, EventListenerPtr& target = nullptr) const;
-
-        /////////////////////////////////////////////////////////////
-        /** @brief Populate an event from his type.
-         *
-         *  If the type of the event is handled, the emitter will
-         *  populate it with correct datas that will be interpreted
-         *  by listeners and/or uniters.
-         *
-         *  @param event : Event to populate.
-        **/
-        /////////////////////////////////////////////////////////////
-        virtual void populateEvent(EventPtr& event) const { }
+        virtual EventPtr createEvent(const HashType& e_type) const;
     };
 
     typedef AutoPointer<EventEmitter> EventEmitterPtr;///< AutoPointer to EventEmitter. No need to overload the destruction.

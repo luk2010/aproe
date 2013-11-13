@@ -280,6 +280,27 @@ namespace APro
         ConsoleOptions currentState;///< Current console state.
         String dumpedLog;///< Black box of the console. Record everything written.
     };
+
+    ////////////////////////////////////////////////////////////
+    /** @class EmptyConsole
+     *  @ingroup Utils
+     *  @brief Faked Console System.
+     *
+     *  Use this class Singleton to provide macro-specific debug
+     *  operations.
+     *
+     *  In macro aprodebug, it is used in Released mode.
+    **/
+    ////////////////////////////////////////////////////////////
+    class APRO_DLL EmptyConsole : public Singleton<EmptyConsole>
+    {
+        APRO_DECLARE_SINGLETON(EmptyConsole)
+
+    public:
+
+        template <typename T>
+        EmptyConsole& operator << (const T& _a_thing) { return *this; }
+    };
 }
 
 #endif

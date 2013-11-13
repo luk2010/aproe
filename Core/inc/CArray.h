@@ -19,96 +19,81 @@
 #include "Copyable.h"
 #include "Printable.h"
 
-#include "STDUtils.h"
-
 namespace APro
 {
     /////////////////////////////////////////////////////////////
     /** @class CArray
-     *  @ingroup Memory
-     *  @brief A C-style array.
-     *  @details This array has a fixed size. If you change the size,
-     *  you reallocate the whole array and destroy the previous
-     *  content.
-     *  @note Destructors are called when destroying each object.
-     *  @note Use the changeSize method to reallocate the Array
-     *  without destroying his content.
+     *  @ingroup Utils
+     *  @brief A fixed size array.
+     *
+     *  Objects in are dynamicly managed as in Array, but the size
+     *  of this array is fixed. You cannot change it.
+     *
+     *  It may be very much more quick to use a CArray instead of
+     *  Array if you already know the size and do not need to change
+     *  it.
+     *
+     *  It is managed the same way a classic C-array is managed.
+     *  An array is created in the constructor and is destroyed
+     *  in the destructor. These operations are made
+     *  automaticly in the clear() function.
     **/
     /////////////////////////////////////////////////////////////
-    template <typename Type>
-    class CArray : public Copyable<CArray<Type> >,
+    template <typename Type, int S>
+    class CArray : public Copyable<CArray<Type, S> >,
                    public Printable
     {
-    private:
+    public:
 
-        Type*        m_array;///< Pointer to the array.
-        unsigned int m_size;///< Size of the array.
+        Type   m_array;///< Pointer to the array.
+        enum { Size = S; /**< Size of the array. */ };
 
-    private:
+    public:
 
         /////////////////////////////////////////////////////////////
-        /** @brief Allocate a new array.
-         *  @internal
+        /** @brief Return the size of this array.
         **/
         /////////////////////////////////////////////////////////////
-        void _allocate_array()
-        {
-            if(m_size > 0)
-            {
-                if(m_array)
-                {
-                    _deallocate_array();
-                }
-
-                m_array = AProNewA(Type, m_size);
-
-                if(!m_array)
-                {
-                    m_size = 0;
-                    m_array = nullptr;
-                }
-            }
-        }
-
-        /////////////////////////////////////////////////////////////
-        /** @brief Copy the content of an size-equally array.
-         *  @internal
-        **/
-        /////////////////////////////////////////////////////////////
-        void _copy_content(const Type* array)
-        {
-            if(m_size > 0 && m_array)
-            {
-                Std::Memcpy(m_array, array, _real_size());
-            }
-        }
-
-        /////////////////////////////////////////////////////////////
-        /** @brief Deallocate current array.
-        **/
-        /////////////////////////////////////////////////////////////
-        void _deallocate_array()
-        {
-            if(m_array && m_size > 0)
-            {
-                for(unsigned int i = 0; i < m_size; ++i)
-                {
-                    (&(m_array[i]))->~Type();
-                }
-
-                AProDelete(m_array);
-                m_array = nullptr;
-                m_size = 0;
-            }
-        }
+        unsigned int size() const { return Size; }
 
         /////////////////////////////////////////////////////////////
         /** @brief Return the byte size of the array.
         **/
         /////////////////////////////////////////////////////////////
-        unsigned int _real_size()
+        unsigned int bitsSize()
         {
-            return m_size * sizeof(Type);
+            return Size * sizeof(Type);
+        }
+
+    public:
+
+        // Iterators and co.
+
+        typedef Type* iterator;
+        typedef const Type* const_iterator;
+
+        iterator begin() { return (iterator) m_array; }
+        const_iterator begin() const { return (const_iterator) m_array; }
+
+        iterator end() { return (const_iterator) m_array + Size; }
+        const_iterator end() const { return (const_iterator) m_array + Size; }
+
+    private:
+
+        void allocate_array()
+        {
+            if(!m_array)
+            {
+                m_array = AProNewA(Type, Size);
+            }
+        }
+
+        void deallocate_array()
+        {
+            if(m_array)
+            {
+                AProDelete(m_array);
+            }
         }
 
     public:
@@ -117,21 +102,21 @@ namespace APro
         /** @brief Constructor with defined size.
         **/
         /////////////////////////////////////////////////////////////
-        CArray(unsigned int size)
-            : m_array(nullptr), m_size(size)
+        CArray()
+            : m_array(nullptr)
         {
-            _allocate_array();
+            allocate_array();
         }
 
         /////////////////////////////////////////////////////////////
         /** @brief Constructor from other array.
         **/
         /////////////////////////////////////////////////////////////
-        CArray(const CArray<Type>& other)
-            : m_array(nullptr), m_size(other.getSize())
+        CArray(const CArray<Type, S>& other)
+            : m_array(nullptr)
         {
-            _allocate_array();
-            _copy_content(other.getArray());
+            allocate_array();
+            set(other);
         }
 
         /////////////////////////////////////////////////////////////
@@ -140,16 +125,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         ~CArray()
         {
-            _deallocate_array();
-        }
-
-        /////////////////////////////////////////////////////////////
-        /** @brief Return the size of the array, in Object unit.
-        **/
-        /////////////////////////////////////////////////////////////
-        unsigned int getSize() const
-        {
-            return m_size;
+            deallocate_array();
         }
 
         /////////////////////////////////////////////////////////////
@@ -170,16 +146,19 @@ namespace APro
             return m_array;
         }
 
+        Type* operator Type* () { return m_array; }
+        const Type* operator Type* const () { return m_array; }
+
         /////////////////////////////////////////////////////////////
         /** @see Copyable::copyFrom
         **/
         /////////////////////////////////////////////////////////////
-        void copyFrom(const CArray<Type>& other)
+        void copyFrom(const CArray<Type, S>& other)
         {
-            _deallocate_array();
-            m_size = other.getSize();
-            _allocate_array();
-            _copy_content(other.getArray());
+            for(unsigned int i = 0; i < S, ++i)
+            {
+                m_array[i] = other[i];
+            }
         }
 
         /////////////////////////////////////////////////////////////
@@ -191,49 +170,28 @@ namespace APro
             if(getSize() != other.getSize())
                 return false;
 
-            return Std::Memcmp(m_array, other.getArray(), _real_size());
+            for(unsigned int i = 0; i < S; ++i)
+            {
+                if(!(m_array[i] == other[i]))
+                    return false;
+            }
+
+            return true;
         }
 
         /////////////////////////////////////////////////////////////
         /** @brief Clear the array.
+         *
+         *  This function reset every objects in the array, but doesn't
+         *  deallocate them.
+         *
+         *  @note It calls destructors of every objects.
         **/
         /////////////////////////////////////////////////////////////
         void clear()
         {
-            _deallocate_array();
-        }
-
-        /////////////////////////////////////////////////////////////
-        /** @brief Change the current size of the array.
-         *  @param size : new size
-        **/
-        /////////////////////////////////////////////////////////////
-        void changeSize(unsigned int size)
-        {
-            if(size == 0)
-                clear();
-
-            Type* tmp = m_array;
-            unsigned int tmp_sz = m_size;
-
-            // Allocate new array
-            m_size = size;
-            m_array = nullptr;
-            _allocate_array();
-
-            // Copy old array
-            if(size > tmp_sz)
-                m_size = tmp_sz;
-            _copy_content(tmp);
-
-            // Delete old array
-            m_size = tmp_sz;
-            Type* tmp2 = m_array;
-            m_array = tmp;
-            _deallocate_array();
-
-            m_size = size;
-            m_array = tmp2;
+            deallocate_array();
+            allocate_array();
         }
 
         /////////////////////////////////////////////////////////////
@@ -260,7 +218,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         void print(Console& console) const
         {
-            console << "C Array { Size = " << getSize() << " } ";
+            console << "C Array { Type = \"" << className<Type>() << "\", Size = \"" << S << "\" } ";
         }
     };
 }

@@ -1,16 +1,16 @@
+////////////////////////////////////////////////////////////
 /** @file Color.h
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
  *  @date 23/09/2012
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the Color class.
+ *  Defines the Color class.
  *
 **/
+////////////////////////////////////////////////////////////
 #ifndef APROCOLOR_H
 #define APROCOLOR_H
 
@@ -19,34 +19,43 @@
 
 namespace APro
 {
-    //! @class Color
-    /** @brief Represents a color as RGBA in 32 bits ( 8 + 8 + 8 + 8 ).
+    ////////////////////////////////////////////////////////////
+    /** @class Color
+     *  @ingroup Utils
+     *  @brief Represents a color as RGBA in 32 bits ( 8 + 8 + 8
+     *  + 8 ).
      *
-     * This class help manipulating colors.
+     *  You can manipulate colors and stock them by using this
+     *  class. In this representation, Colors channels are Red, Green,
+     *  Blue and Alpha and are from 0 to 255 as they are represented
+     *  by a char (8 bits).
      *
-     * @note Colors can be stored in a Array<Color> without any problems, so you should
-     * use this storage system instead of List.
-     *
-     * @note Color size is 4. It is equivalent to int (32bits).
-     *
-     */
+     *  @note Color size is 4. It is equivalent to int (32bits).
+    **/
+    ////////////////////////////////////////////////////////////
     class APRO_DLL Color
     {
     public:
 
-        /** @brief Helper to describe most formats used. */
+        ////////////////////////////////////////////////////////////
+        /** @brief Helper to describe most formats used.
+        **/
+        ////////////////////////////////////////////////////////////
         class Format
         {
         public:
             enum _
             {
                 RGBA, ///< Used by this Engine.
-                ARGB, ///< Used by DirectX.
-                ABGR  ///< Usd by OpenGL.
+                ARGB, ///< Commonly used by DirectX.
+                ABGR  ///< Commonly used by OpenGL.
             };
         };
 
-        /** @brief The four components of the color. */
+        ////////////////////////////////////////////////////////////
+        /** @brief The four components of the color.
+        **/
+        ////////////////////////////////////////////////////////////
         class Component
         {
         public:
@@ -61,14 +70,54 @@ namespace APro
 
     public:
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Construct a Color with 0 as initialization. */
+        ////////////////////////////////////////////////////////////
         Color();
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Construct a color from a 32bit value with given
+         *  supported format.
+        **/
+        ////////////////////////////////////////////////////////////
         explicit Color(unsigned long int c, Format::_ f = Format::RGBA);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Construct a Color from given RGBA value, each one
+         *  from 0 to 255.
+        **/
+        ////////////////////////////////////////////////////////////
         Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Construct a Color from given RGBA, each one from
+         *  0.f to 255.f.
+         *
+         *  @note 0.f corresponds to 0 (no color), and 1.f corresponds
+         *  to 255 (full color).
+        **/
+        ////////////////////////////////////////////////////////////
         explicit Color(float r, float g, float b, float a = 1.0f);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Constructs a Color from another one.
+        **/
+        ////////////////////////////////////////////////////////////
         Color(const Color& other);
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Destructs the Color.
+        **/
+        ////////////////////////////////////////////////////////////
         ~Color();
 
+    public:
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Set this Color to given 32bit value and from given
+         *  format.
+        **/
+        ////////////////////////////////////////////////////////////
         void set(unsigned long int c, Format::_ f = Format::RGBA);
         void set(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);
         void set(float r, float g, float b, float a = 1.0f);

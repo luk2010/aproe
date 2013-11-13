@@ -274,7 +274,7 @@ namespace APro
     size_t String::size() const
     {
 
-        return mstr.getSize() - 1;
+        return mstr.size() - 1;
     }
 
     Array<char>& String::toArray()
@@ -600,5 +600,30 @@ namespace APro
         ret.append(buffer);
 
         return ret;
+    }
+
+    HashType String::hash() const
+    {
+        // From : http://stackoverflow.com/questions/8094790/how-to-get-hash-code-of-a-string-in-c
+        HashType h = 0;
+        for(size_t i = 0; i < size(); ++i)
+        {
+            h = 65599 * h + at(i);
+        }
+
+        return h ^ (h << 16);
+    }
+
+    HashType String::Hash(const char* str)
+    {
+        // From : http://stackoverflow.com/questions/8094790/how-to-get-hash-code-of-a-string-in-c
+        // Modified to fit in this contet.
+        HashType h = 0;
+        for(char* i = str; i != nullptr && (*i) != '\0'; i++)
+        {
+            h = 65599 * h + (*i);
+        }
+
+        return h ^ (h << 16);
     }
 }

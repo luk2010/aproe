@@ -19,40 +19,43 @@
 
 namespace APro
 {
-    Event::Event(const String& type, EventEmitter* _emitter, EventListener* _target)
-    : ParametedObject()
+
+    APRO_REGISTER_EVENT_NOCONTENT(NullEvent)
+
+    Event::Event()
     {
-        m_type      = type;
+        m_type      = 0;
         m_id        = Main::get().getIdGenerator().pick();
-        m_target    = _target;
-        m_emitter   = _emitter;
+        m_target    = nullptr;
+        m_emitter   = nullptr;
+        must_stop   = false;
     }
-    
+
     Event::~Event()
     {
-        
+
     }
-    
+
     EventEmitter& Event::emitter()
     {
-        if(m_emitter) 
+        if(m_emitter)
             return *m_emitter;
         else
         {
-            APRO_THROW("NullPtrToReference", "Null emitter !", "Event");
+            aprothrow_ce("NullPtrToReference", "Null emitter !", "Event");
         }
     }
-    
+
     const EventEmitter& Event::emitter() const
     {
-        if(m_emitter) 
+        if(m_emitter)
             return *m_emitter;
         else
         {
             APRO_THROW("NullPtrToReference", "Null emitter !", "Event");
         }
     }
-    
+
     EventListener& Event::listener()
     {
         if(m_listener)
@@ -62,7 +65,7 @@ namespace APro
             APRO_THROW("NullPtrToReference", "Null target !", "Event");
         }
     }
-    
+
     const EventListener& Event::listener() const
     {
         if(m_listener)
@@ -72,25 +75,40 @@ namespace APro
             APRO_THROW("NullPtrToReference", "Null target !", "Event");
         }
     }
-    
-    const String& Event::type() const
+
+    HashType Event::type() const
     {
         return m_type;
     }
-    
-    const unsigned int & Event::id() const
+
+    unsigned long Event::id() const
     {
         return m_id;
     }
-    
+
     bool Event::hasEmitter() const
     {
         return m_emitter == nullptr;
     }
-    
+
     bool Event::hasListener() const
     {
         return m_listener == nullptr;
     }
-    
+
+    bool Event::isValid() const
+    {
+        return m_type != 0;
+    }
+
+    bool Event::isNullEvent() const
+    {
+        return m_type == NullEvent::Hash;
+    }
+
+    void Event::mustStop()
+    {
+        must_stop = true;
+    }
+
 }

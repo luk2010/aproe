@@ -23,57 +23,29 @@ namespace APro
     ////////////////////////////////////////////////////////////
     /** @class AutoPointer
      *  @ingroup Memory
-     *  @brief references a shared pointer and delete it when no
-     *  use.
-     *  @details AutoPointer references a given adress. Each times
-     *  this adress is referenced, it has a given referene counter
-     *  (PointerCollector) that tell if the adress is used, or not.
+     *  @brief Reference a pointer to the given PointerCollector
+     *  and destroy it when unused.
      *
-     *  The PointerCollector can be anyone you give, but by default,
-     *  it is the Main Global Pointer Collector that is given to
-     *  AutoPointer, to provide global pointer referencing.
+     *  The AutoPointer is an object initialized with a pointer
+     *  and a PointerCollector. The pointer is grabbed in the
+     *  PointerCollector.
      *
-     *  If the PointerCollector is a custom one, only AutoPointer
-     *  copied from original will have the same PointerCollector.
+     *  When the PointerCollector detects that every instance of
+     *  the pointer is destroyed, the pointer is obviously destroyed
+     *  by this class, calling the AProDelete function.
      *
-     *  You can customize the deletion of particular objects, in
-     *  subclassing a specialization of this class.
-     *  @code
-     *  class MyIntPointer : public AutoPointer<int>
-     *  @endcode
+     *  Every destructors are called by this class. You do not need
+     *  to make a homemade system to bypass the destructors calls.
+     *  But you can subclass easily this class by using the
+     *  APRO_COPY_AUTOPOINTER_CONSTRUCT() macro and correctly
+     *  overwrite the destroy_pointer() function wich must call
+     *  deallocate_pointer() at the end.
      *
-     *  This can be used to reimplement the ::destroy_pointer method,
-     *  to perform customized destruction of objects.
+     *  @note For most case, a simple typedef is sufficient because
+     *  the destruction system calls every destructors.
      *
-     *  @note You must call the ungrab_pointer function from the
-     *  destructor of your class. The pointer isn't automaticly
-     *  released in the original class.
-     *
-     *  To create a sub class of this one, you should use the template
-     *  as :
-     *
-     *  @code
-     *  class Example {};
-     *  
-     *  class Example_AutoPointer : public AutoPointer<Example>
-     *  {
-     *     public:
-     *        APRO_COPY_AUTOPOINTER_CONSTRUCT(Example_AutoPointer,
-     *                                          Example)
-     *        
-     *        virtual ~Example_AutoPointer() { ungrab_pointer(); }
-     *
-     *     protected:
-     *        void destroy_pointer() {  Do_your_stuff_here_(); }
-     *  };
-     *  @endcode
-     *
-     *  The public part is the standard part, the protected one is 
-     *  your customization part. If your object dosen't have specific
-     *  destruction (except delete of course), you can use
-     *  @code typedef AutoPointer<Example> Example_AutoPointer; @endcode
-     *  to quickly perform AutoPointer subclass. 
-     *
+     *  @note AutoPointer can be used also as a normal pointer
+     *  because operator T* is overwritten.
     **/
     ////////////////////////////////////////////////////////////
     template <typename T>
@@ -155,7 +127,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         virtual ~AutoPointer()
         {
-            ungrab_pointer(); 
+            ungrab_pointer();
         }
 
     protected:
@@ -188,11 +160,11 @@ namespace APro
          *  destruction of objects.
          *  This function is called only if the collector tell that use
          *  is 0.
-         * 
-         *  Use it to perform custom destruction as virtual destroy 
+         *
+         *  Use it to perform custom destruction as virtual destroy
          *  function object (as in AbstractObject).
          *
-         *  @note Never forget to call ::deallocate_pointer at the end 
+         *  @note Never forget to call ::deallocate_pointer at the end
          *  of this function.
         **/
         ////////////////////////////////////////////////////////////
@@ -268,12 +240,36 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the current pointer.
-         *  @note Never delete a pointer from this function.
+         *  @note Never delete a pointer returned by this function.
         **/
         ////////////////////////////////////////////////////////////
         const T* getPointer() const
         {
             return pointer;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the number of instance of this pointer,
+         *  given by the PointerCollector.
+        **/
+        ////////////////////////////////////////////////////////////
+        size_t getPointerUses() const
+        {
+            if(pointer)
+            {
+                if(custom_collector)
+                {
+                    return custom_collector->getPointerUtility(pointer);
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         ////////////////////////////////////////////////////////////
@@ -297,7 +293,8 @@ namespace APro
         }
 
         ////////////////////////////////////////////////////////////
-        /** @brief Set the current pointer to null if not.
+        /** @brief Set the current pointer to null if not, and
+         *  ungrab it from the PointerCollector.
         **/
         ////////////////////////////////////////////////////////////
         void nullize()
@@ -336,6 +333,16 @@ namespace APro
             return *pointer;
         }
 
+        inline T* operator T* ()
+        {
+            return pointer;
+        }
+
+        inline const T* operator T* () const
+        {
+            return pointer;
+        }
+
     public:
 
         bool operator == (const AutoPointer<T>& other) const
@@ -353,8 +360,38 @@ namespace APro
             set(other.pointer);
             return *this;
         }
+
+    public:
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Reinterpret current pointer to another class.
+         *
+         *  You can use this function to reinterpret this pointer to
+         *  for exemple, a derived class that you are sure this pointer
+         *  refers to.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename Y>
+        Y* reinterpret()
+        {
+            return reinterpret_cast<Y*>(pointer);
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Reinterpret current pointer to another class.
+         *
+         *  You can use this function to reinterpret this pointer to
+         *  for exemple, a derived class that you are sure this pointer
+         *  refers to.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<typename Y>
+        const Y* reinterpret() const
+        {
+            return reinterpret_cast<const Y*>(pointer);
+        }
     };
-    
+
 #define APRO_COPY_AUTOPOINTER_CONSTRUCT(type, object) \
     type() : AutoPointer<object>() { } \
     type(object* __o) : AutoPointer<object>(__o) { } \

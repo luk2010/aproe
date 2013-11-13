@@ -630,7 +630,7 @@ namespace APro
             return;
 
         outConvexHull.append(pointArray, numPoints);
-        int convexhullsize = ConvexHullInPlace(&outConvexHull[0], outConvexHull.getSize());
+        int convexhullsize = ConvexHullInPlace(&outConvexHull[0], outConvexHull.size());
         outConvexHull.resize((size_t) convexhullsize);
     }
 

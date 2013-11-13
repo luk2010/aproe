@@ -121,6 +121,19 @@ namespace APro
         APRO_DLL void CopyInterlaced(void* target, const void* source, size_t sz);
 
         APRO_DLL void Set (void* target, int value, size_t num);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief The memcmp() function compares the first n characters
+         *  of the object pointed to by s1 to the first n characters of
+         *  the object pointed to by s2.
+         *
+         *  @return The memcmp() function returns an integer greater than,
+         *  equal to, or less than zero, accordingly as the object pointed
+         *  to by s1 is greater than, equal to, or less than the object
+         *  pointed to by s2.
+        **/
+        /////////////////////////////////////////////////////////////
+        APRO_DLL int Cmp(const void * s1, const void * s2, size_t n);
     }
 }
 
@@ -252,7 +265,7 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
  *  be called.
 **/
 ////////////////////////////////////////////////////////////
-template<typename T> void AProDestructObject(T* object, size_t sz, bool _is_array = false)
+template<typename T> void AProDestructObject(T* object, size_t sz = 1, bool _is_array = false)
 {
     if(APro::Types::IsDestructible<T>())
     {

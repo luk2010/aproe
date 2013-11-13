@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012
+ *  @date 11/09/2012, 02/11/2013
  *
  *  Defines the EventListener class.
  *
@@ -45,9 +45,10 @@ namespace APro
 
     protected:
 
-        String      m_name;    ///< Name of the listener.
-        Id          id;        ///< Id of this listener.
-        EventPtr    last_event;///< Last event received by this listener.
+        String      m_name;         ///< Name of the listener.
+        Id          id;             ///< Id of this listener.
+        EventPtr    last_event;     ///< Last event received by this listener.
+        HashArray   eventprocessed; ///< List of event normally processed by this listener.
 
     public:
 
@@ -81,7 +82,7 @@ namespace APro
          *  ::handle() return false the event won't be stored.
         **/
         /////////////////////////////////////////////////////////////
-        bool receive(const EventPtr& event);
+        bool receive(EventPtr& event);
 
     protected:
 
@@ -97,7 +98,7 @@ namespace APro
          *  @return true if event is used, user-dependant.
         **/
         /////////////////////////////////////////////////////////////
-        virtual bool handle(const EventPtr& event) { return false; }
+        virtual bool handle(EventPtr& event) { return false; }
 
     public:
 
@@ -119,9 +120,30 @@ namespace APro
         /////////////////////////////////////////////////////////////
         const unsigned long& getId() const;
 
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Add an event to the list of processed events.
+        **/
+        /////////////////////////////////////////////////////////////
+        void addEventProcessed(const HashType& event);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Remove an event from the list of processed events.
+        **/
+        /////////////////////////////////////////////////////////////
+        void removeEventProcessed(const HashType& event);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Tell if an event can normally be processed by this
+         *  listener.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool isEventProcessed(const HashType& event) const;
+
     };
 
-    typedef AutoPointer<EventListener> EventListenerPtr;///< AutoPointerof EventListener. No custom destruction needed, so simple typedef used.
+    typedef AutoPointer<EventListener> EventListenerPtr;///< AutoPointer of EventListener. No custom destruction needed, so simple typedef used.
 }
 
 #endif
