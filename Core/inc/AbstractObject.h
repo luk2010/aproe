@@ -38,8 +38,7 @@ namespace APro
      *  Object construction.
      *
      *  As it follows the Factory Design Pattern, you must provide
-     *  clone() function to your customized object, but you also
-     *  must provide a standard destroy() method.
+     *  clone() function to your customized object.
      *
      *  @note Properties must be copied by subclass, they better
      *  know what type of property are stored :) .
@@ -52,9 +51,9 @@ namespace APro
         String                  m_name;      ///< Name of the object.
         AbstractObjectFactory*  m_factory;   ///< Factory that created this object.
         Dictionnary             m_properties;///< Properties of this object.
-        
+
     public:
-        
+
         typedef AbstractObjectAutoPointer ptr;
 
     public:
@@ -77,9 +76,7 @@ namespace APro
         AbstractObject(const AbstractObject& other, AbstractObjectFactory* factory = nullptr);
 
         ////////////////////////////////////////////////////////////
-        /** @brief Destructor.
-         *  @note It must do nothing because there is a destroy function
-         *  that can better do that.
+        /** @brief Destruct the abstract object.
         **/
         ////////////////////////////////////////////////////////////
         virtual ~AbstractObject();
@@ -159,55 +156,10 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         size_t getPropertiesNumber() const;
-
-    public:
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Destroy this object, and every custom data.
-        **/
-        ////////////////////////////////////////////////////////////
-        virtual void destroy() = 0;
     };
 
-    ////////////////////////////////////////////////////////////
-    /** @class AbstractObjectFactory
-     *  @ingroup Core
-     *  @brief A factory instanciated by the Main object.
-     *  @details Use it to register custom objects, or to create
-     *  objects.
-    **/
-    ////////////////////////////////////////////////////////////
-    class AbstractObjectFactory : public Factory<AbstractObject> {};
-
-    ////////////////////////////////////////////////////////////
-    /** @class AbstractObjectAutoPointer
-     *  @ingroup Core
-     *  @brief Specialized version of AutoPointer.
-     *
-     *  The AbstractObjectAutoPointer destroy the pointer by 
-     *  calling the ungrab_pointer() and destroy_pointer function
-     *  where AbstractObject::destroy is called before
-     *  deallocation.
-    **/
-    ////////////////////////////////////////////////////////////
-    class APRO_DLL AbstractObjectAutoPointer : public AutoPointer<AbstractObject>
-    {
-    public:
-        
-        APRO_COPY_AUTOPOINTER_CONSTRUCT(AbstractObjectAutoPointer, AbstractObject)
-        
-        virtual ~AbstractObjectAutoPointer() { ungrab_pointer(); }
-        
-    protected:
-
-        virtual void destroy_pointer()
-        {
-            if(pointer)
-                pointer->destroy();
-
-            AutoPointer<AbstractObject>::deallocate_pointer();
-        }
-    };
+    typedef Factory<AbstractObject>     AbstractObjectFactory;///< A Factory instanciated by the Main object.
+    typedef AutoPointer<AbstractObject> AbstractObjectPtr;    ///< An AutoPointer to AbstractObject.
 }
 
 #endif // APRO_ABSTRACTOBJECT_H

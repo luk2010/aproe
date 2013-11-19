@@ -1,14 +1,16 @@
+/////////////////////////////////////////////////////////////
 /** @file List.h
- *  @ingroup Memory
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 16/07/2012
+ *  @date 18/11/2013
  *
  *  Defines the List container.
  *
 **/
+/////////////////////////////////////////////////////////////
 #ifndef APROLIST_H
 #define APROLIST_H
 
@@ -19,830 +21,404 @@
 
 namespace APro
 {
-    template<typename T>
+    /////////////////////////////////////////////////////////////
+    /** @class List
+     *  @ingroup Utils
+     *  @brief A Simple Linked List.
+     *
+     *  This container is a simple linked list. Each Node has
+     *  a pointer to the next Node.
+     *
+     *  This is a different approach from Array, because push_front
+     *  will be much quicker, but push_back will be less. You
+     *  should use the List when you will have to prepend many objects
+     *  quickly.
+     *
+     *  Access also is less quick than Array.
+     *
+     *  @note Constructors and Destructor of data are called during
+     *  copy and destruction.
+    **/
+    /////////////////////////////////////////////////////////////
+    template <typename T>
     class List
     {
-    private:
+    protected:
 
+        /////////////////////////////////////////////////////////////
+        /** @brief Describe a Node in the List.
+         *
+         *  At construction, Node allocate memory for data and construct
+         *  a copy using placement new and AProConstructedCopy.
+         *
+         *  At destruction, data is destroyed (calling destructor) and
+         *  then memory is deallocated.
+        **/
+        /////////////////////////////////////////////////////////////
         class Node
         {
         public:
-            Node()
-            : next(nullptr), previous(nullptr), element(nullptr)
-            {
 
-            }
+            T* data;
+            Node* next;
 
             Node(const T& other)
+                : data(nullptr), next(nullptr)
             {
-                element = AProNew(T, other);
-                next = previous = nullptr;
+                data = (T*) AProAllocate(sizeof(T));
+                AProConstructedCopy(data, other, T);
             }
 
-            Node(const Node& other)
+            Node(const Node<T>& other)
+                : data(nullptr), next(nullptr)
             {
-                element = AProNew(T, other.element);
-                next = previous = nullptr;
+                data = (T*) AProAllocate(sizeof(T));
+                AProConstructedCopy(data, *(other.data), T);
             }
 
             ~Node()
             {
-                if(element != nullptr)
-                    AProDelete(element);
-            }
-
-            Node* next;
-            Node* previous;
-            T*    element;
-        };
-
-        class BeginNode : public Node
-        {
-        public:
-            BeginNode()
-            {
-                Node::element = nullptr;
-                Node::next = Node::previous = nullptr;
-            }
-
-            ~BeginNode()
-            {
-                /* Do nothing */
+                AProDestructObject(data);
+                AProDeallocate(data);
             }
         };
 
-        class EndNode : public Node
+        /** @brief An iterator through nodes. */
+        class NodeIter
         {
         public:
-            EndNode()
-            {
-                Node::element = nullptr;
-                Node::next = Node::previous = nullptr;
-            }
+            Node* n;
 
-            ~EndNode()
-            {
-                /* Do nothing */
-            }
+            NodeIter() : n(nullptr) {}
+            NodeIter(const Node* _node) : n(_node) {}
+            NodeIter(const NodeIter& it) : n(it.n) {}
+
+            T* operator T*() { return n ? n->data : nullptr; }
+            const T* operator T*() const { return n ? n->data : nullptr; }
+
+            void operator++() { if(n) n = n->next; }
+            NodeIter operator + (size_t n) { NodeIter it = *this; while(n) { it++; n--; } return it; }
+            const NodeIter operator + (size_t n) const { NodeIter it = *(const_cast<NodeIter*>(this)); while(n) { it++; n--; } return it; }
+
+            T& operator *() { return *(n->data); }
+            const T& operator *() const { return *(n->data); }
+
+            T* operator ->() { return n ? n->data : nullptr; }
+            const T* operator ->() const { return n ? n->data : nullptr; }
+
+            bool operator == (const NodeIter& it) const { return n == it.n; }
+            bool operator != (const NodeIter& it) const { return n != it.n; }
+
+            NodeIter& operator = (const NodeIter& other) { n = other.n; return *this; }
         };
 
     public:
 
-        class ConstIterator;
+        Node*  first;///< First Node of the List.
+        Node*  last; ///< Last Node of the list.
+        size_t sz;   ///< Size of the List (number of elements).
 
-        class Iterator
-        {
-        public:
+        typedef NodeIter iterator;              ///< Iterator through nodes.
+        typedef const NodeIter const_iterator;  ///< Constant Iterator through nodes.
 
-            friend class List<T>;
+        /** @brief Return an iterator to the first node. */
+        iterator begin() { return NodeIter(first); }
+        /** @brief Return an iterator to the first node. */
+        const_iterator begin() const { return NodeIter(first); }
 
-            Iterator(Node* node_)
-            {
-                node = node_;
-            }
-
-            Iterator(const Iterator& it)
-            {
-                node = it.node;
-            }
-
-            ~Iterator()
-            {
-                /* Do nothing */
-            }
-
-            T& get()
-            {
-                if(node != nullptr)
-                    return *(node->element);
-
-#if APRO_EXCEPTION == APRO_ON
-
-                APRO_THROW("BadIterator", "Iterator have bad node !", "Iterator");
-
-#endif
-            }
-
-            bool next()
-            {
-                if(node == nullptr)
-                    return false;
-
-                if(node->next == nullptr)
-                    return false;
-
-                node = node->next;
-                return true;
-            }
-
-            bool previous()
-            {
-                if(node == nullptr)
-                    return false;
-
-                if(node->previous == nullptr)
-                    return false;
-
-                node = node->previous;
-                return true;
-            }
-
-            bool isEnd() const
-            {
-                if(node == nullptr || node->next == nullptr)
-                    return true;
-                return false;
-            }
-            bool isFirst() const
-            {
-                if(node == nullptr || node->previous == nullptr)
-                    return true;
-                return false;
-            }
-
-            bool operator ++ (int)
-            {
-                return next();
-            }
-            bool operator -- (int)
-            {
-                return previous();
-            }
-
-            bool operator == (Iterator i) const
-            {
-                return i.node == node;
-            }
-
-            bool operator != (Iterator i) const
-            {
-                return !(*this == i);
-            }
-
-            bool operator == (ConstIterator i) const
-            {
-                return i.node == node;
-            }
-
-            bool operator != (ConstIterator i) const
-            {
-                return !(*this == i);
-            }
-
-            Iterator& operator + (int i)
-            {
-                if(i < 0)
-                {
-                    while(i != 0)
-                    {
-                        i++;
-                        previous();
-                    }
-                }
-                else if(i > 0)
-                {
-                    while(i != 0)
-                    {
-                        i--;
-                        next();
-                    }
-                }
-
-                return *this;
-            }
-
-            Iterator& operator - (int i)
-            {
-                if(i < 0)
-                {
-                    while(i != 0)
-                    {
-                        i++;
-                        next();
-                    }
-                }
-                else if(i > 0)
-                {
-                    while(i != 0)
-                    {
-                        i--;
-                        previous();
-                    }
-                }
-
-                return *this;
-            }
-
-        private:
-            Node* node;
-        };
-
-        class ConstIterator
-        {
-        public:
-
-            friend class List<T>;
-
-            ConstIterator(const Node* node_)
-            {
-                node = const_cast<Node*>(node_);
-            }
-
-            ConstIterator(const ConstIterator& it)
-            {
-                node = it.node;
-            }
-
-            ConstIterator(const Iterator& it)
-            {
-                node = it.node;
-            }
-
-            ~ConstIterator()
-            {
-                /* Do nothing */
-            }
-
-            const T& get() const
-            {
-                if(node != nullptr)
-                    return *(node->element);
-
-#if APRO_EXCEPTION == APRO_ON
-
-                APRO_THROW("BadConstIterator", "Iterator have bad node !", "ConstIterator");
-
-#endif
-            }
-
-            bool next()
-            {
-                if(node == nullptr)
-                    return false;
-
-                if(node->next == nullptr)
-                    return false;
-
-                node = node->next;
-                return true;
-            }
-
-            bool previous()
-            {
-                if(node == nullptr)
-                    return false;
-
-                if(node->previous == nullptr)
-                    return false;
-
-                node = node->previous;
-                return true;
-            }
-
-            bool isEnd() const
-            {
-                if(node == nullptr || node->next == nullptr)
-                    return true;
-                return false;
-            }
-            bool isFirst() const
-            {
-                if(node == nullptr || node->previous == nullptr)
-                    return true;
-                return false;
-            }
-
-            bool operator ++ (int)
-            {
-                return next();
-            }
-            bool operator -- (int)
-            {
-                return previous();
-            }
-
-            bool operator == (Iterator i) const
-            {
-                return i.node == node;
-            }
-
-            bool operator == (ConstIterator i) const
-            {
-                return i.node == node;
-            }
-
-            bool operator != (ConstIterator i) const
-            {
-                return !(*this == i);
-            }
-
-            bool operator != (Iterator i) const
-            {
-                return !(*this == i);
-            }
-
-            ConstIterator& operator + (int i)
-            {
-                if(i < 0)
-                {
-                    while(i != 0)
-                    {
-                        i++;
-                        previous();
-                    }
-                }
-                else if(i > 0)
-                {
-                    while(i != 0)
-                    {
-                        i--;
-                        next();
-                    }
-                }
-
-                return *this;
-            }
-
-            ConstIterator& operator - (int i)
-            {
-                if(i < 0)
-                {
-                    while(i != 0)
-                    {
-                        i++;
-                        next();
-                    }
-                }
-                else if(i > 0)
-                {
-                    while(i != 0)
-                    {
-                        i--;
-                        previous();
-                    }
-                }
-
-                return *this;
-            }
-
-        private:
-            Node* node;
-        };
-
-    private:
-
-          BeginNode     firstNode;
-          EndNode       lastNode;
-          size_t msize;
+        /** @brief Return an iterator to the node after the Last node, i.e. always null. */
+        iterator end() { return NodeIter(nullptr); }
+        /** @brief Return an iterator to the node after the Last node, i.e. always null. */
+        const_iterator end() const { return NodeIter(nullptr); }
 
     public:
 
+        typedef List<T> list_t;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs an empty list.
+        **/
+        /////////////////////////////////////////////////////////////
         List()
-            : msize(0)
+            : first(nullptr), last(nullptr), sz(0)
+        { }
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs a List copying given one.
+        **/
+        /////////////////////////////////////////////////////////////
+        List(const list_t& other)
+            : first(nullptr), last(nullptr), sz(0)
         {
-            lastNode.previous = &firstNode;
-            firstNode.next = &lastNode;
-        }
-        List(const List<T>& l)
-            : msize(0)
-        {
-            lastNode.previous = &firstNode;
-            firstNode.next = &lastNode;
-            append(l);
+            if(other.sz)
+            {
+                const_iterator e = other.end();
+                for(const_iterator it = other.begin(); it != e; it++)
+                {
+                    push_back(*it);
+                }
+            }
         }
 
-        List<T>& operator = (const List<T>& other)
-        {
-            clear();
-            lastNode.previous = &firstNode;
-            firstNode.next = &lastNode;
-            append(l);
-        }
-
+        /////////////////////////////////////////////////////////////
+        /** @brief Destructs the list.
+        **/
+        /////////////////////////////////////////////////////////////
         ~List()
         {
             clear();
         }
 
-        void append(const T& obj)
+    private:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Creates a new node from an object.
+         *
+         *  The object is copied in the constructor of Node.
+        **/
+        /////////////////////////////////////////////////////////////
+        Node* __create_node(const T& obj)
         {
-            Node* rlastNode = lastNode.previous;
-
-            if(rlastNode == nullptr)
-            {
-                repairLastNode();
-
-                rlastNode = lastNode.previous;
-                if(rlastNode == nullptr)
-                {
-#if APRO_EXCEPTION == APRO_ON
-
-                    APRO_THROW("BadInitializationList", "List has been bad initialized and couldn't be fixed !", "List");
-
-#endif
-
-                    return;
-                }
-            }
-
-            Node* newNode = AProNew(Node, obj);
-            newNode->previous = rlastNode;
-            newNode->next = &lastNode;
-
-            lastNode.previous = newNode;
-            rlastNode->next = newNode;
-
-            msize ++;
+            return AProNew(Node, obj);
         }
 
-        void append(const List<T>& obj)
-        {
-            for(List<T>::ConstIterator it(obj.begin()); !it.isEnd(); it++)
-            {
-                append(it.get());
-            }
-        }
+    public:
 
+        /////////////////////////////////////////////////////////////
+        /** @brief Push an object at the end of the List.
+        **/
+        /////////////////////////////////////////////////////////////
         void push_back(const T& obj)
         {
-            append(obj);
-        }
+            Node* n = __create_node(obj);
 
-        void push_back(const List<T>& obj)
-        {
-            append(obj);
-        }
-
-        void prepend(const T& obj)
-        {
-            Node* rfirstNode = firstNode.next;
-
-            if(rfirstNode == nullptr)
+            if(n)
             {
-                repairFirstNode();
-
-                rfirstNode = firstNode.next;
-                if(rfirstNode == nullptr)
+                if(!first)
                 {
-#if APRO_EXCEPTION == APRO_ON
-
-                    APRO_THROW("BadInitializationList", "List has been bad initialized and couldn't be fixed !", "List");
-
-#endif
-
-                    return;
+                    first = n;
+                    last = n;
+                    n->next = nullptr;
                 }
+                else
+                {
+                    Node* tmp = last;
+                    last = n;
+                    tmp->next = last;
+                    n->next = nullptr;
+                }
+
+                sz++;
             }
-
-            Node* newNode = AProNew(Node, obj);
-            newNode->previous = &firstNode;
-            newNode->next = rfirstNode;
-
-            firstNode.next = newNode;
-            rfirstNode.previous = newNode;
-
-            msize ++;
-        }
-
-        void prepend(const List<T>& obj)
-        {
-            for(List<T>::ConstIterator it(obj.end()); !it.isFirst(); it--)
+            else
             {
-                prepend(it.get());
+                aprodebug("Can't create Node.");
             }
         }
 
+        /////////////////////////////////////////////////////////////
+        /** @brief Push an object at the end of the List.
+        **/
+        /////////////////////////////////////////////////////////////
+        void append(const T& obj)
+        {
+            push_back(obj);
+        }
+
+        list_t& operator << (const T& obj)
+        {
+            push_back(obj);
+            return *this;
+        }
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Push an object at the beginning of the list.
+        **/
+        /////////////////////////////////////////////////////////////
         void push_front(const T& obj)
         {
-            prepend(obj);
-        }
+            Node* n = __create_node(obj);
 
-        void push_front(const List<T>& obj)
-        {
-            prepend(obj);
-        }
-
-        void insert(size_t before, const T& obj, size_t copy = 1)
-        {
-            if(before >= msize) return;
-            if(copy == 0) return;
-
-            Iterator i = it(before);
-            if(i == begin() || i == (begin() ++))
+            if(n)
             {
-                while(copy > 0)
+                if(!first)
                 {
-                    prepend(obj);
-                    copy--;
+                    first = n;
+                    last = n;
+                    n->next = nullptr;
+                }
+                else
+                {
+                    Node* tmp = first;
+                    first = n;
+                    n->next = tmp;
                 }
 
-                return;
+                sz++;
             }
-
-            if(i == end())
+            else
             {
-                while(copy > 0)
+                aprodebug("Can't create Node.");
+            }
+        }
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Push an object at the beginning of the list.
+        **/
+        /////////////////////////////////////////////////////////////
+        void prepend(const T& obj)
+        {
+            push_front(obj);
+        }
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Insert an object before the given iterator.
+         *
+         *  @note insert(obj, begin()) == push_front(obj) and
+                  insert(obj, end())   == push_back(obj).
+        **/
+        /////////////////////////////////////////////////////////////
+        void insert(const T& obj, iterator before)
+        {
+            if(before == end())
+                push_back(obj);
+            else if(before == begin())
+                push_front(obj);
+            else
+            {
+                Node* n = __create_node(obj);
+
+                if(n)
                 {
-                    append(obj);
-                    copy--;
+                    Node* bef = first;
+                    while(bef->next != before && bef) bef = bef->next;
+
+                    if(bef)
+                        bef->next = n;
+                    n->next = before;
+                }
+            }
+        }
+
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Erase the object at given position.
+        **/
+        /////////////////////////////////////////////////////////////
+        void erase(iterator pos)
+        {
+            if(pos != end())
+            {
+                Node* toerr = pos.n;
+
+                if(first != toerr)
+                {
+                    Node* aft = toerr->next;
+
+                    Node* bef = first;
+                    while(bef->next != toerr && bef) bef = bef->next;
+
+                    if(bef)
+                        bef->next = aft;
+
+                    if(pos.n == last)
+                        last = bef;
                 }
 
-                return;
-            }
-
-            Node* nextNode = (begin() + before).node;
-            Node* previousNode = nextNode->previous;
-
-            Node* newNode = AProNew(Node, obj);
-            newNode->previous = previousNode;
-            newNode->next = nextNode;
-
-            previousNode->next = newNode;
-            nextNode->previous = newNode;
-
-            msize ++;
-
-            if(copy > 1)
-            {
-                insert(before, obj, copy - 1);
+                AProDelete(toerr);
+                sz--;
             }
         }
 
-        void insert(size_t before, const List<T>& obj, size_t copy = 1)
+        /////////////////////////////////////////////////////////////
+        /** @brief Erase the objects in range [from, to).
+         *
+         *  Elements between from (included) and to (excluded) are
+         *  destroyed. erase(begin(), end()) is equivalent to clear().
+        **/
+        /////////////////////////////////////////////////////////////
+        void erase(iterator from, const_iterator to)
         {
-            if(before >= msize) return;
-            if(copy == 0) return;
-
-            for(List<T>::ConstIterator i(obj.end()); !(i.isFirst()); i--)
+            iterator cpy;
+            while(from != to && from != end())
             {
-                insert(before, i.get(), 1);
-            }
-
-            if(copy > 1)
-                insert(before, obj, copy - 1);
-        }
-
-        void erase(size_t first, int last = -1)
-        {
-            if(last == -1) last = first;
-
-            if((int) first > last)
-            {
-                size_t tmp = first;
-                first = last;
-                last = tmp;
-            }
-
-            if(first >= msize) return;
-            if(last >= (int) msize) last = (int) msize - 1;
-
-            Node* nodeToErase = (begin() + first).node;
-
-            Node* previousNode = nodeToErase->previous;
-            Node* nextNode = nodeToErase->next;
-
-            nextNode->previous = previousNode;
-            previousNode->next = nextNode;
-
-            AProDelete(nodeToErase);
-            msize--;
-
-            if(last - first >= 1)
-            {
-                erase(first, last - 1);
+                cpy = from;
+                cpy++;
+                erase(from);
+                from = cpy;
             }
         }
 
-        void erase(Iterator& it)
-        {
-            ConstIterator endd = end();
-            if(it == endd)
-                return;
-
-            Node* nodeToErase = it.node;
-            it++;
-
-            Node* previousNode = nodeToErase->previous;
-            Node* nextNode = nodeToErase->next;
-
-            nextNode->previous = previousNode;
-            previousNode->next = nextNode;
-
-            AProDelete(nodeToErase);
-            msize--;
-        }
-
+        /////////////////////////////////////////////////////////////
+        /** @brief Clear the list.
+         *
+         *  It also clean the properties of the List.
+        **/
+        /////////////////////////////////////////////////////////////
         void clear()
         {
-            erase(0, msize);
+            erase(begin(), end());
+
+            sz = 0;
+            first = nullptr;
+            last = nullptr;
         }
 
-        T& at(size_t index)
+    public:
+
+        T& at(size_t index) { return *(begin() + index); }
+        const T& at(size_t index) const { return *(begin() + index); }
+
+        T& operator [] (size_t index) { return *(begin() + index); }
+        const T& operator [] (size_t index) const { return *(begin() + index); }
+
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns the size of the List.
+        **/
+        /////////////////////////////////////////////////////////////
+        size_t size() const { return sz; }
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Return true if List is empty.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool isEmpty() const { return sz == 0; }
+
+        bool operator == (const list_t& other) const
         {
-            return (begin() + index).get();
+            if(size() != other.size()) return false;
+
+            for(unsigned int i = 0; i < size(); ++i)
+            {
+                if(other[i] != (*this)[i])
+                    return false;
+            }
+
+            return true;
         }
 
-        const T& at(size_t index) const
-        {
-            return (begin() + index).get();
-        }
-
-        T& operator [] (size_t index)
-        {
-            return at(index);
-        }
-
-        const T& operator [] (size_t index) const
-        {
-            return at(index);
-        }
-
-        int lastIndex() const
-        {
-            return msize ? msize - 1 : 0;
-        }
-
-        Iterator begin()
-        {
-            Iterator i (&firstNode); i++;
-            return i;
-        }
-        ConstIterator begin() const
-        {
-            ConstIterator i (&firstNode); i++;
-            return i;
-        }
-
-        Iterator end()
-        {
-            return Iterator(&lastNode);
-        }
-
-        ConstIterator end() const
-        {
-            return ConstIterator(&lastNode);
-        }
-
-        Iterator it(size_t index)
-        {
-            return begin() + index;
-        }
-
-        ConstIterator cstit(size_t index) const
-        {
-            return begin() + index;
-        }
-
-        size_t size() const
-        {
-            return msize;
-        }
-
-        size_t allocatedSize() const
-        {
-            return (sizeof(Node) + sizeof(T)) * (msize + 2) - sizeof(T) * 2;
-        }
-
-        bool isEmpty() const
-        {
-            return size() == 0;
-        }
-
-        void repair()
-        {
-            findHole();
-            fixSize();
-        }
-
-        List<T> & operator << (const T& obj)
-        {
-            append(obj);
-            return *this;
-        }
-
-        List<T> & operator << (const List<T>& list)
-        {
-            append(list);
-            return *this;
-        }
-
+        /////////////////////////////////////////////////////////////
+        /** @brief Return the index of the object if it is found in
+         *  the List, -1 otherweise.
+        **/
+        /////////////////////////////////////////////////////////////
         int find(const T& obj) const
         {
-            for(size_t i = 0; i < size(); i++)
-            {
-                if(at(i) == obj)
-                {
-                    return (int) i;
-                }
-            }
+            const_iterator e = end();
+            size_t i = 0;
+            for(const_iterator it = begin(); it != e; it++, i++)
+                if((*it) == obj)
+                    return i;
 
             return -1;
         }
 
-        T& last()
-        {
-            Iterator it(end()); it--;
-            return it.get();
-        }
-
-        const T& last() const
-        {
-            ConstIterator it(end()); it--;
-            return it.get();
-        }
-
-        T& first()
-        {
-            return begin().get();
-        }
-
-        const T& first() const
-        {
-            return begin().get();
-        }
-
-    private:
-
-        void repairLastNode()
-        {
-            Iterator i(&firstNode);
-            while(i++) {};
-
-            if(i.node != &lastNode && (i.node->next == nullptr || lastNode.previous == nullptr))
-            {
-                i.node->next = &lastNode;
-                lastNode.previous = i.node;
-            }
-
-            fixSize();
-        }
-
-        void repairFirstNode()
-        {
-            Iterator i(&lastNode);
-            while(i--) {};
-
-            if(i.node != &firstNode && (i.node->previous == nullptr || firstNode.next == nullptr))
-            {
-                i.node->previous = &firstNode;
-                firstNode.next = i.node;
-            }
-
-            fixSize();
-        }
-
-        void fixSize()
-        {
-            Iterator i(&firstNode);
-            size_t sz = 0;
-
-            while(i++) sz++;
-
-            msize = sz;
-        }
-
-        void findHole()
-        {
-            if(firstNode.next == nullptr && lastNode.previous == nullptr)
-            {
-                firstNode.next = &lastNode;
-                lastNode.previous = &firstNode;
-
-#if APRO_EXCEPTION == ARO_ON
-
-                APRO_THROW("CorruptedList", "List is definitivly corrupted ! Repairing will lost all data in memory...", "List");
-
-#endif
-            }
-
-            if(firstNode.next == nullptr)
-                repairFirstNode();
-            if(lastNode.previous == nullptr)
-                repairLastNode();
-
-            Node* tmpNode = nullptr;
-            for(Iterator i2 (lastNode.previous); i2.node != &firstNode; i2--)
-            {
-                if(i2.node->next == nullptr)
-                {
-                    i2.node->next = tmpNode;
-                }
-
-                tmpNode = i2.node;
-            }
-
-            tmpNode = nullptr;
-            for(Iterator i2 (firstNode.next); i2.node != &lastNode; i2++)
-            {
-                if(i2.node->previous == nullptr)
-                {
-                    i2.node->previous = tmpNode;
-                }
-
-                tmpNode = i2.node;
-            }
-        }
     };
 }
+
+
 
 #endif

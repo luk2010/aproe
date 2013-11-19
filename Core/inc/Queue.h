@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/07/2013
+ *  @date 03/07/2013 - 19/11/2013
  *
  *  Defines a queue.
  *
@@ -24,71 +24,51 @@ namespace APro
     /** @class Queue
      *  @ingroup Utils
      *  @brief Defines a regular first-in first-out queue.
-     *  @details The concept of the queue is a classic first-in
+     *
+     *  The concept of the queue is a classic first-in
      *  first-out container. You stores one by one every objects,
      *  and then you access them in the same order as you pushed
      *  them.
+     *
+     *  The Queue can have different containers, they just need to
+     *  follow the standard containers methods. By defaut, container
+     *  used is an Array.
+     *
+     *  @note Queue is a Copyable object, but objects pushed in the
+     *  Queue should be copyable too.
     **/
     /////////////////////////////////////////////////////////////
-    template<typename T>
-    class Queue : public Copyable<QUeue>,
+    template<typename T, typename Container = Array<T> >
+    class Queue : public Copyable<Queue>,
                   public Printable
     {
     protected:
 
-        Array<T> m_queue;
+        typedef Queue<T, Container> queue_t;
+        Container m_queue;///< The container object.
 
     public:
 
         /////////////////////////////////////////////////////////////
-        /** @brief Constructor.
-         *
-         *  You can specify the capacity of the queue, i.e. a reserved
-         *  space to allocate quicker objects.
+        /** @brief Constructs a Queue without objects.
         **/
         /////////////////////////////////////////////////////////////
-        Queue(unsigned int capacity = 0)
-        {
-            if(capacity)
-                m_queue.reserve(capacity);
-        }
+        Queue() { }
 
         /////////////////////////////////////////////////////////////
-        /** @brief Constructor from classic array.
+        /** @brief Constructs a Queue from a Container.
         **/
         /////////////////////////////////////////////////////////////
-        explicit Queue(const Array<T>& other)
-        {
-            m_queue = other;
-        }
+        explicit Queue(const Container& other) : m_queue(other) { }
 
         /////////////////////////////////////////////////////////////
-        /** @brief Constructor for copy.
-         *
-         *  This function use the regular Array copy function, so copy
-         *  constructors are not called.
+        /** @brief Constructs from a copy object.
         **/
         /////////////////////////////////////////////////////////////
-        Queue(const Queue<T>& other)
-        {
-            m_queue = other.m_queue;
-        }
+        Queue(const queue_t& other) : m_queue(other.m_queue) { }
 
         /////////////////////////////////////////////////////////////
-        /** @brief Constructor from a C style array.
-         *
-         *  @param c_queue : pointer to the first element of the
-         *  queue.
-         *  @param sz : Size of the queue.
-        **/
-        /////////////////////////////////////////////////////////////
-        explicit Queue(const T* c_queue, unsigned int sz)
-        {
-            m_queue.append(c_queue, sz);
-        }
-
-        /////////////////////////////////////////////////////////////
-        /** @brief Destructor.
+        /** @brief Destructs the Queue.
         **/
         /////////////////////////////////////////////////////////////
         ~Queue()
@@ -104,7 +84,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         void print(Console& console) const
         {
-            console << "Queue <" << className<T>() << "> { size : " << m_queue.size() << ", reserve : " << m_queue.reservedSpaceAvailable() << " }";
+            console << "Queue <" << className<T>() << ", " << className<Container>() << "> { size : " << m_queue.size() << " }";
         }
 
     public: // Copyable
@@ -113,7 +93,7 @@ namespace APro
         /** @see Copyable::copyFrom
         **/
         /////////////////////////////////////////////////////////////
-        void copyFrom(const Queue<T>& other)
+        void copyFrom(const queue_t& other)
         {
             m_queue = other.m_queue;
         }
@@ -122,7 +102,7 @@ namespace APro
         /** @see Copyable::operator==
         **/
         /////////////////////////////////////////////////////////////
-        bool operator == (const Queue<T>& other) const
+        bool operator == (const queue_t& other) const
         {
             return m_queue == other;
         }
@@ -130,10 +110,10 @@ namespace APro
     public:
 
         /////////////////////////////////////////////////////////////
-        /** @brief Add an object at the beginning of the queue.
+        /** @brief Push an object in the Queue.
          *
-         *  In this order, this object will be the last given with the
-         *  ::popg function.
+         *  It prepends the element in the Container, and it will be the
+         *  last popped object.
         **/
         /////////////////////////////////////////////////////////////
         void push(const T& object)
@@ -142,12 +122,12 @@ namespace APro
         }
 
         /////////////////////////////////////////////////////////////
-        /** @brief Remove the firts object in the queue.
+        /** @brief Remove the last object in the Container.
         **/
         /////////////////////////////////////////////////////////////
         void pop()
         {
-            m_queue.erase(m_queue.size() - 1);
+            m_queue.erase(m_queue.begin() + (m_queue.size() - 1));
         }
 
         /////////////////////////////////////////////////////////////
@@ -170,19 +150,10 @@ namespace APro
             return m_queue.size();
         }
 
-        /////////////////////////////////////////////////////////////
-        /** @brief Return the capacity of the queue.
-        **/
-        /////////////////////////////////////////////////////////////
-        unsigned int capacity() const
-        {
-            return m_queue.getPhysicalSize();
-        }
-
     public:
 
         /////////////////////////////////////////////////////////////
-        /** @brief Return the current first object in the queue.
+        /** @brief Return the last object in the Container.
         **/
         /////////////////////////////////////////////////////////////
         T& get()
@@ -191,7 +162,7 @@ namespace APro
         }
 
         /////////////////////////////////////////////////////////////
-        /** @brief Return the current first object in the queue.
+        /** @brief Return the last object in the Container.
         **/
         /////////////////////////////////////////////////////////////
         const T& get() const
@@ -203,6 +174,10 @@ namespace APro
         /** @brief Return the last object and remove it from the queue.
          *
          *  The object given is so a copy of the original object.
+         *
+         *  @note Using Queue::get() then Queue::pop() is recommended
+         *  instead of Queue::popg() because there isn't any copy in the
+         *  first method.
         **/
         /////////////////////////////////////////////////////////////
         T popg()
