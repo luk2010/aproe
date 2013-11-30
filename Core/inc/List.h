@@ -69,7 +69,7 @@ namespace APro
                 AProConstructedCopy(data, other, T);
             }
 
-            Node(const Node<T>& other)
+            Node(const Node& other)
                 : data(nullptr), next(nullptr)
             {
                 data = (T*) AProAllocate(sizeof(T));

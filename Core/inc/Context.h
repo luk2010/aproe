@@ -47,7 +47,7 @@ namespace APro
      *  - WindowResizedEvent : Context resize his default viewport
      *  size and update the others.
      *
-     *  ### Part is the Rendering System
+     *  ### Part in the Rendering System
      *
      *  The currently binded Context is used by the Rendering System
      *  to know where to draw. In the Context, it will draw in the default

@@ -291,7 +291,7 @@ namespace APro
     {
         if(event->type() == WindowResizedEvent::Hash)
         {
-            updateViewPorts(event->getPointer());
+            updateViewPorts(event->reinterpret<WindowResizedEvent*>());
             return true;
         }
     }
