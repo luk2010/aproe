@@ -1,5 +1,5 @@
-Things to do
-------------
+Things to do mathematicly
+-------------------------
 
 *  What's done for next release (0.01A) :
 
@@ -10,17 +10,6 @@ Things to do
 - Vector4     : A Vector with 4 components.
 - Matrix3x3   : A 3 by 3 matrix.
 - Quaternion  : A rotation store.
-
-+ Event System :
-
-- EventEmitter : Emitter of Synchronous Event System.
-- EventListener : Listener of the Event System.
-- Event : The base event of the Event System.
-- Delete EventReceiver, wich is obsolete and unused.
-
-+ Plugin :
-
-- Added some Plugin Api version checking.
 
 *  Have to be done for next release (0.01A) :
 
@@ -46,10 +35,5 @@ Things to do
 - Plane       : A plane.
 - Capsule     : Cylinder with spherical end.
 - Polyhedron  : A 3D representation of polygon.
-
-+ Events System :
-
-- EventUniter : The Asynchronous Event System manager.
-- Adapt engine to the new event system.
 
 

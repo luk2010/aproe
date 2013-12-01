@@ -12,7 +12,6 @@
 **/
 ////////////////////////////////////////////////////////////
 #include "ThreadSafe.h"
-#include "ThreadMutex.h"
 #include "ThreadManager.h"
 
 namespace APro
@@ -20,14 +19,19 @@ namespace APro
     ThreadSafe::ThreadSafe()
         : mutexptr(nullptr), mutexcreated(false), mutexcreating(false)
     {
-
+        if(mutexptr.isNull() && ThreadManager::IsCreated())
+        {
+            mutexptr = ThreadManager::get().createMutex();
+            mutexcreated = true;
+            mutexcreating = false;
+        }
     }
 
     ThreadSafe::~ThreadSafe()
     {
-        if(mutexcreated && mutexptr)
+        if(!mutexptr.isNull())
         {
-            if(ThreadManager::currentThreadManager)
+            if(ThreadManager::IsCreated())
             {
                 ThreadManager::get().destroyMutex(mutexptr->getId());
                 mutexptr = nullptr;
@@ -37,61 +41,59 @@ namespace APro
 
     void ThreadSafe::createmutex()
     {
-        if(!mutexptr && ThreadManager::currentThreadManager)
+        if(!mutexptr.isNull()) return;
+
+        mutexcreating = true;
+
+        if(mutexptr.isNull() && ThreadManager::IsCreated())
         {
-            mutexcreating = true;
-            {
-                ThreadMutexPtr mp = ThreadManager::get().createMutex();
-                mutexptr = mp.getPtr();
-                if(!mp.isNull())
-                    mutexcreated = true;
-            }
-            mutexcreating = false;
+            mutexptr = ThreadManager::get().createMutex();
+            if(!mutexptr.isNull())
+                mutexcreated = true;
+            else
+                aprodebug("Couldn't create mutex !");
         }
+
+        mutexcreating = false;
     }
 
     void ThreadSafe::safelock()
     {
-        if(mutexcreating)
-            return;
+        // Here we are sure that mutexcreating will go back to false.
+        __wait_boolean__(&mutexcreating, false);
 
-        if(mutexcreated && mutexptr)
-        {
+        if(mutexcreated)
             mutexptr->lock();
-        }
         else
         {
             createmutex();
             if(mutexcreated)
-            {
                 mutexptr->lock();
+            else
+            {
+                aprodebug("Couldn't lock mutex because not created.");
+                aprothrow_ce("Error in mutex creation.");
             }
         }
     }
 
     void ThreadSafe::safeunlock()
     {
-        if(mutexcreating)
-            return;
+        // Here we are sure that mutexcreating will go back to false.
+        __wait_boolean__(&mutexcreating, false);
 
-        if(mutexcreated && mutexptr)
-        {
+        if(mutexcreated)
             mutexptr->unlock();
-        }
-        else
-        {
-            createmutex();
-        }
     }
 
     ThreadMutex* ThreadSafe::getMutex()
     {
-        return mutexptr;
+        return mutexptr.getPointer();
     }
 
     const ThreadMutex* ThreadSafe::getMutex() const
     {
-        return mutexptr;
+        return mutexptr.getPointer();
     }
 
     bool ThreadSafe::isMutexCreated() const

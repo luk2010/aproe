@@ -86,7 +86,7 @@ namespace APro
     typedef REAL_TYPE           unit_t;     ///< Represents the system unit measure.
     typedef unit_t              Real;       ///< Represents a number in the system unit measure.
 
-    typedef ANGLE_TYPE           angle_t;    ///< Represents an angle in the system unit measure.
+    typedef ANGLE_TYPE          angle_t;    ///< Represents an angle in the system unit measure.
     typedef angle_t             Radian;     ///< Represents a Radian angle measure.
     typedef angle_t             Degree;     ///< Represents a Degree angle measure.
 
@@ -164,6 +164,17 @@ namespace APro
     /////////////////////////////////////////////////////////////
     template <typename T>
     bool is_less(const T& a, const T& b) { return a < b;  }
+
+    /////////////////////////////////////////////////////////////
+    /** @brief Block given calling Thread while a given boolean is
+     *  different from given boolean value.
+     *
+     *  This function is used in internal Thread implementation to
+     *  prevent Thread Creation paradoxe. Do not use it unless you
+     *  know what you are doing.
+    **/
+    /////////////////////////////////////////////////////////////
+    void __wait_boolean__(bool* b, bool result) { while (*b != result); }
 }
 
 ////////////////////////////////////////////////////////////

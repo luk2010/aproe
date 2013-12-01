@@ -29,18 +29,9 @@ newoption {
 }
 
 newoption {
-	trigger 	= "threadsapi",
-	value		= "API",
-	description	= "Choose if engine must use plugin or pthread thread API.",
-	allowed		= {
-		{ "plugin", "Thread API is given by a plugin implementation." },
-		{ "pthread", "Thread API is provided natively by pthread. This is the quickest and efficientest method." }
-	}
+	trigger 	= "no-thread",
+	description	= "Disable multithreading support. Use it when your platform doesn't have the 'pthread' library."
 }
-
-if not _OPTIONS["threadsapi"] then
-  _OPTIONS["threadsapi"] = "pthread"
-end
 
 solution "aproe"
 	configurations { "Debug", "Release" }
@@ -91,9 +82,10 @@ project("core")
 	configuration "double-angle"
 		defines {"_USE_DOUBLEANGLE_"}
 	
-	configuration "pthread"
+	configuration "not no-thread"
 		defines {"_COMPILE_WITH_PTHREAD_"}
 		links   {"pthread"}
+		defines {"_REENTRANT"}
 
 	configuration "debug"
 		defines {"_HAVE_DEBUG_MODE_"}

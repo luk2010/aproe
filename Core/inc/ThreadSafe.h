@@ -15,36 +15,34 @@
 #define APRO_THREADSAFE_H
 
 #include "Platform.h"
-#include "SharedPointer.h"
-//#include "ThreadMutex.h"
+#include "ThreadMutex.h"
 
 namespace APro
 {
-    class ThreadMutex;
-    typedef SharedPointer<ThreadMutex> ThreadMutexPtr;
-
     ////////////////////////////////////////////////////////////
     /** @class ThreadSafe
      *  @brief Enables a safe mutex lock and unlock for classes.
-     *  @details Inherits from this class enables yours to have a
+     *
+     *  Inherits from this class enables yours to have a
      *  ready-to-use mutex to protect data overwritting from threads.
      *  You can use the easy functions safelock and safeunlock to
      *  lock/unlock the mutex.
-     *  @note The mutex is created only when the ThreadManager is created
-     *  AND when one of the functions safelock / safeunlock is called.
+     *
+     *  @note The mutex is created in the safelock function if it
+     *  wasn't done in the constructor.
     **/
     ////////////////////////////////////////////////////////////
     class ThreadSafe
     {
     public:
         ////////////////////////////////////////////////////////////
-        /** Default constructor.
+        /** @brief Default constructor.
         **/
         ////////////////////////////////////////////////////////////
         ThreadSafe();
 
         ////////////////////////////////////////////////////////////
-        /** Destructor.
+        /** @brief Destructor.
         **/
         ////////////////////////////////////////////////////////////
         ~ThreadSafe();
@@ -52,17 +50,19 @@ namespace APro
     public:
 
         ////////////////////////////////////////////////////////////
-        /** Lock safely the mutex.
-         *  @note Performs creation test before it is created. Create it if
-         *  not yet.
+        /** @brief Lock safely the mutex.
+         *
+         *  The mutex is locked and created if it isn't yet.
+         *
+         *  @throw CustomException if mutex cannot be created.
         **/
         ////////////////////////////////////////////////////////////
         void safelock();
 
         ////////////////////////////////////////////////////////////
-        /** Unlock safely the mutex.
-         *  @note Performs creation test before it is created. Create it if
-         *  not yet.
+        /** @brief Unlock safely the mutex.
+         *
+         *  The mutex is unlocked and created if it isn't yet.
         **/
         ////////////////////////////////////////////////////////////
         void safeunlock();
@@ -70,15 +70,17 @@ namespace APro
     public:
 
         ////////////////////////////////////////////////////////////
-        /** Return the internal mutex.
-         *  @return Pointer to the mutex.
+        /** @brief Return the internal mutex.
+         *
+         *  The pointer returned musn't be deleted.
         **/
         ////////////////////////////////////////////////////////////
         ThreadMutex* getMutex();
 
         ////////////////////////////////////////////////////////////
-        /** Return the internal mutex.
-         *  @return Pointer to the mutex.
+        /** @brief Return the internal mutex.
+         *
+         *  The pointer returned musn't be deleted.
         **/
         ////////////////////////////////////////////////////////////
         const ThreadMutex* getMutex() const;
@@ -86,13 +88,13 @@ namespace APro
     public:
 
         ////////////////////////////////////////////////////////////
-        /** Tell if the mutex has been created.
+        /** @brief Tell if the mutex has been created.
         **/
         ////////////////////////////////////////////////////////////
         bool isMutexCreated() const;
 
         ////////////////////////////////////////////////////////////
-        /** Tell if the mutex is currently in creation.
+        /** @brief Tell if the mutex is currently in creation.
         **/
         ////////////////////////////////////////////////////////////
         bool isMutexCreating() const;
@@ -100,7 +102,7 @@ namespace APro
     private:
 
         ////////////////////////////////////////////////////////////
-        /** Creates the mutex.
+        /** @brief Creates the mutex.
          *  @internal
         **/
         ////////////////////////////////////////////////////////////
@@ -108,9 +110,9 @@ namespace APro
 
     private:
 
-        ThreadMutex* mutexptr;///< Safe-pointer to the mutex.
-        bool mutexcreated;///< Tell if mutex is created.
-        bool mutexcreating;///< Tell if mutex is creating.
+        ThreadMutexPtr mutexptr;///< Pointer to the mutex.
+        bool mutexcreated;      ///< Tell if mutex is created.
+        bool mutexcreating;     ///< Tell if mutex is creating.
     };
 
     #define APRO_THREADSAFE_AUTOLOCK ThreadSafe::safelock(); THREADMUTEXAUTOLOCK(ThreadSafe::getMutex());

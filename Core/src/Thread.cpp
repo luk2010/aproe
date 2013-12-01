@@ -13,135 +13,246 @@
 ////////////////////////////////////////////////////////////
 #include "Thread.h"
 
+#ifdef _COMPILE_WITH_PTHREAD_
+#   include <pthread.h>
+#   define GET_HANDLEPTR() ((pthread_t*)m_thread)
+#   define GET_HANDLE() (*(GET_HANDLEPTR()))
+#endif // _COMPILE_WITH_PTHREAD_
+
 namespace APro
 {
-    Thread::Thread()
-        : Implementable(String("APro::Thread")), m_name(), m_started(false), m_callback(NULL), m_userdata(NULL)
-    {
+    APRO_REGISTER_EVENT_NOCONTENT(ThreadStartedEvent);
+    APRO_REGISTER_EVENT_NOCONTENT(ThreadFinishedEvent);
+    APRO_REGISTER_EVENT_NOCONTENT(ThreadTerminatedEvent);
 
+    void* Thread::_thread_func(void* _caller)
+    {
+        if(_caller)
+        {
+            // We retrieve the TThread and just call Thread::run().
+            // Now everything done in ::run() is in this Thread.
+            Thread* thread = (Thread*) _caller;
+            thread->run();
+        }
+
+        return nullptr;
+    }
+
+    Thread::Thread()
+    {
+        m_name = String("Unknown");
+        m_thread = nullptr;
+
+        m_started.value = false;
+        m_finished.value = false;
+        m_terminated.value = false;
+
+        m_callback = nullptr;
+        m_userdata = nullptr;
+
+        documentEvent(ThreadStartedEvent::Hash, String("Thread has been started."));
+        documentEvent(ThreadFinishedEvent::Hash, String("Thread is finished."));
+        documentEvent(ThreadTerminatedEvent::Hash, String("Thread is terminated."));
     }
 
     Thread::Thread(const String& name)
-        : Implementable(String("APro::Thread")), m_name(name), m_started(false), m_callback(NULL), m_userdata(NULL)
     {
-        createImplementation();
+        m_name = name;
+        m_thread = nullptr;
+
+        m_started.value = false;
+        m_finished.value = false;
+        m_terminated.value = false;
+
+        m_callback = nullptr;
+        m_userdata = nullptr;
+
+        documentEvent(ThreadStartedEvent::Hash, String("Thread has been started."));
+        documentEvent(ThreadFinishedEvent::Hash, String("Thread is finished."));
+        documentEvent(ThreadTerminatedEvent::Hash, String("Thread is terminated."));
     }
 
     Thread::~Thread()
     {
-
+        /* If thread is running, we terminate it even if
+        it has undefined behaviour. */
+        if(isRunning())
+            terminate();
     }
 
-    String Thread::getName() const
+    const String& Thread::getName() const
     {
         return m_name;
     }
 
-    void Thread::removeCallback()
+    void Thread::setCallback(pfunc ptr, void* userdata)
     {
-        m_callback = NULL;
-        m_userdata = NULL;
+        m_callback = ptr;
+        m_userdata = userdata;
+    }
+
+    void Thread::resetCallback()
+    {
+        m_callback = nullptr;
+        m_userdata = nullptr;
+    }
+
+    void Thread::start()
+    {
+#ifdef _COMPILE_WITH_PTHREAD_
+        // Create the Thread
+        m_thread = (apro_thread_t) AProAllocate(sizeof(pthread_t));
+        int ret = pthread_create(GET_HANDLEPTR(), NULL, Thread::_thread_func, static_cast<void*>(this));
+        if(ret != 0)
+        {
+            aprodebug("Can't create Thread name '") << m_name << "'.";
+        }
+#endif // _COMPILE_WITH_PTHREAD_
     }
 
     void Thread::run()
     {
-        if(!Implementable::implement.isNull())
-        {
-            if(!Implementable::implement->init())
-            {
-                Console::get() << "\n[Thread]{run} Can't create thread " << m_name << ".";
-            }
-        }
+#ifdef _COMPILE_WITH_PTHREAD_
+        // Thread started.
+        m_started.mutex.lock();
+        m_started.value = true;
+        m_started.mutex.unlock();
+
+        // Send event
+        sendEvent(createEvent(ThreadStartedEvent::Hash));
+
+        // Call to exec function.
+        exec();
+
+        // Call callback if it exists.
+        if(m_callback)
+            m_callback(m_userdata);
+
+        // Thread started off.
+        m_started.mutex.lock();
+        m_started.value = false;
+        m_started.mutex.unlock();
+
+        // Thread finished.
+        m_finished.mutex.lock();
+        m_finished.value = true;
+        m_finished.mutex.unlock();
+
+        // Thread not terminated.
+        m_terminated.mutex.lock();
+        m_terminated.value = false;
+        m_terminated.mutex.unlock();
+
+        // Send finished event.
+        sendEvent(createEvent(ThreadFinishedEvent::Hash));
+#endif // _COMPILE_WITH_PTHREAD_
     }
 
     void Thread::join()
     {
-        if(m_started)
+#ifdef _COMPILE_WITH_PTHREAD_
+        if(pthread_join(GET_HANDLE(), nullptr) != 0)
         {
-            if(!Implementable::implement.isNull())
-            {
-                Implementable::implement->join_thread();
-            }
+            aprodebug("Can't join Thread name '") << m_name << "'.";
         }
-        else
-        {
-            Console::get() << "\n[Thread]{run} Can't join not started thread " << m_name << ".";
-        }
+#endif // _COMPILE_WITH_PTHREAD_
     }
 
     void Thread::terminate()
     {
-        if(m_started)
+#ifdef _COMPILE_WITH_PTHREAD_
+        if(pthread_cancel(GET_HANDLE()) == 0)
         {
-            if(!Implementable::implement.isNull())
-            {
-                Implementable::implement->terminate_thread();
-            }
+            // Thread started off.
+            m_started.mutex.lock();
+            m_started.value = false;
+            m_started.mutex.unlock();
+
+            m_terminated.mutex.lock();
+            m_terminated.value = true;
+            m_terminated.mutex.unlock();
+
+            m_finished.mutex.lock();
+            m_finished.value = true;
+            m_finished.mutex.unlock();
+
+            // Send event
+            sendEvent(createEvent(ThreadTerminatedEvent::Hash));
         }
         else
         {
-            Console::get() << "\n[Thread]{run} Can't terminate not started thread " << m_name << ".";
+            aprodebug("Can't cancel Thread name '") << m_name << "'.";
         }
-    }
-
-    void Thread::destroy()
-    {
-        if(m_started)
-        {
-            if(!Implementable::implement.isNull())
-            {
-                Console::get() << "\n[Thread]Destroying thread " << getName() << ".";
-                Implementable::implement->deinit();
-            }
-        }
+#endif // _COMPILE_WITH_PTHREAD_
     }
 
     bool Thread::isRunning() const
     {
-        return m_started;
+#ifdef _COMPILE_WITH_PTHREAD_
+        m_started.mutex.lock();
+        bool ret = m_started.value;
+        m_started.mutex.unlock();
+        return ret;
+#else
+        return false;
+#endif
     }
 
-    Event::ptr Thread::createEvent(const String& name) const
+    bool Thread::isFinished() const
     {
-        return EventEmitter::createEvent(name);
+#ifdef _COMPILE_WITH_PTHREAD_
+        m_finished.mutex.lock();
+        bool ret = m_finished.value;
+        m_finished.mutex.unlock();
+        return ret;
+#else
+        return false;
+#endif
+    }
+
+    bool Thread::isTerminated() const
+    {
+#ifdef _COMPILE_WITH_PTHREAD_
+        m_finished.mutex.lock();
+        bool ret = m_finished.value;
+        m_finished.mutex.unlock();
+        return ret;
+#else
+        return false;
+#endif
     }
 
     void Thread::exec()
     {
-        // Thread entry-point
+        /* We do nothing as it is to the user to do somethings. */
+    }
 
-        if(m_callback && !Implementable::implement.isNull())
+    EventPtr Thread::createEvent(const HashType& e_type) const
+    {
+        switch(e_type)
         {
-            m_callback(m_userdata);
-            Implementable::implement->exit();
+        case ThreadStartedEvent:
+            EventPtr ret = AProNew(ThreadStartedEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        case ThreadFinishedEvent:
+            EventPtr ret = AProNew(ThreadFinishedEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        case ThreadTerminatedEvent:
+            EventPtr ret = AProNew(ThreadTerminatedEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        default:
+            return EventEmitter::createEvent(e_type);
         }
     }
-
-    void Thread::notify_thread_started()
-    {
-        m_started = true;
-        sendEvent(createEvent(String("ThreadStartedEvent")));
-    }
-
-    void Thread::notify_thread_terminated()
-    {
-        m_started = false;
-        sendEvent(createEvent(String("ThreadFinishedEvent")));
-    }
-
-    void Thread::initImplementation()
-    {
-        Implementable::implement->m_parent = this;
-    }
-
-    void Thread::documentEvents()
-    {
-        String event = String("ThreadStartedEvent");
-        String description = String("Thread is started.");
-        documentEvent(event, description);
-
-        event = "ThreadFinishedEvent";
-        description = "Thread has returned or has been forced to exit by a \"finish\" function.";
-        documentEvent(event, description);
-    }
 }
+
+#ifdef _COMPILE_WITH_PTHREAD_
+#   undef GET_HANDLE
+#   undef GET_HANDLEPTR
+#endif // _COMPILE_WITH_PTHREAD_

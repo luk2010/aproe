@@ -349,27 +349,6 @@ namespace APro
         return nullptr;
     }
 
-    EventPtr EventEmitter::createAndPopulateEvent(const String& event_type, bool set_target, EventListenerPtr& target) const
-    {
-        if(!isEventHandled(event_type))
-        {
-            Console::get() << "\n[Console]{createAndPopulateEvent} Sending not handled event type \"" << event_type << "\" is not recommended !";
-        }
-
-        EventPtr ret = AProNew(Event, event_type, this, set_target ? target.getPointer() : nullptr);
-
-        if(ret.isNull())
-        {
-            Console::get() << "\n[Console]{createAndPopulateEvent} Couldn't create event \"" << event_type << "\".";
-        }
-        else
-        {
-            populateEvent(ret);
-        }
-
-        return ret;
-    }
-
     EventPtr EventEmitter::createEvent(const HashType& e_type) const
     {
         aprodebug("Creating default NullEvent because no overwritten function is available.");

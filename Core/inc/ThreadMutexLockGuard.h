@@ -15,12 +15,10 @@
 #define APRO_MUTEXLOCKGUARD_H
 
 #include "Platform.h"
-#include "SharedPointer.h"
+#include "ThreadMutex.h"
 
 namespace APro
 {
-    class ThreadMutex;
-
     ////////////////////////////////////////////////////////////
     /** @class ThreadMutexLockGuard
      *  @ingroup Thread
@@ -36,30 +34,37 @@ namespace APro
      *  @endcode
     **/
     ////////////////////////////////////////////////////////////
-    class APRO_DLL ThreadMutexLockGuard
+    class APRO_DLL ThreadMutexLockGuard : public NonCopyable
     {
     public:
 
         ////////////////////////////////////////////////////////////
-        /** Default constructor.
+        /** @brief Constructs the lockguard.
+         *
+         *  The mutex is locked during the process.
          *  @param mutex : Mutex to guard.
         **/
         ////////////////////////////////////////////////////////////
         ThreadMutexLockGuard(ThreadMutex* mutex);
 
         ////////////////////////////////////////////////////////////
-        /** Destructor.
+        /** @brief Destructs the lockguard.
+         *
+         *  The mutex is unlocked during the process.
         **/
         ////////////////////////////////////////////////////////////
         ~ThreadMutexLockGuard();
 
     private:
 
-        ThreadMutex* m_mutex;///< Mutex of the guard
+        ThreadMutex* m_mutex;///< Mutex
     };
 
-    #define THREADMUTEXAUTOLOCK(mutex) ThreadMutexLockGuard __mutex_guard(mutex)///< Create a variable to lock a given mutex.
-    #define THREADMUTEXAUTOLOCK_named(mutex, variable) ThreadMutexLockGuard variable(mutex)///< Create a variable with given name to autolock a given mutex.
+/// @brief Create a variable to lock a given mutex.
+///
+/// The name of the lockguard will be __mutex_guard__ with the mutex variable name
+/// appended.
+#define THREADMUTEXAUTOLOCK(mutex) ThreadMutexLockGuard __mutex_guard__##mutex (&mutex)
 }
 
 #endif // APRO_MUTEXLOCKGUARD_H

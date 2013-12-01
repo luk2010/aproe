@@ -12,7 +12,6 @@
 **/
 ////////////////////////////////////////////////////////////
 #include "ThreadMutexLockGuard.h"
-#include "ThreadMutex.h"
 
 namespace APro
 {

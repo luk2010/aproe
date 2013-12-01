@@ -5,137 +5,58 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013
+ *  @date 06/04/2013 - 01/12/2013
  *
- *  Defines the Condition class and his implementation.
+ *  Defines the Condition class.
  *
 **/
 ////////////////////////////////////////////////////////////
 #ifndef APRO_THREADCONDITION_H
 #define APRO_THREADCONDITION_H
 
-#include "Implementable.h"
-#include "Implementation.h"
+#include "Platform.h"
+#include "NonCopyable.h"
 #include "ThreadMutex.h"
+#include "Time.h"
 
 namespace APro
 {
     ////////////////////////////////////////////////////////////
-    /** @class ThreadConditionImplementation
-     *  @ingroup Thread
-     *  @brief Defines the implementation interface of
-     *  ThreadCondition.
-    **/
-    ////////////////////////////////////////////////////////////
-    class APRO_DLL ThreadConditionImplementation : public Implementation
-    {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(ThreadConditionImplementation)
-
-    public:
-
-        ////////////////////////////////////////////////////////////
-        /** Give the name of the class implemented.
-         *  @see Implementation::getClassImplementation
-        **/
-        ////////////////////////////////////////////////////////////
-        const String getClassImplementation() const
-        {
-            return String("APro::ThreadCondition");
-        }
-
-    public:
-
-        ////////////////////////////////////////////////////////////
-        /** Default constructor.
-        **/
-        ////////////////////////////////////////////////////////////
-        ThreadConditionImplementation()
-        {
-
-        }
-
-        ////////////////////////////////////////////////////////////
-        /** Virtual destructor.
-        **/
-        ////////////////////////////////////////////////////////////
-        virtual ~ThreadConditionImplementation()
-        {
-
-        }
-
-    public:
-
-        ////////////////////////////////////////////////////////////
-        /** Create condition object.
-         *  @see Implementation::init
-         *  @return Is object created ?
-        **/
-        ////////////////////////////////////////////////////////////
-        virtual bool init() = 0;
-
-        ////////////////////////////////////////////////////////////
-        /** Destroy condition object.
-         *  @see Implementation::deinit
-        **/
-        ////////////////////////////////////////////////////////////
-        virtual void deinit() = 0;
-
-    public:
-
-        ////////////////////////////////////////////////////////////
-        /** Unblock one thread blocked with this condition.
-        **/
-        ////////////////////////////////////////////////////////////
-        virtual void signal() = 0;
-
-        ////////////////////////////////////////////////////////////
-        /** Unblock every thread blocked with this condition.
-        **/
-        ////////////////////////////////////////////////////////////
-        virtual void signalAll() = 0;
-
-        ////////////////////////////////////////////////////////////
-        /** Block the calling thread while the condition isn't signaled
-         *  by another thread.
-         *  @param muteximp : The mutex to wait for.
-        **/
-        ////////////////////////////////////////////////////////////
-        virtual void wait(ThreadMutexImplementation* muteximp) = 0;
-
-        ////////////////////////////////////////////////////////////
-        /** Block the calling thread while the condition isn't signaled
-         *  by another thread. If timeout is depassed, condition is
-         *  unblocked automaticly.
-         *  @param muteximp : Mutex to wait for.
-         *  @param timeout : Time not to depass.
-        **/
-        ////////////////////////////////////////////////////////////
-        virtual void waitTimeout(ThreadMutexImplementation* muteximp, int timeout) = 0;
-    };
-
-    ////////////////////////////////////////////////////////////
     /** @class ThreadCondition
      *  @ingroup Thread
      *  @brief A Condition block the thread while another thread
-     *  signals that the condition can be unblocked.
-     *  @details It is associated to a mutex, and can be used
-     *  to wait for mutex to be to be unlocked.
+     *  signals this condition.
+     *
+     *  When a thread must wait for a condition, he can be idling
+     *  while the other thread that have the 'lock' unlock this
+     *  condition by signaling it and unblock the waiting thread.
+     *
+     *  @note Waiting a condition always make thread idling.
     **/
     ////////////////////////////////////////////////////////////
-    class APRO_DLL ThreadCondition : public Implementable<ThreadConditionImplementation>
+    class APRO_DLL ThreadCondition : public NonCopyable
     {
         APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(ThreadCondition)
 
     public:
 
+        typedef enum _WaitError
+        {
+            WE_OK,       ///< Returned by wait() when condition is signaled without error.
+            WE_TIMEOUT,  ///< Returned by wait() when condition is cancelled due to time out.
+            WE_EINVALUE  ///< Returned by wait() when condition is cancelled due to an error with one of the argues given.
+        } WaitError;
+
+    public:
+
         ////////////////////////////////////////////////////////////
-        /** Default constructor.
+        /** @brief Constructs an empty condition.
         **/
         ////////////////////////////////////////////////////////////
         ThreadCondition();
 
         ////////////////////////////////////////////////////////////
-        /** Contructor with Id.
+        /** @brief Constructs a condition with given id.
          *  @note The id is given by the Thread Manager.
          *  @param id : Id of the condition.
         **/
@@ -143,7 +64,7 @@ namespace APro
         ThreadCondition(Id id);
 
         ////////////////////////////////////////////////////////////
-        /** Destructor.
+        /** @brief Destructs the condition.
         **/
         ////////////////////////////////////////////////////////////
         ~ThreadCondition();
@@ -151,61 +72,70 @@ namespace APro
     public:
 
         ////////////////////////////////////////////////////////////
-        /** Unblock one thread blocked with this condition.
+        /** @brief Unblock one thread blocked with this condition.
+         *
+         *  @note If more than one thread is blocked on a condition
+         *  variable, then unblocking them will be done in the
+         *  sheduling order. First blocked will be first unblocked.
         **/
         ////////////////////////////////////////////////////////////
         void signal();
 
         ////////////////////////////////////////////////////////////
-        /** Unblock every thread blocked with this condition.
+        /** @brief Unblock every thread blocked with this condition.
+         *
+         *  @note If more than one thread is blocked on a condition
+         *  variable, then unblocking them will be done in the
+         *  sheduling order. First blocked will be first unblocked.
         **/
         ////////////////////////////////////////////////////////////
         void signalAll();
 
         ////////////////////////////////////////////////////////////
-        /** Block the calling thread while the condition isn't signaled
-         *  by another thread.
-         *  @note If timeout is negativ, this function call the non-time
-         *  wait.
+        /** @brief Block the calling thread while the condition isn't
+         *  signaled by another thread.
+         *
+         *  @note If timeout is invalid, no time-out is applied.
+         *
          *  @param mid : Id of the Mutex.
          *  @param timeout : Time before cancel of condition.
+         *
+         *  @return WE_OK if everything is okay, else an error code.
         **/
         ////////////////////////////////////////////////////////////
-        void wait(Id mid, int timeout = -1);
+        WaitError wait(Id mid, const Time& timeout = Time::Invalid);
 
         ////////////////////////////////////////////////////////////
-        /** Block the calling thread while the condition isn't signaled
-         *  by another thread.
-         *  @note If timeout is negativ, this function call the non-time
-         *  wait.
+        /** @brief Block the calling thread while the condition isn't
+         *  signaled by another thread.
+         *
+         *  @note If timeout is invalid, no time-out is applied.
+         *
          *  @param mutex : Mutex to associate.
          *  @param timeout : Time before cancel of condition.
+         *
+         *  @return WE_OK if everything is okay, else an error code.
         **/
         ////////////////////////////////////////////////////////////
-        void wait(ThreadMutex::ptr mutex, int timeout = -1);
+        WaitError wait(ThreadMutexPtr& mutex, const Time& timeout = Time::Invalid);
 
     public:
 
         ////////////////////////////////////////////////////////////
-        /** Give the id of this condition.
-         *  @note This has nothing to do with pthread's ID or anything
-         *  else.
-         *  @return The ID.
+        /** @brief Give the id of this condition.
         **/
         ////////////////////////////////////////////////////////////
-        Id getId() const;
-
-        ////////////////////////////////////////////////////////////
-        /** Init implementation.
-         *  @see Implementable::initImplementation
-        **/
-        ////////////////////////////////////////////////////////////
-        void initImplementation();
+        Id getId() const { return m_id; }
 
     protected:
 
-        Id m_id;///< ID of the condition
+        typedef void* apro_condition_t;
+
+        apro_condition_t condition; ///< Pointer to the condition data holded by pthread.
+        Id m_id;                    ///< ID of this condition object.
     };
+
+    typedef AutoPointer<ThreadCondition> ThreadConditionPtr;
 }
 
 #endif // APRO_THREADCONDITION_H

@@ -70,7 +70,7 @@ namespace APro
             if(window->context_bind())
             {
                 setBinded(true);
-                sendEvent(createAndPopulateEvent(ContextBindedEvent::Hash));
+                sendEvent(createEvent(ContextBindedEvent::Hash));
                 return true;
             }
             else
@@ -88,7 +88,7 @@ namespace APro
             if(window->context_unbind())
             {
                 setBinded(false);
-                sendEvent(createAndPopulateEvent(ContextUnbindedEvent::Hash));
+                sendEvent(createEvent(ContextUnbindedEvent::Hash));
                 return true;
             }
             else

@@ -41,3 +41,8 @@ example ) and then work on the source. Think to clean your folder before any pus
 You can build the doc if you have doxygen. Simply run doxygen in this directory. Documentation will output
 by default in the 'html' directory. 
 Then open the 'index.html' file in the 'html' directory with your favorite browser.
+
+### Dependancies 
+
+You must have 'pthread' if you want multithreading features. This feature is enabled by default, but you still
+can disable it with option '--no-thread'in premake4.
