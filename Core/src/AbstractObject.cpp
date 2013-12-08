@@ -15,6 +15,8 @@
 
 namespace APro
 {
+    APRO_IMPLEMENT_MANUALSINGLETON(AbstractObjectFactory)
+
     AbstractObject::AbstractObject(const String& name, AbstractObjectFactory* factory)
     {
         m_name = name;

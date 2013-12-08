@@ -1,21 +1,22 @@
+////////////////////////////////////////////////////////////
 /** @file MathFunctionManager.cpp
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 10/10/2012
+ *  @date 10/10/2012 - 03/12/2013
  *
- *  @addtogroup Global
- *  @addtogroup Maths
- *
- *  This file defines the MathFunctionManager class.
+ *  Implements the MathFunctionManager class.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "MathFunctionManager.h"
 #include "Maths.h"
 
 namespace APro
 {
+    APRO_IMPLEMENT_MANUALSINGLETON(MathFunctionManager)
+
     Variant MathFunctionCos(const List<Variant>& args)
     {
         double arg1 = args.at(0).to<double>();
@@ -30,21 +31,20 @@ namespace APro
 
     MathFunctionManager::MathFunctionManager()
     {
-        MathModule::ptr stdModule( AProNew(MathModule, String("Std"), String("Standard Module.")) );
+        MathModulePtr stdModule( AProNew(MathModule, String("Std"), String("Standard Module.")) );
 
-        MathFunction::ptr cosFunction ( AProNew(MathFunction, String("Cos"),
-                                                               String("double:double"),
-                                                               String("Cosinus of an angle, in radian."),
-                                                               MathFunctionCos));
+        MathFunctionPtr cosFunction ( AProNew(MathFunction, String("Cos"),
+                                                            String("double:double"),
+                                                            String("Cosinus of an angle, in radian."),
+                                                            MathFunctionCos));
+
+        MathFunctionPtr sinFunction ( AProNew(MathFunction, String("Sin"),
+                                                            String("double:double"),
+                                                            String("Sinus of an angle, in radian."),
+                                                            MathFunctionSin));
 
         stdModule->pushFunction(cosFunction);
-
-        MathFunction::ptr sinFunction ( AProNew(MathFunction, String("Sin"),
-                                                               String("double:double"),
-                                                               String("Sinus of an angle, in radian."),
-                                                               MathFunctionSin));
         stdModule->pushFunction(sinFunction);
-
         push(stdModule);
     }
 
@@ -58,13 +58,14 @@ namespace APro
         List<String> names = completeName.explode('.');
         if(names.size() > 1)
         {
-            List<String>::Iterator it = names.end(); it--;
-            String func = it.get();
-            MathModule::ptr curModule = module(names.begin().get());
+            List<String>::iterator it = names.begin() + (names.size() - 1);
+            String& func = it.get();// This is the function real name.
+
+            MathModulePtr curModule = module(names.begin().get());
             int i = 1;
             while(!curModule.isNull())
             {
-                MathModule::ptr tmp = curModule->findModule(names.at(i));
+                MathModulePtr tmp = curModule->findModule(names.at(i));
                 if(tmp.isNull())
                     break;
 
@@ -73,7 +74,7 @@ namespace APro
             }
 
             if(i < (int) names.size() - 2)// Can't reach last module
-                return MathFunction::ptr();
+                return MathFunctionPtr();
             else
                 return curModule->findFunction(func);
         }
@@ -83,10 +84,10 @@ namespace APro
 
     MathModule::ptr MathFunctionManager::module(const String& moduleName)
     {
-        List<MathModule::ptr>& modules = Manager<MathModule>::objects;
+        List<MathModulePtr>& modules = Manager<MathModule>::objects;
         for(unsigned int i = 0; i < modules.size(); ++i)
         {
-            MathModule::ptr tmp = modules.at(i);
+            MathModulePtr tmp = modules.at(i);
             if(tmp->getName() == moduleName)
                 return tmp;
         }

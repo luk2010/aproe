@@ -5,29 +5,28 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012, 02/11/2013
+ *  @date 11/09/2012, 02/12/2013
  *
  *  Implements the EventListener class.
  *
 **/
 /////////////////////////////////////////////////////////////
 #include "EventListener.h"
-
-#include "Main.h"
+#include "IdGenerator.h"
 
 namespace APro
 {
     EventListener::EventListener(const String& name)
     {
         m_name = name;
-        id     = Main::get().getIdGenerator().canPick() ? Main::get().getIdGenerator().pick() : 0;
+        id     = IdGenerator::Get().canPick() ? IdGenerator::Get().pick() : 0;
         last_event = nullptr;
     }
 
     EventListener::EventListener(const EventListener& other)
     {
         m_name = other.m_name;
-        id = Main::get().getIdGenerator().canPick() ? Main::get().getIdGenerator().pick() : 0;
+        id = IdGenerator::Get().canPick() ? IdGenerator::Get().pick() : 0;
         last_event = nullptr;
     }
 

@@ -32,6 +32,10 @@ namespace APro
      *  - MutexLockedEvent
      *  - MutexUnlockedEvent
      *
+     *  If mutex is created without id (id == 0), this seems the mutex
+     *  is internal. Event Sending is so disabled to prevent multiple
+     *  events creation.
+     *
      *  @note ThreadMutex are identified with an unique id,
      *  given by the ThreadManager.
      *  @note Mutex should always be created thanks to the

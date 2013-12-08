@@ -324,7 +324,7 @@ namespace APro
         if(dir.isEmpty())
             return dir;
 
-        return dir.extract(dir.findLast(Main::get().getFileSystem().pathSeparator()), dir.size() - 1);
+        return dir.extract(dir.findLast(Main::get().getFileSystem().pathSeparator()), dir.size());
     }
 
     String File::getPath() const
@@ -334,7 +334,7 @@ namespace APro
 
     String File::getFileName() const
     {
-        return m_filePath.extract(m_filePath.findLast(Main::get().getFileSystem().pathSeparator()), m_filePath.size() - 1);
+        return m_filePath.extract(m_filePath.findLast(Main::get().getFileSystem().pathSeparator()), m_filePath.size());
     }
 
     String File::getFullPath() const

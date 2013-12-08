@@ -13,7 +13,6 @@
 **/
 #include "Window.h"
 #include "WindowManager.h"
-#include "Main.h"
 
 namespace APro
 {

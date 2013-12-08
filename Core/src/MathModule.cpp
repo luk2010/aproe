@@ -1,16 +1,16 @@
+////////////////////////////////////////////////////////////
 /** @file MathModule.cpp
+ *  @ingroup Maths
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 16/10/2012
+ *  @date 16/10/2012 - 08/12/2013
  *
- *  @addtogroup Global
- *  @addtogroup Maths
- *
- *  This file defines the MathModule class.
+ *  Implements the MathModule class.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "MathModule.h"
 
 namespace APro
@@ -31,78 +31,90 @@ namespace APro
         : name(n), description(other.getDescription()), functions(Manager<MathFunction>::objects), modules(Manager<MathModule>::objects)
     {
         functions = other.functions;
-        modules = other.modules;
+        modules   = other.modules;
     }
 
     MathModule::~MathModule()
     {
-        clears();
+        clear();
     }
 
-    String MathModule::getName() const
+    const String& MathModule::getName() const
     {
         return name;
     }
 
-    String MathModule::getDescription() const
+    const String& MathModule::getDescription() const
     {
         return description;
     }
 
-    void MathModule::pushFunction(const MathFunction::ptr& obj)
+    void MathModule::pushFunction(const MathFunctionPtr& obj)
     {
         Manager<MathFunction>::push(obj);
     }
 
-    void MathModule::pushModule(const MathModule::ptr& obj)
+    void MathModule::pushModule(const MathModulePtr& obj)
     {
         Manager<MathModule>::push(obj);
     }
 
-    void MathModule::popFunction(const MathFunction::ptr& obj)
+    void MathModule::popFunction(const MathFunctionPtr& obj)
     {
         Manager<MathFunction>::pop(obj);
     }
 
-    void MathModule::popModule(const MathModule::ptr& obj)
+    void MathModule::popModule(const MathModulePtr& obj)
     {
         Manager<MathModule>::pop(obj);
     }
 
-    MathFunction::ptr MathModule::findFunction(const String& obj)
+    MathFunctionPtr& MathModule::findFunction(const String& fname)
     {
-        if(obj.isEmpty())
-            return MathFunction::ptr();
+        if(fname.isEmpty())
+            return MathFunctionPtr();
 
-        for(unsigned int i = 0; i < functions.size(); i++)
+        List<MathFunctionPtr>::const_iterator e = functions.end();
+        for(List<MathFunctionPtr>::iterator it = functions.begin(); it != e; it++)
         {
-            if(functions.at(i)->getName() == obj)
-                return functions.at(i);
+            if((*it)->getName() == fname)
+                return *it;
         }
 
-        return MathFunction::ptr();
+        return MathFunctionPtr();
     }
 
-    MathModule::ptr MathModule::findModule(const String& obj)
+    const MathFunctionPtr& MathModule::findFunction(const String& fname) const
     {
-        if(obj.isEmpty())
-            return MathModule::ptr();
+        return const_cast<MathModule*>(*this)->findFunction(fname);
+    }
 
-        for(unsigned int i = 0; i < modules.size(); i++)
+    MathModulePtr& MathModule::findModule(const String& mname)
+    {
+        if(mname.isEmpty())
+            return MathModulePtr();
+
+        List<MathModulePtr>::const_iterator e = modules.end();
+        for(List<MathModulePtr>::iterator it = modules.begin(); it != e; it++)
         {
-            if(modules.at(i)->getName() == obj)
-                return modules.at(i);
+            if((*it)->getName() == mname)
+                return *it;
         }
 
-        return MathModule::ptr();
+        return MathModulePtr();
     }
 
-    List<MathFunction::ptr>& MathModule::getFunctions()
+    const MathModulePtr& MathModule::findModule(const String& mname) const
+    {
+        return const_cast<MathModule*>(this)->findModule(mname);
+    }
+
+    List<MathFunctionPtr>& MathModule::getFunctions()
     {
         return functions;
     }
 
-    List<MathModule::ptr>& MathModule::getModules()
+    List<MathModulePtr>& MathModule::getModules()
     {
         return modules;
     }
@@ -117,7 +129,7 @@ namespace APro
         Manager<MathModule>::clear();
     }
 
-    void MathModule::clears()
+    void MathModule::clear()
     {
         clearFunction();
         clearModule();

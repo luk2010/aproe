@@ -28,8 +28,11 @@ namespace APro
      *  You can use the easy functions safelock and safeunlock to
      *  lock/unlock the mutex.
      *
-     *  @note The mutex is created in the safelock function if it
-     *  wasn't done in the constructor.
+     *  Thanks to this class, you can easily convert your class to
+     *  an atomic-like one without changing your API.
+     *
+     *  @note The mutex is created independantly from the
+     *  ThreadManager because you do not have full access to it.
     **/
     ////////////////////////////////////////////////////////////
     class ThreadSafe
@@ -51,18 +54,12 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Lock safely the mutex.
-         *
-         *  The mutex is locked and created if it isn't yet.
-         *
-         *  @throw CustomException if mutex cannot be created.
         **/
         ////////////////////////////////////////////////////////////
         void safelock();
 
         ////////////////////////////////////////////////////////////
         /** @brief Unlock safely the mutex.
-         *
-         *  The mutex is unlocked and created if it isn't yet.
         **/
         ////////////////////////////////////////////////////////////
         void safeunlock();
@@ -71,51 +68,22 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the internal mutex.
-         *
-         *  The pointer returned musn't be deleted.
         **/
         ////////////////////////////////////////////////////////////
-        ThreadMutex* getMutex();
+        ThreadMutex& getMutex() { return mutex; }
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the internal mutex.
-         *
-         *  The pointer returned musn't be deleted.
         **/
         ////////////////////////////////////////////////////////////
-        const ThreadMutex* getMutex() const;
-
-    public:
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Tell if the mutex has been created.
-        **/
-        ////////////////////////////////////////////////////////////
-        bool isMutexCreated() const;
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Tell if the mutex is currently in creation.
-        **/
-        ////////////////////////////////////////////////////////////
-        bool isMutexCreating() const;
+        const ThreadMutex& getMutex() const { return mutex; }
 
     private:
 
-        ////////////////////////////////////////////////////////////
-        /** @brief Creates the mutex.
-         *  @internal
-        **/
-        ////////////////////////////////////////////////////////////
-        void createmutex();
-
-    private:
-
-        ThreadMutexPtr mutexptr;///< Pointer to the mutex.
-        bool mutexcreated;      ///< Tell if mutex is created.
-        bool mutexcreating;     ///< Tell if mutex is creating.
+        ThreadMutex mutex;///< Mutex.
     };
 
-    #define APRO_THREADSAFE_AUTOLOCK ThreadSafe::safelock(); THREADMUTEXAUTOLOCK(ThreadSafe::getMutex());
+    #define APRO_THREADSAFE_AUTOLOCK THREADMUTEXAUTOLOCK(ThreadSafe::getMutex());
 }
 
 #endif // APRO_THREADSAFE_H

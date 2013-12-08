@@ -14,7 +14,7 @@
 
 #include "Platform.h"
 #include "List.h"
-#include "SharedPointer.h"
+#include "AutoPointer.h"
 
 namespace APro
 {
@@ -22,15 +22,20 @@ namespace APro
     /** @class Manager
      *  @ingroup Utils
      *  @brief Utility class to manage typed objects.
-     *  @details SubClass can manage a type of object with the
-     *  push and pop command.
-     *  @note Manager class isn't Thread-safe so the subclass
-     *  should implement it.
-     *  @note The subclass must clear the objets itself.
+     *
+     *  Simplifies the managing of objects by using uniquely the
+     *  push/pop system.
+     *  Objects are stored as AutoPointer.
+     *
+     *  @note This class is ThreadSafe.
+     *  You can access to the objects list by using
+     *  Manager<T>::objects. We advice you to use a reference variable
+     *  constructed directly in the class :
+     *  @code MyClass() : my_reference(Manager<T>::objects) {} @endcode
     **/
     ////////////////////////////////////////////////////////////
     template<typename T>
-    class Manager
+    class Manager : public ThreadSafe
     {
     public:
 
@@ -47,22 +52,19 @@ namespace APro
         /** @brief Destructor.
         **/
         ////////////////////////////////////////////////////////////
-        virtual ~Manager()
+        ~Manager()
         {
-            // Manager must explicitly clear there objects
-            //objects.clear();
+            APRO_THREADSAFE_AUTOLOCK
+            objects.clear();
         }
 
         ////////////////////////////////////////////////////////////
         /** @brief Push an object in the objects list.
-         *  @details If the adress of the object is already pushed,
-         *  the object isn't pushed.
-         *
-         *  @param obj : Object Pointer to push.
         **/
         ////////////////////////////////////////////////////////////
-        virtual void push(const SharedPointer<T>& obj)
+        void push(const AutoPointer<T>& obj)
         {
+            APRO_THREADSAFE_AUTOLOCK
             if(!obj.isNull() && objects.find(obj) == -1)
                 objects.append(obj);
         }
@@ -70,31 +72,29 @@ namespace APro
         ////////////////////////////////////////////////////////////
         /** @brief Pop an object from the object list.
          *  @note The object isn't deleted.
-         *
-         *  @param obj : Object to erase from the list.
         **/
         ////////////////////////////////////////////////////////////
-        virtual void pop(const SharedPointer<T>& obj)
+        void pop(const AutoPointer<T>& obj)
         {
+            APRO_THREADSAFE_AUTOLOCK
             int index = objects.find(obj);
             if(!obj.isNull() && index != -1)
-                objects.erase(index);
+                objects.erase(objects.begin() + index);
         }
 
         ////////////////////////////////////////////////////////////
         /** @brief Clear every objects.
-         *  @details This can be re-implemented by subclasses to
-         *  possibly clear each object with special methods or things.
         **/
         ////////////////////////////////////////////////////////////
-        virtual void clear()
+        void clear()
         {
+            APRO_THREADSAFE_AUTOLOCK
             objects.clear();
         }
 
     protected:
 
-        List<SharedPointer<T> > objects;///< Object list.
+        List< AutoPointer<T> > objects;///< Object list.
     };
 }
 

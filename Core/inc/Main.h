@@ -200,17 +200,17 @@ namespace APro
             return *impStore;
         }
 */
-        
+
         const ImplementationFactory& getImplementations() const
         {
             return *impFactory;
         }
-        
+
         ImplementationFactory& getImplementations()
         {
             return *impFactory;
         }
-        
+
         const FileSystem& getFileSystem() const
         {
             return *fs;
@@ -243,18 +243,54 @@ namespace APro
 
     private:
         // In activation order ! Don't change
+
+        // Core
+        /* 1. The Idgenerator, because it is needed by almost
+        everyone and no needs for himself. */
         IdGenerator* id_generator;
+        /* 2. The PointerCollector. It doesn't need anything
+        as the IdGenerator.*/
         PointerCollector* sharedpointer_collector;
-        ResourceManager* resourceManager;
-//      ImplementationStore* impStore;
+
+        // Factory
+        /* 3. The ImplementationFactory. Needs only the Manager, wich needs
+        ThreadSafe and AutoPointer. */
         ImplementationFactory* impFactory;
-//      RendererFactoryManager* rfm; // Not use anymore
-        PluginManager* pluginManager;
-        MathFunctionManager* mathManager;
-        WindowManager* windowManager;
-        FileSystem* fs;
-        ThreadManager* tmanager;
+        /* 4. The AbstractObjectFactory. Needs only the Manager, wich needs
+        ThreadSafe and AutoPointer. */
         AbstractObjectFactory* abstract_object_factory;
+
+        // EventUniter
+        /* 5. The EventUniter. Needs Thread implementation but no ThreadManager.
+        Needs what is above. */
+        EventUniter* euniter;
+
+        // Manager
+        /* 6. The ThreadManager. It needs only the IdGenerator
+        and the PointerCollector. */
+        ThreadManager* tmanager;
+        /* 7. The MathFunctionManager. It needs only the IdGenerator
+        and the PointerCollector. */
+        MathFunctionManager* mathManager;
+        /* 8. The ResourceManager. Needs only the Manager, wich needs
+        ThreadSafe and AutoPointer and the ThreadManager, as resources loading
+        and writing is done multi-threaded. */
+        ResourceManager* resourceManager;
+        /* 9. The PluginManager. Needs almost everything above. */
+        PluginManager* pluginManager;
+        /* 10. The WindowManager. Needs a window plugin loaded. */
+        WindowManager* windowManager;
+
+// OLD  Do not erase
+
+//      ImplementationStore* impStore;
+//      RendererFactoryManager* rfm; // Not use anymore
+
+// UNUSED or in rewriting
+
+        FileSystem* fs;
+
+
 
     private:
 

@@ -35,6 +35,8 @@ namespace APro
     ////////////////////////////////////////////////////////////
     class APRO_DLL PointerCollector : public ThreadSafe
     {
+        APRO_DECLARE_MANUALSINGLETON(PointerCollector)
+
     private:
 
         String name;///< Name of the collector.

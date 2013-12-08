@@ -14,9 +14,10 @@
 #ifndef APRO_IDGENERATOR_H
 #define APRO_IDGENERATOR_H
 
-#include <Platform.h>
+#include "Platform.h"
+#include "ThreadSafe.h"
 
-namespace APro 
+namespace APro
 {
     /////////////////////////////////////////////////////////////
     /** @class IdGenerator
@@ -33,61 +34,66 @@ namespace APro
      *
      *  @note You can set a maximum id returned by this generator.
      *  When this is used, you should use the IdGenerator::canPick
-     *  function to know if new ids are available. 
-     *  
+     *  function to know if new ids are available.
+     *
      *  @note If Max is 0, infinite limit.
+     *
+     *  This class is thread-safe.
     **/
     /////////////////////////////////////////////////////////////
-    class APRO_DLL IdGenerator
+    class APRO_DLL IdGenerator : public ThreadSafe
     {
+
+        APRO_DECLARE_MANUALSINGLETON(IdGenerator)
+
     private:
-        
+
         unsigned long m_cur_id;///< Current id that will be given to next call.
-        
+
         unsigned long m_incrementation;///< Current incrementation tick.
         unsigned long m_base;///< Base of the generator.
         unsigned long m_max;///< Possible maximum id available.
-        
+
     public:
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Constructor.
         **/
         /////////////////////////////////////////////////////////////
         IdGenerator();
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Destructor.
         **/
         /////////////////////////////////////////////////////////////
         ~IdGenerator();
-        
+
     public:
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Reset the incrementation of this generator.
         **/
         /////////////////////////////////////////////////////////////
         void reset();
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Set the base to given.
         **/
         /////////////////////////////////////////////////////////////
         void setBase(unsigned long base);
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Set to given incrementation tick.
         **/
         /////////////////////////////////////////////////////////////
         void setIncrementation(unsigned long increment);
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Set new maximum id limit.
         **/
         /////////////////////////////////////////////////////////////
         void setMaximumId(unsigned long max);
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Return the next id available.
          *
@@ -95,15 +101,15 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         unsigned long pick();
-        
+
         /////////////////////////////////////////////////////////////
         /** @brief Tell if next id will be valid.
          **/
         /////////////////////////////////////////////////////////////
         bool canPick() const;
     };
-    
-    typedef unsigned long id; ///< A generic id type.
+
+    typedef unsigned long Id; ///< A generic id type.
 }
 
 #endif // APRO_IDGENERATOR_H

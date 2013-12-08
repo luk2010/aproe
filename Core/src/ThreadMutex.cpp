@@ -67,7 +67,8 @@ namespace APro
         if(pthread_mutex_lock(&GET_MUTEX()) == 0)
         {
             m_locked = true;
-            sendEvent(createEvent(MutexLockedEvent::Hash));
+            if(id)
+                sendEvent(createEvent(MutexLockedEvent::Hash));
         }
         else
         {
@@ -82,7 +83,8 @@ namespace APro
         if(pthread_mutex_trylock(&GET_MUTEX()) == 0)
         {
             m_locked = true;
-            sendEvent(createEvent(MutexLockedEvent::Hash));
+            if(id)
+                sendEvent(createEvent(MutexLockedEvent::Hash));
             return true;
         }
         else
@@ -100,7 +102,8 @@ namespace APro
         if(pthread_mutex_unlock(&GET_MUTEX()) == 0)
         {
             m_locked = false;
-            sendEvent(createEvent(MutexUnlockedEvent::Hash));
+            if(id)
+                sendEvent(createEvent(MutexUnlockedEvent::Hash));
         }
         else
         {

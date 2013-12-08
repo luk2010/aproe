@@ -17,6 +17,8 @@
 
 namespace APro
 {
+    APRO_IMPLEMENT_MANUALSINGLETON(ResourceManager)
+
     ResourceManager::ResourceManager()
         : resources(Manager<Resource>::objects), loaders(Manager<ResourceLoader>::objects), writers(Manager<ResourceWriter>::objects)
     {

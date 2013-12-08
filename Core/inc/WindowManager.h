@@ -25,6 +25,9 @@ namespace APro
     class APRO_DLL WindowManager : public Manager<Window>,
                                    public ThreadSafe
     {
+
+        APRO_DECLARE_MANUALSINGLETON(WindowManager)
+
     public:
 
         WindowManager();

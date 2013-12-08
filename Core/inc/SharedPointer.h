@@ -249,10 +249,13 @@ namespace APro
 
         void delete_using_deletion()
         {
-            if(dmethod == DeletionMethod::Delete)
-            {
-                AProDelete(ptr);
-            }
+//          This is completely obsolee.
+//            if(dmethod == DeletionMethod::Delete)
+//            {
+//                AProDelete(ptr);
+//            }
+
+            AProDelete(ptr);
         }
 
     private:
@@ -273,6 +276,10 @@ namespace APro
         return *(reinterpret_cast<SharedPointer<ValueType>*>(&sp));
     }
 
+    /// @def APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(class)
+    /// @brief Declare main shared pointers typedefs.
+    /// @note The SharedPointer use is obsolete and shouldn't
+    /// be used, unless an old part of the Engine need it.
     #define APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(class) \
     public:\
     typedef APro::SharedPointer<class> ptr;\

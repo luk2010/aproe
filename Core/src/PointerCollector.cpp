@@ -14,6 +14,8 @@
 
 namespace APro
 {
+    APRO_IMPLEMENT_MANUALSINGLETON(PointerCollector)
+
     PointerCollector::PointerCollector(const String& collector_name)
         : name(collector_name)
     {
@@ -59,21 +61,25 @@ namespace APro
 
     bool PointerCollector::exists(void* ptr) const
     {
+        APRO_THREADSAFE_AUTOLOCK
         return pointers_utility.exists(ptr);
     }
 
     size_t PointerCollector::getPointersCollected() const
     {
+        APRO_THREADSAFE_AUTOLOCK
         return pointers_utility.size();
     }
 
     unsigned int PointerCollector::getPointerUtility(void* ptr) const
     {
+        APRO_THREADSAFE_AUTOLOCK
         return pointers_utility.exists(ptr) ? 0 : pointers_utility[ptr];
     }
 
     const String& PointerCollector::getName() const
     {
+        APRO_THREADSAFE_AUTOLOCK
         return name;
     }
 }

@@ -32,6 +32,13 @@ namespace APro
 {
     APRO_IMPLEMENT_SINGLETON(Main)
 
+    class MainException : public Exception
+    {
+        APRO_MAKE_EXCEPTION(MainException)
+
+        const char* what() const throw() { return "Can't initialize Main class."; }
+    };
+
     Main::Main()
     {
         resourceManager = nullptr;
@@ -73,42 +80,150 @@ namespace APro
                      << "\n - Debugging Implementation = " << (hasOption((int) GlobalOption::Debugging_Implementation) ? "true" : "false");
 
 
+        // -- Core ---------------------------------------------------------------------
+
         id_generator = AProNew(IdGenerator);
         if(id_generator)
         {
+            IdGenerator::__curent_IdGenerator = id_generator;
             getConsole() << "\n[Main] Global ID Generator OK.";
         }
         else
         {
             getConsole() << "\n[Main] Can't create Global ID Generator ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
+            clear();
+            aprothrow(MainException);
         }
 
         sharedpointer_collector = AProNew(PointerCollector, String("Global"));
         if(sharedpointer_collector)
         {
+            PointerCollector::__curent_PointerCollector = sharedpointer_collector;
             getConsole() << "\n[Main] Global Pointer Collector OK.";
         }
         else
         {
             getConsole() << "\n[Main] Can't create Global Pointer Collector ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
+            clear();
+            aprothrow(MainException);
+        }
+
+        // -- Factory ------------------------------------------------------------------
+
+        impFactory = AProNew(ImplementationFactory);
+        if(impFactory)
+        {
+            ImplementationFactory::__curent_ImplementationFactory = impFactory;
+            getConsole() << "\n[Main] Implementation Factory OK.";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't create Implementation Factory ! Aborting...";
+            clear();
+            aprothrow(MainException);
+        }
+
+        abstract_object_factory = AProNew(AbstractObjectFactory);
+        if(abstract_object_factory)
+        {
+            AbstractObjectFactory::__curent_AbstractObjectFactory = abstract_object_factory;
+            getConsole() << "\n[Main] Object Factory OK.";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't create Object Factory ! Aborting...";
+            clear();
+            aprothrow(MainException);
+        }
+
+        // -- Event Uniter -------------------------------------------------------------
+
+        euniter = AProNew(EventUniter, String("GlobalUniter"));
+        if(euniter)
+        {
+            EventUniter::__curent_EventUniter = euniter;
+            getConsole() << "\n[Main] EventUniter OK.";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't create EventUniter ! Aborting...";
+            clear();
+            aprothrow(MainException);
+        }
+
+        // -- Manager ------------------------------------------------------------------
+
+        tmanager = AProNew(ThreadManager);
+        if(tmanager)
+        {
+            ThreadManager::__curent_ThreadManager = tmanager;
+            getConsole() << "\n[Main] Thread Manager OK.";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't create Thread Manager ! Aborting...";
+            clear();
+            aprothrow(MainException);
+        }
+
+        mathManager = AProNew(MathFunctionManager);
+        if(mathManager)
+        {
+            MathFunctionManager::__curent_MathFunctionManager = mathManager;
+            getConsole() << "\n[Main] Math Function Manager OK.";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't create Math Function Manager ! Aborting...";
+            clear();
+            aprothrow(MainException);
         }
 
         resourceManager = AProNew(ResourceManager);
         if(resourceManager)
         {
             // Add default loader here.
-            resourceManager->addLoader(ResourceLoader::ptr(AProNew(DynamicLibraryLoader)));
-            resourceManager->addLoader(ResourceLoader::ptr(AProNew(NullLoader)));
+            resourceManager->addLoader(ResourceLoaderPtr(AProNew(DynamicLibraryLoader)));
+            resourceManager->addLoader(ResourceLoaderPtr(AProNew(NullLoader)));
 
+            ResourceManager::__curent_ResourceManager = resourceManager;
             getConsole() << "\n[Main] Resource Manager OK.";
         }
         else
         {
             getConsole() << "\n[Main] Can't create Resource Manager ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
+            clear();
+            aprothrow(MainException);
         }
+
+        pluginManager = AProNew(PluginManager);
+        if(pluginManager)
+        {
+            PluginManager::__curent_PluginManager = pluginManager;
+            getConsole() << "\n[Main] Plugin Manager OK. Loading plugins and implementations in directory \"plugins\".";
+            pluginManager->loadDirectory(String("plugins/"));
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't create Plugin Manager ! Aborting...";
+            clear();
+            aprothrow(MainException);
+        }
+
+        windowManager = AProNew(WindowManager);
+        if(windowManager)
+        {
+            WindowManager::__curent_WindowManager = windowManager:
+            getConsole() << "\n[Main] Window Manager OK.";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't create Window Manager ! Aborting...";
+            clear();
+            aprothrow(MainException);
+        }
+
+
 /*
         impStore = AProNew(ImplementationStore);
         if(impStore)
@@ -120,16 +235,7 @@ namespace APro
         }
  */
 
-        impFactory = AProNew(ImplementationFactory);
-        if(impFactory)
-        {
-            getConsole() << "\n[Main] Implementation Factory OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Implementation Factory ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
-        }
+
 
 /* TODO
         rfm = AProNew(1, RendererFactoryManager) ();
@@ -142,49 +248,7 @@ namespace APro
         }
 */
 
-        pluginManager = AProNew(PluginManager);
-        if(pluginManager)
-        {
-            getConsole() << "\n[Main] Plugin Manager OK. Loading plugins and implementations in directory \"plugins\".";
-            pluginManager->loadDirectory(String("plugins/"));
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Plugin Manager ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
-        }
 
-        tmanager = AProNew(ThreadManager);
-        if(tmanager)
-        {
-            // Create memorytracker mutex
-            char* buffer = AProNew(char);
-            AProDelete(buffer);
-            getConsole() << "\n[Main] Thread Manager OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Thread Manager ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
-        }
-
-        mathManager = AProNew(MathFunctionManager);
-        if(mathManager)
-            getConsole() << "\n[Main] Math Function Manager OK.";
-        else
-        {
-            getConsole() << "\n[Main] Can't create Math Function Manager ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
-        }
-
-        windowManager = AProNew(WindowManager);
-        if(windowManager)
-            getConsole() << "\n[Main] Window Manager OK.";
-        else
-        {
-            getConsole() << "\n[Main] Can't create Window Manager ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
-        }
 
         fs = AProNew(FileSystem, workingdir, fs);
         if(fs)
@@ -197,16 +261,6 @@ namespace APro
             APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
         }
 
-        abstract_object_factory = AProNew(AbstractObjectFactory);
-        if(abstract_object_factory)
-        {
-            getConsole() << "\n[Main] Object Factory OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Object Factory ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
-        }
 
         getConsole() << "\n[Main] Main Initialized ! Enjoy ;)";
         return *this;

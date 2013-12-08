@@ -19,7 +19,7 @@
 #include "Resource.h"
 #include "ResourceLoader.h"
 #include "ResourceWriter.h"
-#include "SharedPointer.h"
+#include "AutoPointer.h"
 
 namespace APro
 {
@@ -27,11 +27,13 @@ namespace APro
                                      public Manager<ResourceLoader>,
                                      public Manager<ResourceWriter>
     {
+        APRO_DECLARE_MANUALSINGLETON(ResourceManager)
+
     private:
 
-        List<SharedPointer<Resource> >& resources;
-        List<SharedPointer<ResourceLoader> >& loaders;
-        List<SharedPointer<ResourceWriter> >& writers;
+        List<AutoPointer<Resource> >& resources;
+        List<AutoPointer<ResourceLoader> >& loaders;
+        List<AutoPointer<ResourceWriter> >& writers;
 
     public:
 

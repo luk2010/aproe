@@ -14,9 +14,8 @@
 #ifndef APRO_THREAD_H
 #define APRO_THREAD_H
 
-#include "Implementable.h"
+#include "Platform.h"
 #include "List.h"
-#include "Variant.h"
 #include "SString.h"
 #include "EventEmitter.h"
 
@@ -184,6 +183,13 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         void join();
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Wait for this thread to finish.
+         *  @param timeout : Maximum time to wait for the joined thread.
+        **/
+        ////////////////////////////////////////////////////////////
+        void join(const Time& timeout);
 
         ////////////////////////////////////////////////////////////
         /** @brief Terminates the thread.

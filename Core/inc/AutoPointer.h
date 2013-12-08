@@ -16,7 +16,6 @@
 
 #include "Platform.h"
 #include "PointerCollector.h"
-#include "Main.h"
 
 namespace APro
 {
@@ -65,7 +64,7 @@ namespace APro
         AutoPointer()
             : pointer(nullptr), custom_collector(nullptr)
         {
-            custom_collector = &(Main::get().getGlobalPointerCollector());
+            custom_collector = &(PointerCollector::Get());
         }
 
         ////////////////////////////////////////////////////////////
@@ -76,7 +75,7 @@ namespace APro
         AutoPointer(T* pointer_to_init)
             : pointer(pointer_to_init), custom_collector(nullptr)
         {
-            custom_collector = &(Main::get().getGlobalPointerCollector());
+            custom_collector = &(PointerCollector::Get());
             init_pointer();
         }
 
@@ -89,7 +88,7 @@ namespace APro
         AutoPointer(T* pointer_to_init, PointerCollector* p_collector)
         {
             pointer = pointer_to_init;
-            custom_collector = (p_collector) ? p_collector : &(Main::get().getGlobalPointerCollector());
+            custom_collector = (p_collector) ? p_collector : &(PointerCollector::Get());
             init_pointer();
         }
 

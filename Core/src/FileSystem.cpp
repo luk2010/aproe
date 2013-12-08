@@ -217,7 +217,7 @@ namespace APro
 
     String FileSystem::extension(const String& filepath)
     {
-        return filepath.extract(filepath.findLast('.') + 1, filepath.size() - 1);
+        return filepath.extract(filepath.findLast('.') + 1, filepath.size());
     }
 
     void FileSystem::initImplementation()

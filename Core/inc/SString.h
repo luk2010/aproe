@@ -91,6 +91,7 @@ namespace APro
         size_t findLast(char c) const;
         size_t findLast(const String& str) const;
 
+        /* Return the string[from, to). */
         String extract(size_t from, size_t to) const;
 
         List<String> explode(const String & str) const;

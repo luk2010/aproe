@@ -692,6 +692,27 @@ namespace APro
             return it_e;
         }
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Return an iterator if given object is found in this
+         *  array.
+         *
+         *  Objects must have a correct comparison function.
+        **/
+        ////////////////////////////////////////////////////////////
+        iterator find(const T& obj)
+        {
+            iterator it = begin();
+            const_iterator it_e = end();
+
+            while(it != it_e)
+                if((*it) == obj)
+                    return it;
+                else
+                    it++;
+
+            return it_e;
+        }
+
     };
 
     typedef Array<HashType> HashArray;///< An array of HashType.

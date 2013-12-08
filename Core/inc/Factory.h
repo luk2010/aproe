@@ -25,7 +25,8 @@ namespace APro
      *  @ingroup Utils
      *  @brief A factory class that implements the Factory Design
      *  Pattern.
-     *  @details A factory is an object that can create other objects
+     *
+     *  A factory is an object that can create other objects
      *  by cloning them from a prototype stored in the factory.
      *  The prototype is user-created from the application or from
      *  a plugin if the factory is accessible from every point of
@@ -38,10 +39,14 @@ namespace APro
      *
      *  @note The Factory Design Pattern is even more usefull if it is
      *  more efficient to copy this object than to initialise it.
+     *  @note A Factory is always thread-safe.
+     *
+     *  @warning The prototype has to be destroyed by the creator.
     **/
     /////////////////////////////////////////////////////////////
     template <typename PrototypeBase>
-    class Factory : public Printable
+    class Factory : public Printable,
+                    public ThreadSafe
     {
     protected:
         Map<String, PrototypeBase*> prototypes;///< Prototypes the factory can clone.
@@ -59,7 +64,7 @@ namespace APro
          *  @return A copy of this object.
         **/
         /////////////////////////////////////////////////////////////
-        PrototypeBase* create(const String& key) const { return prototypes.exists(key) ? prototypes[key]->clone() : nullptr; }
+        PrototypeBase* create(const String& key) const { APRO_THREADSAFE_AUTOLOCK return prototypes.exists(key) ? prototypes[key]->clone() : nullptr; }
 
         /////////////////////////////////////////////////////////////
         /** @brief Register a prototype to this factory.
@@ -67,13 +72,13 @@ namespace APro
          *  @param proto : Prototype to store.
         **/
         /////////////////////////////////////////////////////////////
-        void register_prototype(const String& key, PrototypeBase* proto) { if(proto) { prototypes[key] = proto; proto->fact = this; } }
+        void register_prototype(const String& key, PrototypeBase* proto) { APRO_THREADSAFE_AUTOLOCK if(proto) { prototypes[key] = proto; proto->fact = this; } }
 
         ////////////////////////////////////////////////////////////
         /** @brief Tell if a prototype is registered.
         **/
         ////////////////////////////////////////////////////////////
-        bool hasPrototype(const String& key) { return prototypes.exists(key); }
+        bool hasPrototype(const String& key) { APRO_THREADSAFE_AUTOLOCK return prototypes.exists(key); }
 
         /////////////////////////////////////////////////////////////
         /** @see Printable::print
@@ -81,6 +86,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         void print(Console& console) const
         {
+            APRO_THREADSAFE_AUTOLOCK
             console << "Factory { Prototypes = \"" << className<PrototypeBase>() << "\", Prototypes Number = " << prototypes.size() << " }";
         }
     };

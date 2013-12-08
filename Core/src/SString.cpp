@@ -244,10 +244,10 @@ namespace APro
         String result;
 
         if(from > to) Allocator<size_t>::swap(&from, &to, 1);
-        if(to >= size()) to = size() - 1;
+        if(to > size()) to = size();
         if(from >= size()) return result;
 
-        for(size_t i = from; i <= to; i++)
+        for(size_t i = from; i < to; i++)
             result.append(at(i));
 
         return result;
@@ -485,12 +485,12 @@ namespace APro
         size_t index = str.findFirst(c);
         while(index < str.size())
         {
-            ret.append(str.extract(old, index - 1));
+            ret.append(str.extract(old, index));
             old = index + 1;
             index = str.findFirst(c, old);
         }
 
-        ret.append(str.extract(old, index));
+        ret.append(str.extract(old, index + 1));
         return ret;
     }
 
@@ -505,12 +505,12 @@ namespace APro
 
         while(index < strc.size())
         {
-            ret.append(strc.extract(old, index - 1));
+            ret.append(strc.extract(old, index));
             old = index + 1;
             index = strc.findFirst(str, old);
         }
 
-        ret.append(strc.extract(old, index));
+        ret.append(strc.extract(old, index + 1));
         return ret;
     }
 

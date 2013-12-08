@@ -14,7 +14,9 @@
 #include "Thread.h"
 
 #ifdef _COMPILE_WITH_PTHREAD_
+#   define _GNU_SOURCE // For use pthread_timedjoin_np
 #   include <pthread.h>
+#   include <ctime>
 #   define GET_HANDLEPTR() ((pthread_t*)m_thread)
 #   define GET_HANDLE() (*(GET_HANDLEPTR()))
 #endif // _COMPILE_WITH_PTHREAD_
@@ -158,6 +160,17 @@ namespace APro
 #endif // _COMPILE_WITH_PTHREAD_
     }
 
+    void Thread::join(const Time& timeout)
+    {
+        struct timespec t;
+        t.tv_sec = timeout.toSeconds();
+        t.tv_nsec = timeout.getNano() + timeout.getMicro() * 1000 + timeout.getMilli() * 1000 * 1000;
+        if(pthread_timedjoin_np(GET_HANDLE(), nullptr, &t) != 0)
+        {
+            aprodebug("Can't join Thread name '") << m_name << "'. Waited for '" << timeout << "'.";
+        }
+    }
+
     void Thread::terminate()
     {
 #ifdef _COMPILE_WITH_PTHREAD_
@@ -231,17 +244,17 @@ namespace APro
     {
         switch(e_type)
         {
-        case ThreadStartedEvent:
+        case ThreadStartedEvent::Hash:
             EventPtr ret = AProNew(ThreadStartedEvent);
             ret->m_emitter = this;
             return ret;
 
-        case ThreadFinishedEvent:
+        case ThreadFinishedEvent::Hash:
             EventPtr ret = AProNew(ThreadFinishedEvent);
             ret->m_emitter = this;
             return ret;
 
-        case ThreadTerminatedEvent:
+        case ThreadTerminatedEvent::Hash:
             EventPtr ret = AProNew(ThreadTerminatedEvent);
             ret->m_emitter = this;
             return ret;

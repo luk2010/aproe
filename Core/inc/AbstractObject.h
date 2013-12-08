@@ -158,8 +158,13 @@ namespace APro
         size_t getPropertiesNumber() const;
     };
 
-    typedef Factory<AbstractObject>     AbstractObjectFactory;///< A Factory instanciated by the Main object.
-    typedef AutoPointer<AbstractObject> AbstractObjectPtr;    ///< An AutoPointer to AbstractObject.
+    /// A Factory instanciated by the Main object.
+    class AbstractObjectFactory : public Factory<AbstractObject>
+    {
+        APRO_DECLARE_MANUALSINGLETON(AbstractObjectFactory)
+    };
+
+    typedef AutoPointer<AbstractObject> AbstractObjectPtr;///< An AutoPointer to AbstractObject.
 }
 
 #endif // APRO_ABSTRACTOBJECT_H

@@ -11,7 +11,7 @@
 **/
 #include "MemoryTracker.h"
 #include "Console.h"
-#include "ThreadManager.h"
+#include "ThreadMutex.h"
 
 #include <sstream>
 #include <cstdio>
@@ -21,41 +21,16 @@ namespace APro
 {
     namespace
     {
-        ThreadMutex::ptr global_mutex = nullptr;
-        bool mutex_created = false;
-        bool mutex_creating = false;
-
-        void create_and_lock_global_mutex()
-        {
-            mutex_creating = true;
-            APRO_THREAD_MUTEX_SAFELOCK(global_mutex);
-            if(!global_mutex.isNull())
-                mutex_created = true;// Mutex is created but is also locked.
-            mutex_creating = false;
-        }
+        ThreadMutex global_mutex;
 
         void lock_global_mutex()
         {
-            if(mutex_creating) return;
-
-            if(mutex_created)
-                APRO_THREAD_MUTEX_SAFELOCK(global_mutex);
-            else
-                create_and_lock_global_mutex();
+            global_mutex.lock();
         }
 
         void unlock_global_mutex()
         {
-            if(mutex_creating) return;
-
-            if(mutex_created)
-                APRO_THREAD_MUTEX_SAFEUNLOCK(global_mutex);
-            else
-            {
-                create_and_lock_global_mutex();
-                if(mutex_created)
-                    APRO_THREAD_MUTEX_SAFEUNLOCK(global_mutex);
-            }
+            global_mutex.unlock();
         }
     }
 
@@ -74,7 +49,7 @@ namespace APro
 
     MemoryManager::~MemoryManager()
     {
-
+        lock_global_mutex();
 #if APRO_MEMORYTRACKER == APRO_ON
 
         // Clear every Operation if we can.
@@ -100,10 +75,11 @@ namespace APro
 
         operations.clear();
 
+
 #endif // APRO_MEMORYTRACKER
 
         blocks.clear();
-
+        unlock_global_mutex();
     }
 
     void MemoryManager::reportAllocation(void* ptr, size_t byte, const char* func, const char* file, int line)
@@ -273,6 +249,7 @@ namespace APro
 
     const MemoryManager::Operation* MemoryManager::getLastOperation()
     {
+        THREADMUTEXAUTOLOCK(global_mutex);
         if(operations.size() > 0)
             return operations[operations.size() - 1];
         else
@@ -283,6 +260,7 @@ namespace APro
 
     MemoryManager::Statistics MemoryManager::getStats()
     {
+        THREADMUTEXAUTOLOCK(global_mutex);
         return memstats;
     }
 

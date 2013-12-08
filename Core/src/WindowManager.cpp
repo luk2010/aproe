@@ -17,6 +17,8 @@
 
 namespace APro
 {
+    APRO_IMPLEMENT_MANUALSINGLETON(WindowManager)
+
     WindowManager::WindowManager()
         : ThreadSafe(), windows(Manager<Window>::objects)
     {

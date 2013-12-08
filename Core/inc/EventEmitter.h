@@ -44,6 +44,24 @@ namespace APro
      *  @note Getting listeners by name only get the first listener
      *  with given name, you should use unique id's instead.
      *
+     *  You can set an EmitPolicy to the Emitter :
+     *  - EP_NONE : The emitter doesn't send the event, even if
+     *  asked.
+     *  - EP_MANUAL : The emitter send the events to registered listeners,
+     *  no threaded queue. This i the default behaviour.
+     *  - EP_UNITER : The emitter send event to the Global Uniter,
+     *  this is a threaded system.
+     *
+     *  This policy choice let you change the default behaviour of the
+     *  emitter by the EventEmitter::send() function. But you also can
+     *  have the EP_MANUAL policy and send events to the uniter thanks
+     *  to EventEmitter::sendAsynchronousEvent().
+     *
+     *  @note The EmitPolicy affects only the EventEmitter::sendEvent(event)
+     *  function. If you specifies the listener, it will send to the
+     *  listener. The EmitPolicy is here just to make easier the choice
+     *  to send event to registered listeners or to GlobalUniter.
+     *
      *  @see Events for more explanation about the event system.
     **/
     /////////////////////////////////////////////////////////////
@@ -54,8 +72,16 @@ namespace APro
         typedef Map<HashType, String>  EventsList;   ///< List of events type, with documentation.
         typedef List<EventListenerPtr> ListenersList;///< List of listeners pointer.
 
+        enum EmitPolicy
+        {
+            EP_NONE,   ///< Events are send to no-one.
+            EP_MANUAL, ///< Events are send to the registered listeners, directly.
+            EP_UNITER  ///< Events are send to the global uniter.
+        };
+
         ListenersList   listeners;///< List of AutoPointer to listeners.
         EventsList      events;   ///< List of events type with documentation, handled correctly by this emitter.
+        EmitPolicy      epolicy;  ///< Current EmitPolicy. By default, it is EP_MANUAL.
 
     public:
 
@@ -322,6 +348,14 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         virtual EventPtr createEvent(const HashType& e_type) const;
+
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Change the EmitPolicy to given one.
+        **/
+        /////////////////////////////////////////////////////////////
+        void setEmitPolicy(EmitPolicy ep);
     };
 
     typedef AutoPointer<EventEmitter> EventEmitterPtr;///< AutoPointer to EventEmitter. No need to overload the destruction.

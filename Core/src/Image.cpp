@@ -12,7 +12,6 @@
  *
 **/
 #include "Image.h"
-#include "Main.h"
 #include "ResourceManager.h"
 
 namespace APro
@@ -162,7 +161,7 @@ namespace APro
             img->fill(Color((unsigned char) 0, 0, 0, 255));
         }
 
-        Main::get().getResourceManager().Manager<Resource>::push(img);
+        ResourceManager::Get().Manager<Resource>::push(img);
         return img;
     }
 

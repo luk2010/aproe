@@ -19,13 +19,14 @@ namespace APro
 {
     EventEmitter::EventEmitter()
     {
-
+        epolicy = EP_MANUAL;
     }
 
     EventEmitter::EventEmitter(const EventEmitter& emitter)
     {
         listeners = emitter.listeners;
         events    = emitter.events;
+        epolicy = EP_MANUAL;
     }
 
     EventEmitter::~EventEmitter()
@@ -47,15 +48,22 @@ namespace APro
             return false;
         }
 
-        bool tmp = false;
-        ListenersList::const_iterator e = listeners.end();
-        for(ListenersList::iterator it = listeners.begin(); it != e && !(e->must_stop); it++)
+        if(epolicy == EP_MANUAL)
         {
-            if((*it)->receive(e))
-                tmp = true;
-        }
+            bool tmp = false;
+            ListenersList::const_iterator e = listeners.end();
+            for(ListenersList::iterator it = listeners.begin(); it != e && !(e->must_stop); it++)
+            {
+                if((*it)->receive(e))
+                    tmp = true;
+            }
 
-        return tmp;
+            return tmp;
+        }
+        else if(epolicy == EP_UNITER)
+            return sendAsynchronousEvent(e);
+        else
+            return true;// Stub
     }
 
     bool EventEmitter::sendEvent(EventPtr& e, EventListenerPtr& listener)
@@ -114,7 +122,7 @@ namespace APro
         if(!e.isNull())
         {
             if(!event_uniter)
-                event_uniter = Main::get().getEventUniterPtr();
+                event_uniter = &(EventUniter::Get());
 
             if(!event_uniter)
             {
@@ -141,7 +149,7 @@ namespace APro
         if(!e.isNull())
         {
             if(!event_uniter)
-                event_uniter = Main::get().getEventUniterPtr();
+                event_uniter = &(EventUniter::Get());
 
             if(!event_uniter)
             {
@@ -355,6 +363,11 @@ namespace APro
         EventPtr ret = AProNew(NullEvent);
         ret->m_emitter = this;
         return ret;
+    }
+
+    void EventEmitter::setEmitPolicy(EmitPolicy ep)
+    {
+        epolicy = ep;
     }
 
 }

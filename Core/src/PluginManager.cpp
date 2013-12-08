@@ -14,14 +14,14 @@
 #include "PluginManager.h"
 #include "ResourceManager.h"
 #include "FileSystem.h"
-#include "Main.h"
+#include "Console.h"
 
 #include <dirent.h>
 #include <unistd.h>
 
 namespace APro
 {
-    //APRO_IMPLEMENT_SINGLETON(PluginManager)
+    APRO_IMPLEMENT_MANUALSINGLETON(PluginManager)
 
     PluginManager::PluginManager()
         : pluginList(Manager<PluginHandle>::objects)
@@ -50,7 +50,7 @@ namespace APro
         SharedPointer<PluginHandle> ret = getPluginHandle(name);
         if(ret.isNull())
         {
-            SharedPointer<DynamicLibrary> lib = Main::get().getResourceManager().loadResource<DynamicLibrary>(name + String("_") + filename, filename);
+            SharedPointer<DynamicLibrary> lib = ResourceManager::Get().loadResource<DynamicLibrary>(name + String("_") + filename, filename);
 
             if(lib.isNull())
             {
@@ -187,7 +187,7 @@ namespace APro
                         if(getPluginHandle(pname).isNull())
                         {
                             plugin->setName(pname); // Le plugin est valide on le fait savoir.
-                            Main::get().getConsole() << "\n[PluginManager]{loadDirectory} Plugin " << pname << " charge !";
+                            Console::Get() << "\n[PluginManager]{loadDirectory} Plugin " << pname << " charge !";
                             ++ploaded;
                         }
                         else
