@@ -168,10 +168,6 @@ namespace APro
     /////////////////////////////////////////////////////////////
     /** @brief Block given calling Thread while a given boolean is
      *  different from given boolean value.
-     *
-     *  This function is used in internal Thread implementation to
-     *  prevent Thread Creation paradoxe. Do not use it unless you
-     *  know what you are doing.
     **/
     /////////////////////////////////////////////////////////////
     void __wait_boolean__(bool* b, bool result) { while (*b != result); }

@@ -1,16 +1,16 @@
+////////////////////////////////////////////////////////////
 /** @file Resource.cpp
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/08/2012
+ *  @date 25/08/2012 - 23/12/2013
  *
- *  @addtogroup Global
- *  @addtogroup Resource
- *
- *  This file defines the Resource class.
+ *  Implements the Resource class.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "Resource.h"
 #include "SharedPointer.h"
 #include "ThreadMutex.h"
@@ -18,17 +18,15 @@
 
 namespace APro
 {
-    Resource::Resource() : ThreadSafe(), name(""), filename(""), type("Resource")
+    APRO_IMPLEMENT_HASHEDTYPE(Resource);
+
+    Resource::Resource()
     {
 
     }
 
-    Resource::Resource(const String& name_, const String& other) : ThreadSafe(), name(name_), filename(other), type("Resource")
-    {
-
-    }
-
-    Resource::Resource(const Resource& other) : ThreadSafe(), name(""), filename(other.filename), type("Resource")
+    Resource::Resource(const String& filename)
+        : m_filename(filename)
     {
 
     }
@@ -38,43 +36,8 @@ namespace APro
 
     }
 
-    Resource& Resource::operator = (const Resource& other)
+    const String& Resource::getFilename() const
     {
-        APRO_THREADSAFE_AUTOLOCK
-
-        name = other.name;
-        filename = other.filename;
-        type = other.type;
-
-        return *this;
-    }
-
-    String Resource::getName() const
-    {
-        return name;
-    }
-
-    void Resource::setName(const String& other)
-    {
-        APRO_THREADSAFE_AUTOLOCK
-
-        name = other;
-    }
-
-    String Resource::getFilename() const
-    {
-        return filename;
-    }
-
-    void Resource::setFilename(const String& other)
-    {
-        APRO_THREADSAFE_AUTOLOCK
-
-        filename = other;
-    }
-
-    String Resource::getType() const
-    {
-        return type;
+        return m_filename;
     }
 }

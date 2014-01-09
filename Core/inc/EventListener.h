@@ -14,10 +14,10 @@
 #ifndef APROEVENTLISTENER_H
 #define APROEVENTLISTENER_H
 
+#include "Platform.h"
+#include "AutoPointer.h"
 #include "Event.h"
-#include "List.h"
-#include "SharedPointer.h"
-#include "ParametedObject.h"
+#include "Array.h"
 
 namespace APro
 {
@@ -41,7 +41,7 @@ namespace APro
     /////////////////////////////////////////////////////////////
     class APRO_DLL EventListener
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(EventListener)
+//      APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(EventListener)
 
     protected:
 

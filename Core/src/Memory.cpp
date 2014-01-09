@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 04/09/2013
+ *  @date 21/05/2012 - 22/12/2013
  *
  *  Implements basic memory function, like malloc, realloc, free. It is usefull when the engine
  *  use the Memory Tracker.
@@ -27,7 +27,7 @@ namespace APro
         const char* what() const throw() { return "Not enough Memory accessible !"; }
     };
 
-    void* allocate(size_t byte, const char* func_, const char* file_, int line_)
+    void* allocate(size_t byte, const char* func_, const char* file_, int line_, bool is_arr)
     {
         if(byte == 0)
         {
@@ -46,8 +46,8 @@ namespace APro
                 return nullptr;
             }
 
-            Memory::Set(ptr, 0, byte);
-            MemoryManager::get().reportAllocation(ptr, byte, func_, file_, line_);
+            Memory::Set(ptr, 0, byte);// We assert that memory is clean.
+            MemoryManager::get().reportAllocation(ptr, byte, func_, file_, line_, is_arr);
             return ptr;
         }
     }

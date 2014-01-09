@@ -15,9 +15,6 @@
 #define APROLIST_H
 
 #include "Platform.h"
-#include "Allocator.h"
-#include "Array.h"
-#include <typeinfo>
 
 namespace APro
 {

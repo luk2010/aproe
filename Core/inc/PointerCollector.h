@@ -25,7 +25,7 @@ namespace APro
     /** @class PointerCollector
      *  @ingroup Memory
      *  @brief Collects pointers and tell how many use they have.
-     *  @details This class can is used by SharedPointers to push
+     *  @details This class is used by SharedPointers to push
      *  and pop shared adresses.
      *  You can create your own to collect custom pointers.
      *

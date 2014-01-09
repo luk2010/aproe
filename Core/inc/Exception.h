@@ -14,7 +14,7 @@
 #ifndef APROEXCEPTION_H
 #define APROEXCEPTION_H
 
-#include "Platform.h"
+#include "Base.h"
 
 #if APRO_EXCEPTION == APRO_ON
 

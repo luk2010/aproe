@@ -1,16 +1,16 @@
+////////////////////////////////////////////////////////////
 /** @file ResourceManager.cpp
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 27/08/2012
+ *  @date 27/08/2012 - 09/01/2014
  *
- *  @addtogroup Global
- *  @addtogroup Resource
- *
- *  This file defines the ResourceManager singleton.
+ *  Implements the ResourceManager.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "ResourceManager.h"
 #include "Console.h"
 #include "FileSystem.h"
@@ -20,271 +20,629 @@ namespace APro
     APRO_IMPLEMENT_MANUALSINGLETON(ResourceManager)
 
     ResourceManager::ResourceManager()
-        : resources(Manager<Resource>::objects), loaders(Manager<ResourceLoader>::objects), writers(Manager<ResourceWriter>::objects)
+        : m_loaders(Manager<ResourceLoader>::objects), m_writers(Manager<ResourceWriter>::objects)
     {
-
+        m_default_loaders[""] = nullptr;
+        m_default_writers[""] = nullptr;
     }
 
     ResourceManager::~ResourceManager()
     {
+        // Loaders and Writers are destroyed by the AutoPointer. We
+        // do not need to destroy them.
+        // Resource unloading is done there to be sure because some resources
+        // take much space in memory.
 
+        unloadAllResource();
     }
 
-    SharedPointer<Resource> ResourceManager::getResource(const String& name)
+    ResourcePtr& ResourceManager::getResource(const String& name)
     {
-        for(List<SharedPointer<Resource> >::Iterator i = resources.begin(); !i.isEnd(); i++)
+        if(!name.isEmpty())
         {
-            if(i.get()->getName() == name)
+            APRO_THREADSAFE_AUTOLOCK;
+
+            ResourceEntryPtr entry = nullptr;
+            List<ResourceEntry>::const_iterator e = m_resource_entries.end();
+            for(List<ResourceEntry>::iterator it = m_resource_entries.begin(); it != e; it++)
+                if((*it).getName() == name)
+                    entry = &(*it);
+
+            if(entry)
+                return entry->getResource();
+            else
             {
-                return i.get();
+                aprodebug("Can't find Resource Entry '") << name << "'.";
             }
         }
 
-        return SharedPointer<Resource>();
+        return nullptr;
     }
 
-    SharedPointer<ResourceLoader> ResourceManager::getLoader(const String & name)
+    const ResourcePtr& ResourceManager::getResource(const String& name) const
     {
-        for(List<SharedPointer<ResourceLoader> >::Iterator i = loaders.begin(); !i.isEnd(); i++)
+        if(!name.isEmpty())
         {
-            if(i.get()->name() == name)
+            APRO_THREADSAFE_AUTOLOCK;
+
+            const ResourceEntryPtr entry = nullptr;
+            List<ResourceEntry>::const_iterator e = m_resource_entries.end();
+            for(List<ResourceEntry>::const_iterator it = m_resource_entries.begin(); it != e; it++)
+                if((*it).getName() == name)
+                    entry = &(*it);
+
+            if(entry)
+                return entry->getResource();
+            else
             {
-                return i.get();
+                aprodebug("Can't find Resource Entry '") << name << "'.";
             }
         }
 
-        return SharedPointer<ResourceLoader>();
+        return nullptr;
     }
 
-    SharedPointer<ResourceWriter> ResourceManager::getWriter(const String& name)
+    ResourceEntryPtr ResourceManager::getResourceEntry(const String& name)
     {
-        for(List<SharedPointer<ResourceWriter> >::Iterator i = writers.begin(); !i.isEnd(); i++)
+        if(!name.isEmpty())
         {
-            if(i.get()->name() == name)
+            APRO_THREADSAFE_AUTOLOCK;
+
+            ResourceEntryPtr entry = nullptr;
+            List<ResourceEntry>::const_iterator e = m_resource_entries.end();
+            for(List<ResourceEntry>::iterator it = m_resource_entries.begin(); it != e; it++)
+                if((*it).getName() == name)
+                    entry = &(*it);
+
+            if(entry)
+                return entry;
+            else
             {
-                return i.get();
+                aprodebug("Can't find Resource Entry '") << name << "'.";
             }
         }
 
-        return SharedPointer<ResourceWriter>();
+        return nullptr;
     }
 
-    SharedPointer<Resource> ResourceManager::loadResource(const String& name, const String& filename)
+    const ResourceEntryPtr ResourceManager::getResourceEntry(const String& name) const
     {
-        SharedPointer<Resource> res = getResource(name);
-        if(!res.isNull())
+        if(!name.isEmpty())
         {
-            if(res->getFilename() == filename)
+            APRO_THREADSAFE_AUTOLOCK;
+
+            const ResourceEntryPtr entry = nullptr;
+            List<ResourceEntry>::const_iterator e = m_resource_entries.end();
+            for(List<ResourceEntry>::const_iterator it = m_resource_entries.begin(); it != e; it++)
+                if((*it).getName() == name)
+                    entry = &(*it);
+
+            if(entry)
+                return entry;
+            else
             {
-                return res;
+                aprodebug("Can't find Resource Entry '") << name << "'.";
+            }
+        }
+
+        return nullptr;
+    }
+
+    ResourceEntryPtr ResourceManager::createResourceEntry(const String& name)
+    {
+        if(!name.isEmpty())
+        {
+            APRO_THREADSAFE_AUTOLOCK;
+
+            ResourceEntryPtr entry = nullptr;
+            List<ResourceEntry>::const_iterator e = m_resource_entries.end();
+            for(List<ResourceEntry>::iterator it = m_resource_entries.begin(); it != e; it++)
+                if((*it).getName() == name)
+                    entry = &(*it);
+
+            if(entry)
+            {
+//              No need as we use this function also to retrieve resource or create it if it doesn't exists.
+//              aprodebug("Entry '") << name << "' already exists. Can't create it.";
+                return entry;
             }
             else
             {
-                String name_ = name;
-                name_ << "_" << filename;
-                return loadResource(name_, filename);
+                entry = AProNew(ResourceEntry, name);
+                m_resource_entries.push_back(entry);
+                return entry;
             }
         }
 
-        SharedPointer<ResourceLoader> loader;
+        return nullptr;
+    }
 
-        String ext = FileSystem::extension(filename);
-        for(List<SharedPointer<ResourceLoader> >::Iterator i(loaders.begin()); !i.isEnd(); i++)
+    ResourceEntryPtr ResourceManager::loadResource(const String& name, const String& filename)
+    {
+        if(name.isEmpty())
         {
-            if(i.get()->extensions().find(ext) >= 0 && !(i.get()->getParam(String("IsManual")).to<bool>()))
-            {
-                loader = i.get();
-                break;
-            }
-        }
-
-        if(loader.isNull())
-        {
-            String str("Can't find a correct loader for extension "); str << ext << ".";
-            Console::get().inform(str, String("ResourceManager"));
+            aprodebug("Try to load file '") << filename << "' without name.";
+            return nullptr;
         }
         else
         {
-            res = loadResourceWithLoader(name, filename, loader->name());
+            ResourceEntryPtr _entry = createResourceEntry(name);
+            loadResource(_entry, filename);
+            return _entry;
         }
-
-        return res;
     }
 
-    SharedPointer<Resource> ResourceManager::loadResourceWithLoader(const String& name, const String& filename, const String& loaderName)
+    bool ResourceManager::loadResource(ResourceEntryPtr& entry, const String& filename)
     {
-        SharedPointer<Resource> res = getResource(name);
-        if(!res.isNull())
+        if(!entry)
         {
-            if(res->getFilename() == filename)
-            {
-                return res;
-            }
-            else
-            {
-                String name_ = name;
-                name_ << "_" << filename;
-                return loadResourceWithLoader(name_, filename, loaderName);
-            }
+            aprodebug("Try to load file '") << filename << "' without entry.";
+            return false;
         }
-
-        SharedPointer<ResourceLoader> loader = getLoader(loaderName);
-        if(loader.isNull())
+        else if (filename.isEmpty())
         {
-            Console::get() << "\n[ResourceManager] Can't find loader " << loaderName << " !";
-            return SharedPointer<Resource>();
+            aprodebug("Try to load entry '") << entry->getName() << "' without file."
+            return false;
         }
         else
         {
-            Console::get() << "\n[ResourceManager] Loading resource " << filename << " with name " << name << " and loader " << loader->name() << ".";
-
-            res = loader->loadResource(filename);
-
-            String str;
-            if(!res.isNull())
+            if(!entry->getResource().isNull())
             {
-                res->setName(name);
-                str << "\n[ResourceManager] Loading resource " << res->getName() << " completed !";
-                resources.append(res);
+                aprodebug("Overwriting resource '") << entry->getName() << "'.";
+                unloadResource(entry->getName());
             }
-            else
-            {
-                str << "\n[ResourceManager] Loading resource " << name << " failed !";
-            }
-            Console::get() << str;
 
-            return res;
+            ResourceLoaderPtr loader = _findCorrectLoader(FileSystem::getExtension(filename));
+            if(!loader.isNull())
+            {
+                ResourcePtr resource = _loadResourceFrom(filename, loader);
+                entry->m_resource_data = resource;
+                return !resource.isNull();
+            }
         }
+
+        return false;
+    }
+
+    ResourceEntryPtr ResourceManager::loadResourceWithLoader(const String& name, const String& filename, const String& loaderName)
+    {
+        if(name.isEmpty())
+        {
+            aprodebug("Try to load file '") << filename << "' without name.";
+            return nullptr;
+        }
+        else
+        {
+            ResourceEntryPtr _entry = createResourceEntry(name);
+            loadResourceWithLoader(_entry, filename, loaderName);
+            return _entry;
+        }
+    }
+
+    bool ResourceManager::loadResourceWithLoader(ResourceEntryPtr& entry, const String& filename, const String& loaderName)
+    {
+        if(!entry)
+        {
+            aprodebug("Try to load file '") << filename << "' without entry.";
+            return false;
+        }
+        else if (filename.isEmpty())
+        {
+            aprodebug("Try to load entry '") << entry->getName() << "' without file."
+            return false;
+        }
+        else
+        {
+            ResourceLoaderPtr loader = getLoader(loaderName);
+            if(loader.isNull())
+            {
+                aprodebug("Can't find loader '") << loaderName << "'.";
+                return false;
+            }
+
+            if(!entry->getResource().isNull())
+            {
+                aprodebug("Overwriting resource '") << entry->getName() << "'.";
+                unloadResource(entry->getName());
+            }
+
+            if(!loader.isNull())
+            {
+                ResourcePtr resource = _loadResourceFrom(filename, loader);
+                entry->m_resource_data = resource;
+                return !resource.isNull();
+            }
+        }
+
+        return false;
     }
 
     void ResourceManager::unloadResource(const String& name)
     {
-        SharedPointer<Resource> res = getResource(name);
-        if(!res.isNull())
+        if(!name.isEmpty())
         {
-            resources.erase(resources.find(res));
-            Console::get() << "\n[ResourceManager] Unloading resource " << name << ".";
+            ResourceEntryPtr entry = getResourceEntry(name);
+
+            APRO_THREADSAFE_AUTOLOCK
+            entry->m_resource_data.nullize();
+            // Destructors should correctly be called in this
+            // instruction, so we have nothing else to do.
         }
     }
 
-    void ResourceManager::write(const String& resource, const String& writer, const String& filename)
+    String ResourceManager::printResources() const
     {
-        SharedPointer<Resource> res = getResource(resource);
-        if(res.isNull())
-        {
-            Console::get() << "\n[ResourceManager] Can't find resource " << resource << ".";
-            return;
-        }
+        String result;
+        result << "[ResourceManager] Resource's List :\n"
+               << "-----------------------------------\n";
 
-        SharedPointer<ResourceWriter> w = getWriter(writer);
-        if(w.isNull())
+        // Begin AutoLock
         {
-            Console::get() << "\n[ResourceManager] Can't find writer " << writer << ".";
-            return;
-        }
+            APRO_THREADSAFE_AUTOLOCK
 
-        w->write(res, filename);
+            List<ResourceEntry>::const_iterator e = m_resource_entries.end();
+            for(List<ResourceEntry>::iterator it = m_resource_entries.begin(); it != e; it++)
+                result << " - " << (*it).getName() << "\n";
+        }
+        // End AutoLock
+
+        result << "-----------------------------------\n";
+        return result;
     }
 
-    void ResourceManager::addLoader(const SharedPointer<ResourceLoader>& loader)
+    ResourceLoaderPtr ResourceManager::getLoader(const String& name)
+    {
+        if(!name.isEmpty())
+        {
+            APRO_THREADSAFE_AUTOLOCK
+
+            List<AutoPointer<ResourceLoader> >::const_iterator e = m_loaders.end();
+            for(List<AutoPointer<ResourceLoader> >::iterator it = m_loaders.begin(); it != e; it++)
+            {
+                if((*it)->getName() == name)
+                    return (*it);
+            }
+
+            // We reach this point only if loader is not found.
+            aprodebug("Can't find loader '") << name << "'.";
+        }
+
+        return ResourceLoaderPtr();
+    }
+
+    const ResourceLoaderPtr ResourceManager::getLoader(const String& name) const
+    {
+        if(!name.isEmpty())
+        {
+            APRO_THREADSAFE_AUTOLOCK
+
+            List<AutoPointer<ResourceLoader> >::const_iterator e = m_loaders.end();
+            for(List<AutoPointer<ResourceLoader> >::const_iterator it = m_loaders.begin(); it != e; it++)
+            {
+                if((*it)->getName() == name)
+                    return (*it);
+            }
+
+            // We reach this point only if loader is not found.
+            aprodebug("Can't find loader '") << name << "'.";
+        }
+
+        return ResourceLoaderPtr();
+    }
+
+    bool ResourceManager::addLoader(ResourceLoaderPtr& loader)
     {
         if(!loader.isNull())
         {
-            if(getLoader(loader->name()).isNull())
+            if(getLoader(loader->getName()).isNull())
             {
-                loaders.append(loader);
-                Console::get() << "\n[ResourceManager] Added Loader " << loader->name() << ".";
+                APRO_THREADSAFE_AUTOLOCK
+                m_loaders.push_back(loader);
+                return true;
+            }
+            else
+            {
+                aprodebug("Loader '") << loader->getName() << "' already in ResourceManager. Please set another name to your loader.";
             }
         }
+
+        return false;
     }
 
-    void ResourceManager::removeLoader(const SharedPointer<ResourceLoader>& loader)
+    bool ResourceManager::removeLoader(const ResourceLoaderPtr& loader)
     {
-        if(!loader.isNull())
+        if(loader.isNull())
+            return false;
+
+        APRO_THREADSAFE_AUTOLOCK
+
+        int i = m_loaders.find(loader);
+        if(i < 0)
         {
-            if(!(getLoader(loader->name()).isNull()))
-            {
-                loaders.erase(loaders.find(loader));
-                Console::get() << "\n[ResourceManager] Removed Loader " << loader->name() << ".";
-            }
+            aprodebug("Can't find loader '") << loader->getName() << "'.";
+            return false;
         }
+
+        m_loaders.erase(m_loaders.begin() + i);
+        return true;
     }
 
-    void ResourceManager::addWriter(const SharedPointer<ResourceWriter>& writer)
+    bool ResourceManager::removeLoader(const String& loader_name)
+    {
+        if(!loader_name.isEmpty())
+        {
+            int index = _getLoaderIndex(loader_name);
+            if(index >= 0)
+            {
+                APRO_THREADSAFE_AUTOLOCK
+                m_loaders.erase(m_loaders.begin() + index);
+                return true;
+            }
+            else
+            {
+                aprodebug("Can't find loader '") << loader_name << "'.";
+            }
+        }
+
+        return false;
+    }
+
+    String ResourceManager::printLoaders() const
+    {
+        String result;
+        result << "[ResourceManager] ResourceLoader's List :\n"
+               << "-----------------------------------------\n";
+
+        // Begin AutoLock
+        {
+            APRO_THREADSAFE_AUTOLOCK
+
+            List<AutoPointer<ResourceLoader> >::const_iterator e = m_loaders.end();
+            for(List<AutoPointer<ResourceLoader> >::iterator it = m_loaders.begin(); it != e; it++)
+                result << " - " << (*it).getName() << "\n";
+        }
+        // End AutoLock
+
+        result << "-----------------------------------\n";
+        return result;
+    }
+
+    void ResourceManager::setDefaultLoader(const String& ext, const String& loader)
+    {
+        if(Platform::IsDebugMode())
+        {
+            if(getLoader(loader).isNull())
+                return;
+        }
+
+        APRO_THREADSAFE_AUTOLOCK
+        m_default_loaders[ext] = loader;
+    }
+
+    ResourceLoaderPtr ResourceManager::getDefaultLoader(const String& ext) const
+    {
+        APRO_THREADSAFE_AUTOLOCK
+        if(m_default_loaders.keyExists(ext))
+            return m_default_loaders[ext];
+        else
+            return ResourceLoaderPtr();
+    }
+
+    ResourceWriterPtr ResourceManager::getWriter(const String& name)
+    {
+        if(!name.isEmpty())
+        {
+            APRO_THREADSAFE_AUTOLOCK
+
+            List<AutoPointer<ResourceWriter> >::const_iterator e = m_writers.end();
+            for(List<AutoPointer<ResourceWriter> >::iterator it = m_writers.begin(); it != e; it++)
+            {
+                if((*it)->getName() == name)
+                    return (*it);
+            }
+
+            // We reach this point only if writer is not found.
+            aprodebug("Can't find writer '") << name << "'.";
+        }
+
+        return ResourceWriterPtr();
+    }
+
+    const ResourceWriterPtr ResourceManager::getWriter(const String& name) const
+    {
+        if(!name.isEmpty())
+        {
+            APRO_THREADSAFE_AUTOLOCK
+
+            List<AutoPointer<ResourceWriter> >::const_iterator e = m_writers.end();
+            for(List<AutoPointer<ResourceWriter> >::const_iterator it = m_writers.begin(); it != e; it++)
+            {
+                if((*it)->getName() == name)
+                    return (*it);
+            }
+
+            // We reach this point only if writer is not found.
+            aprodebug("Can't find writer '") << name << "'.";
+        }
+
+        return ResourceWriterPtr();
+    }
+
+    bool ResourceManager::addWriter(ResourceWriterPtr& writer)
     {
         if(!writer.isNull())
         {
-            if(getWriter(writer->name()).isNull())
+            if(getWriter(writer->getName()).isNull())
             {
-                writers.append(writer);
-                Console::get() << "\n[ResourceManager] Added Writer " << writer->name() << ".";
+                APRO_THREADSAFE_AUTOLOCK
+                m_writers.push_back(writer);
+                return true;
+            }
+            else
+            {
+                aprodebug("Writer '") << writer->getName() << "' already in ResourceManager. Please set another name to your writer.";
             }
         }
+
+        return false;
     }
 
-    void ResourceManager::removeWriter(const SharedPointer<ResourceWriter>& writer)
+    bool ResourceManager::removeWriter(const ResourceLoaderPtr& writer)
     {
-        if(!writer.isNull())
+        if(writer.isNull())
+            return false;
+
+        APRO_THREADSAFE_AUTOLOCK
+
+        int i = m_writers.find(writer);
+        if(i < 0)
         {
-            if(!(getWriter(writer->name()).isNull()))
+            aprodebug("Can't find writer '") << writer->getName() << "'.";
+            return false;
+        }
+
+        m_writers.erase(m_writers.begin() + i);
+        return true;
+    }
+
+    bool ResourceManager::removeWriter(const String& writer_name)
+    {
+        if(!writer_name.isEmpty())
+        {
+            int index = _getWriterIndex(writer_name);
+            if(index >= 0)
             {
-                writers.erase(writers.find(writer));
-                Console::get() << "\n[ResourceManager] Removed Writer " << writer->name() << ".";
+                APRO_THREADSAFE_AUTOLOCK
+                m_writers.erase(m_writers.begin() + index);
+                return true;
+            }
+            else
+            {
+                aprodebug("Can't find writer '") << writer_name << "'.";
             }
         }
+
+        return false;
     }
 
-    String ResourceManager::listLoaders() const
+    String ResourceManager::printWriters() const
     {
         String result;
+        result << "[ResourceManager] ResourceWriter's List :\n"
+               << "-----------------------------------------\n";
 
-        result << "Loaders's list : " << "\n" << "----------";
-        result << "\nNumber of loaders : " << String::toString((int) loaders.size()) << ".";
-        for(List<SharedPointer<ResourceLoader> >::Iterator i = loaders.begin(); !i.isEnd(); i++)
+        // Begin AutoLock
         {
-            result << "\n  + " << i.get()->name() << " : " << i.get()->description();
-        }
+            APRO_THREADSAFE_AUTOLOCK
 
+            List<AutoPointer<ResourceWriter> >::const_iterator e = m_writers.end();
+            for(List<AutoPointer<ResourceWriter> >::iterator it = m_writers.begin(); it != e; it++)
+                result << " - " << (*it).getName() << "\n";
+        }
+        // End AutoLock
+
+        result << "-----------------------------------\n";
         return result;
     }
 
-    String ResourceManager::listWriters() const
+    bool ResourceManager::writeResource(const String& resource_name, const String& writer_name, const String& filename)
     {
-        String result;
-
-        result << "Writer's list : " << "\n" << "----------";
-        result << "\nNumber of Writers : " << String::toString((int) writers.size()) << ".";
-        for(List<SharedPointer<ResourceWriter> >::Iterator i = writers.begin(); !i.isEnd(); i++)
+        if(!resource_name.isEmpty())
         {
-            result << "\n  + " << i.get()->name() << " : " << i.get()->description();
-        }
+            ResourceEntryPtr res = getResourceEntry(resource_name);
+            if(!res || res->getResource().isNull())
+            {
+                aprodebug("Can't write empty resource '") << resource_name << "'.";
+                return false;
+            }
 
-        return result;
+            ResourceWriterPtr writer = getWriter(writer_name);
+            if(writer.isNull())
+            {
+                aprodebug("Can't write with writer '") << writer_name << "'.";
+                return false;
+            }
+
+            return writer->write(res->getResource(), filename);
+        }
     }
 
-    String ResourceManager::listResources() const
+    void ResourceManager::setDefaultWriter(const String& ext, const String& writer)
     {
-        String result;
-
-        result << "Resources's list : " << "\n" << "----------";
-        result << "\nNumber of resources : " << String::toString((int) resources.size()) << ".";
-        for(List<SharedPointer<Resource> >::Iterator i(resources.begin()); !i.isEnd(); i++)
+        if(Platform::IsDebugMode())
         {
-            result << "\n  + " << i.get()->getName() << " : " << String::toString((int) i.get().getUses()) << " uses.";
+            if(getWriter(writer).isNull())
+                return;
         }
 
-        return result;
+        APRO_THREADSAFE_AUTOLOCK
+        m_default_writers[ext] = writer;
     }
 
-    void ResourceManager::clear()
+    ResourceWriterPtr ResourceManager::getDefaultWriter(const String& ext) const
     {
-        for(List<SharedPointer<Resource> > ::Iterator i(resources.begin()); !i.isEnd(); i++)
+        APRO_THREADSAFE_AUTOLOCK
+        if(m_default_writers.keyExists(ext))
+            return m_default_writers[ext];
+        else
+            return ResourceWriterPtr();
+    }
+
+    ResourceLoaderPtr ResourceManager::_findCorrectLoader(const String& extension)
+    {
+        if(!extension.isEmpty())
         {
-            i.get()->destroy();
+            // First we look for default loader
+            ResourceLoaderPtr __loader = getDefaultLoader(extension);
+            if(!__loader.isNull())
+                return __loader;
+
+            // If null, we return a null loader.
         }
 
-        resources.clear();
-        loaders.clear();
-        writers.clear();
+        return ResourceLoaderPtr();
     }
+
+    int ResourceManager::_getLoaderIndex(const String& name) const
+    {
+        if(!name.isEmpty())
+        {
+            APRO_THREADSAFE_AUTOLOCK
+
+            int i = 0;
+            List<AutoPointer<ResourceLoader> >::const_iterator e = m_loaders.end();
+            for(List<AutoPointer<ResourceLoader> >::const_iterator it = m_loaders.begin(); it != e; it++, ++i)
+            {
+                if((*it)->getName() == name)
+                    return i;
+            }
+
+            // We reach this point only if loader is not found.
+//          aprodebug("Can't find loader '") << name << "'.";
+        }
+
+        return -1;
+    }
+
+    int ResourceManager::_getWriterIndex(const String& name) const
+    {
+        if(!name.isEmpty())
+        {
+            APRO_THREADSAFE_AUTOLOCK
+
+            int i = 0;
+            List<AutoPointer<ResourceWriter> >::const_iterator e = m_writers.end();
+            for(List<AutoPointer<ResourceWriter> >::const_iterator it = m_writers.begin(); it != e; it++, ++i)
+            {
+                if((*it)->getName() == name)
+                    return i;
+            }
+
+            // We reach this point only if writer is not found.
+//          aprodebug("Can't find writer '") << name << "'.";
+        }
+
+        return -1;
+    }
+
 }

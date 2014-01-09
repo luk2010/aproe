@@ -1,16 +1,16 @@
+////////////////////////////////////////////////////////////
 /** @file ResourceLoader.h
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/08/2012
+ *  @date 25/08/2012 - 29/12/2013
  *
- *  @addtogroup Global
- *  @addtogroup Resource
- *
- *  This file defines the ResourceLoader class.
+ *  Defines the ResourceLoader class.
  *
 **/
+////////////////////////////////////////////////////////////
 #ifndef APRORESOURCELOADER_H
 #define APRORESOURCELOADER_H
 
@@ -23,24 +23,81 @@
 
 namespace APro
 {
+    ////////////////////////////////////////////////////////////
+    /** @class ResourceLoader
+     *  @ingroup Core
+     *  @brief A Resource Loader.
+     *
+     *  A ResourceLoader directly creates a resource from a file
+     *  and returns it to the ResourceManager. This Resource will
+     *  be destroyed by the resourceManager.
+     *
+     *  The ResourceLoader can be parameted with customs arguments,
+     *  through the ParametedObject interface.
+     *
+     *  @note Default loaders for given extensions are managed by
+     *  the ResourceManager.
+    **/
+    ////////////////////////////////////////////////////////////
     class APRO_DLL ResourceLoader : public ParametedObject
     {
         APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(ResourceLoader)
 
+    protected:
+
+        String name;
+        String description;
+
     public:
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Constructs the ResourceLoader.
+        **/
+        ////////////////////////////////////////////////////////////
         ResourceLoader();
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Constructs the ResourceLoader.
+        **/
+        ////////////////////////////////////////////////////////////
+        ResourceLoader(const String& name, const String& description);
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Constructs the ResourceLoader by copy.
+         *  @note This function is given for convenience only as Loaders
+         *  are manipulated with Pointers.
+        **/
+        ////////////////////////////////////////////////////////////
         ResourceLoader(const ResourceLoader& other);
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Destructs the ResourceLoader.
+        **/
+        ////////////////////////////////////////////////////////////
         virtual ~ResourceLoader();
 
-        virtual SharedPointer<Resource> loadResource(const String& filename) = 0;
+        ////////////////////////////////////////////////////////////
+        /** @brief Load a resource.
+         *  @note Create the Resource object and returns it. If an error
+         *  occurs, nullptr is returned.
+        **/
+        ////////////////////////////////////////////////////////////
+        virtual ResourcePtr loadResource(const String& filename) = 0;
 
-        String                  name() const;
-        String                  description() const;
-        const List<String>&     extensions() const;
-        bool                    isManual() const;
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns the name of this Loader.
+        **/
+        ////////////////////////////////////////////////////////////
+        const String& getName() const;
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns the description of this Loader.
+        **/
+        ////////////////////////////////////////////////////////////
+        const String& getDescription() const;
     };
+
+    typedef AutoPointer<ResourceLoader> ResourceLoaderPtr;
 }
 
 #endif

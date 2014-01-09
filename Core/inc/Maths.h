@@ -15,6 +15,7 @@
 #define APROMATHS_H
 
 #include "Platform.h"
+#include "Swappable.h"
 
 namespace APro
 {
@@ -474,6 +475,54 @@ namespace APro
             num1 ^= num2;
             num2 ^= num1;
             num1 ^= num2;
+        }
+    }
+
+    /// @ingroup Utils
+    /// @brief Some algorithms functions, specialized for some
+    /// customs types.
+    namespace Algo
+    {
+        ////////////////////////////////////////////////////////////
+        /** @brief Swap two objects.
+         *  @note This is a generic function wich use a copy
+         *  constructor. If object doesn't have it, it won't work.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<class T>
+        void swap(T& a, T& b)
+        {
+            T tmp(a);
+            a = b;
+            b = tmp;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Swap two objects.
+         *  @note This is a specialization for Swappable objects.
+        **/
+        ////////////////////////////////////////////////////////////
+        template<template <typename Class> class S>
+        void swap(S<Class>& a, S<Class>& b)
+        {
+            a.swap(b);
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Exchanges the values of each of the elements in the
+         *  range [first1,last1) with those of their respective elements
+         *  in the range beginning at first2.
+        **/
+        ////////////////////////////////////////////////////////////
+        // From http://www.cplusplus.com/reference/algorithm/swap_ranges/
+        template<class ForwardIterator1, class ForwardIterator2>
+        ForwardIterator2 swap_ranges (ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2)
+        {
+            while (first1!=last1) {
+                swap (*first1, *first2);
+            ++first1; ++first2;
+            }
+            return first2;
         }
     }
 

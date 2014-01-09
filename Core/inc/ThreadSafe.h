@@ -16,6 +16,7 @@
 
 #include "Platform.h"
 #include "ThreadMutex.h"
+#include "ThreadMutexLockGuard.h"
 
 namespace APro
 {

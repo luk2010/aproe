@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 04/09/2013
+ *  @date 21/05/2012 - 22/12/2013
  *
  *  Redefines basic memory function, like malloc, realloc, free. It is usefull when the engine
  *  use the Memory Tracker.
@@ -55,6 +55,10 @@ namespace APro
      *  @param func_ : function where the allocate was called.
      *  @param file_ : file where the function was called.
      *  @param line_ : line where the function was called.
+     *  @param is_arr : True if call is to allocate an array, false
+     *  otherweise. This argue may be used with the AProNewA
+     *  function as it informs the MemoryManager that the block
+     *  will be an array.
      *
      *  @return A pointer to allocated bytes.
      *
@@ -64,7 +68,7 @@ namespace APro
      *  zero.
     **/
     ////////////////////////////////////////////////////////////
-    APRO_DLL void* allocate(size_t byte, const char* func_, const char* file_, int line_);
+    APRO_DLL void* allocate(size_t byte, const char* func_, const char* file_, int line_, bool is_arr = false);
 
     ////////////////////////////////////////////////////////////
     /** @brief Reallocate bytes using an old pointer.
@@ -148,16 +152,20 @@ namespace APro
  *  @param func_ : Function calling this one.
  *  @param file_ : File where the function is.
  *  @param line_ : Line of call.
+ *  @param is_arr : True if call is an allocation of array,
+ *  false otherweise. We could use the n argue but we so are
+ *  sure for 1-sized array (you could allocate an array of
+ *  size 1, unnecessary but could be a problem).
  *
  *  @return A pointer to newly created object, but not
  *  constructed.
 **/
 ////////////////////////////////////////////////////////////
-template <typename T> T* AProNew (size_t n, const char* func_, const char* file_, int line_)
+template <typename T> T* AProNew (size_t n, const char* func_, const char* file_, int line_, bool is_arr = false)
 {
     // Allocation of memory.
     size_t sz = n * sizeof(T);
-    return (T*) APro::allocate(sz, func_, file_, line_);
+    return (T*) APro::allocate(sz, func_, file_, line_, is_arr);
 }
 
 ////////////////////////////////////////////////////////////
@@ -200,9 +208,11 @@ template <typename T> void AProDelete(T* ptr, const char* func_, const char* fil
 
         // Looking for Block.
         const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((ptr_t) ptr);
-        if(mblock && mblock->size >= sz_t * 2)
+        if(mblock && mblock->is_array)
         {
             // If block is valid and it is an array (# of objects superior or equal to 2), we determine how many objects there are in.
+            // Each blocks should have been initialized. As this function is called with AProNewA, this is what is done with placement.
+            // This is necessary as every allocation using AProNew uses placement new.
             size_t n = (size_t) mblock->size / sz_t;
             while(n)
                 ptr[--n].~T();// Destroy each one in descending order to preserv cannonical destruction order of C++.
@@ -241,7 +251,7 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
 /// @param T : Type of objects.
 /// @param N : Size of array (in number of elements).
 /// @see AProNew, AProDelete
-#define AProNewA(T, N, ...) new (AProNew<T>(N, __FUNCTION__, __FILE__, __LINE__)) T[N] ( ## __VA_ARGS__)
+#define AProNewA(T, N, ...) new (AProNew<T>(N, __FUNCTION__, __FILE__, __LINE__, true)) T[N] ( ## __VA_ARGS__)
 
 /// Destroys an array of objects and call destructor if possible.
 /// @ingroup Memory

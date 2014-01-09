@@ -1,12 +1,10 @@
 /** @file Platform.h
+ *  @ingroup Global
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 29/05/2012
- *
- *  @addtogroup Global
- *  @addtogroup Memory
+ *  @date 21/05/2012 - 31/12/2013
  *
  *  This file defines some constants to be used on different platform. This constants are Memory-specific.
  *
@@ -43,6 +41,12 @@ public:
         Apple       = APRO_OSX
     };
 
+    ////////////////////////////////////////////////////////////
+    /** @brief Return the current builded platform.
+     *  @note This might be different to the current running
+     *  platform.
+    **/
+    ////////////////////////////////////////////////////////////
     static const int get()
     {
 #if APRO_PLATFORM == APRO_WINDOWS
@@ -57,6 +61,10 @@ public:
        return Unknown;
     }
 
+    ////////////////////////////////////////////////////////////
+    /** @brief Converts a platform identifier to a plain string.
+    **/
+    ////////////////////////////////////////////////////////////
     static const char* toString(const int& platform)
     {
         if(platform == Unknown) return "Unknown";
@@ -66,6 +74,22 @@ public:
         if(platform == Apple) return "Apple";
         return "Bad platform id !";
     }
+
+    ////////////////////////////////////////////////////////////
+    /** @brief Tells if build is in debug mode.
+    **/
+    ////////////////////////////////////////////////////////////
+    static bool IsDebugMode()
+    {
+#if APRO_DEBUG == APRO_ON
+        return true;
+#else
+        return false;
+#endif // APRO_DEBUG
+    }
 };
+
+// We include the basic memory system.
+#include "Memory.h"
 
 #endif

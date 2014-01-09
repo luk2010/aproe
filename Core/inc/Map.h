@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 19/11/2013
+ *  @date 19/11/2013 - 31/12/2013
  *
  *  Defines the Map class.
  *
@@ -15,8 +15,6 @@
 #define APROMAP_H
 
 #include "Platform.h"
-#include "List.h"
-#include "Console.h"
 
 namespace APro
 {
@@ -681,6 +679,15 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         size_t size() const { return m_sz; }
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Tell if a node exists.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool keyExists(const key_t& k) const
+        {
+            return lookup_node(k) != nullptr;
+        }
 
     };
 }

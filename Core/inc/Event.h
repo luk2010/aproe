@@ -15,7 +15,6 @@
 #define AROEVENT_H
 
 #include <Platform.h>
-#include <ParametedObject.h>
 #include <SString.h>
 #include <AutoPointer.h>
 
@@ -130,7 +129,7 @@ namespace APro
     /////////////////////////////////////////////////////////////
     class APRO_DLL Event : public NonCopyable
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Event)
+//        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Event)
 
     public:
 

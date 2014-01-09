@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012
+ *  @date 21/05/2012 - 22/12/2013
  *
  *  Defines the Memory Tracker.
  *
@@ -44,6 +44,7 @@ namespace APro
             std::string file;
             int         line;
             size_t      size;
+            bool        is_array;
 
         } MemoryBlock;
 
@@ -154,7 +155,7 @@ namespace APro
         /** @brief Report an allocation to the Memory Manager.
         **/
         ////////////////////////////////////////////////////////////
-        void reportAllocation(void* ptr, size_t byte, const char* func, const char* file, int line);
+        void reportAllocation(void* ptr, size_t byte, const char* func, const char* file, int line, bool is_arr = false);
 
         ////////////////////////////////////////////////////////////
         /** @brief Report a reallocation to the Memory Manager.
@@ -188,7 +189,8 @@ namespace APro
 
 #else
 
-        const void* getLastOperation() { return nullptr; }
+        typedef void Operation;
+        const Operation* getLastOperation() { return nullptr; }
 
 #endif // APRO_MEMORYTRACKER
 

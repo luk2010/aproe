@@ -1,14 +1,16 @@
+////////////////////////////////////////////////////////////
 /** @file MemoryTracker.cpp
  *  @ingroup Memory
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 22/05/2012
+ *  @date 22/05/2012 - 22/12/2013
  *
  *  Implements the Memory Tracker.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "MemoryTracker.h"
 #include "Console.h"
 #include "ThreadMutex.h"
@@ -82,7 +84,7 @@ namespace APro
         unlock_global_mutex();
     }
 
-    void MemoryManager::reportAllocation(void* ptr, size_t byte, const char* func, const char* file, int line)
+    void MemoryManager::reportAllocation(void* ptr, size_t byte, const char* func, const char* file, int line, bool is_arr)
     {
         if(ptr && byte)
         {
@@ -97,6 +99,7 @@ namespace APro
                 block.line = line;
                 block.file = file;
                 block.size = byte;
+                block.is_array = is_arr;
                 blocks[ptr] = block;
 
 #if APRO_MEMORYTRACKER == APRO_ON
@@ -160,6 +163,7 @@ namespace APro
                 block.line = line;
                 block.file = file;
                 block.size = byte;
+                block.is_array = false;
                 blocks[new_ptr] = block;
 
 #if APRO_MEMORYTRACKER == APRO_ON
@@ -183,6 +187,7 @@ namespace APro
                 block.line = line;
                 block.file = file;
                 block.size = byte;
+                block.is_array = false;
                 blocks[new_ptr] = block;
 
 #if APRO_MEMORYTRACKER == APRO_ON
@@ -228,6 +233,7 @@ namespace APro
                 deblock.func = func;
                 deblock.line = line;
                 deblock.size = oldblock.size;
+                deblock.is_array = oldblock.is_array;
 
                 // On cree une nouvelle operation
                 DeallocationOperation* ope = new DeallocationOperation;

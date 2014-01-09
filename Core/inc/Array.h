@@ -15,7 +15,6 @@
 #define APROARRAY_H
 
 #include "Platform.h"
-#include "Memory.h"
 
 namespace APro
 {

@@ -409,7 +409,7 @@ namespace APro
     bool String::operator==(const String & other) const
     {
 
-        return other.mstr == mstr;
+        return hash() == other.hash();
     }
 
     bool String::operator!=(const String & other) const
@@ -617,7 +617,7 @@ namespace APro
     HashType String::Hash(const char* str)
     {
         // From : http://stackoverflow.com/questions/8094790/how-to-get-hash-code-of-a-string-in-c
-        // Modified to fit in this contet.
+        // Modified to fit in this context.
         HashType h = 0;
         for(char* i = str; i != nullptr && (*i) != '\0'; i++)
         {
