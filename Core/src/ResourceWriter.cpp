@@ -1,32 +1,38 @@
+////////////////////////////////////////////////////////////
 /** @file ResourceWriter.cpp
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 01/09/2012
+ *  @date 01/09/2012 - 03/02/2014
  *
- *  @addtogroup Global
- *  @addtogroup Resource
- *
- *  This file defines the ResourceWriter class.
+ *  Defines the ResourceWriter class.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "ResourceWriter.h"
 
 namespace APro
 {
     ResourceWriter::ResourceWriter()
-        : ParametedObject()
+        : name(""), description("")
     {
-        setParam(String("Name"), Variant(String("ResourceWriter")), String("Name of the writer."));
-        setParam(String("Description"), Variant(String("A Basic ResourceWriter.")), String("Description or Usage of the writer."));
-        setParam(String("DefaultFile"), Variant(String("")), String("Default file to write resource."));
+
+    }
+
+    ResourceWriter::ResourceWriter(const String& n, const String& desc)
+        : name(n), description(desc)
+    {
+
     }
 
     ResourceWriter::ResourceWriter(const ResourceWriter& other)
-        : ParametedObject(other)
+        : name(""), description("")
     {
-
+        name = other.getName();
+        description = other.getDescription();
+        compatible_hash = other.compatible_hash;
     }
 
     ResourceWriter::~ResourceWriter()
@@ -34,24 +40,19 @@ namespace APro
 
     }
 
-    String ResourceWriter::name() const
+    bool ResourceWriter::isCompatible(const ResourcePtr& resource) const
     {
-        return getParam(String("Name")).to<String>();
+        HashType h = resource->getHash();
+        return compatible_hash.contains(h);
     }
 
-    String ResourceWriter::description() const
+    const String& ResourceWriter::getName() const
     {
-        return getParam(String("Description")).to<String>();
+        return name;
     }
 
-    ResourceWriter& ResourceWriter::operator<<(const SharedPointer<Resource> & resource)
+    const String& ResourceWriter::getDescription() const
     {
-        ResourceWriter::write(resource, getParam(String("DefaultFile")).to<String>());
-        return *this;
-    }
-
-    void ResourceWriter::write(const SharedPointer<Resource> & /* resource */, const String& /* filename */) const
-    {
-
+        return description;
     }
 }

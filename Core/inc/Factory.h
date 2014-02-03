@@ -40,6 +40,9 @@ namespace APro
      *  @note The Factory Design Pattern is even more usefull if it is
      *  more efficient to copy this object than to initialise it.
      *  @note A Factory is always thread-safe.
+     *  @note We advice you to use standard function className() to
+     *  set a new key registering a prototype, so everybody will
+     *  guess which name you use.
      *
      *  @warning The prototype has to be destroyed by the creator.
     **/

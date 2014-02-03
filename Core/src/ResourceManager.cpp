@@ -557,7 +557,7 @@ namespace APro
             }
 
             ResourceWriterPtr writer = getWriter(writer_name);
-            if(writer.isNull())
+            if(writer.isNull() || !writer->isCompatible(res->getResource()))
             {
                 aprodebug("Can't write with writer '") << writer_name << "'.";
                 return false;

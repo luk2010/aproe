@@ -18,6 +18,11 @@
 
 namespace APro
 {
+
+    /* DEPRECATED
+     ************
+     Use of standard Number should use the Real type.
+
     class Number : public Variant
     {
     protected:
@@ -190,6 +195,7 @@ namespace APro
             return to<float>();
         }
     };
+    */
 }
 
 #endif // APRO_NUMBER_H

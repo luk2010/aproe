@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 29/05/2012
+ *  @date 29/05/2012 - 03/02/2014
  *
  *  Defines the Array class.
  *
@@ -710,6 +710,15 @@ namespace APro
                     it++;
 
             return it_e;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if array contains given object.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool contains(const T& obj) const
+        {
+            return find(obj) != end();
         }
 
     };
