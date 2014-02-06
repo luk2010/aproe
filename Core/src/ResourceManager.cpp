@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 27/08/2012 - 09/01/2014
+ *  @date 27/08/2012 - 04/02/2014
  *
  *  Implements the ResourceManager.
  *
@@ -267,6 +267,18 @@ namespace APro
             entry->m_resource_data.nullize();
             // Destructors should correctly be called in this
             // instruction, so we have nothing else to do.
+        }
+    }
+
+    void ResourceManager::unloadAllResource()
+    {
+        APRO_THREADSAFE_AUTOLOCK
+
+        ResourceEntryPtr entry = &(m_resource_entries.at(0));
+        while(m_resource_entries.size() > 0)
+        {
+            entry->m_resource_data.nullize();
+            entry = &(m_resource_entries.at(0));
         }
     }
 

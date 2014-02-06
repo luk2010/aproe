@@ -1,90 +1,117 @@
+/////////////////////////////////////////////////////////////
 /** @file DynamicLibrary.cpp
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/09/2012
+ *  @date 18/09/2012 - 04/02/2014
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the DynamicLibrary class.
+ *  Implements the DynamicLibrary class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #include "DynamicLibrary.h"
 #include "Console.h"
 
 namespace APro
 {
     DynamicLibrary::DynamicLibrary()
-        : Resource(), loaded(false), handle(nullptr)
+        : Resource()
     {
-        type = String("DynamicLibrary");
+        loaded.set(false);
+        handle = nullptr;
     }
 
-    DynamicLibrary::DynamicLibrary(const String& mname, const String& mfilename)
-        : Resource(mname, mfilename), loaded(false), handle(nullptr)
+    DynamicLibrary::DynamicLibrary(const String& mfilename)
+        : Resource(mfilename)
     {
-        type = String("DynamicLibrary");
+        loaded.set(false);
+        handle = nullptr;
         load();
     }
 
     DynamicLibrary::~DynamicLibrary()
     {
-
-    }
-
-    void DynamicLibrary::destroy()
-    {
         unload();
     }
 
-    void* DynamicLibrary::getSymbol(const String& sym) const
+    void* DynamicLibrary::getSymbol(const char* sym) const
     {
-        if(loaded)
+        if(isLoaded())
         {
-            return (void*) DYNLIB_GETSYM(handle, sym.toCstChar());
+            return (void*) DYNLIB_GETSYM(handle, sym);
         }
 
         return nullptr;
     }
 
-    void DynamicLibrary::load()
+    bool DynamicLibrary::load()
     {
-        if(!loaded)
+        if(isLoaded())
+            return true;
+
+        APRO_THREADSAFE_AUTOLOCK
+
+        handle = DYNLIB_LOAD(getFilename().toCstChar());
+        if(!handle)
         {
-            handle = DYNLIB_LOAD(getFilename().toCstChar());
-            if(!handle)
-            {
-                Console::get() << "\n[DynamicLibrary] Couldn't load DynLib " << getFilename() << " : " << dlerror() << ".";
-                loaded = false;
-            }
-            else
-            {
-                Console::get() << "\n[DynamicLibrary] DynLib " << getFilename() << " loaded successfuly.";
-                loaded = true;
-            }
+            Console::get() << "\n[DynamicLibrary] Couldn't load DynLib " << getFilename() << " : " << DYNLIB_LASTERROR() << ".";
+            loaded.set(false);
+            return false;
+        }
+        else
+        {
+            sendEvent(createEvent(DynamicLibraryLoadedEvent::Hash));
+            Console::get() << "\n[DynamicLibrary] DynLib " << getFilename() << " loaded successfuly.";
+            loaded.set(true);
+            return true;
         }
     }
 
-    void DynamicLibrary::unload()
+    bool DynamicLibrary::unload()
     {
-        if(loaded && handle)
+        if(!isLoaded())
+            return true;
+
+        APRO_THREADSAFE_AUTOLOCK
+
+        sendEvent(createEvent(DynamicLibraryUnloadedEvent::Hash));
+        if(!DYNLIB_UNLOAD(handle))
         {
-            if(! DYNLIB_UNLOAD(handle))
-            {
-                Console::get() << "\n[DynamicLibrary] Couldn't release DynLib " << getFilename() << ".";
-            }
-            else
-            {
-                Console::get() << "\n[DynamicLibrary] DynLib " << getFilename() << " unloaded successfuly.";
-                loaded = false;
-            }
+            Console::get() << "\n[DynamicLibrary] Couldn't release DynLib " << getFilename() << " : " << DYNLIB_LASTERROR() << ".";
+            loaded.set(false);
+            return false;
+        }
+        else
+        {
+            Console::get() << "\n[DynamicLibrary] DynLib " << getFilename() << " unloaded successfuly.";
+            loaded.set(false);
+            return true;
         }
     }
 
     bool DynamicLibrary::isLoaded() const
     {
-        return loaded;
+        return loaded.get();
+    }
+
+    EventPtr DynamicLibrary::createEvent(const HashType& e_type) const
+    {
+        switch (e_type)
+        {
+        case DynamicLibraryLoadedEvent::Hash:
+            EventPtr ret = (Event*) AProNew(DynamicLibraryLoadedEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        case DynamicLibraryUnloadedEvent::Hash:
+            EventPtr ret = (Event*) AProNew(DynamicLibraryUnloadedEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        default:
+            return EventEmitter::createEvent(e_type);
+        }
     }
 }

@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 01/12/2013
+ *  @date 01/12/2013 - 04/02/2014
  *
  *  Defines the Atomic class.
  *
@@ -26,7 +26,7 @@ namespace APro
      *
      *  An atomic object is an object that can automaticly used in
      *  threaded applications. It holds base type objects, and can
-     *  be use normally without taking care of mutexes locks.
+     *  be used normally without taking care of mutexes locks.
     **/
     ////////////////////////////////////////////////////////////
     template<typename T>
@@ -35,7 +35,7 @@ namespace APro
     protected:
 
         mutable ThreadMutex mutex;///< Mutex holding the value.
-        T                   value;///< Value of our atomic.
+        volatile T          value;///< Value of our atomic.
 
     public:
 
@@ -83,17 +83,7 @@ namespace APro
         /** @brief Returns the value of this atomic.
         **/
         ////////////////////////////////////////////////////////////
-        T& get()
-        {
-            THREADMUTEXAUTOLOCK(mutex);
-            return value;
-        }
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Returns the value of this atomic.
-        **/
-        ////////////////////////////////////////////////////////////
-        const T& get() const
+        T get() const
         {
             THREADMUTEXAUTOLOCK(mutex);
             return value;
@@ -145,12 +135,7 @@ namespace APro
             return equals(v);
         }
 
-        T& operator T()
-        {
-            return get();
-        }
-
-        const T& operator T() const
+        T operator T() const
         {
             return get();
         }

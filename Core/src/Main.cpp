@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012
+ *  @date 20/09/2012 - 06/02/2014
  *
  *  Implements the Main class.
  *
@@ -182,8 +182,11 @@ namespace APro
         resourceManager = AProNew(ResourceManager);
         if(resourceManager)
         {
-            // Add default loader here.
+            // Default loader for libraries.
             resourceManager->addLoader(ResourceLoaderPtr(AProNew(DynamicLibraryLoader)));
+            resourceManager->setDefaultLoader(DYNLIB_EXTENSION, "DynamicLibraryLoader");
+
+            // Exemple Null Loader.
             resourceManager->addLoader(ResourceLoaderPtr(AProNew(NullLoader)));
 
             ResourceManager::__curent_ResourceManager = resourceManager;

@@ -53,14 +53,17 @@ project("core")
 	configuration "linux"
 		defines {"LINUX"}
 		defines {"_HAVE_POSIX_"}
+		links {"dl"}
 
 	configuration "PS3"
 		defines {"_PS3_"}
 		defines {"_HAVE_POSIX_"}
+		links {"dl"}
 
 	configuration "macosx"
 		defines {"_MACOSX_"}
 		defines {"_HAVE_POSIX_"}
+		links {"dl"}
 
 	configuration "with-exceptions"
 		defines {"_HAVE_EXCEPTIONS_"}

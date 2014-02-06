@@ -1,39 +1,24 @@
+/////////////////////////////////////////////////////////////
 /** @file DynamicLibraryLoader.cpp
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/09/2012
+ *  @date 18/09/2012 - 06/02/2014
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the DynamicLibraryLoader class.
+ *  Implements the DynamicLibraryLoader class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #include "DynamicLibraryLoader.h"
-#include "List.h"
 
 namespace APro
 {
-    DynamicLibraryLoader::DynamicLibraryLoader() : ResourceLoader()
+    DynamicLibraryLoader::DynamicLibraryLoader()
+    : ResourceLoader("DynamicLibraryLoader", "Loads Dynamic Library Object")
     {
-        setParam(String("Name"), Variant(String("DynamicLibraryLoader")));
-        setParam(String("Description"), Variant(String("Does nothing itself, create the DynamicLibrary resource object.")));
-        setParam(String("IsManual"), Variant(false));
 
-        List<String> exts; exts << String(DYNLIB_EXTENSION);
-        setParam(String("Extensions"), Variant(exts));
-    }
-
-    DynamicLibraryLoader::DynamicLibraryLoader(const DynamicLibraryLoader& other) : ResourceLoader(other)
-    {
-        setParam(String("Name"), Variant(String("DynamicLibraryLoader")));
-        setParam(String("Description"), Variant(String("Does nothing itself, create the DynamicLibrary resource object.")));
-        setParam(String("IsManual"), Variant(false));
-
-        List<String> exts; exts << String(DYNLIB_EXTENSION);
-        setParam(String("Extensions"), Variant(exts));
     }
 
     DynamicLibraryLoader::~DynamicLibraryLoader()
@@ -41,13 +26,13 @@ namespace APro
 
     }
 
-    SharedPointer<Resource> DynamicLibraryLoader::loadResource(const String& filename)
+    ResourcePtr DynamicLibraryLoader::loadResource(const String& filename)
     {
-        SharedPointer<DynamicLibrary> dynlib = AProNew(DynamicLibrary, String(), filename);
+        DynamicLibrary* dynlib = AProNew(DynamicLibrary, String(), filename);
 
         if(dynlib->isLoaded())
-            return SharedPointer<Resource>(dynlib);
+            return ResourcePtr(dynlib);
         else
-            return SharedPointer<Resource>();
+            return ResourcePtr();
     }
 }

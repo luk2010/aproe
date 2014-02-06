@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012
+ *  @date 11/09/2012 - 06/02/2014
  *
  *  Defines the EventEmitter class.
  *
@@ -46,9 +46,11 @@ namespace APro
      *
      *  You can set an EmitPolicy to the Emitter :
      *  - EP_NONE : The emitter doesn't send the event, even if
-     *  asked.
+     *  asked. It does <br>not</br> totally disable event sending action
+     *  as you always can send events using manual function specifying
+     *  the listener or the uniter.
      *  - EP_MANUAL : The emitter send the events to registered listeners,
-     *  no threaded queue. This i the default behaviour.
+     *  no threaded queue. This is the default behaviour.
      *  - EP_UNITER : The emitter send event to the Global Uniter,
      *  this is a threaded system.
      *

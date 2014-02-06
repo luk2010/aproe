@@ -62,6 +62,10 @@ namespace APro
      *  entry is like a handle to this class, and you should always
      *  pass through this handler to manipulate your resource.
      *
+     *  @note Resource is already ThreadSafe. If you override the
+     *  Resource class, you can still use APRO_THREADSAFE_AUTOLOCK to lock
+     *  automatic mutex.
+     *
     **/
     ////////////////////////////////////////////////////////////
     class APRO_DLL Resource : public ThreadSafe,

@@ -1,37 +1,50 @@
+/////////////////////////////////////////////////////////////
 /** @file DynamicLibraryLoader.h
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/09/2012
+ *  @date 18/09/2012 - 04/02/2014
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the DynamicLibraryLoader class.
+ *  Defines the DynamicLibraryLoader class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #ifndef APRODYNAMICLIBRARYLOADER_H
 #define APRODYNAMICLIBRARYLOADER_H
 
 #include "ResourceLoader.h"
 #include "DynamicLibrary.h"
-#include "SharedPointer.h"
 
 namespace APro
 {
+
     class APRO_DLL DynamicLibraryLoader : public ResourceLoader
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(DynamicLibraryLoader)
+//      APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(DynamicLibraryLoader) DEPRECATED
 
     public:
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Constructs the loader.
+        **/
+        ////////////////////////////////////////////////////////////
         DynamicLibraryLoader();
-        DynamicLibraryLoader(const DynamicLibraryLoader& other);
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Destructs the loader.
+        **/
+        ////////////////////////////////////////////////////////////
         ~DynamicLibraryLoader();
 
-        SharedPointer<Resource> loadResource(const String& filename);
+        ////////////////////////////////////////////////////////////
+        /** @brief Load a resource.
+         *  @note Create the Resource object and returns it. If an error
+         *  occurs, nullptr is returned.
+        **/
+        ////////////////////////////////////////////////////////////
+        ResourcePtr loadResource(const String& filename);
     };
 }
 
