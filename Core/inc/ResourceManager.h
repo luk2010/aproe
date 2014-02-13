@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/08/2012 - 09/01/2014
+ *  @date 25/08/2012 - 13/02/2014
  *
  *  Defines the ResourceManager singleton.
  *
@@ -140,6 +140,22 @@ namespace APro
 
         typedef ResourceEntry* ResourceEntryPtr;///< Hack to protect from local destruction.
 
+        ////////////////////////////////////////////////////////////
+        /** @class NameCopyGenerator
+         *  @ingroup Core
+         *  @brief A class function to generate copy name for already
+         *  used name.
+        **/
+        ////////////////////////////////////////////////////////////
+        class NameCopyGenerator
+        {
+        public:
+            NameCopyGenerator(ResourceManager* _rm) { rm = _rm; }
+            static String operator () (const String& name);
+        private:
+            ResourceManager* rm;
+        };
+
     private:
 
         List<ResourceEntry>                 m_resource_entries;///< ResourceEntry list.
@@ -148,6 +164,9 @@ namespace APro
 
         Map<String, String>                 m_default_loaders; ///< Default Loader for extension.
         Map<String, String>                 m_default_writers; ///< Default Writer for extension.
+
+        bool                                m_overwrite_loading; ///< Overwrite resource when loading with same name. If set to true, loading resource with same name
+                                                                 ///  will overwrite and erase old resource. False is default value. If false, copy name will be generated.
 
     public:
 
@@ -331,6 +350,12 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         String printResources() const;
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Set the m_overwrite_loading property.
+        **/
+        ////////////////////////////////////////////////////////////
+        void overwriteOnLoading(bool _overwrite);
 
         /// @}
 

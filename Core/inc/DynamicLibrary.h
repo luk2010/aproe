@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/09/2012 - 04/02/2014
+ *  @date 18/09/2012 - 06/02/2014
  *
  *  Defines the DynamicLibrary class.
  *
@@ -129,7 +129,7 @@ namespace APro
          *  @return Null if sym is incorrect (bad or null value).
         **/
         /////////////////////////////////////////////////////////////
-        void* getSymbol(const char* sym) const;
+        void* getSymbol(const char* sym);
 
     public:
 

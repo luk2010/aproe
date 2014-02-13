@@ -17,10 +17,6 @@
 #include "Manager.h"
 #include "PluginHandle.h"
 
-#define APRO_CURRENT_PLUGIN_MAJOR 1
-#define APRO_CURRENt_PLUGIN_MINOR 0
-#define APRO_CURRENT_PLUGIN_BUILD 1
-
 namespace APro
 {
     /////////////////////////////////////////////////////////////
@@ -43,10 +39,6 @@ namespace APro
      *  function at the begin of the old-style main function, and
      *  EndPlugin where you will destroy everything allocated in
      *  StartPlugin.
-     *
-     *  Because of the allocation system, you must deallocate yourself
-     *  what you allocated in the plugin (using the AProNew / AProDelete
-     *  system).
     **/
     /////////////////////////////////////////////////////////////
 

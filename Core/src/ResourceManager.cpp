@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 27/08/2012 - 04/02/2014
+ *  @date 27/08/2012 - 13/02/2014
  *
  *  Implements the ResourceManager.
  *
@@ -188,8 +188,18 @@ namespace APro
         {
             if(!entry->getResource().isNull())
             {
-                aprodebug("Overwriting resource '") << entry->getName() << "'.";
-                unloadResource(entry->getName());
+                if(m_overwrite_loading)
+                {
+                    aprodebug("Overwriting resource '") << entry->getName() << "'.";
+                    unloadResource(entry->getName());
+                }
+                else
+                {
+                    aprodebug("Resource '") << entry->getName() << "' already exists so generating a copy name.";
+
+                    NameCopyGenerator ncg(this);
+                    return loadResource(ncg(entry->getName()), filename, loaderName);
+                }
             }
 
             ResourceLoaderPtr loader = _findCorrectLoader(FileSystem::getExtension(filename));
@@ -233,17 +243,27 @@ namespace APro
         }
         else
         {
+            if(!entry->getResource().isNull())
+            {
+                if(m_overwrite_loading)
+                {
+                    aprodebug("Overwriting resource '") << entry->getName() << "'.";
+                    unloadResource(entry->getName());
+                }
+                else
+                {
+                    aprodebug("Resource '") << entry->getName() << "' already exists so generating a copy name.";
+
+                    NameCopyGenerator ncg(this);
+                    return loadResourceWithLoader(ncg(entry->getName()), filename, loaderName);
+                }
+            }
+
             ResourceLoaderPtr loader = getLoader(loaderName);
             if(loader.isNull())
             {
                 aprodebug("Can't find loader '") << loaderName << "'.";
                 return false;
-            }
-
-            if(!entry->getResource().isNull())
-            {
-                aprodebug("Overwriting resource '") << entry->getName() << "'.";
-                unloadResource(entry->getName());
             }
 
             if(!loader.isNull())
@@ -300,6 +320,11 @@ namespace APro
 
         result << "-----------------------------------\n";
         return result;
+    }
+
+    void ResourceManager::overwriteOnLoading(bool _overwrite)
+    {
+        m_overwrite_loading = _overwrite;
     }
 
     ResourceLoaderPtr ResourceManager::getLoader(const String& name)
@@ -655,6 +680,39 @@ namespace APro
         }
 
         return -1;
+    }
+
+    String ResourceManager::NameCopyGenerator::operator() (const String& name)
+    {
+        if(rm)
+        {
+            // We try to find a name as MyResource (1)
+            //                          MyResource (2)
+            //                          MyResource (3)
+            //                          ...
+            //                          MyResource (2147483647)
+
+            int _cpy = 0;
+            if(rm->getResourceEntry(name) == nullptr)
+                return name;
+
+            _cpy++;
+            String _cpyname;
+            do
+            {
+                _cpyname = name;
+                _cpyname.append(" (");
+                _cpyname.append(String::fromInt(_cpy));
+                _cpyname.append(")");
+
+            } while (rm->getResource(_cpyname) != nullptr);
+
+            return _cpyname;
+        }
+        else
+        {
+            return String("null");
+        }
     }
 
 }

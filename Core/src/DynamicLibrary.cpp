@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/09/2012 - 04/02/2014
+ *  @date 18/09/2012 - 06/02/2014
  *
  *  Implements the DynamicLibrary class.
  *
@@ -36,7 +36,7 @@ namespace APro
         unload();
     }
 
-    void* DynamicLibrary::getSymbol(const char* sym) const
+    void* DynamicLibrary::getSymbol(const char* sym)
     {
         if(isLoaded())
         {
