@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/08/2012 - 13/02/2014
+ *  @date 25/08/2012 - 15/02/2014
  *
  *  Defines the ResourceManager singleton.
  *
@@ -17,6 +17,7 @@
 #include "Platform.h"
 #include "AutoPointer.h"
 #include "Manager.h"
+#include "NameCopyGenerator.h"
 
 #include "Resource.h"
 #include "ResourceLoader.h"
@@ -141,17 +142,17 @@ namespace APro
         typedef ResourceEntry* ResourceEntryPtr;///< Hack to protect from local destruction.
 
         ////////////////////////////////////////////////////////////
-        /** @class NameCopyGenerator
+        /** @class ResourceNCG
          *  @ingroup Core
          *  @brief A class function to generate copy name for already
          *  used name.
         **/
         ////////////////////////////////////////////////////////////
-        class NameCopyGenerator
+        class ResourceNCG : public NameCopyGenerator
         {
         public:
-            NameCopyGenerator(ResourceManager* _rm) { rm = _rm; }
-            static String operator () (const String& name);
+            ResourceNCG(ResourceManager* _rm) { rm = _rm; }
+            bool isNameUsed(const String& name) const;
         private:
             ResourceManager* rm;
         };
@@ -357,6 +358,13 @@ namespace APro
         ////////////////////////////////////////////////////////////
         void overwriteOnLoading(bool _overwrite);
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if given resource entry name already
+         *  exists.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool resourceEntryExists(const String& name) const;
+
         /// @}
 
     public:
@@ -533,7 +541,7 @@ namespace APro
         /** @brief Create a Resource with given loader from given file.
         **/
         ////////////////////////////////////////////////////////////
-        ResourcePtr _loadResourceFrom(const String& filename, ResourceLoader& loader);
+        ResourcePtr _loadResourceFrom(const String& filename, ResourceLoaderPtr& loader);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the index of given Loader.

@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013
+ *  @date 06/04/2013 - 15/02/2014
  *
  *  Implements the Mutex class.
  *
@@ -31,7 +31,7 @@ namespace APro
 
 #ifdef _COMPILE_WITH_PTHREAD_
         m_mutex = (apro_mutex_t) AProAllocate(sizeof(pthread_mutex_t));
-        GET_MUTEX() = PTHREAD_MUTEX_INITIALIZER;
+        GET_MUTEX() = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
 #else
         m_mutex = nullptr;
 #endif
@@ -58,7 +58,9 @@ namespace APro
 
     ThreadMutex::~ThreadMutex()
     {
-
+#ifdef _COMPILE_WITH_PTHREAD_
+        pthread_mutex_destroy(&GET_MUTEX());
+#endif // _COMPILE_WITH_PTHREAD_
     }
 
     void ThreadMutex::lock()

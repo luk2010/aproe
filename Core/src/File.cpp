@@ -74,7 +74,7 @@ namespace APro
             close();
         }
 
-        FileSystem& fs = Main::get().getFileSystem();
+        FileSystem& fs = Main::Get().getFileSystem();
         bool ret = fs.copy(m_filePath, newPath);
 
         if(oldpos >= 0)
@@ -94,7 +94,7 @@ namespace APro
             close();
         }
 
-        FileSystem& fs = Main::get().getFileSystem();
+        FileSystem& fs = Main::Get().getFileSystem();
         bool ret = fs.rename(m_filePath, newPath);
         setFile(newPath);
         return ret;
@@ -107,7 +107,7 @@ namespace APro
             close();
         }
 
-        FileSystem& fs = Main::get().getFileSystem();
+        FileSystem& fs = Main::Get().getFileSystem();
         return fs.Delete(m_filePath);
     }
 
@@ -144,11 +144,11 @@ namespace APro
 
         if(!m_file)
         {
-            Main::get().getConsole() << "\n[File]{open} Can't open file " << m_filePath << " !";
+            Main::Get().getConsole() << "\n[File]{open} Can't open file " << m_filePath << " !";
         }
         else
         {
-            Main::get().getConsole() << "\n[File]{open} Opened file " << m_filePath << ".";
+            Main::Get().getConsole() << "\n[File]{open} Opened file " << m_filePath << ".";
         }
 
         m_lastOperation = Operation::None;
@@ -193,7 +193,7 @@ namespace APro
             return true;
         }
 
-        FileSystem& fs = Main::get().getFileSystem();
+        FileSystem& fs = Main::Get().getFileSystem();
         return fs.exists(m_filePath);
     }
 

@@ -54,8 +54,8 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** Default constructor.
-          * @note The constructor is involved at the firt use of Main::get()
-          * function. Please be sure to call every Main::get() function in a
+          * @note The constructor is involved at the firt use of Main::Get()
+          * function. Please be sure to call every Main::Get() function in a
           * try / catch block, to catch exception that may be thrown during
           * the initialization process.
         **/

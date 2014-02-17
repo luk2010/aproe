@@ -5,9 +5,9 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013 - 01/12/2013
+ *  @date 06/04/2013 - 15/02/2014
  *
- *  Defines the Mutex class and his implementation.
+ *  Defines the Mutex class.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ namespace APro
      *  given by the ThreadManager.
      *  @note Mutex should always be created thanks to the
      *  ThreadManager using createMutex(). In rare excepted cases,
-     *  you can create internal mutexs usgin the default constructor,
+     *  you can create internal mutexs using the default constructor,
      *  as done in Atomic and Thread. This method simplify the creation
      *  of mutexs at the beginning of the program, where we are not sure
      *  that ThreadManager has been created.

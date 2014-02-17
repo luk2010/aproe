@@ -1,23 +1,19 @@
+/////////////////////////////////////////////////////////////
 /** @file PluginManager.cpp
+ *  @ingroup Plugin
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/09/2012
+ *  @date 18/09/2012 - 17/02/2014
  *
- *  @addtogroup Global
- *  @addtogroup Plugin
- *
- *  This file defines the PluginManager class.
+ *  Implements the PluginManager class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #include "PluginManager.h"
-#include "ResourceManager.h"
 #include "FileSystem.h"
 #include "Console.h"
-
-#include <dirent.h>
-#include <unistd.h>
 
 namespace APro
 {
@@ -31,93 +27,255 @@ namespace APro
 
     PluginManager::~PluginManager()
     {
-
+        // The Manager destructor destroys automatycly every objects,
+        // and PluginHandle destructor already call end().
     }
 
-    SharedPointer<PluginHandle> PluginManager::getPluginHandle(const String& name)
+    PluginHandlePtr PluginManager::getPluginHandle(const String& name)
     {
-        for(List<SharedPointer<PluginHandle> >::Iterator i(pluginList.begin()); !i.isEnd(); i++)
+        APRO_THREADSAFE_AUTOLOCK
+
+        List<PluginHandlePtr>::const_iterator e = pluginList.end();
+        for(List<PluginHandlePtr>::iterator it = pluginList.begin(); it != e; it++)
         {
-            if(i.get()->getName() == name)
-                return i.get();
+            if((*it)->getName() == name)
+                return (*it);
         }
 
-        return SharedPointer<PluginHandle>();
+        return PluginHandlePtr;
     }
 
-    SharedPointer<PluginHandle> PluginManager::addPluginHandle(const String& name, const String& filename)
+    const PluginHandlePtr PluginManager::getPluginHandle(const String& name) const
     {
-        SharedPointer<PluginHandle> ret = getPluginHandle(name);
-        if(ret.isNull())
-        {
-            SharedPointer<DynamicLibrary> lib = ResourceManager::Get().loadResource<DynamicLibrary>(name + String("_") + filename, filename);
+        APRO_THREADSAFE_AUTOLOCK
 
-            if(lib.isNull())
+        List<PluginHandlePtr>::const_iterator e = pluginList.end();
+        for(List<PluginHandlePtr>::const_iterator it = pluginList.begin(); it != e; it++)
+        {
+            if((*it)->getName() == name)
+                return (*it);
+        }
+
+        return PluginHandlePtr;
+    }
+
+    PluginHandlePtr PluginManager::addPluginHandle(const String& name, const String& filename, bool load_now)
+    {
+        if(name.isEmpty())
+            return nullptr;
+
+        PluginHandlePtr ph = getPluginHandle(name);
+        if(!ph.isNull())
+        {
+            if(!ph->toDynamicLibrary().isNull())
             {
-                return SharedPointer<PluginHandle>();
+                if(ph->toDynamicLibrary()->getFilename() == filename)
+                {
+                    return ph;
+                }
+                else
+                {
+                    return nullptr;
+                }
             }
             else
             {
-                ret = AProNew(PluginHandle, name, lib);
-                Manager<PluginHandle>::push(ret);
-
-                if(isOutdated(ret))
-                {
-                    Console::get() << "\n[PluginManager]{addPluginHandle} Warning : Plugin " << name << " is outdated !";
-                }
-
-                return ret;
+                return nullptr;
             }
         }
-        else
+
+        APRO_THREADSAFE_AUTOLOCK
+
+        ph = AProNew(PluginHandle, name, filename);
+        if(!ph.isNull())
         {
-            return ret;
+            if(name.isEmpty())
+            {
+                // If Plugin is correctly loaded, we try to see if Library is loaded
+                // to load PluginInfo structure into our memory.
+                DynamicLibraryPtr dlp = ph->toDynamicLibrary();
+                if(!dlp.isNull())
+                {
+                    if(!dlp->isLoaded())
+                    {
+                        if(!dlp->load())
+                        {
+                            aprodebug("DynamicLibrary '") << dlp->getFilename() << "' can't be loaded.";
+                            return nullptr;
+                        }
+                    }
+
+                    // Getting info struct.
+                    ph->refreshPluginInfo();
+                    PluginInfo* info = ph->getPluginInfo();
+                    if(info)
+                    {
+                        // We set plugin name to info name.
+                        ph->name = info->name;
+                    }
+                    else
+                    {
+                        // We can't set a correct name so destroy the plugin and return null.
+                        aprodebug("Can't find any PluginInfo structure for plugin from file '") << dlp->getFilename() << "'.";
+                        return nullptr;
+                    }
+                }
+            }
+
+            // Add this plugin to the manager.
+            Manager<PluginHandle>::push(ph);
+            aprodebug("Plugin '") << ph->name << "' successfully added.";
+
+            if(load_now)
+            {
+                // Initialize the plugin correctly.
+                if(!ph->initialize())
+                {
+                    aprodebug("Couldn't initialize plugin '") << ph->name << "' correctly. Try it again yourself or see plugin provider.";
+                }
+            }
         }
+
+        // We return the pointer.
+        return ph;
     }
 
-    SharedPointer<PluginHandle> PluginManager::addPluginHandle(const String& name, const SharedPointer<DynamicLibrary>& lib)
+    PluginHandlePtr PluginManager::addPluginHandle(const String& name, const DynamicLibraryPtr& lib, bool load_now)
     {
-        SharedPointer<PluginHandle> ret = getPluginHandle(name);
-        if(ret.isNull())
+        if(name.isEmpty() || lib.isNull())
+            return nullptr;
+
+        PluginHandlePtr ph = getPluginHandle(name);
+        if(!ph.isNull())
         {
-            if(lib.isNull() || !lib.isLoaded())
+            if(!ph->toDynamicLibrary().isNull())
             {
-                return AProNew(PluginHandle, name);
+                if(ph->toDynamicLibrary()->getFilename() == lib->getFilename())
+                {
+                    return ph;
+                }
+                else
+                {
+                    return nullptr;
+                }
             }
             else
             {
-                ret = AProNew(PluginHandle, name, lib);
-                Manager<PluginHandle>::push(ret);
+                return nullptr;
+            }
+        }
 
-                if(isOutdated(ret))
+        APRO_THREADSAFE_AUTOLOCK
+
+        ph = AProNew(PluginHandle, name, lib);
+        if(!ph.isNull())
+        {
+            if(name.isEmpty())
+            {
+                // If Plugin is correctly loaded, we try to see if Library is loaded
+                // to load PluginInfo structure into our memory.
+                DynamicLibraryPtr dlp = ph->toDynamicLibrary();
+                if(!dlp.isNull())
                 {
-                    Console::get() << "\n[PluginManager]{addPluginHandle} Warning : Plugin " << name << " is outdated !";
+                    if(!dlp->isLoaded())
+                    {
+                        if(!dlp->load())
+                        {
+                            aprodebug("DynamicLibrary '") << dlp->getFilename() << "' can't be loaded.";
+                            return nullptr;
+                        }
+                    }
+
+                    // Getting info struct.
+                    ph->refreshPluginInfo();
+                    PluginInfo* info = ph->getPluginInfo();
+                    if(info)
+                    {
+                        // We set plugin name to info name.
+                        ph->name = info->name;
+                    }
+                    else
+                    {
+                        // We can't set a correct name so destroy the plugin and return null.
+                        aprodebug("Can't find any PluginInfo structure for plugin from file '") << dlp->getFilename() << "'.";
+                        return nullptr;
+                    }
+                }
+            }
+
+            // Add this plugin to the manager.
+            Manager<PluginHandle>::push(ph);
+            aprodebug("Plugin '") << ph->name << "' successfully added.";
+
+            if(load_now)
+            {
+                // Initialize the plugin correctly.
+                if(!ph->initialize())
+                {
+                    aprodebug("Couldn't initialize plugin '") << ph->name << "' correctly. Try it again yourself or see plugin provider.";
+                }
+            }
+        }
+
+        // We return the pointer.
+        return ph;
+    }
+
+    int PluginManager::loadDirectory(const String& path)
+    {
+        if(FileSystem::Exists(path) && FileSystem::IsDirectory(path))
+        {
+            Directory dir(path);
+            dir.skipDirectory(true);
+            dir.skipDot(true);
+
+            int files_in_dir = dir.countFiles();
+            if(files_in_dir > 0)
+            {
+                aprodebug("Trying to load '") << files_in_dir << "' files.";
+
+                int ret = 0;
+                Directory::Entry ent;
+                while(dir >> ent)
+                {
+                    if(!addPluginHhandle(String(), ent.name, true).isNull())
+                        ret++;
                 }
 
+                aprodebug("'") << ret << "' plugins loaded.";
                 return ret;
             }
+
+            return 0;
         }
         else
         {
-            return ret;
+            aprodebug("Path '") << path << "' doesn't exists or is not a directory.";
+            return 0;
         }
     }
 
-    void PluginManager::removePluginHandle(const String& name)
+    bool PluginManager::removePluginHandle(const String& name)
     {
-        SharedPointer<PluginHandle> rm = getPluginHandle(name);
+        PluginHandlePtr rm = getPluginHandle(name);
         if(!rm.isNull())
         {
+            APRO_THREADSAFE_AUTOLOCK
+
             Manager<PluginHandle>::pop(rm);
 
-            rm->end();
-            rm.release();// We release the pointer just to be sure.
+            // We call the end() function because at the end
+            // of removePluginHandle(), plugin must be ended.
+            // It would be done also by destructors.
+            return rm->end();
         }
+
+        return false;
     }
 
     PluginInfo* PluginManager::getPluginInfo(const String& pluginhandle)
     {
-        SharedPointer<PluginHandle> ph = getPluginHandle(pluginhandle);
+        PluginHandlePtr ph = getPluginHandle(pluginhandle);
         if(!ph.isNull())
         {
             return ph->getPluginInfo();
@@ -130,128 +288,30 @@ namespace APro
 
     const PluginApiVersion PluginManager::getCurrentApiVersion() const
     {
-        PluginApiVersion av;
-        av.major = APRO_CURRENT_PLUGIN_MAJOR;
-        av.minor = APRO_CURRENT_PLUGIN_MINOR;
-        av.build = APRO_CURRENT_PLUGIN_BUILD;
+        static PluginApiVersion av
+        {
+            APRO_CURRENT_PLUGIN_MAJOR,
+            APRO_CURRENT_PLUGIN_MINOR,
+            APRO_CURRENT_PLUGIN_BUILD
+        };
+
         return av;
     }
 
-    int PluginManager::loadDirectory(const String& path)
-    {// Doit etre fait sans utiliser FileSystem car l'implementation n'est pas encore charge. C'est ici que sera charge par ailleurs son implementation.
-        if(!path.isEmpty())
-        {
-            DIR* dir;
-            struct dirent* dirp;
-
-            dir = opendir(path.toCstChar());
-            if(!dir)
-            {
-                Console::get() << "\n[PluginManager]{loadDirectory} Couldn't load directory plugin \"" << path << "\" !";
-                return 0;
-            }
-
-            List<String> files;
-            String filepath(FileSystem::getWorkingDirectory());
-            if(path.at(0) != '/')
-                filepath.append("/");
-            filepath.append(path);
-
-            while( (dirp = readdir(dir)) != NULL)
-            {
-                String file(dirp->d_name);
-                files.append(file);
-            }
-
-            int ploaded = 0;
-
-            if(files.size() <= 2)
-            {
-                Console::get() << "\n[PluginManager]{loadDirectory} No plugins in directory \"" << path << "\" !";
-
-            }
-            else
-            {
-                for(unsigned int i = 0; i < files.size(); ++i)
-                {
-                    String f = files.at(i);
-                    if(f.size() <= 3) continue;
-
-                    String f2(filepath);
-                    f2.append(f);
-
-                    PluginHandle::ptr plugin = addPluginHandle(String("testxxhash456789"), f2);
-                    if(!plugin.isNull())
-                    {
-                        String pname = plugin->getPluginInfo()->name;
-                        if(getPluginHandle(pname).isNull())
-                        {
-                            plugin->setName(pname); // Le plugin est valide on le fait savoir.
-                            Console::Get() << "\n[PluginManager]{loadDirectory} Plugin " << pname << " charge !";
-                            ++ploaded;
-                        }
-                        else
-                        {
-                            // Le plugin a deja ete charge, on detruit celui la.
-                            removePluginHandle(String("testxxhash456789"));
-                        }
-                    }
-                }
-            }
-
-            closedir(dir);
-            return ploaded;
-        }
-
-        return 0;
+    bool PluginManager::isVersionValid(const PluginApiVersion& version) const
+    {
+        return getCurrentApiversion().build == version.build;
     }
 
-    bool PluginManager::hasValidApiVersion(const PluginHandle::ptr& plugin) const
+    bool PluginManager::isOutdated(const PluginApiVersion& version) const
     {
-        bool ret = false;
-
-        if(!plugin->isNull())
-        {
-            PluginInfo* info = plugin->getPluginInfo();
-            if(info)
-            {
-                const PluginApiVersion current = getCurrentApiVersion();
-
-                if(info->apiversion.major <= current.major && info->apiversion.minor <= current.minor)
-                {
-                    ret = true;
-                }
-                else if(info->apiversion.build <= current.build)
-                {
-                    ret = true;
-                }
-            }
-        }
-
-        return ret;
+        return !isVersionValid(version);
     }
 
-    bool PluginManager::isOutdated(const PluginHandle::ptr& plugin) const
+    void PluginManager::print(Console& console)
     {
-        bool ret = false;
-        if(!plugin.isNull())
-        {
-            if(hasValidApiVersion(plugin))
-            {
-                const PluginApiVersion current = getCurrentApiVersion();
-                PluginInfo* info = plugin->getPluginInfo();
+        APRO_THREADSAFE_AUTOLOCK
 
-                if(info->apiversion.build < current.build)
-                {
-                    ret = true;
-                }
-                else if(info->apiversion.major < current.major || info->apiversion.minor < current.minor)
-                {
-                    ret = true;
-                }
-            }
-        }
-
-        return ret;
+        console << "\n[PluginManager] There are currently '" << pluginList.size() << "' plugins.";
     }
 }

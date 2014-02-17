@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/09/2012 - 06/02/2014
+ *  @date 18/09/2012 - 15/02/2014
  *
  *  Defines the DynamicLibrary class.
  *

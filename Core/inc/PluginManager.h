@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/09/2012
+ *  @date 18/09/2012 - 16/02/2014
  *
  *  Defines the PluginManager class.
  *
@@ -15,6 +15,7 @@
 #define APROPLUGINMANAGER_H
 
 #include "Manager.h"
+#include "Printable.h"
 #include "PluginHandle.h"
 
 namespace APro
@@ -39,6 +40,31 @@ namespace APro
      *  function at the begin of the old-style main function, and
      *  EndPlugin where you will destroy everything allocated in
      *  StartPlugin.
+     *
+     *  ### Example functions
+     *
+     *  @code
+     *
+     *  PluginInfo info;
+     *
+     *  extern "C" void* GetPluginInfo(void)
+     *  { return &info; }
+     *
+     *  extern "C" void StartPlugin(void)
+     *  {
+     *    info.name = "Example";
+     *    info.author = "You";
+     *    info.date = "01/01/1991";
+     *    info.description = "An example plugin.";
+     *    info.apiversion = PluginManager::Get().getCurrentApiVersion();
+     *
+     *    // Do whatever you want here.
+     *  }
+     *
+     *  extern "C" void EndPlugin(void)
+     *  { }
+     *
+     *  @endcode
     **/
     /////////////////////////////////////////////////////////////
 
@@ -46,22 +72,41 @@ namespace APro
     /** @class PluginManager
      *  @ingroup Plugin
      *  @brief Manage every plugins.
-     *  @details You should use this class to load/unload plugins.
-     *  At initialisation, the Main class load the "plugins/"
+     *
+     *  You should use this class to load/unload plugins.
+     *  At Main initialisation, the Main class load the "plugins/"
      *  directory in the current working dir, i.e. the executable
      *  one.
      *
-     *  Plugins are loaded without API version checking, but you
-     *  should verify it yourself at end of loading. Notice that
-     *  plugins using older version of API than this one are
-     *  marked as outdated, but you still can use it.
+     *  Plugins must follow the API version checking system. It is
+     *  mainly based on the build field, the other one being only
+     *  informative. A plugin that do not have the same API version
+     *  as the bounded Engine library won't be loaded, as it would
+     *  result at some errors.
+     *
+     *  ### Plugins Loading process
+     *
+     *  Loading a plugin takes place in three steps :
+     *  - Loading the DynamicLibraryFile.
+     *  - Getting the plugin's informations.
+     *  - If version is okay, call to StartPlugin() in the plugin.
+     *
+     *  @note This process is done in the Pluginhandle::initialize
+     *  function. The DynamicLibrary doesn't need to already be
+     *  loaded but it will be loaded in the Pluginhandle::initialize
+     *  function if it is not.
      *
      *  @note You can access a global instance using the Main
-     *  object : @code Main::get().getPluginManager(); @endcode
+     *  object : @code Main::Get().getPluginManager(); @endcode
      *  This make you sure this is always the same plugin manager.
+     *
+     *  @note PluginManager::Get() is also available but you should
+     *  verify with PluginManager::IsCreated() that the PluginManager
+     *  is created.
     **/
     /////////////////////////////////////////////////////////////
-    class APRO_DLL PluginManager : public Manager<PluginHandle>
+    class APRO_DLL PluginManager : public Manager<PluginHandle>,
+                                   public Printable
     {
         APRO_DECLARE_MANUALSINGLETON(PluginManager)
 
@@ -81,7 +126,7 @@ namespace APro
 
     private:
 
-        List<SharedPointer<PluginHandle> >& pluginList;///< List of plugins pointer.
+        List<PluginHandlePtr>& pluginList;///< List of plugins pointer.
 
     public:
 
@@ -91,69 +136,81 @@ namespace APro
          *  If nothing correspond, it returns a null pointer.
         **/
         /////////////////////////////////////////////////////////////
-        SharedPointer<PluginHandle> getPluginHandle(const String& name);
+        PluginHandlePtr getPluginHandle(const String& name);
 
         /////////////////////////////////////////////////////////////
-        /** @brief Load a plugin from a file.
+        /** @brief Return the plugin designated with name.
          *
-         *  @param name : Name of the created plugin.
-         *  @param filename : File to load.
-         *
-         *  @return A pointer to the handle to the plugin.
-         *
-         *  If name is already used, plugin is not loaded and
-         *  existing one is returned.
-         *  If filename doesn't exist, a null pointer is returned.
+         *  If nothing correspond, it returns a null pointer.
         **/
         /////////////////////////////////////////////////////////////
-        SharedPointer<PluginHandle> addPluginHandle(const String& name, const String& filename);
+        const PluginHandlePtr getPluginHandle(const String& name) const;
+
+    public:
 
         /////////////////////////////////////////////////////////////
-        /** @brief Load a plugin from an already loaded dynamic
+        /** @brief Loads a plugin from a file.
+         *
+         *  @param name : Name of the created plugin. If empty, name in
+         *  the PLugiInfo structure will be set as PluginHandle name.
+         *  @param filename : File to load.
+         *  @param load_now : True if you want to initialize the plugin
+         *  immediatly after its creation.
+         *
+         *  @return - If this name is already used, but filename is different,
+         *  it returns a null pointer. If name and filename corresponds,
+         *  the already loaded PluginHandle is returned.
+         *          - If filename is empty, or invalid, it returns a null
+         *  pointer.
+        **/
+        /////////////////////////////////////////////////////////////
+        PluginHandlePtr addPluginHandle(const String& name, const String& filename, bool load_now = false);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Loads a plugin from an already loaded dynamic
          *  library.
          *
          *  @param name : Name of the created plugin.
          *  @param lib : Dynamic library to use.
+         *  @param load_now : True if you want to initialize the plugin
+         *  immediatly after its creation.
          *
-         *  @return A pointer to the handle to the plugin.
-         *
-         *  If name already exists, plugin is not loaded and existing
-         *  one is returned.
-         *  If lib is null or unloaded, null pointer is returned.
-         *
-         *  @note You must load the library before passing it to this
-         *  function !
+         *  @return - If this name is already used, but filename is different,
+         *  it returns a null pointer. If name and filename corresponds,
+         *  the already loaded PluginHandle is returned.
+         *          - If lib is null, a null pointer is returned.
         **/
         /////////////////////////////////////////////////////////////
-        SharedPointer<PluginHandle> addPluginHandle(const String& name, const SharedPointer<DynamicLibrary>& lib = SharedPointer<DynamicLibrary>());
+        PluginHandlePtr addPluginHandle(const String& name, const DynamicLibraryPtr& lib, bool load_now = false);
 
         /////////////////////////////////////////////////////////////
         /** @brief Load every plugins in given directory.
          *
-         *  @param path : relative path to directory to load.
-         *  @return Number of plugins loaded successfully.
+         *  Names of plugins will be the name provided in the PluginInfo
+         *  structure. Refers to the Plugin's Provider for name given,
+         *  or list them using the Console.
+         *  @note Plugins are loaded and initialized, equivalent to set
+         *  the load_now property of addPluginHandle() to true.
          *
-         *  Iterating in the directory is made by using unistd and
-         *  dirent functions and structures, so this function is only
-         *  available in platforms supporting these functions.
+         *  @return Number of plugins loaded.
         **/
         /////////////////////////////////////////////////////////////
-        int loadDirectory  (const String& path);
+        int loadDirectory(const String& path);
+
+    public:
 
         /////////////////////////////////////////////////////////////
         /** @brief Removes given plugin and unload it.
          *
          *  @param name : Name of plugin to remove.
-         *
-         *  If name doesn't correspond to a plugin, this function does
-         *  nothing.
-         *  At the end of the function, the plugin is always ended, even
-         *  if anywhere there is a restant pointer that has not been
-         *  released. The plugin is released only when every pointers
-         *  have been released, but is ended in this function.
+         *  @return Results of PluginHandle::end() or false if name is
+         *  invalid.
         **/
         /////////////////////////////////////////////////////////////
-        void removePluginHandle(const String& name);
+        bool removePluginHandle(const String& name);
+
+    public:
+
 
         /////////////////////////////////////////////////////////////
         /** @brief Return the plugin info of given plugin name.
@@ -176,24 +233,26 @@ namespace APro
         /////////////////////////////////////////////////////////////
         /** @brief Tell if given plugin has a valid api version.
          *
-         *  An api version is valid if build version is < or = to
-         *  this one, OR if major and minor version are both < or =
-         *  to this one.
-         *
-         *  Build version and Major/Minor versions are totally
-         *  independent.
+         *  An api version is valid if build version is tthe same as
+         *  current build version.
         **/
         /////////////////////////////////////////////////////////////
-        bool hasValidApiVersion(const PluginHandle::ptr& plugin) const;
+        bool isVersionValid(const PluginApiVersion& version) const;
 
         /////////////////////////////////////////////////////////////
         /** @brief Tell if given plugin is outdated.
-         *
-         *  A plugin is outdated if either major/minor is older than
-         *  this one, either the build version is older.
+         *  @return The opposite of isVersionValid().
         **/
         /////////////////////////////////////////////////////////////
-        bool isOutdated(const PluginHandle::ptr& plugin) const;
+        bool isOutdated(const PluginApiVersion& version) const;
+
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Print information about this object in the console.
+        **/
+        /////////////////////////////////////////////////////////////
+        void print(Console& console) const;
 
     };
 }

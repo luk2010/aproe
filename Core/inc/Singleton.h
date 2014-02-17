@@ -34,10 +34,10 @@ namespace APro
 
     #define APRO_DECLARE_SINGLETON(class) \
     public: \
-    static class& get();
+    static class& Get();
 
     #define APRO_IMPLEMENT_SINGLETON(class) \
-    class& class::get()\
+    class& class::Get()\
     { static class singleton; return singleton;  }
 
     /// @brief Macro to define Main constructed classes.

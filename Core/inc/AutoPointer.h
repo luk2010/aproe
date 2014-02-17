@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013
+ *  @date 02/07/2013 - 16/02/2014
  *
  *  Defines the AutoPointer class.
  *
@@ -357,6 +357,12 @@ namespace APro
         AutoPointer& operator = (const AutoPointer<T>& other)
         {
             set(other.pointer);
+            return *this;
+        }
+
+        AutoPointer& operator = (T* ptr)
+        {
+            set(ptr);
             return *this;
         }
 

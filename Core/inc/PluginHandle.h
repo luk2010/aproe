@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 17/09/2012 - 13/02/2014
+ *  @date 17/09/2012 - 16/02/2014
  *
  *  Defines the PluginHandle class.
  *
@@ -53,6 +53,8 @@ namespace APro
         String           description;///< Plugin's description.
         PluginApiVersion apiversion; ///< Plugin's API description.
     } PluginInfo;
+
+    class PluginManager;// For friendly sh*t.
 
     /////////////////////////////////////////////////////////////
     /** @class PluginHandle
@@ -124,6 +126,10 @@ namespace APro
                                   public ThreadSafe,
                                   public NonCopyable
     {
+
+    public:
+
+        friend class PluginManager;
 
     protected:
 
@@ -241,6 +247,13 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         void refreshPluginInfo();
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Create an event recognized by his hash type.
+         *  @see EventEmitter::createEvent
+        **/
+        /////////////////////////////////////////////////////////////
+        EventPtr createEvent(const HashType& e_type) const;
 
     public:
 

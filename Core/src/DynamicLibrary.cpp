@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/09/2012 - 06/02/2014
+ *  @date 18/09/2012 - 15/02/2014
  *
  *  Implements the DynamicLibrary class.
  *
@@ -16,11 +16,17 @@
 
 namespace APro
 {
+    APRO_REGISTER_EVENT_NOCONTENT(DynamicLibraryLoadedEvent);
+    APRO_REGISTER_EVENT_NOCONTENT(DynamicLibraryUnloadedEvent);
+
     DynamicLibrary::DynamicLibrary()
         : Resource()
     {
         loaded.set(false);
         handle = nullptr;
+
+        documentEvent(DynamicLibraryLoadedEvent::Hash,   "DynamicLibrary has been loaded.");
+        documentEvent(DynamicLibraryUnloadedEvent::Hash, "DynamicLibrary has been unloaded.");
     }
 
     DynamicLibrary::DynamicLibrary(const String& mfilename)
@@ -28,6 +34,9 @@ namespace APro
     {
         loaded.set(false);
         handle = nullptr;
+
+        documentEvent(DynamicLibraryLoadedEvent::Hash,   "DynamicLibrary has been loaded.");
+        documentEvent(DynamicLibraryUnloadedEvent::Hash, "DynamicLibrary has been unloaded.");
         load();
     }
 
@@ -76,7 +85,6 @@ namespace APro
 
         APRO_THREADSAFE_AUTOLOCK
 
-        sendEvent(createEvent(DynamicLibraryUnloadedEvent::Hash));
         if(!DYNLIB_UNLOAD(handle))
         {
             Console::get() << "\n[DynamicLibrary] Couldn't release DynLib " << getFilename() << " : " << DYNLIB_LASTERROR() << ".";
@@ -85,6 +93,7 @@ namespace APro
         }
         else
         {
+            sendEvent(createEvent(DynamicLibraryUnloadedEvent::Hash));
             Console::get() << "\n[DynamicLibrary] DynLib " << getFilename() << " unloaded successfuly.";
             loaded.set(false);
             return true;

@@ -25,7 +25,7 @@ namespace APro
     Event::Event()
     {
         m_type      = 0;
-        m_id        = Main::get().getIdGenerator().pick();
+        m_id        = Main::Get().getIdGenerator().pick();
         m_target    = nullptr;
         m_emitter   = nullptr;
         must_stop   = false;

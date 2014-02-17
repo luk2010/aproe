@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 27/08/2012 - 13/02/2014
+ *  @date 27/08/2012 - 16/02/2014
  *
  *  Implements the ResourceManager.
  *
@@ -197,7 +197,7 @@ namespace APro
                 {
                     aprodebug("Resource '") << entry->getName() << "' already exists so generating a copy name.";
 
-                    NameCopyGenerator ncg(this);
+                    ResourceNCG ncg(this);
                     return loadResource(ncg(entry->getName()), filename, loaderName);
                 }
             }
@@ -254,7 +254,7 @@ namespace APro
                 {
                     aprodebug("Resource '") << entry->getName() << "' already exists so generating a copy name.";
 
-                    NameCopyGenerator ncg(this);
+                    ResourceNCG ncg(this);
                     return loadResourceWithLoader(ncg(entry->getName()), filename, loaderName);
                 }
             }
@@ -325,6 +325,11 @@ namespace APro
     void ResourceManager::overwriteOnLoading(bool _overwrite)
     {
         m_overwrite_loading = _overwrite;
+    }
+
+    bool ResourceManager::resourceEntryExists(const String& name) const
+    {
+        return getResourceEntry(name) != nullptr;
     }
 
     ResourceLoaderPtr ResourceManager::getLoader(const String& name)
@@ -640,6 +645,11 @@ namespace APro
         return ResourceLoaderPtr();
     }
 
+    ResourcePtr ResourceManager::_loadResourceFrom(const String& filename, ResourceLoaderPtr& loader)
+    {
+        return loader->loadResource(filename);
+    }
+
     int ResourceManager::_getLoaderIndex(const String& name) const
     {
         if(!name.isEmpty())
@@ -682,37 +692,12 @@ namespace APro
         return -1;
     }
 
-    String ResourceManager::NameCopyGenerator::operator() (const String& name)
+    bool ResourceManager::ResourceNCG::isNameUsed(const String& name) const
     {
         if(rm)
-        {
-            // We try to find a name as MyResource (1)
-            //                          MyResource (2)
-            //                          MyResource (3)
-            //                          ...
-            //                          MyResource (2147483647)
-
-            int _cpy = 0;
-            if(rm->getResourceEntry(name) == nullptr)
-                return name;
-
-            _cpy++;
-            String _cpyname;
-            do
-            {
-                _cpyname = name;
-                _cpyname.append(" (");
-                _cpyname.append(String::fromInt(_cpy));
-                _cpyname.append(")");
-
-            } while (rm->getResource(_cpyname) != nullptr);
-
-            return _cpyname;
-        }
+            return rm->getResource(_cpyname) != nullptr;
         else
-        {
-            return String("null");
-        }
+            return false;
     }
 
 }
