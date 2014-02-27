@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/03/2013
+ *  @date 20/03/2013 - 22/02/2014
  *
  *  Defines the Implementable class.
  *
@@ -31,11 +31,6 @@ namespace APro
      *  The implementation doesn't have to be inited or destroyed,
      *  this is in charge of the implementable object to call
      *  correct functions, as it is his object.
-     *
-     *  The implementation can do any of his destruction in his
-     *  destructor as it will be called in ::destroyImplementation
-     *  before to be deallocated by the same heap it was allocated.
-     *  @see Prototype::operator delete().
     **/
     /////////////////////////////////////////////////////////////
     template <typename T>
@@ -92,7 +87,7 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the implementation and if none exists, try
-         *  try to create one.
+         *  to create one.
          *
          *  @note You should always use this function to get the
          *  implementation from the superclass.

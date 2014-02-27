@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012
+ *  @date 20/09/2012 - 21/02/2014
  *
  *  Defines the Main class.
  *
@@ -211,16 +211,6 @@ namespace APro
             return *impFactory;
         }
 
-        const FileSystem& getFileSystem() const
-        {
-            return *fs;
-        }
-
-        FileSystem& getFileSystem()
-        {
-            return *fs;
-        }
-
         const ThreadManager& getThreadManager() const
         {
             return *tmanager;
@@ -285,10 +275,6 @@ namespace APro
 
 //      ImplementationStore* impStore;
 //      RendererFactoryManager* rfm; // Not use anymore
-
-// UNUSED or in rewriting
-
-        FileSystem* fs;
 
 
 

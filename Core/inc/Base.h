@@ -4,7 +4,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 29/05/2012
+ *  @date 29/05/2012 - 27/02/2014
  *
  *  Defines some constants to be used on different platform. This constants are universal.
  *
@@ -49,20 +49,14 @@
 #   define APRO_MEMORYTRACKERMAXBUFFERSIZE 16384
 #endif
 
-/** Set DLL config to export. */
-#define APRO_BUILDDLLEXPORT /* __declspec(dllexport)*/
-
-/** Set DLL config to import. */
-#define APRO_BUILDDLLIMPORT /* __declspec(dllimport)*/
+#include "System.h"
 
 /** Defines either DLL is export or import. */
-#if defined(BUILD_DLL) || defined(DLL) || defined(__DLL__)
+#ifdef __builddll__
 #   define APRO_DLL APRO_BUILDDLLEXPORT
 #else
 #   define APRO_DLL APRO_BUILDDLLIMPORT
 #endif
-
-#include "System.h"
 
 #if defined _USE_DOUBLEREAL_
 #   define REAL_TYPE double

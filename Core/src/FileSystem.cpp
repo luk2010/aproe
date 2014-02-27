@@ -1,242 +1,322 @@
+/////////////////////////////////////////////////////////////
 /** @file FileSystem.cpp
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 13/07/2012
+ *  @date 05/07/2012 - 27/02/2014
  *
- *  @addtogroup Global
- *  @addtogroup IO
- *
- *  This file defines the FileSystem Singleton.
+ *  Implements the FileSystem class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #include "FileSystem.h"
-#include "Main.h"
-
-#include <unistd.h>
 
 namespace APro
 {
-    FileSystem::FileSystem(const String& basepath)
-        : Implementable(String("APro::FileSystem")), m_basepath(basepath)
+    bool FileSystem::Exists(const String& path)
     {
-        createImplementation();
-        if(!isAbsolutePath(basepath))
-        {
-            Main::get().getConsole() << "\n[FileSystem] Initializing FileSystem with relative path \"" << basepath << "\" is dangerous !";
-            setBasePath(absolutePath(basepath));
-        }
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        return PathFileExists((LPCTSTR) path.toCstChar()) == TRUE;
+
+#else
+
+        return access(path, F_OK) == 0;
+
+#endif
     }
 
-    FileSystem::FileSystem(const FileSystem& other)
-        : Implementable(String("APro::FileSystem")), m_basepath(other.getBasePath())
+    bool FileSystem::IsDirectory(const String& path)
     {
-        createImplementation();
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        return PathIsDirectory((LPCTSTR) path.toCstChar()) == TRUE;
+
+#else
+
+        if(!FileSystem::Exists(path))
+            return false;
+
+        struct FSTAT s;
+        if(FSTAT(path.toCstChar(), &s) == 0)
+            return s.st_mode & S_IFDIR;
+        else
+            return false;
+
+#endif // APRO_PLATFORM
     }
 
-    FileSystem::~FileSystem()
+    bool FileSystem::IsFile(const String& path)
     {
-
+        return !FileSystem::IsDirectory(path);
     }
 
-    void FileSystem::clear()
+    bool FileSystem::HasExtension(const String& path)
     {
-
+        String filename = FileSystem::ExtractFilename(path);
+        return filename.findFirst('.') == path.size();
     }
 
-    void FileSystem::setBasePath(const String& basepath)
+    char FileSystem::GetSeparator()
     {
-        m_basepath = basepath;
+        if(Platform::Get() == Platform::Windows ||
+           Platform::Get() == Platform::WindowsCE)
+            return '\\';
+        else
+            return '/';
     }
 
-    String FileSystem::getBasePath() const
+    String FileSystem::ExtractFilename(const String& path)
     {
-        return m_basepath;
+        return path.extract(path.findLast(FileSystem::GetSeparator()), path.size());
     }
 
-    String FileSystem::getRelativePath(const String& absolutepath) const
+    String FileSystem::ExtractExtension(const String& path)
     {
-        if(!exists(absolutepath))
-            return String();
-
-        if(!implement.isNull())
-        {
-            return implement->generateRelative(m_basepath, absolutepath);
-        }
-
-        return String();
+        return path.extract(path.findLast('.'), path.size());
     }
 
-    File::ptr FileSystem::get(const String& path, bool /* relative */)
+    bool FileSystem::CreateFile(const String& path, bool overwrite)
     {
-        //if(exists(path))
-        {
-            return File::ptr(AProNew(File, path));
-        }
-
-        return File::ptr();
-    }
-
-    String FileSystem::absolutePath(const String& filepath) const
-    {
-        if(!exists(filepath))
-            return String();
-
-        if(!implement.isNull())
-        {
-            return implement->generateAbsolute(m_basepath, filepath);
-        }
-
-        return String();
-    }
-
-    bool FileSystem::isAbsolutePath(const String& filepath) const
-    {
-        if(filepath.isEmpty())
+        if(FileSystem::Exists(path) &&
+           !overwrite)
         {
             return false;
         }
 
-        if(!implement.isNull())
+        // We truncate the file and create it if it
+        // doesn't exists.
+        FILE* fp = fopen(path, "wb");
+        if(fp)
         {
-            return implement->isAbsolute(filepath);
+            fclose(fp);
+            return true;
         }
 
         return false;
     }
 
-    String FileSystem::directoryOf(const String& filepath) const
+    bool FileSystem::CreateDirectory(const String& path)
     {
-        String apath = absolutePath(filepath);
-        if(!apath.isEmpty())
-        {
-            return apath.extract(0, apath.findLast(pathSeparator()));
-        }
+        if(FileSystem::Exists(path))
+            return true;
 
-        return String();
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        return CreateDirectory((LPCTSTR) path.toCstChar()) == TRUE;
+
+#else
+
+        if(mkdir(path, S_IRWXG | S_IRWXO | S_IRWXU) == 0)
+            return true;
+
+        return false;
+
+#endif
     }
 
-    String FileSystem::normalizePath(const String& filepath, char sep) const
+    bool FileSystem::RemoveFile(const String& path)
     {
-        String path = normalizeSeparators(filepath, sep);
-        if(!isAbsolutePath(path))
-        {
-            path = absolutePath(path);
-        }
+        if(!FileSystem::Exists(path))
+            return true;
 
-        return path;
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        return DeleteFile((LPCTSTR) path.toCstChar()) == TRUE;
+
+#else
+
+        return remove(path) == 0;
+
+#endif
     }
 
-    String FileSystem::normalizeSeparators(const String& filepath, char sep) const
+    bool FileSystem::RemoveDirectory(const String& path, bool recursive)
     {
-        if(!implement.isNull())
+        if(!FileSystem::Exists(path))
+            return true;
+
+        Directory dir(path);
+        if(dir.isValid())
         {
-            char ps = implement->pathSeparator();
-            String ret(filepath);
-            ret.replaceEvery(sep, ps);
+            if(!dir.isEmpty())
+            {
+                if(recursive)
+                {
+                    dir.makeEmpty();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            dir.close();
+
+#if APRO_PLATFORM == APRO_WINDOWS
+
+            return RemoveDirectory((LPCTSTR) path.toCstChar()) == TRUE;
+
+#else
+
+            return rmdir(path);
+
+#endif
+
+
+        }
+
+        return false;
+    }
+
+    bool FileSystem::CopyFile(const String& from, const String& to, bool failIfExists)
+    {
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        return CopyFile((LPCTSTR) from.toCstChar(), (LPCTSTR) to.toCstChar(), (BOOL) failIfExists) == TRUE;
+
+#else
+
+        if(failIfExists && FileSystem::Exists(to))
+            return false;
+
+        char buf[BUFSIZ];
+        size_t size;
+
+        int source = open(from.toCstChar(), O_RDONLY, 0);
+        int dest   = open(to.toCstChar(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+        if(source == -1 || dest == -1)
+        {
+            close(source);
+            close(dest);
+            return false;
+        }
+
+        while((size = read(source, buf, BUFSIZ)) > 0)
+        {
+            write(dest, buf, BUFSIZ);
+        }
+
+        close(source);
+        close(dest);
+        return true;
+
+#endif // APRO_PLATFORM
+    }
+
+    String FileSystem::GetCurrentWorkingDirectory()
+    {
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        char wd[256];
+        GetCurrentDirectory(256, wd);
+        return String(wd);
+
+#else
+
+        char wd[256];
+        getcwd(wd, 256);
+        return String(wd);
+
+#endif // APRO_PLATFORM
+    }
+
+    bool FileSystem::SetCurrentWorkingDirectory(const String& path)
+    {
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        return SetCurrentDirectory((LPCTSTR) path.toCstChar()) == TRUE;
+
+#else
+
+        return chdir(path) == 0;
+
+#endif
+    }
+
+    bool FileSystem::IsRelative(const String& path)
+    {
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        return PathIsRelative((LPCTSTR) path.toCstChar()) == TRUE;
+
+#else
+
+        return !FileSystem::IsAbsolute(path);
+
+#endif
+    }
+
+    bool FileSystem::IsAbsolute(const String& path)
+    {
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        return !FileSystem::IsRelative(path);
+
+#else
+
+        if(path.isEmpty()) return false;
+        else if (path[0] == '~' && path[1] == '/') return true;
+        else if (path[0] == '/') return true;
+        else return false;
+
+#endif
+    }
+
+    String FileSystem::GetAbsolutePath(const String& relative)
+    {
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        TCHAR  buffer[BUFSIZ] = TEXT("");
+        TCHAR** lppPart       = { NULL };
+
+        GetFullPathName(relative.toCstChar(), BUFSIZ, buffer, lppPart);
+        return String(buffer);
+
+#else
+
+        char* actualpath = NULL;
+        actualpath = realpath(relative.toCstChar(), NULL);
+        if(actualpath)
+        {
+            String ret(actualpath);
+
+            // This is a rare case where we must use free() instead
+            // of AProFree. realpath(3) uses malloc() function to allocate
+            // perfect buffer size.
+            free(actualpath);
             return ret;
         }
-
-        return filepath;
-    }
-
-    bool FileSystem::copy(const String& source, const String& target)
-    {
-        if(!implement.isNull())
-        {
-            if(exists(source))
-            {
-                return implement->copy(source, target);
-            }
-
-            else
-            {
-                Main::get().getConsole() << "\n[FileSystem]{copy} Can't copy file \"" << source << "\" to file \"" << target << "\" because source path doesn't exist !";
-            }
-        }
-
-        return false;
-    }
-
-    bool FileSystem::Delete(const String& filepath)
-    {
-        if(!implement.isNull())
-        {
-            if(exists(filepath))
-            {
-                return implement->f_delete(filepath);
-            }
-
-            else
-            {
-                Main::get().getConsole() << "\n[FileSystem]{delete} Can't delete file \"" << filepath << "\" because it doesn't exist !";
-            }
-        }
-
-        return false;
-    }
-
-    bool FileSystem::exists(const String& filepath) const
-    {
-        if(!implement.isNull())
-        {
-            return implement->exists(filepath);
-        }
-
-        return false;
-    }
-
-    bool FileSystem::rename(const String& source, const String& target)
-    {
-        if(!implement.isNull())
-        {
-            if(exists(source))
-            {
-                return implement->rename(source, target);
-            }
-
-            else
-            {
-                Main::get().getConsole() << "\n[FileSystem]{delete} Can't rename file \"" << source << "\" because it doesn't exist !";
-            }
-        }
-
-        return false;
-    }
-
-    char FileSystem::pathSeparator() const
-    {
-        if(!implement.isNull())
-        {
-            return implement->pathSeparator();
-        }
-
-        return '\\';
-    }
-
-    String FileSystem::extension(const String& filepath)
-    {
-        return filepath.extract(filepath.findLast('.') + 1, filepath.size());
-    }
-
-    void FileSystem::initImplementation()
-    {
-
-    }
-
-    String FileSystem::getWorkingDirectory()
-    {
-        char working_dir[256];
-        working_dir[255] = '\0';
-        if(getcwd(working_dir, 256) == working_dir)
-            return String(working_dir);
         else
+        {
             return String();
+        }
+
+#endif // APRO_PLATFORM
     }
 
-    bool FileSystem::setWorkingDirectory(const String& working_directory)
+    String FileSystem::GetHomeAbsolutePath()
     {
-        return chdir(working_directory.toCstChar()) == 0;
+#if APRO_PLATFORM == APRO_WINDOWS
+
+        char* buf[BUFSIZ];
+        HANDLE hToken;
+
+        if(!OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &hToken))
+            return String();
+
+        GetUserProfileDirectory(hToken, buf, BUFSIZ);
+        CloseHandle(hToken);
+        return String(buf);
+
+#else
+
+        return String("~/");
+
+#endif // APRO_PLATFORM
     }
+
 }

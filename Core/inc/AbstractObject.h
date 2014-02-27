@@ -23,7 +23,7 @@
 namespace APro
 {
     class APRO_DLL AbstractObjectFactory;
-    class APRO_DLL AbstractObjectAutoPointer;
+    class APRO_DLL AbstractObjectPtr;
 
     ////////////////////////////////////////////////////////////
     /** @class AbstractObject

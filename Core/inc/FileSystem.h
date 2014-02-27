@@ -1,88 +1,185 @@
+/////////////////////////////////////////////////////////////
 /** @file FileSystem.h
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 05/07/2012
+ *  @date 05/07/2012 - 21/02/2014
  *
- *  @addtogroup Global
- *  @addtogroup IO
- *
- *  This file defines the FileSystem Singleton.
+ *  Defines the FileSystem class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #ifndef AROFILESYSTEM_H
 #define AROFILESYSTEM_H
 
 #include "SString.h"
-#include "Implementable.h"
-#include "Implementation.h"
-#include "SharedPointer.h"
 #include "File.h"
-#include "FileSystemImplementation.h"
 
 namespace APro
 {
+    /////////////////////////////////////////////////////////////
     /** @class FileSystem
-      * @brief Main-generated class able to give access to files.
-      * @note A platform-dependant implementation is required
-      * to use this class. If none provided, no files will be used !
-      * @note The file system is based on a path and can use relative path to open
-      * files.
+     *  @ingroup Utils
+     *  @brief A set of functions utilities for filesystem.
+     *
+     *  This implementation uses functions in common files in
+     *  every operating system. So we are not dependant of
+     *  operating systems.
+     *
+     *  @note On Windows systems, the specific Windows library is
+     *  used to manipulate files.
     **/
-    class APRO_DLL FileSystem : public Implementable<FileSystemImplementation>
+    /////////////////////////////////////////////////////////////
+    class APRO_DLL FileSystem
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(FileSystem)
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if path exists (either file or
+         *  directory).
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool Exists(const String& path);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if path exists and is a directory.
+         *  @note A directory is a path without extension.
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool IsDirectory(const String& path);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if path exists and is a file.
+         *  @note A file is a path with extension.
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool IsFile(const String& path);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if path has extension.
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool HasExtension(const String& path);
 
     public:
 
-        FileSystem(const String& basepath);
-        FileSystem(const FileSystem& other);
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns '\' on Windows systems and '/' on others.
+        **/
+        /////////////////////////////////////////////////////////////
+        static char GetSeparator();
 
-        ~FileSystem();
+        /////////////////////////////////////////////////////////////
+        /** @brief Extract Filename from path.
+        **/
+        /////////////////////////////////////////////////////////////
+        static String ExtractFilename(const String& path);
 
-        void clear();
-
-    public:
-
-        void setBasePath(const String & basepath);
-        String getBasePath() const;
-
-    public:
-
-        String getRelativePath(const String & absolutepath) const;
-        File::ptr get(const String& path, bool relative = true);
-
-    public:
-
-        String   absolutePath(const String& filepath) const;
-        bool     isAbsolutePath(const String& filepath) const;
-
-        String   directoryOf(const String& filepath) const;
-        String   normalizePath(const String& filepath, char sep) const;
-        String   normalizeSeparators(const String& filepath, char sep) const;
-
-        bool     copy(const String& source, const String& target);
-        bool     Delete(const String& filepath);
-        bool     exists(const String& filepath) const;
-
-        bool     rename(const String& source, const String& target);
-
-        char     pathSeparator() const;
+        /////////////////////////////////////////////////////////////
+        /** @brief Extract Extension from path.
+        **/
+        /////////////////////////////////////////////////////////////
+        static String ExtractExtension(const String& path);
 
     public:
 
-        static String extension(const String& filepath);
-        static String getWorkingDirectory();
-        static bool   setWorkingDirectory(const String& working_directory);
+        /////////////////////////////////////////////////////////////
+        /** @brief Create a file.
+         *
+         *  @param path : Path to create the file. Can be relative or
+         *  absolute.
+         *  @param overwrite : True if you want to overwrite the file
+         *  if it already exists.
+         *  @return true on success.
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool CreateFile(const String& path, bool overwrite = false);
 
-    protected:
+        /////////////////////////////////////////////////////////////
+        /** @brief Create a directory.
+         *
+         *  @param path : Path to create the directory. Can be relative or
+         *  absolute.
+         *  @return true on success. Note that if directory already exists,
+         *  this function returns true.
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool CreateDirectory(const String& path);
 
-        void initImplementation();
+        /////////////////////////////////////////////////////////////
+        /** @brief Remove a given file.
+         *  @return True if file doesn't exists or on sucess.
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool RemoveFile(const String& path);
 
-    protected:
+        /////////////////////////////////////////////////////////////
+        /** @brief Remove a given directory.
+         *  @param path : Path to directory.
+         *  @param recursive : If set to false, only empty directory
+         *  will be removed. If set to true, directory will be emptied
+         *  before being removed.
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool RemoveDirectory(const String& path, bool recursive = false);
 
-        String m_basepath;
+        /////////////////////////////////////////////////////////////
+        /** @brief Copy file given from to file to.
+         *  @param failIfExists : If file already exists, does the
+         *  function fail (true) or overwrite it (false).
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool CopyFile(const String& from, const String& to, bool failIfExists = true);
+
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns the current working directory.
+        **/
+        /////////////////////////////////////////////////////////////
+        static String GetCurrentWorkingDirectory();
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Set the current working directory.
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool SetCurrentWorkingDirectory(const String& path);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if path is relative.
+         *
+         *  @note On Unix-like systems, absolute path are beginning
+         *  with '~/' for home and with '/' for root.
+         *  Paths beginning with a letter or with '\' are relative.
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool IsRelative(const String& path);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if path is absolute.
+         *
+         *  @note On Unix-like systems, absolute path are beginning
+         *  with '~/' for home and with '/' for root.
+         *  Paths beginning with a letter or with '\' are relative.
+        **/
+        /////////////////////////////////////////////////////////////
+        static bool IsAbsolute(const String& path);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns Absolute path from relative path.
+         *  @note On Unix Systems, the path given must exists.
+        **/
+        /////////////////////////////////////////////////////////////
+        static String GetAbsolutePath(const String& relative);
+
+         /////////////////////////////////////////////////////////////
+        /** @brief Returns Absolute path for home.
+        **/
+        /////////////////////////////////////////////////////////////
+        static String GetHomeAbsolutePath();
+
     };
 }
 

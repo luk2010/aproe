@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012
+ *  @date 25/06/2012 - 23/02/2014
  *
  *  @addtogroup Global
  *  @addtogroup Memory
@@ -13,7 +13,6 @@
 **/
 #include "ThreadMutex.h"
 #include "SString.h"
-#include "Number.h"
 
 namespace APro
 {
@@ -625,5 +624,10 @@ namespace APro
         }
 
         return h ^ (h << 16);
+    }
+
+    int String::Size(const char* str)
+    {
+        return strlen(str);
     }
 }

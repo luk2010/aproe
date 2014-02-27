@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012
+ *  @date 25/06/2012 - 27/02/2014
  *
  *  Defines the String class.
  *
@@ -108,6 +108,7 @@ namespace APro
 
         Array<char>& toArray();
         const Array<char>& toCstArray() const;
+
         const char* toCstChar() const;
 
         void clear();
@@ -174,6 +175,9 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         static HashType Hash(const char* str);
+
+        // return size of given string, without the null-terminated character.
+        static int Size(const char* str);
 
     protected:
 

@@ -43,25 +43,19 @@ project("core")
 
 	language "c++"
 	files { "inc/*.h", "src/*.cpp" };
+	defines { "__builddll__" }
 
 	configuration "windows"
-		defines {"WIN32"}
-
-	configuration "Xbox360"
-		defines {"_XBOX360_"}
+		defines {"__windows__"}
+		links {"shlwapi", "userenv", "kernel32"}
 	
 	configuration "linux"
-		defines {"LINUX"}
-		defines {"_HAVE_POSIX_"}
-		links {"dl"}
-
-	configuration "PS3"
-		defines {"_PS3_"}
+		defines {"__linux__"}
 		defines {"_HAVE_POSIX_"}
 		links {"dl"}
 
 	configuration "macosx"
-		defines {"_MACOSX_"}
+		defines {"__macosx__"}
 		defines {"_HAVE_POSIX_"}
 		links {"dl"}
 

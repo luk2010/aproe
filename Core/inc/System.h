@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012
+ *  @date 21/05/2012 - 27/02/2014
  *
  *  @addtogroup Global
  *  @addtogroup Memory
@@ -84,92 +84,59 @@ public:
 /** Set Platform to Windows. */
 #define APRO_WINDOWS 1
 
-/** Set Platform to WindowsCE. */
-#define APRO_WINDOWSCE 2
-
 /** Set Platform to Linux. */
-#define APRO_LINUX 3
+#define APRO_LINUX 2
 
 /** Set Platform to OS X. */
-#define APRO_OSX 4
+#define APRO_OSX 3
 
-/** Set platform to Xbox360. */
-#define APRO_XBOX360 5
-
-/** Set platform to PS3. */
-#define APRO_PS3 6
+// Inclusion des fichiers d'entetes globaux
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <dirent.h>
 
 //----------------------------------------------//
 //                   Windows                    //
 //----------------------------------------------//
 
-#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64)
+#ifdef __windows__
 #   define APRO_PLATFORM APRO_WINDOWS
-#   define __WIN
-#   define WIN
-#   include <windows.h>
-#   include <Windowsx.h>
-#   define FSTAT _stat
-#endif
 
-//----------------------------------------------//
-//                 Windows CE                   //
-//----------------------------------------------//
-
-#if defined(_WIN32_WCE)
-#   define APRO_PLATFORM APRO_WINDOWSCE
 #   include <windows.h>
+#   include <windowsx.h>
+#   include <Shlwapi.h>
+#   include <userenv.h>
+
 #   define FSTAT _stat
+#   define APRO_BUILDDLLEXPORT __declspec(dllexport)
+#   define APRO_BUILDDLLIMPORT __declspec(dllimport)
 #endif
 
 //----------------------------------------------//
 //                    OS X                      //
 //----------------------------------------------//
 
-#if defined(_APPLE_) || defined(MACOSX) || defined(_MACOSX_)
-#   if !defined(MACOSX)
-#       define MACOSX
-#   endif
-#
+#ifdef __macosx__
 #   define APRO_PLATFORM APRO_OSX
 #   define FSTAT stat
 #endif
 
 //----------------------------------------------//
-//                    PS3                       //
-//----------------------------------------------//
-
-#if defined(_PS3_)
-#   define APRO_PLATFORM APRO_PS3
-#   define FSTAT stat
-#endif // defined
-
-//----------------------------------------------//
-//                  XBox360                     //
-//----------------------------------------------//
-
-#if defined(_XBOX360_)
-#   define APRO_PLATFORM APRO_XBOX360
-#   define FSTAT _fstat
-#   include <windows.h>
-#endif // defined
-
-//----------------------------------------------//
 //                   Linux                      //
 //----------------------------------------------//
 
-#ifndef APRO_PLATFORM
+#ifdef __linux__
 #   define APRO_PLATFORM APRO_LINUX
-//#   include <X11/Xlib.h>
 #   define FSTAT stat
-#endif
+#endif // __linux__
 
-#if defined(LINUX)
-#   define APRO_PLATFORM APRO_LINUX
-//#   include <X11/Xlib.h>
-#   define FSTAT stat
-#endif
-
-
+#ifndef __windows__
+#   include <unistd.h>
+#   define APRO_BUILDDLLEXPORT
+#   define APRO_BUILDDLLIMPORT
+#endif // __windows__
 
 #endif

@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 16/03/2013
+ *  @date 16/03/2013 - 22/02/2014
  *
  *  Defines the Implementation class and system.
  *
@@ -55,7 +55,7 @@ namespace APro
     public:
 
         Implementation() { }
-        ~Implementation() { }
+        virtual ~Implementation() { }
 
     };
 

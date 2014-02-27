@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 19/05/2013
+ *  @date 19/05/2013 - 22/02/2014
  *
  *  Defines the Factory class and Design Pattern.
  *
@@ -44,7 +44,8 @@ namespace APro
      *  set a new key registering a prototype, so everybody will
      *  guess which name you use.
      *
-     *  @warning The prototype has to be destroyed by the creator.
+     *  Every prototypes is destroyed by the Factory, you do not
+     *  need to destroy them.
     **/
     /////////////////////////////////////////////////////////////
     template <typename PrototypeBase>
@@ -59,7 +60,16 @@ namespace APro
         /** @brief Destructor.
         **/
         /////////////////////////////////////////////////////////////
-        ~Factory() {}
+        virtual ~Factory()
+        {
+            // Destroy every Prototypes in the factory.
+            Map<String, PrototypeBase*>::const_iterator e = prototypes.end();
+            for(Map<String, PrototypeBase*>::iterator it = prototypes.begin(); it != e; it++)
+            {
+                if(it.value())
+                    AProDelete(it.value());
+            }
+        }
 
         /////////////////////////////////////////////////////////////
         /** @brief Create an object.

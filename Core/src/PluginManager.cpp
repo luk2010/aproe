@@ -223,13 +223,13 @@ namespace APro
 
     int PluginManager::loadDirectory(const String& path)
     {
-        if(FileSystem::Exists(path) && FileSystem::IsDirectory(path))
+        if(FileSystem::IsDirectory(path))
         {
             Directory dir(path);
             dir.skipDirectory(true);
             dir.skipDot(true);
 
-            int files_in_dir = dir.countFiles();
+            int files_in_dir = dir.countEntries();
             if(files_in_dir > 0)
             {
                 aprodebug("Trying to load '") << files_in_dir << "' files.";
@@ -238,7 +238,7 @@ namespace APro
                 Directory::Entry ent;
                 while(dir >> ent)
                 {
-                    if(!addPluginHhandle(String(), ent.name, true).isNull())
+                    if(!addPluginHhandle(String(), String(ent.d_name), true).isNull())
                         ret++;
                 }
 

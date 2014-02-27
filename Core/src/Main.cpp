@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 06/02/2014
+ *  @date 20/09/2012 - 22/02/2014
  *
  *  Implements the Main class.
  *
@@ -25,8 +25,6 @@
 #include "PointerCollector.h"
 #include "AbstractObject.h"
 #include "IdGenerator.h"
-
-#include <unistd.h>
 
 namespace APro
 {
@@ -58,27 +56,29 @@ namespace APro
     {
         getConsole() << "\n[Main] Initializing Main...";
 
-        String workingdir(FileSystem::getWorkingDirectory());
+        getConsole() << "\n[Main] Platform : ";
+        getConsole() << "\n - OS = " << Platform::ToString(Platform::Get());
+        getConsole() << "\n - DebugMode = " << Platform::IsDebugMode() ? "True" : "False";
 
+        String workingdir(FileSystem::GetWorkingDirectory());
         getConsole() << "\n[Main] Current Working directory is \"" << workingdir << "\".";
 
-        if(argc > 0)
+        if(argc > 1 && String("--auto-set-cwd") == argv[1])
         {
+            // We set the Working directory to the current executable only if argv[1] is "--auto-set-cwd"
             workingdir = argv[0];
-            workingdir = workingdir.extract(0, workingdir.findLast('/'));
+            workingdir = workingdir.extract(0, workingdir.findLast(FileSystem::GetSeparator()));
 
             getConsole() << "\n[Main] Setting Working directory to \"" << workingdir << "\".";
-            if(FileSystem::setWorkingDirectory(workingdir))
+            if(FileSystem::SetWorkingDirectory(workingdir))
                 getConsole() << "OK";
             else
                 getConsole() << "FAILED";
         }
 
         setOption((int) GlobalOption::Debugging_Implementation, false);
-
-        getConsole() << "\nCurrent configuration is : "
-                     << "\n - Debugging Implementation = " << (hasOption((int) GlobalOption::Debugging_Implementation) ? "true" : "false");
-
+        getConsole() << "\n[Main] Current configuration is : "
+                     << "\n - Debugging Implementation = " << (hasOption((int) GlobalOption::Debugging_Implementation) ? "True" : "False");
 
         // -- Core ---------------------------------------------------------------------
 
@@ -142,6 +142,7 @@ namespace APro
         if(euniter)
         {
             EventUniter::__curent_EventUniter = euniter;
+            euniter->start();
             getConsole() << "\n[Main] EventUniter OK.";
         }
         else
@@ -251,20 +252,6 @@ namespace APro
         }
 */
 
-
-
-        fs = AProNew(FileSystem, workingdir, fs);
-        if(fs)
-        {
-            getConsole() << "\n[Main] File System OK. Base Path is : \"" << workingdir << "\".";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create File System ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
-        }
-
-
         getConsole() << "\n[Main] Main Initialized ! Enjoy ;)";
         return *this;
     }
@@ -274,7 +261,6 @@ namespace APro
         /*
         Les singleton doivent etre detruits dans l'ordre inverse ou ils ont ete crees
         afin d'etre sur de ne pas causer de troubles pendant leur destruction.
-        NOTE : Leur destructeur devrait ne rien faire.
         */
     }
 
@@ -286,28 +272,6 @@ namespace APro
         */
 
         getConsole() << "\n[Main] Clearing everything...";
-
-        if(abstract_object_factory)
-        {
-            AProDelete(abstract_object_factory);
-            getConsole() << "\n[Main] Object Factory cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Object Factory because not initialized !";
-        }
-
-        if(fs)
-        {
-            fs->clear();
-            AProDelete2(fs);
-            fs = nullptr;
-            getConsole() << "\n[Main] File System cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean File System because not initialized !";
-        }
 
         if(windowManager)
         {
@@ -321,11 +285,39 @@ namespace APro
             getConsole() << "\n[Main] Can't clean Window Manager because not initialized !";
         }
 
+
+        if(pluginManager)
+        {
+            AProDelete(pluginManager);
+
+            pluginManager = nullptr;
+            PluginManager::__curent_PluginManager = nullptr;
+            getConsole() << "\n[Main] Plugin Manager cleaned !";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't clean Plugin Manager because not initialized !";
+        }
+
+        if(resourceManager)
+        {
+            AProDelete(resourceManager);
+
+            resourceManager = nullptr;
+            ResourceManager::__curent_ResourceManager = nullptr;
+            getConsole() << "\n[Main] Resource Manager cleaned !";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't clean Resource Manager because not initialized !";
+        }
+
         if(mathManager)
         {
-            mathManager->clear();
             AProDelete(mathManager);
+
             mathManager = nullptr;
+            MathFunctionManager::__curent_MathFunctionManager = nullptr;
             getConsole() << "\n[Main] Math Manager cleaned !";
         }
         else
@@ -335,11 +327,10 @@ namespace APro
 
         if(tmanager)
         {
-            tmanager->stopAllThreads();
-            tmanager->clear();
             AProDelete(tmanager);
+
             tmanager = nullptr;
-            ThreadManager::currentThreadManager = NULL;
+            ThreadManager::__current_ThreadManager = nullptr;
             getConsole() << "\n[Main] Thread Manager cleaned !";
         }
         else
@@ -347,17 +338,72 @@ namespace APro
             getConsole() << "\n[Main] Can't clean Thread Manager because not initialized !";
         }
 
-        if(pluginManager)
+        if(euniter)
         {
-            pluginManager->clear();
-            AProDelete(pluginManager);
-            pluginManager = nullptr;
-            getConsole() << "\n[Main] Plugin Manager cleaned !";
+            AProDelete(euniter);
+
+            euniter = nullptr;
+            EventUniter::__curent_EventUniter = nullptr;
+            getConsole() << "\n[Main] Global Event Uniter cleaned !";
         }
         else
         {
-            getConsole() << "\n[Main] Can't clean Plugin Manager because not initialized !";
+            getConsole() << "\n[Main] Can't clean Global Event Uniter because not initialized !";
         }
+
+        if(abstract_object_factory)
+        {
+            AProDelete(abstract_object_factory);
+
+            abstract_object_factory = nullptr;
+            AbstractObjectFactory::__curent_AbstractObjectFactory = nullptr;
+            getConsole() << "\n[Main] Object Factory cleaned !";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't clean Object Factory because not initialized !";
+        }
+
+        if(impFactory)
+        {
+            AProDelete(impFactory);
+
+            impFactory = nullptr;
+            ImplementationFactory::__curent_ImplementationFactory = nullptr;
+            getConsole() << "\n[Main] Implementation Factory cleaned !";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't clean Implementation Factory because not initialized !";
+        }
+
+        if(sharedpointer_collector)
+        {
+            AProDelete(sharedpointer_collector);
+
+            sharedpointer_collector = nullptr;
+            PointerCollector::__current_PointerCollector = nullptr;
+            getConsole() << "\n[Main] Global Pointer Collector cleaned !";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't clean Global Pointer Collector because not initialized !";
+        }
+
+        if(id_generator)
+        {
+            AProDelete(id_generator);
+
+            id_generator = nullptr;
+            IdGenerator::__curent_IdGenerator = nullptr;
+            getConsole() << "\n[Main] Global ID Generator cleaned !";
+        }
+        else
+        {
+            getConsole() << "\n[Main] Can't clean Global ID Generator because not initialized !";
+        }
+
+        getConsole() << "\n[Main] Cleaned !";
 
 /*
         if(rfm)
@@ -384,54 +430,6 @@ namespace APro
             getConsole() << "\n[Main] Can't clean Implementation Store because not initialized !";
         }
  */
-
-        if(impFactory)
-        {
-            impFactory->clear();
-            AProDelete(impFactory);
-            impFactory = nullptr;
-            getConsole() << "\n[Main] Implementation Factory cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Implementation Factory because not initialized !";
-        }
-
-        if(resourceManager)
-        {
-            resourceManager->clear();
-            AProDelete(resourceManager);
-            resourceManager = nullptr;
-            getConsole() << "\n[Main] Resource Manager cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Resource Manager because not initialized !";
-        }
-
-        if(sharedpointer_collector)
-        {
-            AProDelete(sharedpointer_collector);
-            sharedpointer_collector = nullptr;
-            getConsole() << "\n[Main] Global Pointer Collector cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Global Pointer Collector because not initialized !";
-        }
-
-        if(id_generator)
-        {
-            AProDelete(id_generator);
-            id_generator = nullptr;
-            getConsole() << "\n[Main] Global ID Generator cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Global ID Generator because not initialized !";
-        }
-
-        getConsole() << "\n[Main] Cleaned !";
     }
 
     void Main::setOption(unsigned int option, bool state)
