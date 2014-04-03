@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/04/2013
+ *  @date 25/04/2013 - 22/03/2014
  *
  *  Defines the ThreadSafe class.
  *
@@ -15,7 +15,7 @@
 #define APRO_THREADSAFE_H
 
 #include "Platform.h"
-#include "ThreadMutex.h"
+#include "ThreadMutexI.h"
 #include "ThreadMutexLockGuard.h"
 
 namespace APro
@@ -71,17 +71,17 @@ namespace APro
         /** @brief Return the internal mutex.
         **/
         ////////////////////////////////////////////////////////////
-        ThreadMutex& getMutex() { return mutex; }
+        IMutex& getMutex() { return mutex; }
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the internal mutex.
         **/
         ////////////////////////////////////////////////////////////
-        const ThreadMutex& getMutex() const { return mutex; }
+        const IMutex& getMutex() const { return mutex; }
 
     private:
 
-        ThreadMutex mutex;///< Mutex.
+        ThreadMutexI mutex;///< Mutex.
     };
 
     #define APRO_THREADSAFE_AUTOLOCK THREADMUTEXAUTOLOCK(ThreadSafe::getMutex());

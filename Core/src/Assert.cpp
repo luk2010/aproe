@@ -5,14 +5,13 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 04/10/2013
+ *  @date 04/10/2013 - 28/02/2014
  *
  *  Implements the throwing exception Assert function.
  *
 **/
 ////////////////////////////////////////////////////////////
 #include "Platform.h"
-#include <cstdio>
 
 namespace APro
 {

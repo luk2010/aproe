@@ -5,17 +5,17 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013 - 15/02/2014
+ *  @date 06/04/2013 - 22/03/2014
  *
  *  Implements the Mutex class.
  *
 **/
 ////////////////////////////////////////////////////////////
+#include "ThreadMutex.h"
+
 #ifdef _COMPILE_WITH_PTHREAD_
 #   include <pthread.h>
 #endif // _COMPILE_WITH_PTHREAD_
-
-#include "ThreadMutex.h"
 
 namespace APro
 {
@@ -92,6 +92,7 @@ namespace APro
         else
         {
             aprodebug("Couldn't trylock mutex id '") << m_id << "'.";
+            return false;
         }
 #else
         return true;

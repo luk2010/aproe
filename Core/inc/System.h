@@ -139,4 +139,9 @@ public:
 #   define APRO_BUILDDLLIMPORT
 #endif // __windows__
 
+// Compile Time assertion
+// From http://code.google.com/p/personal-code-library/source/browse/trunk/CodeLibrary/C%2B%2B/Utility/CCASSERT.cpp
+#define CCASSERT(predicate) _x_CCASSERT_LINE(predicate, __LINE__)
+#define _x_CCASSERT_LINE(predicate, line) typedef char constraint_violated_on_line_##line[2*((predicate)!=0)-1];
+
 #endif

@@ -1,98 +1,246 @@
+/////////////////////////////////////////////////////////////
 /** @file StreamInterface.h
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 04/01/2013
+ *  @date 04/01/2013 - 03/04/2014
  *
- *  @addtogroup Global
- *
- *  This file defines the StreamInterface class.
+ *  Defines the Streams class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #ifndef APRO_STREAMINTERFACE_H
 #define APRO_STREAMINTERFACE_H
 
 #include "Platform.h"
 #include "SString.h"
-#include "Number.h"
 
 namespace APro
 {
-    //! @class StreamInterface
-    /** Interface to create stream. */
-    class APRO_DLL StreamInterface
+    /////////////////////////////////////////////////////////////
+    /** @class CursorStream
+     *  @ingroup Utils
+     *  @internal
+     *  @brief Describes a Stream with a cursor interface.
+     *
+     *  Overload pure functions to get Cursor Interface in your
+     *  Stream.
+     *  @note The size function can be overloaded if you provides
+     *  a better function for performance. Basically, the default
+     *  size() function manages every kind of streams.
+    **/
+    /////////////////////////////////////////////////////////////
+    class CursorStream
     {
     public:
 
-        StreamInterface();
-        StreamInterface(const StreamInterface& other);
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs the Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        CursorStream();
 
-        virtual ~StreamInterface();
-
-    public:
-
-        class Position
-        {
-        public:
-            enum _
-            {
-                Begin,
-                Current,
-                End
-            };
-        };
+        /////////////////////////////////////////////////////////////
+        /** @brief Destructs the Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual ~CursorStream();
 
     public:
 
-        /** Add a character to the stream. */
-        virtual void writeChar(char c) = 0;
-        /** Add a string to the stream. */
-        virtual void writeString(const String& c) = 0;
-        /** Add a Number wit Real precision to the stream. */
-        virtual void writeNumber(const Number& n) = 0;
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if End Of Stream (EOS) is reached.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool operator bool () const;
 
-        /** Read a character from the stream. */
-        virtual void readChar(char& c) = 0;
-        /** Read a string from the stream. */
-        virtual void readString(String& str) = 0;
-        /** Read a word, i.e. a set of character finished by characters ' ', EOL, EOF, or EOS. */
-        virtual void readWord(String& str) = 0;
-        /** Read a number from the stream. */
-        virtual void readNumber(Number& n) = 0;
-
-        StreamInterface& operator << (char c);
-        StreamInterface& operator << (const char* str);
-        StreamInterface& operator << (const String& str);
-        StreamInterface& operator << (const Number& n);
-
-        StreamInterface& operator >> (char& c);
-        StreamInterface& operator >> (String& str);
-        StreamInterface& operator >> (Number& n);
-
-    public:
-
-        /** Size of the stream. */
-        virtual size_t size() const = 0;
-
-        /** Set the position of the cursor in the stream. */
-        virtual void seek(size_t pos, Position::_ relative = Position::Begin) = 0;
-
-        /** Get Current cursor position in the stream. */
-        virtual size_t tell() const = 0;
-
-        /** Tell if end of stream. Equivalent to EOF when stream is file. */
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if End Of Stream (EOS) is reached.
+        **/
+        /////////////////////////////////////////////////////////////
         virtual bool isEOS() const = 0;
 
-    protected:
+    public:
 
-        char stringSeparator;
+        /////////////////////////////////////////////////////////////
+        /** @enum CursorPosition
+         *  @brief Defines some Cursor Positions reference.
+        **/
+        /////////////////////////////////////////////////////////////
+        enum CursorPosition
+        {
+            CP_BEGIN = 0,///< Cursor at the beginning of the stream.
+            CP_CUR   = 1,///< Cursor from its current position.
+            CP_END   = 2 ///< Cursor at the end of the stream.
+        };
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns the current position of the cursor in the
+         *  Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual size_t tell() const = 0;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Set a new position for thhe cursor in the Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual void seek(size_t pos, CursorPosition cp = CP_BEGIN) = 0;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns the size of the stream.
+         *  @note Overload it for performance.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual size_t size();
+    };
+
+    /////////////////////////////////////////////////////////////
+    /** @class InputStream
+     *  @ingroup Utils
+     *  @brief An InputStream base interface.
+    **/
+    /////////////////////////////////////////////////////////////
+    class InputStream : virtual public CursorStream
+    {
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs the Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        InputStream();
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Destructs the Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual ~InputStream();
 
     public:
-        /** Set separator to read strings. By default, separator is the '.' character. Characters EOF and EOS are separators as well. */
-        StreamInterface& setStringSeparator(char sep);
-        /** Return the current String separator. */
-        char getStringSeparator() const;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads a single word (ASCII characters untill
+         *  char ' ', '\n', '\t' or '\0').
+        **/
+        /////////////////////////////////////////////////////////////
+        InputStream& operator >> (String& str);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads a single Real.
+        **/
+        /////////////////////////////////////////////////////////////
+        InputStream& operator >> (Real& r);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads a single integer.
+        **/
+        /////////////////////////////////////////////////////////////
+        InputStream& operator >> (int& i);
+
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads one character.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual bool readChar(char& to) = 0;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads a word.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual bool readWord(String& str) = 0;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads a line.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual bool readLine(String& str) = 0;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads untill one of the given character is reached.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual bool readUntill(String& str, ByteArray clist) = 0;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads a Real number.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual bool readReal(Real& r) = 0;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads an Integer.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual bool readInt(int& i) = 0;
+
+    };
+
+    /////////////////////////////////////////////////////////////
+    /** @class OutputStream
+     *  @ingroup Utils
+     *  @brief An Output Stream base interface.
+    **/
+    /////////////////////////////////////////////////////////////
+    class OutputStream : virtual public CursorStream
+    {
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs the Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        OutputStream();
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Destructs the Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual ~OutputStream();
+
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Write a String.
+        **/
+        /////////////////////////////////////////////////////////////
+        OutputStream& operator << (const String& str);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Write a Real.
+        **/
+        /////////////////////////////////////////////////////////////
+        OutputStream& operator << (const Real& r);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Write an integer.
+        **/
+        /////////////////////////////////////////////////////////////
+        OutputStream& operator << (const int& i);
+
+    public:
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Write a String.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual bool write(const String& str) = 0;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Write a Real.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual bool write(const Real& str) = 0;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Write an integer.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual bool write(const int& str) = 0;
     };
 }
 

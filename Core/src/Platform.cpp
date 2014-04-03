@@ -13,8 +13,6 @@
 ////////////////////////////////////////////////////////////
 #include "Platform.h"
 
-#if 0
-
 #if APRO_PLATFORM == APRO_WINDOWS
 
 bool _path_is_okay(const char * _dir_name)
@@ -136,9 +134,9 @@ void rewinddir(DIR* _dir_p)
     // Setting _cur_id to -1 will let readdir function use findfirst function
     // to be back at the beginning of the directory.
     _dir_p->_cur_id = -1;
+    // We close also the find handle.
+    _finclose(_dir_p->_handle);
 }
 
 #endif
-
-#endif // 0
 

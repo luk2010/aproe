@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 22/12/2013
+ *  @date 21/05/2012 - 28/02/2014
  *
  *  Redefines basic memory function, like malloc, realloc, free. It is usefull when the engine
  *  use the Memory Tracker.
@@ -15,7 +15,6 @@
 #ifndef APROMEMORY_H
 #define APROMEMORY_H
 
-#include "Platform.h"
 #include "MemoryTracker.h"
 #include "Types.h"
 

@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 01/12/2013 - 04/02/2014
+ *  @date 01/12/2013 - 22/03/2014
  *
  *  Defines the Atomic class.
  *
@@ -34,8 +34,8 @@ namespace APro
     {
     protected:
 
-        mutable ThreadMutex mutex;///< Mutex holding the value.
-        volatile T          value;///< Value of our atomic.
+        mutable  ThreadMutexI mutex;///< Mutex holding the value.
+        volatile T            value;///< Value of our atomic.
 
     public:
 

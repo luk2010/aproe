@@ -4,7 +4,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 29/05/2012 - 27/02/2014
+ *  @date 29/05/2012 - 03/04/2014
  *
  *  Defines some constants to be used on different platform. This constants are universal.
  *
@@ -72,10 +72,13 @@
 
 namespace APro
 {
+    typedef uint8_t             u8;
+    typedef uint16_t            u16;
+    typedef uint32_t            u32;
+    typedef uint64_t            u64;
 
-    typedef char                Byte;       ///< Represents a byte (8 bits).
-    typedef long int            Offset;     ///< Represents an adress offset.
-//  typedef unsigned long int   Id; // Defined in IdGenerator.h
+    typedef u8                  Byte;       ///< Represents a byte (8 bits).
+    typedef u64                 Offset;     ///< Represents an adress offset.
 
     typedef REAL_TYPE           unit_t;     ///< Represents the system unit measure.
     typedef unit_t              Real;       ///< Represents a number in the system unit measure.
@@ -86,10 +89,34 @@ namespace APro
 
     typedef unsigned int        HashType; ///< A standard hash type.
 
-    typedef uint8_t             u8;
-    typedef uint16_t            u16;
-    typedef uint32_t            u32;
-    typedef uint64_t            u64;
+
+// ---------------------------------------------------
+// Compile-time assertions
+// ---------------------------------------------------
+// Here we assert that every type has a correct size. This
+// is necessary for different processor architecture, as
+// x86 or x64.
+
+    CCASSERT(sizeof(char) == 1)                 // char = 1 Byte  (8 bits)
+    CCASSERT(sizeof(BYTE) == 1)                 // BYTE = 1 Byte  (8 bits)
+    CCASSERT(sizeof(u8)   == 1)                 // u8   = 1 Byte  (8 bits)
+    CCASSERT(sizeof(u16)  == 2)                 // u16  = 2 Bytes (16 bits)
+    CCASSERT(sizeof(u32)  == 4)                 // u32  = 4 Bytes (32 bits)
+    CCASSERT(sizeof(u64)  == 8)                 // u64  = 8 Bytes (64 bits)
+
+#ifdef _USE_DOUBLEREAL_
+    CCASSERT(sizeof(unit_t) == sizeof(double))  // unit_t = 8 Bytes (64 bits)
+#else
+    CCASSERT(sizeof(unit_t) == sizeof(float))   // unit_t = 4 Bytes (32 bits)
+#endif // _USE_DOUBLEREAL_
+
+#ifdef _USE_DOUBLEANGLE_
+    CCASSERT(sizeof(angle_t) == sizeof(double)) // angle_t = 8 Bytes (64 bits)
+#else
+    CCASSERT(sizeof(angle_t) == sizeof(float))  // angle_t = 4 Bytes (32 bits)
+#endif // _USE_DOUBLEANGLE_
+
+// ---------------------------------------------------
 
     union FloatIntReinterpret
     {

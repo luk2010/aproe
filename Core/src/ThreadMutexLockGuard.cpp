@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013
+ *  @date 06/04/2013 - 22/03/2014
  *
  *  Implements the MutexLockGuard class.
  *
@@ -15,7 +15,7 @@
 
 namespace APro
 {
-    ThreadMutexLockGuard::ThreadMutexLockGuard(ThreadMutex* mutex)
+    ThreadMutexLockGuard::ThreadMutexLockGuard(IMutex* mutex)
         : m_mutex(mutex)
     {
         if(m_mutex)

@@ -5,9 +5,9 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 27/02/2014
+ *  @date 21/05/2012 - 28/02/2014
  *
- *  This file defines some constants to be used on different platform. This constants are Memory-specific.
+ *  This file defines some constants to be used on different platform.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -22,6 +22,8 @@
 #if APRO_EXCEPTION == APRO_ON
 #   include "Exception.h"
 #endif
+
+#include "Memory.h"
 
 ////////////////////////////////////////////////////////////
 /** @class Platform
@@ -92,15 +94,9 @@ public:
     }
 };
 
-// We include input/output C basics
-#include <cstdio>
-
-#if 0
-
 // Basic directory functions
 #if APRO_PLATFORM == APRO_WINDOWS
-#   include <io.h>
-#   include <direct.h>
+#include <io.h>
 
 // On Windows we have to implement a basic opendir/readdir/closedir
 // functions to be more Posix-complient.
@@ -123,13 +119,6 @@ extern "C" int            closedir (DIR* _dir_p);
 extern "C" struct dirent* readdir  (DIR* _dir_p);
 extern "C" void           rewinddir(DIR* _dir_p);
 
-#else
-#   include <dirent.h>
-#endif
+#endif // WINDOWS
 
-#endif // 0
-
-// We include the basic memory system.
-#include "Memory.h"
-
-#endif
+#endif // APROPLATFORM_H

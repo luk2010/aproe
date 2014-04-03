@@ -16,6 +16,7 @@
 
 #include "Platform.h"
 #include "SString.h"
+#include "AutoPointer.h"
 
 namespace APro
 {
@@ -37,9 +38,9 @@ namespace APro
         ////////////////////////////////////////////////////////////
         enum CursorPosition
         {
-            C_BEGIN,    ///< Cursor is at the beginning of the file.
-            C_CURRENT,  ///< Cursor is at the current position.
-            C_END       ///< Cursor is at the end of the file.
+            C_BEGIN   = 0,///< Cursor is at the beginning of the file.
+            C_CURRENT = 1,///< Cursor is at the current position.
+            C_END     = 2 ///< Cursor is at the end of the file.
         };
 
     private:
@@ -213,6 +214,8 @@ namespace APro
 
         static File Invalid; ///< An invalid file descriptor.
     };
+
+    typedef AutoPointer<File> FilePtr;
 }
 
 #endif

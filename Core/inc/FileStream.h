@@ -1,15 +1,16 @@
+/////////////////////////////////////////////////////////////
 /** @file FileStream.h
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/02/2013
+ *  @date 03/02/2013 - 03/04/2014
  *
- *  @addtogroup Global
- *
- *  This file defines the FileStream class.
+ *  Defines the FileStream class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #ifndef APRO_FILESTREAM_H
 #define APRO_FILESTREAM_H
 
@@ -18,53 +19,178 @@
 
 namespace APro
 {
-    class FileStream : public StreamInterface
+    /////////////////////////////////////////////////////////////
+    /** @class FileStream
+     *  @ingroup Utils
+     *  @brief A stream associated to a File.
+     *
+     *  Use this stream to interact easily with already opened
+     *  File. No-opened files will always be wrong.
+     *
+     *  @sa InputStream, OutputStream, File
+    **/
+    /////////////////////////////////////////////////////////////
+    class FileStream : public InputStream,
+                       public OutputStream
     {
-    public:
-
-        FileStream();
-        explicit FileStream(const File::ptr& f);
-        FileStream(const FileStream& other);
-
-        virtual ~FileStream();
-
-    public:
-
-        void set(const File::ptr& f);
-        void set(const FileStream& other);
-
-        const File::ptr& file() const;
-        File::ptr& file();
-
     protected:
 
-        File::ptr mfile;
+        FilePtr m_file;
 
     public:
 
-        /** Add a character to the stream. */
-        virtual void writeChar(char c);
-        /** Add a string to the stream. */
-        virtual void writeString(const String& c);
-        /** Add a Number wit Real precision to the stream. */
-        virtual void writeNumber(const Number& n);
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs an empty Stream.
+         *  @note You must set a correct opened File object to use this
+         *  stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        FileStream();
 
-        /** Read a character from the stream. */
-        virtual void readChar(char& c);
-        /** Read a string from the stream. */
-        virtual void readString(String& str);
-        /** Read a word, i.e. a set of character finished by characters ' ', EOL, EOF, or EOS. */
-        virtual void readWord(String& str);
-        /** Read a number from the stream. */
-        virtual void readNumber(Number& n);
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs a FileStream with the same file object as
+         *  given one.
+        **/
+        /////////////////////////////////////////////////////////////
+        FileStream(FileStream& f_stream);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs a Stream with given File.
+         *
+         *  This File object must be already opened.
+        **/
+        /////////////////////////////////////////////////////////////
+        explicit FileStream(File& f);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Destructs the Stream.
+         *  @note It doesn't close the file object.
+        **/
+        /////////////////////////////////////////////////////////////
+        ~FileStream();
 
     public:
 
-        virtual size_t size() const;
-        virtual bool isEOS() const;
+        /////////////////////////////////////////////////////////////
+        /** @brief Set the File object to given one.
+         *  @return True if given file is valid and setted.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool set(File& f);
 
-        virtual void seek(size_t pos, Position::_ relative = Position::Begin);
-        virtual size_t tell() const;
+        /////////////////////////////////////////////////////////////
+        /** @brief Set the File object to given one in FileStream.
+         *  @return True if given file is valid and setted.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool set(FileStream& other);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Return the File object involved in this Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        const FilePtr& toFilePtr() const;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Return the File object involved in this Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        FilePtr& toFilePtr();
+
+    public:
+
+        // Copied from InputStream
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads one character.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool readChar(char& to);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads a word.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool readWord(String& str);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads a line.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool readLine(String& str);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads untill one of the given character is reached.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool readUntill(String& str, ByteArray clist);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads a Real number.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool readReal(Real& r);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads an Integer.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool readInt(int& i);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Reads blanck characters to the next non-blanck
+         *  one.
+         *  @param c : [out] next non-blanck character.
+         *  @return Number of blanck characters skipped. -1 if error
+         *  occured.
+        **/
+        /////////////////////////////////////////////////////////////
+        int skipBlanck(char& c);
+
+    public:
+
+        // Copied from OutputStream
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Write a String.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool write(const String& str);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Write a Real.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool write(const Real& str);
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Write an integer.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool write(const int& str);
+
+    public:
+
+        // Copied from CursorStream
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if End Of Stream (EOS) is reached.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool isEOS() const;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns the current position of the cursor in the
+         *  Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        size_t tell() const;
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Set a new position for thhe cursor in the Stream.
+        **/
+        /////////////////////////////////////////////////////////////
+        void seek(size_t pos, CursorPosition cp = CP_BEGIN);
     };
 }
 

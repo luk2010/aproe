@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 22/12/2013
+ *  @date 21/05/2012 - 28/02/2014
  *
  *  Defines the Memory Tracker.
  *
@@ -14,7 +14,7 @@
 #ifndef APROMEMORYTRACKER_H
 #define APROMEMORYTRACKER_H
 
-#include "Platform.h"
+#include "Base.h"
 
 #include <map>
 #include <string>

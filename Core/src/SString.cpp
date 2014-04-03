@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 23/02/2014
+ *  @date 25/06/2012 - 03/04/2014
  *
  *  @addtogroup Global
  *  @addtogroup Memory
@@ -403,6 +403,27 @@ namespace APro
         char buffer[30];
         sprintf(buffer, "%f", num);
         return String(buffer);
+    }
+
+    String String::toString(Real r)
+    {
+        char buffer[30];
+        sprintf(buffer, "%f", r);
+        return String(buffer);
+    }
+
+    Real String::toReal() const
+    {
+#ifdef _USE_DOUBLEREAL_
+        return strtod(toCstChar(), nullptr);
+#else
+        return strtof(toCstChar(), nullptr);
+#endif // _USE_DOUBLEREAL_
+    }
+
+    int String::toInt() const
+    {
+        return String::toInt(*this);
     }
 
     bool String::operator==(const String & other) const

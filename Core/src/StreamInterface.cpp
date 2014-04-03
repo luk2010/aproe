@@ -1,86 +1,101 @@
+/////////////////////////////////////////////////////////////
 /** @file StreamInterface.cpp
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/02/2013
+ *  @date 04/01/2013 - 23/03/2014
  *
- *  @addtogroup Global
- *
- *  This file defines the StreamInterface class.
+ *  Implements the Streams class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #include "StreamInterface.h"
 
 namespace APro
 {
-    StreamInterface::StreamInterface()
-        : stringSeparator('.')
+    CursorStream::CursorStream()
     {
 
     }
 
-    StreamInterface::StreamInterface(const StreamInterface& other)
-        : stringSeparator(other.stringSeparator)
+    CursorStream::~CursorStream()
     {
 
     }
 
-    StreamInterface::~StreamInterface()
+    bool CursorStream::operator bool() const
+    {
+        return !isEOS();
+    }
+
+    size_t CursorStream::size()
+    {
+        size_t _p, _ret;
+
+        _p = tell();
+        seek(0, CP_END);
+        _ret = tell();
+        seek(_p, CP_BEGIN);
+
+        return ret;
+    }
+
+    InputStream::InputStream()
+     : CursorStream()
     {
 
     }
 
-    StreamInterface& StreamInterface::operator << (char c)
+    InputStream::~CursorStream()
     {
-        writeChar(c);
-        return *this;
+
     }
 
-    StreamInterface& StreamInterface::operator<< (const char* str)
-    {
-        writeString(String(str));
-        return *this;
-    }
-
-    StreamInterface& StreamInterface::operator << (const String& str)
-    {
-        writeString(str);
-        return *this;
-    }
-
-    StreamInterface& StreamInterface::operator << (const Number& n)
-    {
-        writeNumber(n);
-        return *this;
-    }
-
-    StreamInterface& StreamInterface::operator >> (char& c)
-    {
-        readChar(c);
-        return *this;
-    }
-
-    StreamInterface& StreamInterface::operator >> (String& str)
+    InputStream& InputStream::operator >> (String& str)
     {
         readWord(str);
         return *this;
     }
 
-    StreamInterface& StreamInterface::operator >> (Number& n)
+    InputStream& InputStream::operator >> (Real& r)
     {
-        readNumber(n);
+        readReal(r);
         return *this;
     }
 
-    StreamInterface& StreamInterface::setStringSeparator(char sep)
+    InputStream& InputStream::operator >> (int& i)
     {
-        stringSeparator = sep;
+        readInt(i);
         return *this;
     }
 
-    char StreamInterface::getStringSeparator() const
+    OutputStream::OutputStream()
     {
-        return stringSeparator;
+
+    }
+
+    OutputStream::~OutputStream()
+    {
+
+    }
+
+    OutputStream& OutputStream::operator << (const String& str)
+    {
+        write(str);
+        return *this;
+    }
+
+    OutputStream& OutputStream::operator << (const Real& r)
+    {
+        write(r);
+        return *this;
+    }
+
+    OutputStream& OutputStream::operator << (const int& i)
+    {
+        write(i);
+        return *this;
     }
 }

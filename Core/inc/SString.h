@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 27/02/2014
+ *  @date 25/06/2012 - 03/04/2014
  *
  *  Defines the String class.
  *
@@ -133,9 +133,12 @@ namespace APro
         static String toString(unsigned int num);
         static String toString(int num);
         static String toString(double num);
+        static String toString(Real r);
 
         static int toInt(const String& str);
         static double toDouble(const String& str);
+        Real toReal() const;
+        int toInt() const;
 
         String & operator = (const String & other);
         String & operator = (const char* other);

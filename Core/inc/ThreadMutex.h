@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013 - 15/02/2014
+ *  @date 06/04/2013 - 22/03/2014
  *
  *  Defines the Mutex class.
  *
@@ -17,6 +17,7 @@
 #include "Platform.h"
 #include "NonCopyable.h"
 #include "EventEmitter.h"
+#include "ThreadMutexI.h"
 
 namespace APro
 {
@@ -39,11 +40,8 @@ namespace APro
      *  @note ThreadMutex are identified with an unique id,
      *  given by the ThreadManager.
      *  @note Mutex should always be created thanks to the
-     *  ThreadManager using createMutex(). In rare excepted cases,
-     *  you can create internal mutexs using the default constructor,
-     *  as done in Atomic and Thread. This method simplify the creation
-     *  of mutexs at the beginning of the program, where we are not sure
-     *  that ThreadManager has been created.
+     *  ThreadManager using createMutex(). If you need mutexs without
+     *  event handling, you should use ThreadMutexI instead.
      *
      *  @note On Compilations where option '--no-thread' is setted,
      *  every functions are stubs.
@@ -52,7 +50,7 @@ namespace APro
      *  on mutexs.
     **/
     ////////////////////////////////////////////////////////////
-    class APRO_DLL ThreadMutex : public NonCopyable,
+    class APRO_DLL ThreadMutex : public IMutex,
                                  public EventEmitter
     {
         APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(ThreadMutex)

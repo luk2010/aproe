@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013
+ *  @date 06/04/2013 - 22/03/2014
  *
  *  Defines the MutexLockGuard class.
  *
@@ -15,7 +15,7 @@
 #define APRO_MUTEXLOCKGUARD_H
 
 #include "Platform.h"
-#include "ThreadMutex.h"
+#include "ThreadMutexI.h"
 
 namespace APro
 {
@@ -45,7 +45,7 @@ namespace APro
          *  @param mutex : Mutex to guard.
         **/
         ////////////////////////////////////////////////////////////
-        ThreadMutexLockGuard(ThreadMutex* mutex);
+        ThreadMutexLockGuard(IMutex* mutex);
 
         ////////////////////////////////////////////////////////////
         /** @brief Destructs the lockguard.
@@ -57,7 +57,7 @@ namespace APro
 
     private:
 
-        ThreadMutex* m_mutex;///< Mutex
+        IMutex* m_mutex;///< Mutex
     };
 
 /// @brief Create a variable to lock a given mutex.

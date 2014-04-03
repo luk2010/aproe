@@ -1,172 +1,232 @@
+/////////////////////////////////////////////////////////////
 /** @file FileStream.cpp
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/02/2013
+ *  @date 03/02/2013 - 03/04/2014
  *
- *  @addtogroup Global
- *
- *  This file defines the FileStream class.
+ *  Implements the FileStream class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #include "FileStream.h"
 
 namespace APro
 {
     FileStream::FileStream()
+        : m_file(nullptr)
     {
 
     }
 
-    FileStream::FileStream(const File::ptr& f)
-        : mfile(f)
+    FileStream::FileStream(FileStream& f_stream)
+        : m_file(nullptr)
     {
-
+        if(!f_stream.m_file.isNull() && f_stream.m_file->isOpened())
+            m_file = f_stream.m_file;
     }
 
-    FileStream::FileStream(const FileStream& other)
-        : StreamInterface(), mfile(other.mfile)
+    FileStream::FileStream(File& f)
+        : m_file(nullptr)
     {
-        seek(other.tell());
+        if(f.isOpened())
+            m_file = &f;
     }
 
     FileStream::~FileStream()
     {
-
+        // We do nothing as file object musn't be closed.
     }
 
-    void FileStream::set(const File::ptr& f)
+    bool FileStream::set(File& f)
     {
-        mfile = f;
-    }
-
-    void FileStream::set(const FileStream& other)
-    {
-        mfile = other.mfile;
-    }
-
-    void FileStream::writeChar(char c)
-    {
-        if(!mfile.isNull())
+        if(f.isOpened())
         {
-            mfile->put(c);
+            m_file = &f;
+            return true;
         }
+
+        return false;
     }
 
-    void FileStream::writeString(const String& c)
+    bool FileStream::set(FileStream& other)
     {
-        if(!mfile.isNull())
+        if(!other.m_file.isNull() && other.m_file->isOpened())
         {
-            mfile->put(c);
+            m_file = other.m_file;
+            return true;
         }
+
+        return false;
     }
 
-    void FileStream::writeNumber(const Number& n)
+    const FilePtr& FileStream::toFilePtr() const
     {
-        if(!mfile.isNull())
+        return m_file;
+    }
+
+    FilePtr& FileStream::toFilePtr()
+    {
+        return m_file;
+    }
+
+    bool FileStream::readChar(char& to)
+    {
+        if(m_file.isNull() || !m_file->isOpened())
         {
-            mfile->put(String::fromDouble(n.toReal()));
+            return false;
         }
-    }
-
-    void FileStream::readChar(char& c)
-    {
-        if(!mfile.isNull())
-        {
-            mfile->get(c);
-        }
-    }
-
-    void FileStream::readWord(String& str)
-    {
-        if(!mfile.isNull())
-        {
-            str.clear();
-            if(mfile->isEOF()) return;
-
-            char c;
-            while (mfile->get(c) &&
-                   !(c == ' ') && !(c == '\n'))
-            {
-                str.append(c);
-            }
-        }
-    }
-
-    void FileStream::readString(String& str)
-    {
-        if(!mfile.isNull())
-        {
-            str.clear();
-            if(mfile->isEOF()) return;
-
-            char c;
-            while (mfile->get(c) &&
-                   !(c == stringSeparator))
-            {
-                str.append(c);
-            }
-        }
-    }
-
-    void FileStream::readNumber(Number& n)
-    {
-        if(!mfile.isNull())
-        {
-            if(mfile->isEOF()) return;
-
-            String num; readWord(num);
-            n.set(String::toDouble(num));
-        }
-    }
-
-    size_t FileStream::size() const
-    {
-        if(!mfile.isNull())
-            return mfile->getSize();
         else
-            return 0;
+        {
+            return m_file->read(&to, sizeof(char));
+        }
+    }
+
+    bool FileStream::readWord(String& str)
+    {
+        char c;
+        if(m_file.isNull() || !m_file->isOpened())
+            return false;
+
+        if(skipBlanck(c) < 0)
+            return false;
+
+        while(isalpha((int) c))
+        {
+            str.append(c);
+            if(!readChar(c))
+                break;
+        }
+
+        return true;
+    }
+
+    bool FileStream::readUntill(String& str, ByteArray clist)
+    {
+        char c;
+        if(m_file.isNull() || !m_file->isOpened())
+            return false;
+
+        if(!readChar(c))
+            return false;
+
+        while(!clist.contains((Byte) c))
+        {
+            str.append(c);
+            if(!readChar(c))
+                break;
+        }
+
+        return true;
+    }
+
+    bool FileStream::readReal(Real& r)
+    {
+        char c;
+        if(m_file.isNull() || !m_file->isOpened())
+            return false;
+
+        ByteArray authorized_characters;
+        authorized_characters << (Byte) '+' << (Byte) '-' << (Byte) '.' << (Byte) 'e' << (Byte) 'E';
+
+        String real;
+        if(skipBlanck(c) < 0)
+            return false;
+
+        while(isdigit(c) || authorized_characters.contains(c))
+        {
+            real.append(c);
+            if(!readChar(c))
+                break;
+        }
+
+        r = real.toReal();
+        return true;
+    }
+
+    bool FileStream::readInt(int& i)
+    {
+        char c;
+        if(m_file.isNull() || !m_file->isOpened())
+            return false;
+
+        String real;
+        if(skipBlanck(c) < 0)
+            return false;
+
+        while(isdigit(c))
+        {
+            real.append(c);
+            if(!readChar(c))
+                break;
+        }
+
+        i = real.toInt();
+        return true;
+    }
+
+    int FileStream::skipBlanck(char& c)
+    {
+        if(m_file.isNull() || !m_file->isOpened())
+            return -1;
+
+        int ret = 0;
+        if(!readChar(c))
+            return -1;
+        while(isblank(c))
+        {
+            if(!readChar(c))
+                return ret;
+            ret++;
+        }
+        return ret;
+    }
+
+    bool FileStream::write(const String& str)
+    {
+        if(m_file.isNull() || !m_file->isOpened())
+            return false;
+
+        return m_file->write(str.toCstChar(), str.size());
+    }
+
+    bool FileStream::write(const Real& str)
+    {
+        if(m_file.isNull() || !m_file->isOpened())
+            return false;
+
+        return write(String::toString(str));
+    }
+
+    bool FileStream::write(const int& str)
+    {
+        if(m_file.isNull() || !m_file->isOpened())
+            return false;
+
+        return write(String::toString(str));
     }
 
     bool FileStream::isEOS() const
     {
-        if(!mfile.isNull())
-            return mfile->isEOF();
-        else
-            return true;
-    }
-
-    void FileStream::seek(size_t pos, Position::_ relative)
-    {
-        if(!mfile.isNull())
-        {
-            File::CursorPosition::t p;
-            switch(relative)
-            {
-            case Position::Begin:
-                p = File::CursorPosition::AtBegin;
-                break;
-
-            case Position::End:
-                p = File::CursorPosition::AtEnd;
-                break;
-
-            case Position::Current:
-            default:
-                p = File::CursorPosition::AtCurrent;
-                break;
-            }
-
-            mfile->seek(p, (Offset) pos);
-        }
+        if(m_file.isNull())
+            return false;
+        return m_file->isEOF();
     }
 
     size_t FileStream::tell() const
     {
-        if(!mfile.isNull())
-            return (size_t) mfile->tell();
-        else
+        if(m_file.isNull())
             return 0;
+        return m_file->tell();
     }
+
+    void FileStream::seek(size_t pos, CursorPosition cp)
+    {
+        if(m_file.isNull())
+            return;
+        m_file->seek(File::C_BEGIN + (int) cp, (Offset) pos);
+    }
+
 }

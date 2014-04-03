@@ -14,7 +14,7 @@
 #ifndef APRO_TYPES_H
 #define APRO_TYPES_H
 
-#include "Platform.h"
+#include "Base.h"
 #include <type_traits>
 
 namespace APro
