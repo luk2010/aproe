@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013 - 16/02/2014
+ *  @date 02/07/2013 - 10/04/2014
  *
  *  Defines the AutoPointer class.
  *
@@ -45,6 +45,21 @@ namespace APro
      *
      *  @note AutoPointer can be used also as a normal pointer
      *  because operator T* is overwritten.
+     *
+     *  ### AutoPointer uses
+     *
+     *  - You can use AutoPointer as a basic pointer. Using the
+     *  default constructor, only giving the pointer data, the memory
+     *  will be destroyed when every AutoPointer objects holding
+     *  it are destroyed.
+     *  - You can use it as a pointer that have a owning capability.
+     *  This means that when you initialize the AutoPointer and setting
+     *  the own_pointer property to true, others will only keep the
+     *  pointer but only this pointer will be able to destroy the
+     *  data. @note If you use this kind of pointer, be sure to create
+     *  AutoPointer from others AutoPointer objects and not from the
+     *  real adress because it may result to a destruction by the owning
+     *  AutoPointer and by the uncorrectly initialized AutoPointer.
     **/
     ////////////////////////////////////////////////////////////
     template <typename T>
@@ -55,6 +70,11 @@ namespace APro
         T*                  pointer;            ///< pointer referenced
         PointerCollector*   custom_collector;   ///< Collector used by the AutoPointer.
 
+    private:
+
+        bool                is_owned;           ///< True if pointer is owned.
+        AutoPointer<T>*     owner;              ///< Owning AutoPointer;
+
     public:
 
         ////////////////////////////////////////////////////////////
@@ -62,7 +82,7 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         AutoPointer()
-            : pointer(nullptr), custom_collector(nullptr)
+            : pointer(nullptr), custom_collector(nullptr), is_owned(false), owner(nullptr)
         {
             custom_collector = &(PointerCollector::Get());
         }
@@ -73,7 +93,7 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         AutoPointer(T* pointer_to_init)
-            : pointer(pointer_to_init), custom_collector(nullptr)
+            : pointer(pointer_to_init), custom_collector(nullptr), is_owned(false), owner(nullptr)
         {
             custom_collector = &(PointerCollector::Get());
             init_pointer();
@@ -82,13 +102,20 @@ namespace APro
         ////////////////////////////////////////////////////////////
         /** @brief Constructor with pointer and custom collector.
          *  @param pointer_to_init : Poionter to reference.
-         *  @param p_collector : Pointer to a custom collector.
+         *  @param p_collector : Pointer to a custom collector. if a null
+         *  PointerCollector is passed in argument, the global PointerCollector
+         *  object is used.
+         *  @param owning : @see ::is_owned property.
+         *  @param _owner : if a null owner is passed in argument,
+         *  the 'this' pointer is used. @see ::owner property.
         **/
         ////////////////////////////////////////////////////////////
-        AutoPointer(T* pointer_to_init, PointerCollector* p_collector)
+        AutoPointer(T* pointer_to_init, PointerCollector* p_collector, bool owning = false, AutoPointer<T>* _owner = nullptr)
         {
-            pointer = pointer_to_init;
-            custom_collector = (p_collector) ? p_collector : &(PointerCollector::Get());
+            pointer          = pointer_to_init;
+            custom_collector = p_collector ? p_collector : &(PointerCollector::Get());
+            is_owned         = owning;
+            owner            = _owner ? _owner : this;
             init_pointer();
         }
 
@@ -100,8 +127,10 @@ namespace APro
         ////////////////////////////////////////////////////////////
         AutoPointer(const AutoPointer<T>& auto_pointer)
         {
-            pointer = auto_pointer.pointer;
+            pointer          = auto_pointer.pointer;
             custom_collector = auto_pointer.custom_collector;
+            is_owned         = auto_pointer.is_owned;
+            owner            = auto_pointer.owner;
             init_pointer();
         }
 
@@ -115,8 +144,10 @@ namespace APro
         template<typename Y>
         AutoPointer(const AutoPointer<Y>& auto_pointer)
         {
-            pointer = dynamic_cast<T*>(auto_pointer.pointer);
+            pointer          = dynamic_cast<T*>(auto_pointer.pointer);
             custom_collector = auto_pointer.custom_collector;
+            is_owned         = auto_pointer.is_owned;
+            owner            = nullptr;// Definitly unused : in every cases this pointer will never be the owner.
             init_pointer();
         }
 
@@ -137,20 +168,32 @@ namespace APro
         ////////////////////////////////////////////////////////////
         void ungrab_pointer()
         {
-            if(pointer && custom_collector)
+            if(pointer)
             {
-                custom_collector->pop(pointer);
-                if(custom_collector->getPointerUtility(pointer) == 0)
+                if(is_owned)
                 {
-                    destroy_pointer();
+                    if(custom_collector)
+                        custom_collector->pop(pointer);
+
+                    if((void*) owner == (void*) this)
+                        destroy_pointer();
+                }
+                else
+                {
+                    if(custom_collector)
+                    {
+                        custom_collector->pop(pointer);
+                        if(custom_collector->getPointerUtility(pointer) == 0)
+                            destroy_pointer();
+                    }
+                    else
+                        destroy_pointer();
                 }
             }
-            else if(pointer)
-            {
-                destroy_pointer();
-            }
 
-            pointer = nullptr;
+            pointer  = nullptr;
+            is_owned = false;
+            owner    = nullptr;
         }
 
         ////////////////////////////////////////////////////////////
@@ -199,12 +242,8 @@ namespace APro
         void init_pointer()
         {
             if(pointer)
-            {
                 if(custom_collector)
-                {
                     custom_collector->push(pointer);
-                }
-            }
         }
 
     public:
@@ -219,12 +258,36 @@ namespace APro
         void set(T* ptr)
         {
             if(pointer)
-            {
                 ungrab_pointer();
-            }
 
             pointer = ptr;
             init_pointer();
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Set the owning capability of this pointer.
+         *
+         *  This property can only be set when the AutoPointer object
+         *  is the first holder of this pointer. if another AutoPointer
+         *  already hold this data, you can't change his owning
+         *  property or it will results to errors.
+        **/
+        ////////////////////////////////////////////////////////////
+        void setOwning(bool owning)
+        {
+            aproassert(pointer && custom_collector);
+            aproassert(custom_collector->getPointerUtility(pointer) <= 1, "Too much AutoPointer objects hold the pointer to modify the owning property.");
+
+            if(owning)
+            {
+                is_owned = true;
+                owner    = this;
+            }
+            else
+            {
+                is_owned = false;
+                owner    = nullptr;
+            }
         }
 
         ////////////////////////////////////////////////////////////
@@ -314,31 +377,37 @@ namespace APro
 
         inline T* operator ->()
         {
+            aproassert(pointer != nullptr);
             return pointer;
         }
 
         inline const T* operator ->() const
         {
+            aproassert(pointer != nullptr);
             return pointer;
         }
 
         inline T& operator *()
         {
+            aproassert(pointer != nullptr);
             return *pointer;
         }
 
         inline const T& operator *() const
         {
+            aproassert(pointer != nullptr);
             return *pointer;
         }
 
         inline T* operator T* ()
         {
+            aproassert(pointer != nullptr);
             return pointer;
         }
 
         inline const T* operator T* () const
         {
+            aproassert(pointer != nullptr);
             return pointer;
         }
 

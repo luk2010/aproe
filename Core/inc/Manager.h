@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012
+ *  @date 20/09/2012 - 11/04/2014
  *
  *  Defines the Manager class.
  *
@@ -15,8 +15,8 @@
 #define APROMANAGERR_H
 
 #include "Platform.h"
-#include "List.h"
 #include "AutoPointer.h"
+#include "List.h"
 
 namespace APro
 {
@@ -34,9 +34,22 @@ namespace APro
      *  Manager<T>::objects. We advice you to use a reference variable
      *  constructed directly in the class :
      *  @code MyClass() : my_reference(Manager<T>::objects) {} @endcode
+     *
+     *  @note <b>A note on how objects are stored :</b> Objects
+     *  are stored into AutoPointer, but they are not pushed into
+     *  a PointerCollector. Objects are so destroyed only by the
+     *  Manager. This rule ony apply to objects loaded by brute
+     *  pointer. if you push objects in already made AutoPointer, you
+     *  will not have this feature.
+     *
+     *  Objects Pointers are stored in a List by default, but you
+     *  can choose to store them in an Array. An Array is more efficient
+     *  than a list as there are only push/pop access by default, but
+     *  destructors are less guarenteed to be called in Array than in
+     *  List.
     **/
     ////////////////////////////////////////////////////////////
-    template<typename T>
+    template<typename T, typename Container = List<AutoPointer<T> > >
     class Manager : public ThreadSafe
     {
     public:
@@ -58,6 +71,12 @@ namespace APro
         {
             APRO_THREADSAFE_AUTOLOCK
             objects.clear();
+        }
+
+        void push(T* object)
+        {
+            if(object)
+                push(AutoPointer<T>(object));
         }
 
         ////////////////////////////////////////////////////////////
@@ -96,7 +115,7 @@ namespace APro
 
     protected:
 
-        List< AutoPointer<T> > objects;///< Object list.
+        Container objects;///< Object list.
     };
 }
 

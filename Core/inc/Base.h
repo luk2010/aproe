@@ -4,7 +4,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 29/05/2012 - 03/04/2014
+ *  @date 29/05/2012 - 10/04/2014
  *
  *  Defines some constants to be used on different platform. This constants are universal.
  *
@@ -169,7 +169,8 @@ namespace APro
     template<typename T>
     const char* className()
     {
-        return TOTEXT(T);
+        static const char* _name = TOTEXT(T);
+        return _name;
     }
 
     /////////////////////////////////////////////////////////////
@@ -228,5 +229,7 @@ if(!(condition) ) \
 #else
 #   define aproassert(a,b)
 #endif
+
+#define aproassert(a) aproassert(a, "")
 
 #endif

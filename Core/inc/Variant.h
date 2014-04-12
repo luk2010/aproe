@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 24/01/2014 - 23/03/2014
+ *  @date 24/01/2014 - 10/04/2014
  *
  *  Defines the Variant class.
  *

@@ -32,7 +32,7 @@ namespace APro
     {
 
         APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Window)
-        
+
         public: friend class Context;
 
     public:
@@ -110,6 +110,8 @@ namespace APro
         Keyboard::ptr keyboard;
         Context*      context;
     };
+
+    typedef AutoPointer<Window> WindowPtr;
 }
 
 #endif

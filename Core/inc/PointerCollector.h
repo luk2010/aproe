@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013
+ *  @date 02/07/2013 - 09/04/2014
  *
  *  Defines the PointerCollector class.
  *
@@ -56,7 +56,7 @@ namespace APro
         /** @brief Destructor.
         **/
         ////////////////////////////////////////////////////////////
-        ~PointerCollector();
+        virtual ~PointerCollector();
 
 
         ////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ namespace APro
          *  @param ptr : Pointer to push.
         **/
         ////////////////////////////////////////////////////////////
-        void push(void* ptr);
+        virtual void push(void* ptr);
 
         ////////////////////////////////////////////////////////////
         /** @brief Pop a pointer use, or send an error if no pointer
@@ -75,7 +75,7 @@ namespace APro
          *  @param ptr : Pointer to pop.
         **/
         ////////////////////////////////////////////////////////////
-        void pop(void* ptr);
+        virtual void pop(void* ptr);
 
         ////////////////////////////////////////////////////////////
         /** @brief remove given pointer to the entries.
@@ -83,7 +83,7 @@ namespace APro
          *  because of last entry.
         **/
         ////////////////////////////////////////////////////////////
-        void remove(void* ptr);
+        virtual void remove(void* ptr);
 
     public:
 
@@ -91,25 +91,25 @@ namespace APro
         /** @brief Tell if given pointer adress is registered.
         **/
         ////////////////////////////////////////////////////////////
-        bool exists(void* ptr) const;
+        virtual bool exists(void* ptr) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the number of registered pointers.
         **/
         ////////////////////////////////////////////////////////////
-        size_t getPointersCollected() const;
+        virtual size_t getPointersCollected() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the uses of a given pointer.
         **/
         ////////////////////////////////////////////////////////////
-        unsigned int getPointerUtility(void* ptr) const;
+        virtual unsigned int getPointerUtility(void* ptr) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the name of this collector.
         **/
         ////////////////////////////////////////////////////////////
-        const String& getName() const;
+        virtual const String& getName() const;
     };
 }
 

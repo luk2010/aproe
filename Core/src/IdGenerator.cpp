@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/07/2013
+ *  @date 03/07/2013 - 03/04/2014
  *
  *  Defines the IdGenerator class.
  *
@@ -60,13 +60,19 @@ namespace APro
     {
         APRO_THREADSAFE_AUTOLOCK
         unsigned long ret = m_cur_id;
-        if(ret + 1 > m_max)
+        if(ret + m_incrementation > m_max)
         {
             APRO_THROW("MaxRangeReached", "Max range for id reached !", "IdGenerator");
         }
 
-        m_cur_id += 1;
+        m_cur_id += m_incrementation;
         return ret;
+    }
+
+    void IdGenerator::unpick()
+    {
+        APRO_THREADSAFE_AUTOLOCK
+        m_cur_id -= m_incrementation;
     }
 
     bool IdGenerator::canPick() const

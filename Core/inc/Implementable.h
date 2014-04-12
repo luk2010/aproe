@@ -69,7 +69,7 @@ namespace APro
             }
             else
             {
-                aprodebug("Can't create implementation !");
+                aprodebug("Can't create implementation for class '") << className<T>() << "' !";
             }
         }
 
@@ -110,6 +110,16 @@ namespace APro
         const T* imp() const
         {
             return implement;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if this Implementable class has a valid
+         *  implementation loaded.
+        **/
+        ////////////////////////////////////////////////////////////
+        static bool HasCorrectImplementation()
+        {
+            return ImplementationFactory::Get().hasPrototype(String(className<T>()));
         }
 
     public:

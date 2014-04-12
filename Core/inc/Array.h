@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 29/05/2012 - 03/02/2014
+ *  @date 29/05/2012 - 11/04/2014
  *
  *  Defines the Array class.
  *
@@ -612,6 +612,10 @@ namespace APro
                     // Copy object
                     __copy_object(obj, toIndex(position));
                 }
+            }
+            else
+            {
+                push_back(obj);
             }
         }
 

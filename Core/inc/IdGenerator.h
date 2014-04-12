@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/07/2013
+ *  @date 03/07/2013 - 03/04/2014
  *
  *  Defines the IdGenerator class.
  *
@@ -101,6 +101,14 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         unsigned long pick();
+
+        /////////////////////////////////////////////////////////////
+        /** @brief Back up from one id.
+         *  @warning Use this function only if you don't use the Id you
+         *  have picked up !!
+        **/
+        /////////////////////////////////////////////////////////////
+        void unpick();
 
         /////////////////////////////////////////////////////////////
         /** @brief Tell if next id will be valid.

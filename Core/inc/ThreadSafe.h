@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/04/2013 - 22/03/2014
+ *  @date 25/04/2013 - 11/04/2014
  *
  *  Defines the ThreadSafe class.
  *
@@ -57,13 +57,13 @@ namespace APro
         /** @brief Lock safely the mutex.
         **/
         ////////////////////////////////////////////////////////////
-        void safelock();
+        void safelock() const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Unlock safely the mutex.
         **/
         ////////////////////////////////////////////////////////////
-        void safeunlock();
+        void safeunlock() const;
 
     public:
 
@@ -71,17 +71,11 @@ namespace APro
         /** @brief Return the internal mutex.
         **/
         ////////////////////////////////////////////////////////////
-        IMutex& getMutex() { return mutex; }
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Return the internal mutex.
-        **/
-        ////////////////////////////////////////////////////////////
-        const IMutex& getMutex() const { return mutex; }
+        IMutex& getMutex() const { return mutex; }
 
     private:
 
-        ThreadMutexI mutex;///< Mutex.
+        mutable ThreadMutexI mutex;///< Mutex.
     };
 
     #define APRO_THREADSAFE_AUTOLOCK THREADMUTEXAUTOLOCK(ThreadSafe::getMutex());

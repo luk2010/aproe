@@ -1,28 +1,30 @@
+////////////////////////////////////////////////////////////
 /** @file WindowManager.cpp
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/09/2012
+ *  @date 06/09/2012 - 12/04/2014
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the WindowManager class.
+ *  Implements the WindowManager class.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "WindowManager.h"
-#include "ThreadMutex.h"
-#include "ThreadMutexLockGuard.h"
 
 namespace APro
 {
     APRO_IMPLEMENT_MANUALSINGLETON(WindowManager)
 
     WindowManager::WindowManager()
-        : ThreadSafe(), windows(Manager<Window>::objects)
+        : windows(Manager<Window, Array<WindowPtr> >::objects)
     {
-
+        idgen.setBase(1);
+        idgen.setIncrementation(1);
+        idgen.setMaximumId(1024);
+        idgen.reset();
+        windows.append(WindowPtr(nullptr));
     }
 
     WindowManager::~WindowManager()
@@ -30,97 +32,173 @@ namespace APro
 
     }
 
-    SharedPointer<Window> WindowManager::getWindow(const String & name) const
+    WindowId WindowManager::create(const String& title, const size_t& width, const size_t& height, bool fullscreen)
     {
-        for(List<SharedPointer<Window> >::Iterator i(windows.begin()); !i.isEnd(); i++)
+        if(!title.isEmpty() &&
+           width > 0 && height > 0)
         {
-            if(i.get()->name() == name)
+            if(!Window::HasCorrectImplementation())
             {
-                return i.get();
+                aprodebug("No valid implementation found to create Window object (title='") << title << "').";
+                return 0;
             }
-        }
 
-        return SharedPointer<Window>();
-    }
+            APRO_THREADSAFE_AUTOLOCK
 
-    SharedPointer<Window> WindowManager::getWindow(size_t index) const
-    {
-        return windows.at(index);
-    }
-
-    size_t WindowManager::getWindowNumber() const
-    {
-        return windows.size();
-    }
-
-    SharedPointer<Window> WindowManager::create(const String& name, const String& title, const String& size, bool fullscreen)
-    {
-        APRO_THREADSAFE_AUTOLOCK
-
-        SharedPointer<Window> ret = getWindow(name);
-        if(ret.isNull())
-        {
-            ret = AProNew(Window, name, title, size);
-            ret->fullscreen(fullscreen);
-            if(fullscreen)
+            // Look for free Id
+            WindowId id = findNulllId();
+            if(id == 0)
             {
-                ret->reset();
+                if(idgen.canPick())
+                    id = idgen.pick();
+            }
+
+            if(id != 0)
+            {
+                Window* new_win = AProNew(Window, id, title, width, height, fullscreen);
+
+                if(new_win)
+                {
+                    if(isIdValid(id))
+                        windows.at(id).set(new_win);
+                    else
+                        windows.append(new_win);
+
+                    windows.at(id).setOwning(true);
+                    return id;
+                }
+                else
+                {
+                    aprodebug("Can't allocate Window object (title='") << title << "').";
+                    idgen.unpick();
+                    return 0;
+                }
             }
             else
             {
-                bool created = ret->create();
-                if(!created)
-                {
-                    Console::get() << "\n[WindowManager] Couldn't create Window " << name << " !";
-                    return Window::ptr();
-                }
-
+                aprodebug("Can't create new Window object (title='") << title << "') because max Window number has been reached.";
+                return 0;
             }
-
-            Manager<Window>::push(ret);
-            Console::get() << "\n[WindowManager] Created Window with name : " << name << ", title : " << title << " and size : " << size << ".";
         }
 
-        return ret;
+        return 0;
     }
 
-    void WindowManager::destroy(const String& name)
+    bool WindowManager::destroy(WindowPtr& window)
     {
-        APRO_THREADSAFE_AUTOLOCK
-        SharedPointer<Window> d = getWindow(name);
-        if(!d.isNull())
+        aproassert(!window.isNull());
+
+        if(!isWindowRegistered(window))
         {
-            d->destroy();
+            aprodebug("Can't destroy unregistered Window (title='") << window->getTitle() << "').";
+            return false;
         }
+
+        if(window.getPointerUses() > 1)
+            aprodebug("Window (title='") << window->getTitle() << "') is being destroyed but other AutoPointer holds it. They will be invalidate.";
+
+        // This call the destructor for sure.
+        // We do not erase the entry from the array as we want to re-use
+        // the Id.
+        window.nullize();
+        return true;
     }
 
-    void WindowManager::destroy(const SharedPointer<Window>& window)
+    bool WindowManager::destroy(const WindowId& windowId)
+    {
+        aproassert(isIdValid(windowId));
+
+        APRO_THREADSAFE_AUTOLOCK
+
+        WindowPtr& windowptr = windows.at(windowId);
+
+        if(window.getPointerUses() > 1)
+            aprodebug("Window (title='") << window->getTitle() << "') is being destroyed but other AutoPointer holds it. They will be invalidate.";
+
+        // This call the destructor for sure.
+        // We do not erase the entry from the array as we want to re-use
+        // the Id.
+        windowptr.nullize();
+        return true;
+    }
+
+    WindowPtr& WindowManager::getWindow(const WidowId& windowid)
     {
         APRO_THREADSAFE_AUTOLOCK
-        SharedPointer<Window> d = getWindow(window->name());
-        if(!d.isNull())
-        {
-            d->destroy();
-        }
+        if(isIdValid(windowid))
+            return windows.at(windowid);
+        else
+            return WindowPtr(nullptr);
+    }
+
+    const WindowPtr& WindowManager::getWindow(const WidowId& windowid) const
+    {
+        APRO_THREADSAFE_AUTOLOCK
+        if(isIdValid(windowid))
+            return windows.at(windowid);
+        else
+            return WindowPtr(nullptr);
+    }
+
+    size_t WindowManager::countActiveWindows() const
+    {
+        APRO_THREADSAFE_AUTOLOCK
+        int cnt = 0;
+
+        WindowArray::const_iterator& e = windows.end();
+        for(WindowArray::const_iterator it = windows.begin() + 1; it != e; it++)
+            if(!(*it).isNull())
+                cnt++;
+
+        return cnt;
     }
 
     void WindowManager::clear()
     {
         APRO_THREADSAFE_AUTOLOCK
-        while(!windows.isEmpty())
+
+        windows.clear();
+        windows.append(WindowPtr(nullptr));
+        idgen.reset();
+    }
+
+    void WindowManager::updateWindows()
+    {
+        APRO_THREADSAFE_AUTOLOCK
+
+        WindowArray::const_iterator e = windows.end();
+        for(WindowArray::iterator it = windows.begin() + 1; it != e; it++)
         {
-            destroy(windows.at(0));
-            windows.erase(0);
+            if(!(*it).isNull())
+                (*it)->update();
         }
     }
 
-    void WindowManager::loop()
+    bool WindowManager::isIdValid(const WindowId& windowid) const
     {
         APRO_THREADSAFE_AUTOLOCK
-        for(List<SharedPointer<Window> >::Iterator i(windows.begin()); !i.isEnd(); i++)
-        {
-            if(!(i.get().isNull()))
-                i.get()->systemLoop();
-        }
+        return windowid > 0 &&
+               windowid < windows.size();
     }
+
+    bool WindowManager::isWindowRegistered(const WindowPtr& ptr) const
+    {
+        APRO_THREADSAFE_AUTOLOCK
+        return windows.find(ptr) > 0;
+    }
+
+    WindowId WindowManager::findNullId() const
+    {
+        APRO_THREADSAFE_AUTOLOCK
+
+        WindowArray::const_iterator e = windows.end();
+        for(WindowArray::const_iterator it = windows.begin() + 1; it != e; it++)
+        {
+            if((*it).isNull())
+                return windows.toIndex(it);
+        }
+
+        return 0;
+    }
+
 }

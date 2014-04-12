@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/04/2013
+ *  @date 25/04/2013 - 11/04/2014
  *
  *  Implements the ThreadSafe class.
  *
@@ -26,12 +26,12 @@ namespace APro
 
     }
 
-    void ThreadSafe::safelock()
+    void ThreadSafe::safelock() const
     {
         mutex.lock();
     }
 
-    void ThreadSafe::safeunlock()
+    void ThreadSafe::safeunlock() const
     {
         mutex.unlock();
     }
