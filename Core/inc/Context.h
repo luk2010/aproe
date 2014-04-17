@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 19/09/2012
+ *  @date 19/09/2012 - 18/04/2014
  *
  *  Defines the Context class.
  *
@@ -33,9 +33,8 @@ namespace APro
      *  is an area where the Rendering API will be able to draw
      *  anythings. It also holds some datas.
      *
-     *  It is the Window wich create the context. This class always
-     *  pass through its window parent to make action, so it is
-     *  independant from Rendering API.
+     *  The Context Object is associated to a Window Object. It is
+     *  a link between the Window API and the Rendering API.
      *
      *  ### Events Emitted
      *
@@ -52,23 +51,43 @@ namespace APro
      *  The currently binded Context is used by the Rendering System
      *  to know where to draw. In the Context, it will draw in the default
      *  Viewport, but also in each separate Viewport.
+     *
+     *  @code
+     *  // Create a basic Window
+     *  WindowID myWindow = WindowManager::Get().create(...);
+     *
+     *  // Create the Context for given Window
+     *  RenderingAPIPtr myRenderingAPI = Main::Get().createRenderingAPI();
+     *  ContextPtr myContext = myRenderingAPI->createContext(myWindow);
+     *
+     *  // Do what you want with the context here...
+     *
+     *  // Destroying the context is done with the Window.
+     *  WindowManager::Get().destroy(myWindow);
+     *  myContext.nullize(); // We ensure the pointer is invalidated.
+     *  @endcode
+     *
+     *  @note The Context object destruction is owned by the Window
+     *  object.
     **/
     ////////////////////////////////////////////////////////////
-    class APRO_DLL Context : public EventListener,
-                             public EventEmitter,
-                             public NonCopyable
+    class APRO_DLL Context : public EventEmitter
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Context)
+    protected:
 
-    private:
+        Window*            m_window;       ///< Associated Window.
+        RenderingAPI*      m_renderingapi; ///< RenderingAPI wich constructe the Context object.
+        bool               m_loaded;       ///< true if Context object is ready to be binded.
+        bool               m_binded;       ///< true if binded.
+        Array<ViewPortPtr> m_viewports;    ///< Viewports holded by this Context object.
 
-        friend class Window;
+    public:
 
         ////////////////////////////////////////////////////////////
-        /** @brief Constructs an empty Context object.
+        /** @brief Constructs a Context object.
         **/
         ////////////////////////////////////////////////////////////
-        Context(Window* _window);
+        Context(Window* associatedWindow, RenderingAPI* renderingAPI);
 
         ////////////////////////////////////////////////////////////
         /** @brief Destructs the Context object.
@@ -79,19 +98,17 @@ namespace APro
     public:
 
         ////////////////////////////////////////////////////////////
-        /** @brief Returns a pointer to the parent window.
-         *
-         *  @note Don't delete this pointer nor use it on memory
-         *  function.
+        /** @brief Returns a pointer to the associated Window object.
         **/
         ////////////////////////////////////////////////////////////
         Window* getWindow();
 
         ////////////////////////////////////////////////////////////
-        /** @brief Returns a pointer to the parent window.
+        /** @brief Returns a pointer to the associated RenderingAPI
+         *  object.
         **/
         ////////////////////////////////////////////////////////////
-        const Window* getWindow() const;
+        RenderingAPI* getRenderingAPI();
 
     public:
 
@@ -121,9 +138,6 @@ namespace APro
          *  will be the surface where the Rendering System will draw
          *  the Scenes.
          *
-         *  @note It is to the Window class to physically bind the
-         *  context because it is platform and API dependant.
-         *
          *  @return True if context has been successfully binded.
         **/
         ////////////////////////////////////////////////////////////
@@ -135,9 +149,6 @@ namespace APro
          *  This is equivalent to set the current context to null.
          *  At the end of the function, the Rendering System will stop
          *  drawing in this Context.
-         *
-         *  @note It is to the Window class to physically unbind the
-         *  context because it is platform and API dependant.
          *
          *  @return True if context has been successfully unbinded.
         **/
@@ -224,7 +235,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         size_t getNumViewPorts() const;
 
-    protected:
+    public:
 
         ////////////////////////////////////////////////////////////
         /** @brief Initialize the default ViewPort.
@@ -238,21 +249,16 @@ namespace APro
          *  @internal
         **/
         ////////////////////////////////////////////////////////////
-        void updateViewPorts(WindowResizeEvent* e);
+        void onWindowResized(size_t width, size_t height);
 
-    protected:
-
-        void setLoaded(bool l);
-        void setBinded(bool b);
-
-    protected:
-
-        /////////////////////////////////////////////////////////////
-        /** @brief Handle a given event.
-         *  @see EventListener::handle
+        ////////////////////////////////////////////////////////////
+        /** @brief Update Viewports when Window is resized.
+         *  @internal
         **/
-        /////////////////////////////////////////////////////////////
-        bool handle(EventPtr& event);
+        ////////////////////////////////////////////////////////////
+        void updateViewPorts(size_t width, size_t height);
+
+    protected:
 
         /////////////////////////////////////////////////////////////
         /** @brief Create an event recognized by his hash type.
@@ -260,14 +266,6 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         EventPtr createEvent(const HashType& e_type) const;
-
-    protected:
-
-        Window* window;
-        bool loaded;
-        bool binded;
-
-        Array<ViewPortPtr> viewports;
     };
 
     typedef AutoPointer<Context> ContextPtr;///< An AutoPointer to a Context Object.

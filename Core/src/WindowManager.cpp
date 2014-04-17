@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/09/2012 - 12/04/2014
+ *  @date 06/09/2012 - 14/04/2014
  *
  *  Implements the WindowManager class.
  *
@@ -122,7 +122,7 @@ namespace APro
         return true;
     }
 
-    WindowPtr& WindowManager::getWindow(const WidowId& windowid)
+    WindowPtr& WindowManager::getWindow(const WindowId& windowid)
     {
         APRO_THREADSAFE_AUTOLOCK
         if(isIdValid(windowid))
@@ -131,7 +131,7 @@ namespace APro
             return WindowPtr(nullptr);
     }
 
-    const WindowPtr& WindowManager::getWindow(const WidowId& windowid) const
+    const WindowPtr& WindowManager::getWindow(const WindowId& windowid) const
     {
         APRO_THREADSAFE_AUTOLOCK
         if(isIdValid(windowid))

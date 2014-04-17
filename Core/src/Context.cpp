@@ -1,16 +1,16 @@
+////////////////////////////////////////////////////////////
 /** @file Context.cpp
+ *  @ingroup Rendering
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 19/09/2012
+ *  @date 19/09/2012 - 16/04/2014
  *
- *  @addtogroup Global
- *  @addtogroup Rendering
- *
- *  This file defines the Context class.
+ *  Implements the Context class.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "Context.h"
 #include "Window.h"
 
@@ -19,93 +19,83 @@ namespace APro
     APRO_REGISTER_EVENT_NOCONTENT(ContextBindedEvent);
     APRO_REGISTER_EVENT_NOCONTENT(ContextUnbindedEvent);
 
-    Context::Context(Window* _window)
-        : EventReceiver(), EventEmitter(), window(_window), loaded(false)
+    Context::Context(Window* associatedWindow, RenderingAPI* renderingAPI)
+        : EventEmitter()
     {
+        aproassert(associatedWindow != nullptr);
+        aproassert(renderingAPI != nullptr);
+
+        m_window       = associatedWindow;
+        m_renderingapi = renderingAPI;
+        m_loaded       = false;
+        m_binded       = false;
+        m_viewports.reserve(2);// This is usefull if user wants to create a new viewport immediatly.
+
         // Events Emitted
         documentEvent(ContextBindedEvent::Hash, String("Context is binded."));
         documentEvent(ContextUnbindedEvent::Hash, String("Context is unbinded."));
 
-        // Events Listened
-        addEventProcessed(WindowResizedEvent::Hash);
-
+        // We create the default Viewport.
         initDefaultViewPort();
-
-        if(!_window)
-        {
-            Console::get() << "\n[Context]{Constructor} Warning : Constructed context without window.";
-        }
     }
 
     Context::~Context()
     {
-
+        // When the Context object is destroyed, we unbind it if binded and
+        // we unregister it from the RenderingAPI.
+        if(m_binded)
+            unbind();
+        m_renderingapi->unregisterContext(this);
     }
 
     Window* Context::getWindow()
     {
-        return window;
+        return m_window;
     }
 
-    const Window* Context::getWindow() const
+    RenderingAPI* Context::getRenderingAPI()
     {
-        return window;
+        return m_renderingapi;
     }
 
     bool Context::isLoaded() const
     {
-        return loaded;
+        return m_loaded;
     }
 
     bool Context::isBinded() const
     {
-        return binded;
+        return m_binded;
     }
 
     bool Context::bind()
     {
-        if(window)
+        aproassert(m_renderingapi != nullptr);
+        aproassert(m_loaded == true);
+
+        if(!m_binded)
         {
-            if(window->context_bind())
-            {
-                setBinded(true);
+            m_binded = m_renderingapi->bindContext(this);
+            if(m_binded)
                 sendEvent(createEvent(ContextBindedEvent::Hash));
-                return true;
-            }
-            else
-            {
-                Console::get() << "\n[Context]{bind} Warning : Could not bind Context.";
-                return false;
-            }
         }
+
+        return m_binded;
     }
 
-    void Context::unbind()
+    bool Context::unbind()
     {
-        if(window && isBinded())
+        aproassert(m_renderingapi != nullptr);
+        aproassert(m_loaded == true);
+
+        if(m_binded)
         {
-            if(window->context_unbind())
-            {
-                setBinded(false);
+            m_binded = m_renderingapi->unbindContext(this);
+            if(!m_binded)
                 sendEvent(createEvent(ContextUnbindedEvent::Hash));
-                return true;
-            }
-            else
-            {
-                Console::get() << "\n[Context]{unbind} Warning : Could not unbind Context.";
-                return false;
-            }
         }
-    }
 
-    void Context::setLoaded(bool l)
-    {
-        loaded = l;
-    }
-
-    void Context::setBinded(bool b)
-    {
-        binded = b;
+        return !m_binded;
     }
 
     void Context::addViewPort(const ViewPortPtr& viewport)
@@ -169,7 +159,7 @@ namespace APro
 
     const ViewPortPtr Context::getDefaultViewPort() const
     {
-        return getViewPort(String("Default"));
+        return *viewports.begin();
     }
 
     Array<ViewPortPtr>::const_iterator Context::getViewPortIterator(const String& name) const
@@ -235,17 +225,20 @@ namespace APro
         defaultv->setVisible(true);
 
         addViewPort(defaultv);
-        setLoaded(true);
+        m_loaded = true;
     }
 
-    void Context::updateViewPorts(WindowResizedEvent* e)
+    void Context::onWindowResized(size_t width, size_t height)
     {
-        if(!isLoaded())
+        updateViewPorts(width, height);
+    }
+
+    void Context::updateViewPorts(size_t width, size_t height)
+    {
+        if(!m_loaded)
             return;
 
-        Pair<size_t, size_t> newsize = e->getNewSize();
-        RectangleF zone(0, 0, newsize.first(), newsize.second());
-
+        RectangleF zone(0, 0, width, height);
         getDefaultViewPort()->setZone(zone);
 
         for(size_t i = 0; i < viewports.size(); ++i)
@@ -284,15 +277,6 @@ namespace APro
     const ViewPortPtr& Context::getViewPort(size_t index) const
     {
         return viewports.at(index);
-    }
-
-    bool Context::handle(EventPtr& event)
-    {
-        if(event->type() == WindowResizedEvent::Hash)
-        {
-            updateViewPorts(event->reinterpret<WindowResizedEvent*>());
-            return true;
-        }
     }
 
     EventPtr Context::createEvent(const HashType& e_type) const

@@ -1,63 +1,67 @@
+////////////////////////////////////////////////////////////
 /** @file Window.cpp
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 04/09/2012
+ *  @date 04/09/2012 - 16/04/2014
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the Window class.
+ *  Implements the Window class.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "Window.h"
-#include "WindowManager.h"
+#include "Context.h"
 
 namespace APro
 {
-    Window::Window()
-        : Implementable()
+
+    APRO_REGISTER_EVENT_NOCONTENT(WindowCreatedEvent)
+    APRO_REGISTER_EVENT_NOCONTENT(WindowDestroyedEvent)
+    APRO_REGISTER_EVENT_NOCONTENT(WindowClosingEvent)
+    APRO_REGISTER_EVENT_NOCONTENT(WindowShowedEvent)
+    APRO_REGISTER_EVENT_NOCONTENT(WindowHideEvent)
+
+    APRO_REGISTER_EVENT_CONTENT(WindowMovedEvent)
+    APRO_REGISTER_EVENT_CONTENT(WindowSizedEvent)
+
+    Window::Window(const WindowId& id, const String& title, size_t width, size_t height, bool fullscreen)
+        : EventEmitter(), ThreadSafe(), Implementable()
     {
-        context = 0;
-    }
+        aproassert(id != 0, "Bad ID given for Window.");
+        aproassert(createImplementation() == true, "Can't create implementation.");
 
-    Window::Window(const String& name, const String & title, const String & sz)
-        : ParametedObject(), Implementable()
-    {
-        imp();
+        m_id          = id;
+        m_title       = title;
+        m_rect.width  = width;
+        m_rect.height = height;
+        m_rect.x      = 0;
+        m_rect.y      = 0;
+        m_fullscreen  = fullscreen;
+        m_cursorShown = true;
+        m_implementation = imp();
+        m_status      = StatusNull;
+        m_implementation->parent_window = this;
 
-        setParam(String("Name"), Variant(name), String("Name of the Window Object."));
-        setParam(String("Title"), Variant(title), String("Title of the Window."));
+        documentEvent(WindowCreatedEvent::Hash,   "Window is created. There are no garantee that the window has been showed or drawned. This event is sended after \"create\" has been called.");
+        documentEvent(WindowDestroyedEvent::Hash, "Window is destroyed. This event is sended after \"destroy\" has been called.");
+        documentEvent(WindowMovedEvent::Hash,     "Window has been moved. Event field \"Position\" contains the new position of the window.");
+        documentEvent(WindowSizedEvent::Hash,     "Window has been resized. Event field \"Size\" contains the new size of the window.");
+        documentEvent(WindowClosingEvent::Hash,   "Window is closing.");
+        documentEvent(WindowShowedEvent::Hash,    "Window is showed. There is no garantee that the function \"show\" is a success.");
+        documentEvent(WindowHideEvent::Hash,      "Window is hidden. There is no garantee that the function \"hide\" is a success.");
 
-        List<String> sizess = sz.explode('x');
-        Pair<size_t, size_t> sizes(String::toInt(sizess.at(0)), String::toInt(sizess.at(1)));
-        setParam(String("Size"), Variant(sizes), String("Size of the Window, Width by Height."));
-        setParam(String("Position"), Variant(Pair<size_t, size_t>(0, 0)), String("Position of the Window, x and y."));
-
-        setParam(String("Fullscreen"), Variant(false), String("Set if the Window is Fullscreen Mode or not. \
-                                                              If you change this property, the window has to be reloaded to \
-                                                              this property to take effect."));
-        setParam(String("Status"), Variant(Status::Null), String("Status of the Window. If Null, the window hasn't been created yet."));
-
-        keyboard = AProNew(Keyboard);
-        context = 0;
-        documentEvents();
-    }
-
-    Window::Window(const Window& other)
-        : ParametedObject(other), EventEmitter(), Implementable()
-    {
-        imp();
-
-        String nnae = other.getParam(String("Name")).to<String>();
-        nnae.append("_copy");
-        setParam(String("Name"), Variant(nnae));
-        setParam(String("Status"), Variant(Status::Null), String("Status of the Window. If Null, the window hasn't been created yet."));
-
-        keyboard = other.keyboard;
-        context = 0;
-        documentEvents();
+        // Create the Window object
+        if(!m_implementation->create(title, width, height, fullscreen))
+        {
+            aprodebug("Can't create Window object (title='") << title << "'.";
+        }
+        else
+        {
+            m_status = StatusCreated;
+            sendEvent(createEvent(WindowCreatedEvent::Hash));
+        }
     }
 
     Window::~Window()
@@ -65,267 +69,214 @@ namespace APro
         destroy();
     }
 
-    bool Window::create()
-    {
-        if(!Implementable::implement.isNull())
-        {
-            if(Implementable::implement->init())
-            {
-                setParam(String("Status"), Variant(Window::Status::Created));
-                sendEvent(createEvent(String("WindowCreatedEvent")));
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void Window::destroy()
-    {
-        if(!Implementable::implement.isNull() && status() != Status::Null)
-        {
-            Implementable::implement->deinit();
-            setParam(String("Status"), Variant(Window::Status::Null));
-            sendEvent(createEvent(String("WindowDestroyedEvent")));
-        }
-    }
-
     void Window::show()
     {
-        if(!Implementable::implement.isNull())
+        APRO_THREADSAFE_AUTOLOCK
+
+        if(m_status != StatusNull &&
+           m_status != StatusShown)
         {
-            Implementable::implement->show();
-            setParam(String("Status"), Variant(Window::Status::Showed));
-            sendEvent(createEvent(String("WindowShowedEvent")));
+            if(m_implementation->show())
+            {
+                m_status = StatusShown;
+                sendEvent(createEvent(WindowShowedEvent::Hash));
+            }
         }
     }
 
     void Window::hide()
     {
-        if(!Implementable::implement.isNull())
+        APRO_THREADSAFE_AUTOLOCK
+
+        if(m_status == StatusShown)
         {
-            Implementable::implement->hide();
-            setParam(String("Status"), Variant(Window::Status::Hidden));
-            sendEvent(createEvent(String("WindowHideEvent")));
+            if(m_implementation->hide())
+            {
+                m_status = StatusHidden;
+                sendEvent(createEvent(WindowHideEvent::Hash));
+            }
         }
     }
 
-    void Window::move(int x, int y, bool relative)
+    void Window::move(int x, int y, bool relativePos)
     {
-        if( /* status() == Status::Hidden || */ status() == Status::Null || isFullScreen()) return;
-
-        if(relative)
+        if(m_status != StatusNull &&
+           !m_fullscreen)
         {
-            Pair<size_t, size_t> p = position();
-            x = p.first() + x;
-            y = p.second() + y;
+            if(relativePos)
+            {
+                x = x + m_rect.x;
+                y = y + m_rect.y;
+            }
+            m_implementation->move(x, y);
         }
+    }
 
-        if(!Implementable::implement.isNull())
-        {
-            Implementable::implement->move(x, y);
-        }
+    void Window::_notifiate_window_moved(size_t new_x, size_t new_y)
+    {
+        m_rect.x = new_x;
+        m_rect.y = new_y;
+        sendEvent(createEvent(WindowMovedEvent::Hash));
     }
 
     void Window::resize(size_t width, size_t height)
     {
-        if( /* status() == Status::Hidden || */ status() == Status::Null)
+        if(m_status != StatusNull &&
+           !m_fullscreen)
         {
-            Console::get() << "\n[Window] Resize with an hidden or null window has no effect.";
-            return;
+            m_implementation->resize(width, height);
         }
+    }
 
-        if(!Implementable::implement.isNull())
-        {
-            Implementable::implement->resize(width, height);
-        }
+    void Window::_notifiate_window_resized(size_t new_width, size_t new_height)
+    {
+        m_rect.width = new_width;
+        m_rect.height = new_height;
+        if(m_context)
+            m_context->onWindowResized(new_width, new_height);
+        sendEvent(createEvent(WindowSizedEvent::Hash));
     }
 
     void Window::setTitle(const String& other)
     {
-        if(!Implementable::implement.isNull())
+        if(m_status != StatusNull)
         {
-            Implementable::implement->setTitle(other);
+            m_title = other;
+            m_implementation->setTitle(other);
         }
     }
 
     bool Window::isFullScreen() const
     {
-        return getParam(String("Fullscreen")).to<bool>();
+        return m_fullscreen;
     }
 
-    void Window::fullscreen(bool toggle)
+    Window::Status Window::getStatus() const
     {
-        bool f = isFullScreen();
+        return m_status;
+    }
 
-        if(f != toggle)
+    String Window::getTitle() const
+    {
+        return m_title;
+    }
+
+    size_t Window::getWidth() const
+    {
+        return m_rect.width;
+    }
+
+    size_t Window::getHeight() const
+    {
+        return m_rect.height;
+    }
+
+    size_t Window::getX() const
+    {
+        return m_rect.x;
+    }
+
+    size_t Window::getY() const
+    {
+        return m_rect.y;
+    }
+
+    const Window::Rect& Window::getRect() const
+    {
+        return m_rect;
+    }
+
+    void Window::update()
+    {
+        if(m_status != StatusNull)
         {
-            Status::_ s = status();
-
-            if(s != Status::Null)
-            {
-                setParam(String("Status"), Variant(Status::HasToBeReset));
-            }
-
-            setParam(String("Fullscreen"), Variant(toggle));
+            m_implementation->update();
         }
     }
 
-    Window::Status::_ Window::status() const
+    void Window::toggleCursor() const
     {
-        return getParam(String("Status")).to<Status::_>();
-    }
-
-    String Window::name() const
-    {
-        return getParam(String("Name")).to<String>();
-    }
-
-    String Window::title() const
-    {
-        return getParam(String("Title")).to<String>();
-    }
-
-    Pair<size_t, size_t> Window::size() const
-    {
-        return getParam(String("Size")).to<Pair<size_t, size_t> >();
-    }
-
-    Pair<size_t, size_t> Window::position() const
-    {
-        return getParam(String("Position")).to<Pair<size_t, size_t> >();
-    }
-
-    void Window::systemLoop()
-    {
-        if(status() == Status::Null)
-            return;
-
-        if(!Implementable::implement.isNull())
+        if(m_status != StatusNull)
         {
-            Implementable::implement->loop();
-        }
-
-        //keyboard->loop();
-    }
-
-    bool Window::isValid()
-    {
-        systemLoop();
-        return status() != Status::Null;
-    }
-
-    bool Window::reset()
-    {
-        if(status() != Status::Null)
-            destroy();
-
-        return create();
-    }
-
-    void Window::showCursor(bool s) const
-    {
-        if(!Implementable::implement.isNull())
-        {
-            Implementable::implement->showCursor(s);
+            m_implementation->showCursor(!m_cursorShown);
+            m_cursorShown = !m_cursorShown;
         }
     }
 
-    Event::ptr Window::createEvent(const String& name) const
+    void Window::associateContext(Context* context)
     {
-        Event::ptr e = EventEmitter::createEvent(name);
-        e->setParam(String("Emitter"), Variant(this), String("Emitter of this event."));
-
-        if(name == "WindowMovedEvent")
+        if(m_status != StatusNull)
         {
-            e->setParam(String("Position"), Variant(position()), String("New Position of the window."));
-        }
-        else if(name == "WindowResizedEvent")
-        {
-            e->setParam(String("Size"), Variant(size()), String("New Size of the window."));
-        }
+            if(m_context)
+                m_context.nullize();// This destroy the Context.
 
-        return e;
-    }
-
-    SharedPointer<Keyboard> Window::getKeyboard()
-    {
-        return keyboard;
-    }
-
-    void Window::attachContext(Context* c)
-    {
-        if(context)
-        {
-            detachContext();
-        }
-
-        context = c;
-        context->addListener(addListener(String("WindowToContextListener")));
-    }
-
-    void Window::detachContext()
-    {
-        if(context)
-        {
-            context->removeListener(String("WindowToContextListener"));
-            removeListener(String("WindowToContextListener"));
-
-            context = nullptr;
+            m_context = context;
+            m_context.setOwning(true);// Only the Window object can destroy this Context object.
         }
     }
 
-    void Window::initImplementation()
+    Context* Window::getAssociatedContext()
     {
-        Implementable::implement->parentWindow = this;
+        return m_context;
     }
 
-    void Window::context_bind()
+    void Window::destroy()
     {
-        if(!Implementable::implement.isNull())
+        if(m_status != StatusNull)
         {
-            Implementable::implement->context_bind();
+            associateContext(nullptr);
+            sendEvent(createEvent(WindowClosingEvent::Hash));
+            m_implementation->destroy();
+            sendEvent(createEvent(WindowDestroyedEvent::Hash));
+            m_status = StatusNull;
         }
     }
 
-    void Window::context_unbind()
+    EventPtr Window::createEvent(const HashType& e_type) const
     {
-        if(!Implementable::implement.isNull())
+        switch (e_type)
         {
-            Implementable::implement->context_unbind();
+        case WindowCreatedEvent::Hash :
+            EventPtr ret = (Event*) AProNew(WindowCreatedEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        case WindowClosingEvent::Hash :
+            EventPtr ret = (Event*) AProNew(WindowClosingEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        case WindowDestroyedEvent::Hash :
+            EventPtr ret = (Event*) AProNew(WindowDestroyedEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        case WindowHideEvent::Hash :
+            EventPtr ret = (Event*) AProNew(WindowHideEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        case WindowMovedEvent::Hash :
+            WindowMovedEvent* e = (WindowMovedEvent*) AProNew(WindowMovedEvent);
+            e->new_x = m_rect.x;
+            e->new_y = m_rect.y;
+            e->m_emitter = this;
+            return EventPtr((Event*) e);
+
+        case WindowShowedEvent::Hash :
+            EventPtr ret = (Event*) AProNew(WindowShowedEvent);
+            ret->m_emitter = this;
+            return ret;
+
+        case WindowSizedEvent::Hash :
+            WindowSizedEvent* e = (WindowSizedEvent*) AProNew(WindowSizedEvent);
+            e->new_width = m_rect.width;
+            e->new_height = m_rect.height;
+            e->m_emitter = this;
+            return EventPtr((Event*) e);
+
+        default:
+            return EventEmitter::createEvent(e_type);
         }
-    }
-
-    void Window::documentEvents()
-    {
-        String event;
-        String description;
-
-        event = "WindowCreatedEvent";
-        description = "Window is created. There are no garantee that the window has been showed or drawned. This event is sended after \"create\" has been called.";
-        documentEvent(event, description);
-
-        event = "WindowDestroyedEvent";
-        description = "Window is destroyed. This event is sended after \"destroy\" has been called.";
-        documentEvent(event, description);
-
-        event = "WindowMovedEvent";
-        description = "Window has been moved. Event field \"Position\" contains the new position of the window.";
-        documentEvent(event, description);
-
-        event = "WindowSizedEvent";
-        description = "Window has been resized. Event field \"Size\" contains the new size of the window.";
-        documentEvent(event, description);
-
-        event = "WindowClosingEvent";
-        description = "Window is closing.";
-        documentEvent(event, description);
-
-        event = "WindowShowedEvent";
-        description = "Window is showed. There is no garantee that the function \"show\" is a success.";
-        documentEvent(event, description);
-
-        event = "WindowHideEvent";
-        description = "Window is hidden. There is no garantee that the function \"hide\" is a success.";
-        documentEvent(event, description);
     }
 }

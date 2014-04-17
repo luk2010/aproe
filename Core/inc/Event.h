@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012
+ *  @date 11/09/2012 - 14/04/2014
  *
  *  Defines the Event class and the main Events documentation.
  *
@@ -272,7 +272,21 @@ namespace APro
 /// @param name : Name of the event to declare.
 #define APRO_DECLARE_EVENT_NOCONTENT(name) \
 class APRO_DLL name : public Event \
-{ public: name() { m_type = Hash; } ~name() {} static HashType Hash; }
+{ public: name() { m_type = Hash; } ~name() {} static HashType Hash; };
+
+/// @brief Declares a new event type with his hash.
+/// @ingroup Events
+/// You must use this function in a header file. See
+/// APRO_REGISTER_EVENT_CONTENT for registering the event
+/// in a source file.
+///
+/// @param name : Name of the event to declare.
+#define APRO_DECLARE_EVENT_CONTENT(name) \
+class APRO_DLL name : public Event \
+{ public: name() { m_type = Hash; } ~name() {}
+
+/// @brief Ends the APRO_DECLARE_EVENT_CONTENT macro.
+#define APRO_DECLARE_EVENT_CONTENT_END() };
 
 /// @brief Register a new event type hash.
 /// @ingroup Events
@@ -282,6 +296,16 @@ class APRO_DLL name : public Event \
 ///
 /// @param name : Name of the event to register.
 #define APRO_REGISTER_EVENT_NOCONTENT(name) \
+HashType name::Hash = String::Hash( TOTEXT(name) );
+
+/// @brief Register a new event type hash.
+/// @ingroup Events
+/// You must use this function in a source file. See
+/// APRO_DECLARE_EVENT_CONTENT for declaring the event
+/// in a header file.
+///
+/// @param name : Name of the event to register.
+#define APRO_REGISTER_EVENT_CONTENT(name) \
 HashType name::Hash = String::Hash( TOTEXT(name) );
 
     APRO_DECLARE_EVENT_NOCONTENT(NullEvent)

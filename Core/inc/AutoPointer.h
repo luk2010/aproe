@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013 - 10/04/2014
+ *  @date 02/07/2013 - 16/04/2014
  *
  *  Defines the AutoPointer class.
  *
@@ -409,6 +409,11 @@ namespace APro
         {
             aproassert(pointer != nullptr);
             return pointer;
+        }
+
+        inline bool operator bool() const
+        {
+            return !isNull();
         }
 
     public:

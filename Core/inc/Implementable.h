@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/03/2013 - 22/02/2014
+ *  @date 20/03/2013 - 14/04/2014
  *
  *  Defines the Implementable class.
  *
@@ -60,16 +60,18 @@ namespace APro
          *  On error, a debug string is written.
         **/
         ////////////////////////////////////////////////////////////
-        void createImplementation()
+        bool createImplementation()
         {
             typeptr implementation = ImplementationFactory::Get().create(String(className<T>()));
             if(implementation)
             {
                 implement = implementation;
+                return true;
             }
             else
             {
                 aprodebug("Can't create implementation for class '") << className<T>() << "' !";
+                return false;
             }
         }
 
@@ -125,6 +127,7 @@ namespace APro
     public:
 
         Implementable()
+            : implement(nullptr)
         {
 
         }

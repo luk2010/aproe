@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 21/02/2014
+ *  @date 20/09/2012 - 18/04/2014
  *
  *  Defines the Main class.
  *
@@ -229,6 +229,14 @@ namespace APro
         AbstractObjectFactory& getObjectFactory()
         {
             return *abstract_object_factory;
+        }
+
+        RenderingAPIPtr createRenderingAPI()
+        {
+            if(ImplementationFactory::Get().hasPrototype(className<RenderingAPI>()))
+                return RenderingAPIPtr(ImplementationFactory::Get().create(className<RenderingAPI>()));
+            else
+                return RenderingAPIPtr(nullptr);
         }
 
     private:
