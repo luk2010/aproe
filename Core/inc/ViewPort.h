@@ -15,14 +15,12 @@
 #define APROVIEWPORT_H
 
 #include "Platform.h"
-#include "SharedPointer.h"
 #include "Rectangle.h"
 
 namespace APro
 {
     class ViewPort
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(ViewPort)
 
     public:
 

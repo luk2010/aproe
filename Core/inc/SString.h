@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 03/04/2014
+ *  @date 25/06/2012 - 20/04/2014
  *
  *  Defines the String class.
  *
@@ -181,6 +181,8 @@ namespace APro
 
         // return size of given string, without the null-terminated character.
         static int Size(const char* str);
+
+        bool operator < (const String& other) const;
 
     protected:
 

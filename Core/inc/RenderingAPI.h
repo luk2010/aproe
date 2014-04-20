@@ -86,7 +86,7 @@ namespace APro
         /** @brief Unbind the given Context object, if not null.
         **/
         ////////////////////////////////////////////////////////////
-        virtual bool unbinContext(Context* context) = 0;
+        virtual bool unbindContext(Context* context) = 0;
 
         ////////////////////////////////////////////////////////////
         /** @brief Should unregister the Context object from this

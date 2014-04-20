@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/08/2012 - 06/02/2014
+ *  @date 25/08/2012 - 20/04/2014
  *
  *  Defines the ResourceLoader class.
  *
@@ -16,7 +16,6 @@
 
 #include "Platform.h"
 #include "SString.h"
-// #include "SharedPointer.h"
 #include "Resource.h"
 #include "List.h"
 #include "ParametedObject.h"
@@ -41,7 +40,6 @@ namespace APro
     ////////////////////////////////////////////////////////////
     class APRO_DLL ResourceLoader : public ParametedObject
     {
-//      APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(ResourceLoader) DEPRECATED
 
     protected:
 

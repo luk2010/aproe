@@ -16,14 +16,11 @@
 
 #include "Platform.h"
 #include "ResourceLoader.h"
-#include "SharedPointer.h"
 
 namespace APro
 {
     class APRO_DLL NullLoader : public ResourceLoader
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(NullLoader)
-
     public:
 
         NullLoader();

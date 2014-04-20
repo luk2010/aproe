@@ -18,7 +18,6 @@
 #include "Color.h"
 #include "SString.h"
 #include "Rectangle.h"
-#include "SharedPointer.h"
 
 namespace APro
 {

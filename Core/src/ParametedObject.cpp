@@ -1,26 +1,21 @@
-/** @file ParametedObject.cpp
+/////////////////////////////////////////////////////////////
+/** @file ParametedObject.h
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 01/09/2012
+ *  @date 01/09/2012 - 20/04/2014
  *
- *  @addtogroup Global
- *
- *  This file defines the ParametedObject class.
+ *  Implements the ParametedObject class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #include "ParametedObject.h"
 
 namespace APro
 {
     ParametedObject::ParametedObject()
-    {
-
-    }
-
-    ParametedObject::ParametedObject(const ParametedObject& other)
-        : parameters(other.parameters)
     {
 
     }
@@ -48,20 +43,14 @@ namespace APro
         return parameters[name].data;
     }
 
-    String ParametedObject::listParameters() const
+    void ParametedObject::print(Console& console) const
     {
-        String result;
+        console << "ParametedObject \n{";
 
-        result << "ParametedObject \n{";
+        ParametersMap::const_iterator e = parameters.end();
+        for(ParametersMap::iterator it = parameters.begin(); it != e; it++)
+            console << "\n  + " << it.key() << " : " << it.value().description;
 
-        for(size_t i = 0; i < parameters.size(); i++)
-        {
-            const Map<String, Descriptor>::Pair& pair = parameters.getPair(i);
-            result << "\n  + " << pair.first() << " : " << pair.second().description;
-        }
-
-        result << "\n}";
-
-        return result;
+        console << "\n}";
     }
 }

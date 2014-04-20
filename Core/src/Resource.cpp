@@ -12,7 +12,6 @@
 **/
 ////////////////////////////////////////////////////////////
 #include "Resource.h"
-#include "SharedPointer.h"
 #include "ThreadMutex.h"
 #include "ThreadMutexLockGuard.h"
 

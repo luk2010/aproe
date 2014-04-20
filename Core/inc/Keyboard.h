@@ -16,7 +16,6 @@
 
 #include "Keys.h"
 #include "EventEmitter.h"
-#include "SharedPointer.h"
 #include "Implementable.h"
 
 namespace APro
@@ -24,7 +23,6 @@ namespace APro
 
     class APRO_DLL Keyboard : public EventEmitter
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Keyboard)
 
     public:
 

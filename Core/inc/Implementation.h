@@ -15,11 +15,7 @@
 #define APRO_IMPLEMENTATION_H
 
 #include "Platform.h"
-
-#include "SString.h"
-#include "SharedPointer.h"
-#include "Store.h"
-#include "Variant.h"
+#include "Factory.h"
 
 namespace APro
 {

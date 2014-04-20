@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 03/04/2014
+ *  @date 25/06/2012 - 20/04/2014
  *
  *  @addtogroup Global
  *  @addtogroup Memory
@@ -650,5 +650,10 @@ namespace APro
     int String::Size(const char* str)
     {
         return strlen(str);
+    }
+
+    bool String::operator < (const String& other) const
+    {
+        return hash() < other.hash();
     }
 }

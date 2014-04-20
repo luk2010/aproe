@@ -17,21 +17,20 @@
 #include "Platform.h"
 #include "Singleton.h"
 #include "Console.h"
-// #include "Context.h"
+#include "RenderingAPI.h"
+#include "IdGenerator.h"
+#include "PointerCollector.h"
+#include "Console.h"
+#include "WindowManager.h"
+#include "ResourceManager.h"
+#include "PluginManager.h"
+#include "MathFunctionManager.h"
+#include "Implementation.h"
+#include "ThreadManager.h"
+#include "AbstractObject.h"
 
 namespace APro
 {
-    class WindowManager;
-    class ImplementationStore;
-    class ResourceManager;
-    class PluginManager;
-    class MathFunctionManager;
-    class FileSystem;
-    class ThreadManager;
-    class PointerCollector;
-    class AbstractObjectFactory;
-    class IdGenerator;
-
     ////////////////////////////////////////////////////////////
     /** @class Main
      *  @ingroup Global
@@ -189,17 +188,6 @@ namespace APro
         {
             return *mathManager;
         }
-/*
-        const ImplementationStore& getImplementationStore() const
-        {
-            return *impStore;
-        }
-
-        ImplementationStore& getImplementationStore()
-        {
-            return *impStore;
-        }
-*/
 
         const ImplementationFactory& getImplementations() const
         {
@@ -231,13 +219,13 @@ namespace APro
             return *abstract_object_factory;
         }
 
-        RenderingAPIPtr createRenderingAPI()
-        {
-            if(ImplementationFactory::Get().hasPrototype(className<RenderingAPI>()))
-                return RenderingAPIPtr(ImplementationFactory::Get().create(className<RenderingAPI>()));
-            else
-                return RenderingAPIPtr(nullptr);
-        }
+        ////////////////////////////////////////////////////////////
+        /** @brief Creates a RenderingAPI object.
+         *  @note An Implementation must be available to creates a new
+         *  RenderingAPI Object.
+        **/
+        ////////////////////////////////////////////////////////////
+        RenderingAPIPtr createRenderingAPI();
 
     private:
         // In activation order ! Don't change
@@ -278,13 +266,6 @@ namespace APro
         PluginManager* pluginManager;
         /* 10. The WindowManager. Needs a window plugin loaded. */
         WindowManager* windowManager;
-
-// OLD  Do not erase
-
-//      ImplementationStore* impStore;
-//      RendererFactoryManager* rfm; // Not use anymore
-
-
 
     private:
 

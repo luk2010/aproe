@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 22/02/2014
+ *  @date 20/09/2012 - 18/04/2014
  *
  *  Implements the Main class.
  *
@@ -13,18 +13,9 @@
 ////////////////////////////////////////////////////////////
 #include "Main.h"
 
-#include "ResourceManager.h"
-#include "WindowManager.h"
-#include "PluginManager.h"
-#include "Implementation.h"
-#include "MathFunctionManager.h"
 #include "FileSystem.h"
 #include "DynamicLibraryLoader.h"
 #include "NullLoader.h"
-#include "ThreadManager.h"
-#include "PointerCollector.h"
-#include "AbstractObject.h"
-#include "IdGenerator.h"
 
 namespace APro
 {
@@ -40,12 +31,10 @@ namespace APro
     Main::Main()
     {
         resourceManager = nullptr;
-//      impStore = nullptr;
         impFactory = nullptr;
         pluginManager = nullptr;
         mathManager = nullptr;
         windowManager = nullptr;
-        fs = nullptr;
         tmanager = nullptr;
         sharedpointer_collector = nullptr;
         abstract_object_factory = nullptr;
@@ -227,31 +216,6 @@ namespace APro
             aprothrow(MainException);
         }
 
-
-/*
-        impStore = AProNew(ImplementationStore);
-        if(impStore)
-            getConsole() << "\n[Main] Implementation Store OK.";
-        else
-        {
-            getConsole() << "\n[Main] Can't create Implementation Store ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
-        }
- */
-
-
-
-/* TODO
-        rfm = AProNew(1, RendererFactoryManager) ();
-        if(rfm)
-            getConsole() << "\n[Main] Renderer Factory Manager OK.";
-        else
-        {
-            getConsole() << "\n[Main] Can't create Renderer Factory Manager ! Aborting...";
-            APRO_THROW("Initialization Failed", "Can't Initialize Main Class !", "Main");
-        }
-*/
-
         getConsole() << "\n[Main] Main Initialized ! Enjoy ;)";
         return *this;
     }
@@ -404,32 +368,14 @@ namespace APro
         }
 
         getConsole() << "\n[Main] Cleaned !";
+    }
 
-/*
-        if(rfm)
-        {
-            rfm->clear();
-            getConsole() << "\n[Main] Renderer Factory Manager cleaned !";
-        }
+    RenderingAPIPtr Main::createRenderingAPI()
+    {
+        if(ImplementationFactory::Get().hasPrototype(className<RenderingAPI>()))
+            return RenderingAPIPtr(ImplementationFactory::Get().create(className<RenderingAPI>()));
         else
-        {
-            getConsole() << "\n[Main] Can't clean Renderer Factory Manager because not initialized !";
-        }
- */
-
-/*
-        if(impStore)
-        {
-            impStore->clear();
-            AProDelete(impStore);
-            impStore = nullptr;
-            getConsole() << "\n[Main] Implementation Store cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Implementation Store because not initialized !";
-        }
- */
+            return RenderingAPIPtr(nullptr);
     }
 
     void Main::setOption(unsigned int option, bool state)

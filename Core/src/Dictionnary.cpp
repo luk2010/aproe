@@ -19,11 +19,9 @@ namespace APro
     {
         console << "Dictionnary \n[";
 
-        for(size_t i = 0; i < size(); ++i)
-        {
-            const Dictionnary::Pair& pair = getPair(i);
-            console << "\n \"" << pair.first() << "\"";
-        }
+        const_iterator e = end();
+        for(const_iterator it = begin(); it != e; it++)
+            console << "\n \"" << it.key() << "\"";
 
         console << "\n]";
     }
