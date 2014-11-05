@@ -1,0 +1,158 @@
+////////////////////////////////////////////////////////////
+/** @file UTF8String.h
+ *  @ingroup Global
+ *
+ *  @author Luk2010
+ *  @version 0.1A
+ *
+ *  @date 04/11/2014
+ *
+ *  Defines the UTF8String class.
+ *
+ **/
+////////////////////////////////////////////////////////////
+#ifndef APROUTF8STRING_H 
+#define APROUTF8STRING_H
+
+#include "Platform.h"
+#include "Array.h"
+
+#include <locale> 
+#include <codecvt>
+
+namespace APro
+{
+    ////////////////////////////////////////////////////////////
+    /** @class UTF8CHar
+     *  @ingroup Global
+     *  @brief A helper class to categorize data about UTF-8 
+     *  characters.
+    **/
+    ////////////////////////////////////////////////////////////
+    class APRO_DLL UTF8Char
+    {
+    public:
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Type the Octet can have.
+        **/
+        ////////////////////////////////////////////////////////////
+        enum Type {
+            TBegin,      ///< @brief Octet is first in sequence. ( v = [00 - 7F] | [C2 - F4] )
+            TContinued,  ///< @brief Octet is a continuing sequence. ( v = [80 - BF] )
+            
+            TInvalid     ///< @brief Octet value is Invalid.
+        };
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Type of the Octet in the sequence.
+        **/
+        ////////////////////////////////////////////////////////////
+        enum Sequence {
+            STAscii, ///< @brief Octet is the only sequence octet. ( v = [00 - 7F] )
+            STOctet1x, ///< @brief First octet of a sequence of 2. ( v = [C2 - DF] )
+            STOctet1xx, ///< @brief First octet of a sequence of 3. ( v = [E0 - EF] )
+            STOctet1xxx, ///< @brief First octet of a sequence of 4. ( v = [F0 - F4] )
+            STOctetXNormal, ///< @brief Continuing octet (can be 2nd, third or fourth) normally encountered. ( v = [80 - BF] )
+            STOctet2E0, ///< @brief Second octet of EO. ( v = [A0 - BF] )
+            STOctet2ED, ///< @brief Second octet of ED. ( v = [80 - 9F] )
+            STOctet2F0, ///< @brief Second octet of F0. ( v = [90 - BF] )
+            STOctet2F4, ///< @brief Second octet of F4. ( v = [80 - 8F] )
+            
+            STInvalid, ///< @brief Octet type can be resolved or is invalid.
+        
+            OE1C0C1, ///< @brief Octet 1 is C0 or C1.
+            OE2BAD   ///< @brief Octet 2 has invalid value depending on octet 1.
+        };
+        
+        /// @brief A simple type to define what is the smallest value in an
+        /// UTF8 string.
+        typedef uint8_t Octet;
+        
+        static Type OctetType(Octet cp);
+        static SequenceType Sequence(Octet cp, Octet prev = 0x00);
+        
+        static bool IsSequenceContinuing(SequenceType st);
+        
+        typedef uint32_t CodePoint;
+        /// @brief Extract a code point from given sequence. This sequence can be 1, 2, 3 or 4 octet long.
+        static CodePoint ExtractUTF8CodePoint(Octet o1, Octet o2 = 0x00, Octet o3 = 0x00, Octet o4 = 0x00);
+        /// @brief Return the number of segment used to encode given CodePoint.
+        static size_t GetCodePointSegmentSize(CodePoint cp);
+        
+        static const CodePoint CPInvalid; ///< Defines an Invalid CodePoint.
+        static const CodePoint CPNull;    ///< Defines the Null CodePoint.
+        
+        typedef struct BOM {
+            char byte1;
+            char byte2;
+            char byte3;
+        } BOM;
+        static const BOM CPBOM;  ///< Defines the ByteOrderMask to identify UTF8.
+    };
+    
+    ////////////////////////////////////////////////////////////
+    /** @class String
+     *  @ingroup Global
+     *  @brief Defines an UTF8 encoded String.
+     *
+     *  The UTF8String class is constitued with a simple array of
+     *  codepoints (cp) , designating the sentence cp by cp. 
+     *  This method allows us to have fast managing of the sentence, 
+     *  but the disadvantage here is that an UTF8 string take 4 times
+     *  more memory than an ASCII string (as a cp is 4 char). 
+     *
+     *  @note Read/Write functions
+     *  You can use the File IO functions to read/write to a file.
+     *  We advice you to add a correct BOM at the beginning of every 
+     *  UTF8 file.
+    **/
+    ////////////////////////////////////////////////////////////
+    class APRO_DLL UTF8String
+    {
+    private:
+        
+        Array<UTF8Char::CodePoint> mdata;///< The string data.
+        
+    public:
+        
+        UTF8String ();
+        UTF8String (const UTF8String& str);
+        UTF8String (UTF8String&& str);
+        
+    public:
+        
+        void append (const UTF8String& str);
+        void push_back (const UTF8String& str) { append(str); }
+        UTF8String& operator << (const UTF8String& str) { append(str); return *this; }
+        
+        void append (const UTF8Char::CodePoint& cp);
+        void push_back (const UTF8Char::CodePoint& cp) { append(str); }
+        
+        void prepend (const UTF8String& str);
+        void push_front (const UTF8String& str) { prepend(str); }
+        
+    public:
+        
+        size_t size() { return mdata.size() - 1; }
+        
+        typedef Array<UTF8Char::CodePoint>::iterator iterator;
+        typedef Array<UTF8Char::CodePoint>::const_iterator const_iterator;
+        
+        iterator begin() { return mdata.begin(); }
+        const_iterator begin() const { mdata.begin(); }
+        
+        iterator end() { return mdata.end(); }
+        const_iterator end() const { return mdata.end(); }
+        
+        iterator last() { return mdata.last(); }
+        const_iterator last() const { return mdata.last(); }
+        
+    public:
+        
+        static UTF8String fromAscii (const char* str);
+        static UTF8String fromUtf8Data(const UTF8Char::Octet* data);
+    };
+}
+
+#endif

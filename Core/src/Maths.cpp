@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 26/09/2012
+ *  @date 26/09/2012 - 04/11/2014
  *
  *  Implements the Maths basics functions.
  *
@@ -161,6 +161,11 @@ namespace APro
             return sizeof(Real) == sizeof(float) ?
                 IsInf((float)r) :
                 IsInf((double)r);
+        }
+        
+        Real Log2 (Real r)
+        {
+            return log2(r);
         }
     }
 

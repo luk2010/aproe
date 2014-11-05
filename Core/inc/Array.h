@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 29/05/2012 - 11/04/2014
+ *  @date 29/05/2012 - 04/11/2014
  *
  *  Defines the Array class.
  *
@@ -364,6 +364,13 @@ namespace APro
         {
             return logical_size;
         }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the real size of this object (in number of
+         *  objects).
+        **/
+        ////////////////////////////////////////////////////////////
+        size_t physicalSize() const { return physical_size; }
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the number of space available without
@@ -723,6 +730,28 @@ namespace APro
         bool contains(const T& obj) const
         {
             return find(obj) != end();
+        }
+        
+    public:
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Set the data of this array to given one. 
+         *  
+         *  This array take ownership of the given pointer, assuming
+         *  given size and deleting him at destruction.
+         *
+         *  @note Think to clear the array before using this function, 
+         *  or your previous allocated memory will never be freed ! Use :
+         *  ``` 
+         *  if(!array.isEmpty()) array.clear();
+         *  ```
+        **/
+        ////////////////////////////////////////////////////////////
+        void acquireData(T* data, size_t lsz, size_t psz)
+        {
+            ptr = data;
+            logical_size = lsz;
+            physical_size = psz;
         }
 
     };

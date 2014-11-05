@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 26/09/2012
+ *  @date 26/09/2012 - 04/11/2014
  *
  *  Defines the Maths basics functions.
  *
@@ -321,6 +321,12 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         bool IsInf(Real r);
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns the Binary Logarithm of given Real.
+         **/
+        ////////////////////////////////////////////////////////////
+        Real Log2(Real r);
     }
 
     /// @ingroup Maths
