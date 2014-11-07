@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/02/2013 - 03/04/2014
+ *  @date 03/02/2013 - 07/04/2014
  *
  *  Defines the FileStream class.
  *
@@ -16,6 +16,8 @@
 
 #include "StreamInterface.h"
 #include "File.h"
+
+#include "UTF8String.h"
 
 namespace APro
 {
@@ -136,6 +138,41 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         bool readInt(int& i);
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Read a UTF8 Word in the file.
+         *
+         *  @note
+         *  The given file must be in UTF8 mode. This is checked with
+         *  the File::m_hasbom property (set to true if file has UTF8
+         *  BOM). You also can make this property true if you are sure
+         *  the file is encoded with UTF8, but does not have any BOM,
+         *  using File::forceUTF8().
+         *
+         *  @param ret : Returned UTF8 CodePoint.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool readUTF8Char(UTF8Char::CodePoint& ret);
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Read a UTF8 Word in the file.
+         *  
+         *  @note
+         *  The given file must be in UTF8 mode. This is checked with
+         *  the File::m_hasbom property (set to true if file has UTF8
+         *  BOM). You also can make this property true if you are sure
+         *  the file is encoded with UTF8, but does not have any BOM, 
+         *  using File::forceUTF8(). 
+         *
+         *  @param str : The returned word. The word read is from the
+         *  first encountered character ( UTF8Char::isText() ) to the first 
+         *  space encountered after this character ( UTF8::isSpace() ), 
+         *  limited to the given size. 
+         *  @param maxsz : Max size of the word. If 0 (default value), 
+         *  then no limit is given to the lenght of the word returned.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool readUTF8Word(UTF8String& str, size_t maxsz = 0);
 
         /////////////////////////////////////////////////////////////
         /** @brief Reads blanck characters to the next non-blanck
@@ -168,6 +205,18 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         bool write(const int& str);
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Write an UTF8 CodePoint.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool write(const UTF8Char::CodePoint& cp);
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Write an UTF8 String.
+         **/
+        /////////////////////////////////////////////////////////////
+        bool write(const UTF8String& str);
 
     public:
 

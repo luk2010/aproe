@@ -33,6 +33,11 @@ newoption {
 	description	= "Disable multithreading support. Use it when your platform doesn't have the 'pthread' library."
 }
 
+newoption {
+    trigger = "with-cpp11"
+    description = "Allows the use of C++11 features. Adjust it with your compiler. We highly recommend it !"
+}
+
 solution "aproe"
 	configurations { "Debug", "Release" }
 	
@@ -72,6 +77,9 @@ project("core")
 		defines {"_HAVE_EXCEPTIONS_"}
 		defines {"_HAVE_MEMORYTRACKER_"}
 		defines {"_HAVE_EXCEPT_ON_ASSERT_"}
+		
+    configuration "with-cpp11"
+         defines {"_COMPILE_WITH_CPP11_"}
 
 	configuration "double-real"
 		defines {"_USE_DOUBLEREAL_"}

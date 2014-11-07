@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 30/08/2012 - 04/11/2014
+ *  @date 30/08/2012 - 07/11/2014
  *
  *  Defines the File class.
  *
@@ -228,6 +228,14 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         void setUtf8Writing(bool utf8writing) { m_saveutf8 = utf8writing; }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Force the file to read in mode UTF8. 
+         *  @note This option is not necessary if file contains a 
+         *  UTF8 BOM.
+        **/
+        ////////////////////////////////////////////////////////////
+        void forceUTF8(bool force) { m_hasbom = force ? force : m_hasbom; }
         
     private:
         

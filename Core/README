@@ -19,7 +19,7 @@ How to use these files
 ### Installation
 
 1. Verify that you have premake4 installed. See extra/README for more details.
-2. Run premake4 --with-all [plat] where plat is the desired platform, and "--with-all" active every "--with" options.
+2. Run premake4 --with-all [plat] where plat is the desired platform, and "--with-all" active every "--with" debugging options. We also recommend the —with-cpp11 option to activate C++11 features, which are great. 
 3. Use the generated build files to build the library.
 
 This process will generate the Core lirary, without any plugins or examples.

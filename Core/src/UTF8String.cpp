@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 04/11/2014
+ *  @date 04/11/2014 - 07/11/2014
  *
  *  Implements the UTF8String class.
  *
@@ -138,6 +138,118 @@ namespace APro
         return 4;
     }
     
+    int UTF8Char::GetOctetNumber(const Octet& first)
+    {
+        SequenceType st = Sequence(first);
+        if(st == STAscii) return 1;
+        if(st == STOctet1x) return 2;
+        if(st == STOctet1xx) return 3;
+        if(st == STOctet1xxx) return 4;
+        
+        // Hope we never reach this point.
+        return 0;
+    }
+    
+    bool UTF8Char::IsSpace(const CodePoint& cp)
+    {
+        return cp != 0x0020 && cp != 0x0009 &&
+               cp != 0x000D && cp != 0x000A;
+    }
+    
+    int UTF8Char::toChar(char* ret , const CodePoint& cp)
+    {
+        size_t nsegmentsize = GetCodePointSegmentSize(cp);
+        const char* cpc = (const char*) &cp;
+        
+        //////////////////////////////////////////////////////////////////
+        // The methods to set bits is simple :
+        // We only align bits in the correct pattern
+        // We begin by the end, bits 2 3 and 4 always begin by 10xxxxxx.
+        // We set the 6 first bits, and the 2 last to next byte.
+        //
+        // 10000000
+        // 00XXXXXX // codepoint byte 4.
+        //
+        // 11000000
+        // 000000XX ( XX000000 >> 6 // codepoint byte 4. )
+        // 000XXX00 ( 00000XXX << 2 // codepoint byte 3. )
+        //////////////////////////////////////////////////////////////////
+        
+        if(nsegmentsize == 1)
+        {
+            // [1 - 7] bits.
+            // The most easy, just place the correct bits in the first char.
+            ret[0]  = 0x00;
+            ret[0] |= cpc[4] & 0b01111111;
+            
+            return 1;
+        }
+        
+        if(nsegmentsize == 2)
+        {
+            // [8 - 11] bits.
+            // ret will be 110xxxxx on first char, (0xC2 is 110 00000)
+            //             10xxxxxx on second char.
+            
+            ret[1]  = 0b10000000;
+            ret[1] |= cpc[4] & 0b00111111;// We set the 6 bits.
+            
+            ret[0]  = 0b11000000;
+            ret[0] |= (cpc[4] & 0b11000000) >> 6;
+            ret[0] |= (cpc[3] & 0b00000111) << 2;
+            
+            return 2;
+        }
+        
+        if(nsegmentsize == 3)
+        {
+            // [12 - 16] bits.
+            
+            ret[2]  = 0b10000000;
+            ret[2] |= cpc[4] & 0b00111111;// We set the 6 bits.
+            
+            ret[1]  = 0b10000000;
+            ret[1] |= (cpc[4] & 0b11000000) >> 6;
+            ret[1] |= (cpc[3] & 0b00001111) << 2;
+            
+            ret[0]  = 0b11100000;
+            ret[0] |= (cpc[3] & 0b11000000) >> 6;
+            ret[0] |= (cpc[2] & 0b00000011) << 2;
+            
+            return 3;
+        }
+        
+        if(nsegmentsize == 4)
+        {
+            // [17 - 21 bits]
+            
+            ret[3]  = 0b10000000;
+            ret[3] |= cpc[4] & 0b00111111;// We set the 6 bits.
+            
+            ret[2]  = 0b10000000;
+            ret[2] |= (cpc[4] & 0b11000000) >> 6;
+            ret[2] |= (cpc[3] & 0b00001111) << 2;
+            
+            ret[1]  = 0b10000000;
+            ret[1] |= (cpc[3] & 0b11000000) >> 6;
+            ret[1] |= (cpc[2] & 0b00001111) << 2;
+            
+            ret[0]  = 0b11110000;
+            ret[0] |= (cpc[2] & 0b11000000) >> 6;
+            ret[0] |= (cpc[1] & 0b00000001) << 2;
+            
+            return 4;
+        }
+        
+        return 0;
+    }
+    
+    
+    
+    // -------------------------------------------------------------------------
+    
+    
+    
     UTF8String::UTF8String()
     {
         
@@ -148,11 +260,15 @@ namespace APro
         mdata.append(str);
     }
     
+#if APRO_CPP11
+    
     UTF8String::UTF8String(UTF8String&& str)
     {
         mdata.acquireData(str.mdata.ptr(), str.mdata.size(), str.mdata.physicalSize());
         str.acquireData(nullptr, 0, 0);
     }
+    
+#endif
     
     void UTF8String::append(const UTF8String& str)
     {

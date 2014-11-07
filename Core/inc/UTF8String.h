@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 04/11/2014
+ *  @date 04/11/2014 - 07/11/2014
  *
  *  Defines the UTF8String class.
  *
@@ -27,6 +27,11 @@ namespace APro
      *  @ingroup Global
      *  @brief A helper class to categorize data about UTF-8 
      *  characters.
+     *
+     *  @note
+     *  The UTF-8 CodePoint logic is explained here : http://fr.wikipedia.org/wiki/UTF-8
+     *  All the implementation is based on CodePoints and Octets value
+     *  given there.
     **/
     ////////////////////////////////////////////////////////////
     class APRO_DLL UTF8Char
@@ -48,7 +53,7 @@ namespace APro
         /** @brief Type of the Octet in the sequence.
         **/
         ////////////////////////////////////////////////////////////
-        enum Sequence {
+        enum SequenceType {
             STAscii, ///< @brief Octet is the only sequence octet. ( v = [00 - 7F] )
             STOctet1x, ///< @brief First octet of a sequence of 2. ( v = [C2 - DF] )
             STOctet1xx, ///< @brief First octet of a sequence of 3. ( v = [E0 - EF] )
@@ -73,12 +78,22 @@ namespace APro
         static SequenceType Sequence(Octet cp, Octet prev = 0x00);
         
         static bool IsSequenceContinuing(SequenceType st);
+        static int  GetOctetNumber(const Octet& first);
         
-        typedef uint32_t CodePoint;
+        typedef uint32_t CodePoint;///< A common CodePoint type who can handle every Unicode UTF-8 character.
+        
         /// @brief Extract a code point from given sequence. This sequence can be 1, 2, 3 or 4 octet long.
         static CodePoint ExtractUTF8CodePoint(Octet o1, Octet o2 = 0x00, Octet o3 = 0x00, Octet o4 = 0x00);
+        
         /// @brief Return the number of segment used to encode given CodePoint.
         static size_t GetCodePointSegmentSize(CodePoint cp);
+        
+        /// @brief Returns true if given CodePoint is a spacing character. (U+0020, U+0009, U+000D, U+000A)
+        /// @note UTF8 CodePoin for spacing characters from http://www.w3.org/TR/REC-xml/#NT-S
+        static bool IsSpace(const CodePoint& cp);
+        
+        /// @brief Convert given CodePoint to char, and returns the valid char used.
+        static int toChar(char* ret , const CodePoint& cp);
         
         static const CodePoint CPInvalid; ///< Defines an Invalid CodePoint.
         static const CodePoint CPNull;    ///< Defines the Null CodePoint.
@@ -118,7 +133,10 @@ namespace APro
         
         UTF8String ();
         UTF8String (const UTF8String& str);
+        
+#if APRO_CPP11
         UTF8String (UTF8String&& str);
+#endif
         
     public:
         

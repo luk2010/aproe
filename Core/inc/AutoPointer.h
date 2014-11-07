@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013 - 16/04/2014
+ *  @date 02/07/2013 - 07/11/2014
  *
  *  Defines the AutoPointer class.
  *
@@ -132,6 +132,25 @@ namespace APro
             is_owned         = auto_pointer.is_owned;
             owner            = auto_pointer.owner;
             init_pointer();
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Constructor by move.
+         *  @param auto_pointer : Pointer to move.
+         *  @note Moved AutoPointer is nullized.
+         **/
+        ////////////////////////////////////////////////////////////
+        AutoPointer(AutoPointer<T>&& autopointer)
+        {
+            pointer          = autopointer.pointer;
+            custom_collector = autopointer.custom_collector;
+            is_owned         = autopointer.is_owned;
+            owner            = autopointer.owner;
+            
+            autopointer.pointer          = nullptr;
+            autopointer.custom_collector = nullptr;
+            autopointer.is_owned         = false;
+            autopointer.owner            = nullptr;
         }
 
         ////////////////////////////////////////////////////////////
@@ -431,6 +450,21 @@ namespace APro
         AutoPointer& operator = (const AutoPointer<T>& other)
         {
             set(other.pointer);
+            return *this;
+        }
+        
+        AutoPointer& operator = (AutoPointer<T>&& autopointer)
+        {
+            pointer          = autopointer.pointer;
+            custom_collector = autopointer.custom_collector;
+            is_owned         = autopointer.is_owned;
+            owner            = autopointer.owner;
+            
+            autopointer.pointer          = nullptr;
+            autopointer.custom_collector = nullptr;
+            autopointer.is_owned         = false;
+            autopointer.owner            = nullptr;
+            
             return *this;
         }
 

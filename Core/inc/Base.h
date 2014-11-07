@@ -44,6 +44,11 @@
 #   endif
 #endif
 
+/** Defined if we are compiling using C++11. */
+#if _COMPILE_WITH_CPP11_
+#   define APRO_CPP11_FEATURES
+#endif
+
 /** Defines the Max Buffer Size in MemoryTracker. */
 #if APRO_MEMORYTRACKER == APRO_ON
 #   define APRO_MEMORYTRACKERMAXBUFFERSIZE 16384

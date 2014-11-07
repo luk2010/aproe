@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/02/2013 - 03/04/2014
+ *  @date 03/02/2013 - 07/04/2014
  *
  *  Implements the FileStream class.
  *
@@ -32,7 +32,7 @@ namespace APro
         : m_file(nullptr)
     {
         if(f.isOpened())
-            m_file = &f;
+            m_file = std::move(FilePtr(&f, nullptr, true, nullptr));
     }
 
     FileStream::~FileStream()
@@ -44,7 +44,7 @@ namespace APro
     {
         if(f.isOpened())
         {
-            m_file = &f;
+            m_file = std::move(FilePtr(&f, nullptr, true, nullptr));
             return true;
         }
 
@@ -166,6 +166,94 @@ namespace APro
         i = real.toInt();
         return true;
     }
+    
+    bool FileStream::readUTF8Char(UTF8Char::CodePoint& ret)
+    {
+        if(m_file.isNull())
+            return false;
+        if(!m_file->hasUTF8BOM()) {
+            aprodebug("Reading UTF8 from file '") << m_file->getFileName() << "' wich does not have correct UTF8 mode.\n";
+            return false;
+        }
+        
+        // Preparing octets
+        UTF8Char::Octet octets [4] = { 0x00, 0x00, 0x00, 0x00 };
+        
+        // Read Octet 1
+        if(!m_file->read((Byte*)&octets[0], 1)) {
+            aprodebug("Can't read UTF8 Octet1 from file '") << m_file->getFileName() << "'.\n";
+            return false;
+        }
+        
+        // Checking Octet
+        if(!UTF8Char::OctetType(octets[0]) != UTF8Char::TBegin) {
+            aprodebug("Invalid UTF8 Octet1 from file '") << m_file->getFileName() << "'.\n";
+            return false;
+        }
+        
+        int numoctet = UTF8Char::GetOctetNumber(octets[0]);
+        
+        // Read Octet 2
+        if(numoctet > 1)
+        {
+            if(!m_file->read((Byte*)&octets[1], 1)) {
+                aprodebug("Can't read UTF8 Octet2 from file '") << m_file->getFileName() << "'.\n";
+                return false;
+            }
+        }
+        
+        // Read Octet 3
+        if(numoctet > 2)
+        {
+            if(!m_file->read((Byte*)&octets[2], 1)) {
+                aprodebug("Can't read UTF8 Octet3 from file '") << m_file->getFileName() << "'.\n";
+                return false;
+            }
+        }
+        
+        // Read Octet 4
+        if(numoctet > 3)
+        {
+            if(!m_file->read((Byte*)&octets[3], 1)) {
+                aprodebug("Can't read UTF8 Octet4 from file '") << m_file->getFileName() << "'.\n";
+                return false;
+            }
+        }
+        
+        // Compute the codepoint
+        ret = UTF8Char::ExtractUTF8CodePoint(octets[0], octets[1], octets[2], octets[3]);
+        return true;
+    }
+    
+    bool FileStream::readUTF8Word(UTF8String& str, size_t maxsz)
+    {
+        if(m_file.isNull())
+            return false;
+        if(!m_file->hasUTF8BOM()) {
+            aprodebug("Reading UTF8 from file '") << m_file->getFileName() << "' wich does not have correct UTF8 mode.\n";
+            return false;
+        }
+        
+        if(!str.isEmpty()) {
+            aprodebug("Reading UTF8 Word to string wich is not empty.");
+            return false;
+        }
+        
+        UTF8Char::CodePoint cp = UTF8CHar::CPNull;
+        
+        if(!readUTF8Char(cp)) {
+            return false;
+        }
+        
+        while (cp != UTF8Char::CPNull &&
+               !UTF8Char::IsSpace(cp))
+        {
+            str.append(cp);
+            readUTF8Char(cp);
+        }
+        
+        return true;
+    }
 
     int FileStream::skipBlanck(char& c)
     {
@@ -206,6 +294,34 @@ namespace APro
             return false;
 
         return write(String::toString(str));
+    }
+    
+    bool FileStream::write(const UTF8Char::CodePoint& cp)
+    {
+        if(m_file.isNull() || !m_file->isOpened())
+            return false;
+        
+        // Prepare the char.
+        char cptoc [4] = { 0, 0, 0, 0 };
+        int vcu = UTF8Char::toChar (&cptoc[0], cp);
+        if (vcu < 1)
+            return false;
+        
+        // Write the current used char.
+        return m_file->write ((const char*) cptoc, vcu);
+    }
+    
+    bool FileStream::write(const UTF8String& str)
+    {
+        if(m_file.isNull() || !m_file->isOpened())
+            return false;
+        
+        for(UTF8String::const_iterator it = str.begin(); it != str.end(); it++) {
+            if(!write(*it))
+                return false;
+        }
+        
+        return true;
     }
 
     bool FileStream::isEOS() const
