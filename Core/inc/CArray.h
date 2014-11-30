@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/05/2013
+ *  @date 25/05/2013 - 27/11/2014
  *
  *  Defines a C-style array.
  *
@@ -45,7 +45,7 @@ namespace APro
     {
     public:
 
-        Type   m_array;///< Pointer to the array.
+        Type*  m_array;///< Pointer to the array.
         enum { Size = S; /**< Size of the array. */ };
 
     public:

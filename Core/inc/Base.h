@@ -47,6 +47,13 @@
 /** Defined if we are compiling using C++11. */
 #if _COMPILE_WITH_CPP11_
 #   define APRO_CPP11_FEATURES
+#   define APRO_CPP11
+#   define stdmove(a) std::move (a)
+#endif
+
+#ifndef APRO_CPP11
+/** We define a stub std::move function. **/
+#   define stdmove(a) a
 #endif
 
 /** Defines the Max Buffer Size in MemoryTracker. */

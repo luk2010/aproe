@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 28/02/2014
+ *  @date 21/05/2012 - 30/11/2014
  *
  *  Redefines basic memory function, like malloc, realloc, free. It is usefull when the engine
  *  use the Memory Tracker.
@@ -46,6 +46,18 @@
 
 namespace APro
 {
+    ////////////////////////////////////////////////////////////
+    /** @struct MemoryHeader
+     *  @ingroup Memory
+     *  @brief A memory Header made to simplify memory organization.
+    **/
+    ////////////////////////////////////////////////////////////
+    struct MemoryHeader
+    {
+        size_t size;     ///< @brief Size of the block
+        bool   is_array; ///< @brief True if block is an array.
+    } __attribute__ ((packed));
+    
     ////////////////////////////////////////////////////////////
     /** @brief Allocate bytes using the malloc function.
      *  @ingroup Memory
@@ -204,22 +216,26 @@ template <typename T> void AProDelete(T* ptr, const char* func_, const char* fil
     if(APro::Types::IsDestructible<T>())
     {
         size_t sz_t = sizeof(T);
+        
+        // Looking for Header.
+        MemoryHeader* head    = (MemoryHeader*) ((void*)ptr);
+        T*            realptr = (T*) (((void*) ptr)+sizeof(MemoryHeader));
 
-        // Looking for Block.
-        const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((ptr_t) ptr);
-        if(mblock && mblock->is_array)
+        // Looking for Block. We try to avoid this function at it is too much costs.
+        // const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((ptr_t) ptr);
+        if(head && head->is_array)
         {
             // If block is valid and it is an array (# of objects superior or equal to 2), we determine how many objects there are in.
             // Each blocks should have been initialized. As this function is called with AProNewA, this is what is done with placement.
             // This is necessary as every allocation using AProNew uses placement new.
-            size_t n = (size_t) mblock->size / sz_t;
+            size_t n = (size_t) head->size / sz_t;
             while(n)
-                ptr[--n].~T();// Destroy each one in descending order to preserv cannonical destruction order of C++.
+                realptr[--n].~T();// Destroy each one in descending order to preserv cannonical destruction order of C++.
         }
         else
         {
-            // Block is not in the MemoryTracker, or it isnt an array. We call the destructor as delete would have done it.
-            ptr->~T();
+            // Block is not an array. We call the destructor as delete would have done it.
+            realptr->~T();
         }
     }
 

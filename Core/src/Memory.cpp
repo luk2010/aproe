@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 22/12/2013
+ *  @date 21/05/2012 - 30/11/2014
  *
  *  Implements basic memory function, like malloc, realloc, free. It is usefull when the engine
  *  use the Memory Tracker.
@@ -38,7 +38,10 @@ namespace APro
         {
             // Using the malloc function to allocate memory.
             /// @todo Make it more customizable.
-            void* ptr = malloc(byte);
+            
+            // Create sufficient space for the requested memory and the header.
+            size_t totbyte = byte + sizeof(MemoryHeader);
+            void* ptr = malloc(totbyte);
             if(ptr == nullptr)
             {
                 aprodebug("Can't allocate ") << byte << " bytes ! Call from \"" << func_ << "\" in file \"" << file_ << "\" and line " << line_ << ".";
@@ -46,8 +49,14 @@ namespace APro
                 return nullptr;
             }
 
-            Memory::Set(ptr, 0, byte);// We assert that memory is clean.
+            Memory::Set(ptr, 0, totbyte);// We assert that memory is clean.
             MemoryManager::get().reportAllocation(ptr, byte, func_, file_, line_, is_arr);
+            
+            // Initialize the memoryheader.
+            MemoryHeader* head = (MemoryHeader*) ptr;
+            head->size     = byte;
+            head->is_array = is_arr;
+            
             return ptr;
         }
     }
@@ -69,7 +78,8 @@ namespace APro
 
             else
             {
-                void* new_ptr = realloc(ptr, byte);
+                size_t totbyte = byte + sizeof(MemoryHeader);
+                void* new_ptr = realloc(ptr, totbyte);
                 if(new_ptr == nullptr)
                 {
                     aprodebug("Can't reallocate ") << byte << " bytes ! Call from \"" << func_ << "\" in file \"" << file_ << "\" and line " << line_ << ".";

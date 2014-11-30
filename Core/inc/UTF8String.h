@@ -1,11 +1,11 @@
 ////////////////////////////////////////////////////////////
 /** @file UTF8String.h
- *  @ingroup Global
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 04/11/2014 - 07/11/2014
+ *  @date 04/11/2014 - 08/11/2014
  *
  *  Defines the UTF8String class.
  *
@@ -16,9 +16,6 @@
 
 #include "Platform.h"
 #include "Array.h"
-
-#include <locale> 
-#include <codecvt>
 
 namespace APro
 {
@@ -94,6 +91,8 @@ namespace APro
         
         /// @brief Convert given CodePoint to char, and returns the valid char used.
         static int toChar(char* ret , const CodePoint& cp);
+        /// @brief Convert given hexadecimal string to CodePoint.
+        static CodePoint fromStr(const char* str);
         
         static const CodePoint CPInvalid; ///< Defines an Invalid CodePoint.
         static const CodePoint CPNull;    ///< Defines the Null CodePoint.
@@ -149,6 +148,12 @@ namespace APro
         
         void prepend (const UTF8String& str);
         void push_front (const UTF8String& str) { prepend(str); }
+        
+        void clear();
+        void erase(iterator beg, const_iterator e = nullptr);
+        
+        void insert(const UTF8Char::CodePoint& cp, const_iterator);
+        
         
     public:
         

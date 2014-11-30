@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 29/05/2012 - 04/11/2014
+ *  @date 29/05/2012 - 28/11/2014
  *
  *  Defines the Array class.
  *
@@ -100,6 +100,28 @@ namespace APro
                 __assign_array(rhs.pointer(), rhs.size());
             }
         }
+        
+#ifdef APRO_CPP11
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Move an Array of same type to this one.
+         **/
+        ////////////////////////////////////////////////////////////
+        Array(Array<T>&& rhs) : ptr(nullptr), logical_size(0), physical_size(0)
+        {
+            if(rhs.size() > 0)
+            {
+                ptr               = stdmove (rhs.ptr);
+                logical_size      = stdmove (rhs.logical_size);
+                physical_size     = stdmove (rhs.physical_size);
+                
+                rhs.ptr           = nullptr;
+                rhs.logical_size  = 0;
+                rhs.physical_size = 0;
+            }
+        }
+        
+#endif
 
         ~Array()
         {
@@ -654,6 +676,42 @@ namespace APro
 
             return *this;
         }
+        
+#ifdef APRO_CPP11
+        
+        Array<T>& operator = (Array<T>&& rhs)
+        {
+            move(rhs);
+            return *this;
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Move given array to this one.
+         *  @note Given array contains this array data after swap.
+        **/
+        ////////////////////////////////////////////////////////////
+        void move (Array<T>&& rhs)
+        {
+            std::swap(ptr,           rhs.ptr);
+            std::swap(logical_size,  rhs.logical_size);
+            std::swap(physical_size, rhs.physical_size);
+        }
+        
+#endif
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Swap two Arrays of same type.
+         *  @note This is less efficient than using the operator =
+         *  or Array::move() with std::move() to copy a returned 
+         *  value.
+        **/
+        ////////////////////////////////////////////////////////////
+        void swap (Array<T>& rhs)
+        {
+            std::swap(ptr,           rhs.ptr);
+            std::swap(logical_size,  rhs.logical_size);
+            std::swap(physical_size, rhs.physical_size);
+        }
 
     public:
 
@@ -756,8 +814,9 @@ namespace APro
 
     };
 
-    typedef Array<HashType> HashArray;///< An array of HashType.
-    typedef Array<Byte>     ByteArray;///< An array of Byte.
+    typedef Array<HashType> HashArray;///< @brief An array of HashType.
+    typedef Array<Byte>     ByteArray;///< @brief An array of Byte.
+    typedef Array<char>     CharArray;///< @brief An Array of char.
 }
 
 #endif

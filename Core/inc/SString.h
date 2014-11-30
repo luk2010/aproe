@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 20/04/2014
+ *  @date 25/06/2012 - 30/11/2014
  *
  *  Defines the String class.
  *
@@ -32,7 +32,7 @@ namespace APro
      *  end of the string.
     **/
     ////////////////////////////////////////////////////////////
-    class APRO_DLL String
+    class APRO_DLL String : public Swappable <String>
     {
 
     private:
@@ -53,6 +53,7 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         explicit String(const char* str);
+        String(const char* str, size_t sz)
 
         ////////////////////////////////////////////////////////////
         /** Copy constructor
@@ -65,6 +66,22 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         String(const Number& nb);
+        
+#ifdef APRO_CPP11
+        ////////////////////////////////////////////////////////////
+        /** @brief Move Constructor.
+        **/
+        ////////////////////////////////////////////////////////////
+        String(String&& rhs);
+#endif
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Swap this object with another one from the same
+         *  kind.
+         *  @see Swappable
+        **/
+        ////////////////////////////////////////////////////////////
+        void swap (String& rhs);
 
         ~String();
 
@@ -183,6 +200,25 @@ namespace APro
         static int Size(const char* str);
 
         bool operator < (const String& other) const;
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Interpret given string as an hexadecimal number
+         *  and returns it.
+        **/
+        ////////////////////////////////////////////////////////////
+        static u32 ToHex(const char* str);
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Modify the String, interpreting it as a texted C-String,
+         *  beginning and ending with '"', and having every \" or \'.
+         * 
+         *  This function so erase the ", convert the \" to ", \' to ', 
+         *  etc.
+        **/
+        ////////////////////////////////////////////////////////////
+        void interpretastext();
+        
+        static String Empty;///< @brief An empty string.
 
     protected:
 

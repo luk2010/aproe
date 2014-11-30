@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013 - 07/11/2014
+ *  @date 02/07/2013 - 29/11/2014
  *
  *  Defines the AutoPointer class.
  *
@@ -16,6 +16,8 @@
 
 #include "Platform.h"
 #include "PointerCollector.h"
+
+#include "Swappable.h"
 
 namespace APro
 {
@@ -63,7 +65,7 @@ namespace APro
     **/
     ////////////////////////////////////////////////////////////
     template <typename T>
-    class AutoPointer
+    class AutoPointer : public Swappable <AutoPointer <T> >
     {
     protected:
 
@@ -134,6 +136,7 @@ namespace APro
             init_pointer();
         }
         
+#ifdef APRO_CPP11
         ////////////////////////////////////////////////////////////
         /** @brief Constructor by move.
          *  @param auto_pointer : Pointer to move.
@@ -152,12 +155,18 @@ namespace APro
             autopointer.is_owned         = false;
             autopointer.owner            = nullptr;
         }
+#endif
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor by copy.
          *  @param auto_pointer : Pointer to copy.
          *  @note The type of the pointer must be directly castable
-         *  to the main type of this AutoPointer.
+         *  to the main type of this AutoPointer using dynamic_cast.
+         *  The memory pointed by this pointer will be count in the
+         *  custom collector, but only the AutoPointer which had the
+         *  original type will be able to destroy it (we use the owner 
+         *  system : the pointer is owned but by an unknown source, which
+         *  means the memory is not in its original type).
         **/
         ////////////////////////////////////////////////////////////
         template<typename Y>
@@ -202,7 +211,8 @@ namespace APro
                     if(custom_collector)
                     {
                         custom_collector->pop(pointer);
-                        if(custom_collector->getPointerUtility(pointer) == 0)
+                        if(custom_collector->getPointerUtility(pointer) == 0 &&
+                           custom_collector->isValid(pointer))
                             destroy_pointer();
                     }
                     else
@@ -391,6 +401,35 @@ namespace APro
         {
             return pointer == nullptr;
         }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the pointed memory original type 
+         *  is the same as its original type.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool isOriginal() const
+        {
+            if(is_owned && owner == nullptr)
+                return false;
+            return true;
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the pointed memory is still valid
+         *  and present in the pointer collector.
+         *  @note An AutoPointer object always notifiate the PointerCollector
+         *  the destruction of its pointer.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool isValid() const
+        {
+            if(custom_collector)
+            {
+                return custom_collector->isValid(pointer);
+            }
+            
+            return pointer != nullptr;
+        }
 
     public:
 
@@ -447,25 +486,21 @@ namespace APro
             return !(*this == other);
         }
 
+/* This operator is disabled, as seen in Swappable, operator = (AutoPointer<T> ) is
+   more efficient than operator = (const AutoPointer<T>&) (copy-and-swap or move-and-swap).
         AutoPointer& operator = (const AutoPointer<T>& other)
         {
             set(other.pointer);
             return *this;
         }
+*/
         
-        AutoPointer& operator = (AutoPointer<T>&& autopointer)
+        void swap (AutoPointer<T>& autopointer)
         {
-            pointer          = autopointer.pointer;
-            custom_collector = autopointer.custom_collector;
-            is_owned         = autopointer.is_owned;
-            owner            = autopointer.owner;
-            
-            autopointer.pointer          = nullptr;
-            autopointer.custom_collector = nullptr;
-            autopointer.is_owned         = false;
-            autopointer.owner            = nullptr;
-            
-            return *this;
+            std::swap(pointer,          autopointer.pointer);
+            std::swap(custom_collector, autopointer.custom_collector);
+            std::swap(is_owned,         autopointer.is_owned);
+            std::swap(owner,            autopointer.owner);
         }
 
         AutoPointer& operator = (T* ptr)

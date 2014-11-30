@@ -1,11 +1,11 @@
 ////////////////////////////////////////////////////////////
 /** @file UTF8String.cpp
- *  @ingroup Global
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 04/11/2014 - 07/11/2014
+ *  @date 04/11/2014 - 08/11/2014
  *
  *  Implements the UTF8String class.
  *
@@ -14,6 +14,8 @@
 
 #include "UTF8String.h"
 #include "Maths.h"
+
+#include "SString.h"
 
 namespace APro
 {
@@ -112,7 +114,7 @@ namespace APro
             result |= ((CodePoint) (o3 & 0b00111111));
         }
         
-        else if ( Sequence (o1) == UTF8Char::STOctet1xx &&
+        else if ( Sequence (o1) == UTF8Char::STOctet1xxx &&
                  IsSequenceContinuing ( Sequence(o2, o1) ) &&
                  IsSequenceContinuing ( Sequence(o3, o2) ) &&
                  IsSequenceContinuing ( Sequence(o4, o3) ) )
@@ -242,6 +244,11 @@ namespace APro
         }
         
         return 0;
+    }
+    
+    CodePoint UTF8Char::fromStr(const char* str)
+    {
+        return (CodePoint) String::ToHex (str);
     }
     
     
