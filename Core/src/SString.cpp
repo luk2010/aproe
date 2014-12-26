@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 20/04/2014
+ *  @date 25/06/2012 - 30/11/2014
  *
  *  @addtogroup Global
  *  @addtogroup Memory
@@ -16,6 +16,8 @@
 
 namespace APro
 {
+    String String::Empty = String ();
+    
     String::String()
     {
         mstr.append('\0');
@@ -23,6 +25,12 @@ namespace APro
 
     String::String(const char* str)
         : mstr(str, strlen(str) + 1)
+    {
+        assertFinal();
+    }
+    
+    String::String(const char* str, size_t sz)
+        : mstr(str, sz)
     {
         assertFinal();
     }
@@ -38,10 +46,23 @@ namespace APro
         mstr.append('\0');
         append(nb);
     }
+    
+#ifdef APRO_CPP11
+    String::String(String&& rhs)
+    {
+        mstr.swap(rhs.mstr);
+    }
+#endif
 
     String::~String()
     {
         mstr.clear();
+    }
+    
+    void String::swap(String& rhs)
+    {
+        using std::swap;
+        swap(mstr, rhs.mstr);
     }
 
     void String::append(char c)
@@ -622,6 +643,21 @@ namespace APro
         return ret;
     }
 
+    String String::toString(bool b)
+    {
+        if(b)
+            return String("True");
+        else
+            return String("False");
+    }
+
+    String String::FromInt(int i)
+    {
+        char buffer[32];
+        sprintf(buffer, "%d", i);
+        return String(buffer);
+    }
+
     HashType String::hash() const
     {
         // From : http://stackoverflow.com/questions/8094790/how-to-get-hash-code-of-a-string-in-c
@@ -656,21 +692,35 @@ namespace APro
     {
         return hash() < other.hash();
     }
-
-    String String::toString(bool b)
+    
+    u32 String::ToHex(const char* str)
     {
-        if(b)
-            return String("True");
-        else
-            return String("False");
+        return strtol (str, nullptr, 16);
     }
-
-    String String::FromInt(int i)
+    
+    void String::interpretastext()
     {
-        char buffer[32];
-        sprintf(buffer, "%d", i);
-        return String(buffer);
+        char beginquote;
+        
+        for (size_t i = 0; i < size(); ++i)
+        {
+            // If current character is escaped quote, erase the escape.
+            if(at(i) == '\\' && at(i+1) == '"' && at(i) == beginquote) {
+                erase (i);
+            }
+            
+            // If first charcater is quote, erase it.
+            if(i == 0) {
+                if(at(i) == '\'' || at(i) == '"') {
+                    beginquote = at(i);
+                    erase(i);
+                }
+            }
+            
+            // If last character is quote, and the same as the beginning quote, erase it.
+            if(i == size() - 1 && at(i) == beginquote) {
+                erase (i);
+            }
+        }
     }
-
-    const String String::Empty = String("");
 }

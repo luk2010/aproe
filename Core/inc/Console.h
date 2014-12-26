@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012
+ *  @date 25/06/2012 - 17/12/2014
  *
+ *  @brief
  *  Defines the Console Utility class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -42,40 +60,34 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Defines the Colors used by the console.
-         *  @details The value of these are OS-dependant.
+         *  @details The value of these colors are OS-dependant.
         **/
         ////////////////////////////////////////////////////////////
-        class Color
+        enum class Color
         {
-        public :
-
-            enum _
-            {
 #if APRO_PLATFORM == APRO_WINDOWS
 
-                Black = 0,
-                Blue = 1,
-                Green = 2,
-                Cyan = 3,
-                Red = 4,
-                Magenta = 5,
-                Yellow = 6,
-                White = 7
+            Black = 0,
+            Blue = 1,
+            Green = 2,
+            Cyan = 3,
+            Red = 4,
+            Magenta = 5,
+            Yellow = 6,
+            White = 7
 
 #else
 
-
-                Black = 30,
-                Red = 31,
-                Green = 32,
-                Yellow = 33,
-                Blue = 34,
-                Magenta = 35,
-                Cyan = 36,
-                White = 37
+            Black = 30,
+            Red = 31,
+            Green = 32,
+            Yellow = 33,
+            Blue = 34,
+            Magenta = 35,
+            Cyan = 36,
+            White = 37
 
 #endif
-           };
         };
 
         ////////////////////////////////////////////////////////////
@@ -84,10 +96,10 @@ namespace APro
         ////////////////////////////////////////////////////////////
         struct ConsoleOptions
         {
-            Color::_ foreground;///< Foreground color of the text.
-            Color::_ background;///< Background color of the text.
-            bool bold;///< Text is bold ?
-            bool blink;///< Text is blinking ?
+            Color foreground;   ///< @brief Foreground color of the text.
+            Color background;   ///< @brief Background color of the text.
+            bool bold;          ///< @brief Text is bold ?
+            bool blink;         ///< @brief Text is blinking ?
         };
 
     protected:
@@ -108,7 +120,7 @@ namespace APro
 
 #if APRO_PLATFORM == APRO_WINDOWS
 
-        HANDLE console;///< Handle to the console. In other systems, std::cout is used.
+        HANDLE console;///< @brief Handle to the console. In other systems, std::cout is used.
 
 #endif
 
@@ -117,7 +129,8 @@ namespace APro
         ////////////////////////////////////////////////////////////
         /** @brief Write all the text already written on the console
          *  in a file.
-         *  @details As every text is automaticly recorded in a String,
+         *
+         *  As every text is automaticly recorded in a String,
          *  you can use this function at anytime.
          *
          *  @param filename : File to write. Path is relative.
@@ -172,7 +185,7 @@ namespace APro
          *  @return The console.
         **/
         ////////////////////////////////////////////////////////////
-        Console& backgroundColor(Color::_ color);
+        Console& backgroundColor(Color color);
 
         ////////////////////////////////////////////////////////////
         /** @brief Change the current foreground color of the text.
@@ -181,7 +194,7 @@ namespace APro
          *  @return The console.
         **/
         ////////////////////////////////////////////////////////////
-        Console& foregroundColor(Color::_ color);
+        Console& foregroundColor(Color color);
 
         ////////////////////////////////////////////////////////////
         /** @brief Change the current bold state of the text.
@@ -211,7 +224,7 @@ namespace APro
          *  @return The console.
         **/
         ////////////////////////////////////////////////////////////
-        Console& params(Color::_ foreground, Color::_ background, bool bold, bool blink);
+        Console& params(Color foreground, Color background, bool bold, bool blink);
 
         ////////////////////////////////////////////////////////////
         /** @brief Reset every text's params.
@@ -275,7 +288,7 @@ namespace APro
          *  @return The console.
         **/
         ////////////////////////////////////////////////////////////
-        void write(const String& str, Color::_ foreground, Color::_ background, bool bold, bool blink);
+        void write(const String& str, Color foreground, Color background, bool bold, bool blink);
 
     protected:
 

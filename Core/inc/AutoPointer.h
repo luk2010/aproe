@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013 - 22/04/2014
+ *  @date 02/07/2013 - 15/12/2014
  *
+ *  @brief
  *  Defines the AutoPointer class.
+ * 
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -16,6 +34,8 @@
 
 #include "Platform.h"
 #include "PointerCollector.h"
+
+#include "Swappable.h"
 
 namespace APro
 {
@@ -63,7 +83,7 @@ namespace APro
     **/
     ////////////////////////////////////////////////////////////
     template <typename T>
-    class AutoPointer
+    class AutoPointer : public Swappable <AutoPointer <T> >
     {
     protected:
 
@@ -83,6 +103,8 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor.
+         *  The PointerCollector is set to the default one, i.e. 
+         *  PointerCollector::Get().
         **/
         ////////////////////////////////////////////////////////////
         AutoPointer()
@@ -93,6 +115,8 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor from adress.
+         *  The PointerCollector is set to the default one, i.e.
+         *  PointerCollector::Get().
          *  @param pointer_to_init : Pointer to reference.
         **/
         ////////////////////////////////////////////////////////////
@@ -108,7 +132,7 @@ namespace APro
          *  @param pointer_to_init : Poionter to reference.
          *  @param p_collector : Pointer to a custom collector. if a null
          *  PointerCollector is passed in argument, the global PointerCollector
-         *  object is used.
+         *  object is used. (i.e. PointerCollector::Get())
          *  @param owning : @see ::is_owned property.
          *  @param _owner : if a null owner is passed in argument,
          *  the 'this' pointer is used. @see ::owner property.
@@ -137,12 +161,36 @@ namespace APro
             owner            = auto_pointer.owner;
             init_pointer();
         }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Constructor by move.
+         *  @param auto_pointer : Pointer to move.
+         *  @note Moved AutoPointer is nullized.
+         **/
+        ////////////////////////////////////////////////////////////
+        AutoPointer(AutoPointer<T>&& autopointer)
+        {
+            pointer          = autopointer.pointer;
+            custom_collector = autopointer.custom_collector;
+            is_owned         = autopointer.is_owned;
+            owner            = autopointer.owner;
+            
+            autopointer.pointer          = nullptr;
+            autopointer.custom_collector = nullptr;
+            autopointer.is_owned         = false;
+            autopointer.owner            = nullptr;
+        }
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor by copy.
          *  @param auto_pointer : Pointer to copy.
          *  @note The type of the pointer must be directly castable
-         *  to the main type of this AutoPointer.
+         *  to the main type of this AutoPointer using dynamic_cast.
+         *  The memory pointed by this pointer will be count in the
+         *  custom collector, but only the AutoPointer which had the
+         *  original type will be able to destroy it (we use the owner 
+         *  system : the pointer is owned but by an unknown source, which
+         *  means the memory is not in its original type).
         **/
         ////////////////////////////////////////////////////////////
         template<typename Y>
@@ -187,7 +235,8 @@ namespace APro
                     if(custom_collector)
                     {
                         custom_collector->pop(pointer);
-                        if(custom_collector->getPointerUtility(pointer) == 0)
+                        if(custom_collector->getPointerUtility(pointer) == 0 &&
+                           custom_collector->isValid(pointer))
                             destroy_pointer();
                     }
                     else
@@ -209,6 +258,10 @@ namespace APro
          *
          *  Use it to perform custom destruction as virtual destroy
          *  function object (as in AbstractObject).
+         *
+         *  @note 
+         *  The overload use of this function is deprecated, because
+         *  AProDelete already use destructor system on Objects.
          *
          *  @note Never forget to call ::deallocate_pointer at the end
          *  of this function.
@@ -376,6 +429,35 @@ namespace APro
         {
             return pointer == nullptr;
         }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the pointed memory original type 
+         *  is the same as its original type.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool isOriginal() const
+        {
+            if(is_owned && owner == nullptr)
+                return false;
+            return true;
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the pointed memory is still valid
+         *  and present in the pointer collector.
+         *  @note An AutoPointer object always notifiate the PointerCollector
+         *  the destruction of its pointer.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool isValid() const
+        {
+            if(custom_collector)
+            {
+                return custom_collector->isValid(pointer);
+            }
+            
+            return pointer != nullptr;
+        }
 
     public:
 
@@ -436,6 +518,16 @@ namespace APro
         {
             set(other.pointer);
             return *this;
+        }
+        
+        void swap (AutoPointer<T>& autopointer)
+        {
+            // We don't need 'using std::swap' because std::swap is always okay
+            // for swapping pointers.
+            std::swap(pointer,          autopointer.pointer);
+            std::swap(custom_collector, autopointer.custom_collector);
+            std::swap(is_owned,         autopointer.is_owned);
+            std::swap(owner,            autopointer.owner);
         }
 
         AutoPointer& operator = (T* ptr)

@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 27/02/2014
+ *  @date 21/05/2012 - 11/12/2014
  *
  *  @addtogroup Global
  *  @addtogroup Memory
@@ -78,6 +78,75 @@ public:
 #endif
 
 //----------------------------------------------//
+//              Compilators specs               //
+//----------------------------------------------//
+
+// We need to have the following features to compile
+// our Engine :
+// - binaryliterals (0bxxxxxxxx)
+
+// The following macros have been found on : http://sourceforge.net/p/predef/wiki/Compilers/
+
+/** Defined on Clang compiler. **/
+/// @see http://clang.llvm.org/docs/LanguageExtensions.html#id4
+#ifdef __clang__
+#   define APRO_COMPILER_CLANG
+#endif
+
+#ifdef APRO_COMPILER_CLANG
+#   if !__has_feature(cxx_binary_literals)
+#       error "Please update your Clang version to support binary literals."
+#   endif
+#endif
+
+/** Defined on GCC Compilers. **/
+#ifdef __GNUG__
+#   define APRO_COMPILER_GCC
+#endif
+
+#ifdef APRO_COMPILER_GCC
+#   define GCC_VERSION (__GNUC__ * 10000 \
++ __GNUC_MINOR__ * 100 \
++ __GNUC_PATCHLEVEL__)
+#   if GCC_VERSION < 40300
+#       error "Please update your version of GCC : version < 4.3.0, wich does not support C++ binary literals."
+#   endif
+#endif
+
+/** Defined on MSVC Compilers. **/
+#ifdef __MSC_VER
+#   error "MSVC++ not supported for now : no binary literals available."
+#endif
+
+/** Defined on Intel Compiler C++ **/
+#if defined(__ICC) || (__INTEL_COMPILER)
+#   if (__INTEL_COMPILER) < 1100
+#       error "Please update your version of Intel Compiler C++ up to 11.0 ."
+#   endif
+#   define APRO_COMPILER_INTEL
+#endif
+
+namespace APro
+{
+    class Compiler
+    {
+    public:
+        
+        static const char* GetName() {
+#if defined(APRO_COMPILER_GCC)
+            return "Gnu C++ Compiler";
+#elif defined(APRO_COMPILER_CLANG)
+            return "Clang/LLVM C++ Compiler";
+#elif defined
+            return "Intel C++ Compiler";
+#else
+            return "Unkown";
+#endif
+        }
+    };
+}
+
+//----------------------------------------------//
 //              Platforms defines               //
 //----------------------------------------------//
 
@@ -94,7 +163,6 @@ public:
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <errno.h>
 #include <dirent.h>

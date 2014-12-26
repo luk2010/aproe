@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 22/12/2013
+ *  @date 21/05/2012 - 05/12/2014
  *
  *  Implements basic memory function, like malloc, realloc, free. It is usefull when the engine
  *  use the Memory Tracker.
@@ -42,17 +42,26 @@ namespace APro
         {
             // Using the malloc function to allocate memory.
             /// @todo Make it more customizable.
-            void* ptr = malloc(byte);
+            
+            // Create sufficient space for the requested memory and the header.
+            size_t totbyte = byte + sizeof(MemoryHeader);
+            void* ptr = malloc(totbyte);
             if(ptr == nullptr)
             {
-                aprodebug("Can't allocate ") << byte << " bytes ! Call from \"" << func_ << "\" in file \"" << file_ << "\" and line " << line_ << ".";
+                aprodebug("Can't allocate ") << totbyte << " bytes ! Call from \"" << func_ << "\" in file \"" << file_ << "\" and line " << line_ << ".";
                 aprothrow(NotEnoughMemoryException);// Throw an exception if available.
                 return nullptr;
             }
 
-            Memory::Set(ptr, 0, byte);// We assert that memory is clean.
+            Memory::Set(ptr, 0, totbyte);// We assert that memory is clean.
             MemoryManager::get().reportAllocation(ptr, byte, func_, file_, line_, is_arr);
-            return ptr;
+            
+            // Initialize the memoryheader.
+            MemoryHeader* head = (MemoryHeader*) ptr;
+            head->size     = byte;
+            head->is_array = is_arr;
+            
+            return APRO_MEM_VIRTUAL(ptr);
         }
     }
 
@@ -73,17 +82,20 @@ namespace APro
 
             else
             {
-                void* new_ptr = realloc(ptr, byte);
-                if(new_ptr == nullptr)
+                size_t realsz = byte + sizeof(MemoryHeader);
+                void* realptr = APRO_MEM_REAL(ptr);
+                
+                void* ret = realloc(realptr, realsz);
+                if(ret == nullptr)
                 {
-                    aprodebug("Can't reallocate ") << byte << " bytes ! Call from \"" << func_ << "\" in file \"" << file_ << "\" and line " << line_ << ".";
+                    aprodebug("Can't reallocate ") << realsz << " bytes ! Call from \"" << func_ << "\" in file \"" << file_ << "\" and line " << line_ << ".";
                     aprothrow(NotEnoughMemoryException);
                     return nullptr;
                 }
 
-                MemoryManager::get().reportReallocation(ptr, new_ptr, byte, func_, file_, line_);
-                ptr = new_ptr;
-                return new_ptr;
+                MemoryManager::get().reportReallocation(realptr, ret, realsz, func_, file_, line_);
+                ptr = APRO_MEM_VIRTUAL(ret);
+                return APRO_MEM_VIRTUAL(ret);
             }
         }
     }
@@ -98,6 +110,7 @@ namespace APro
 
         else
         {
+            ptr = APRO_MEM_REAL(ptr);
             MemoryManager::get().reportDeallocation(ptr, func_, file_, line_);
             free(ptr);
         }
@@ -125,6 +138,11 @@ namespace APro
         int Cmp(const void * s1, const void * s2,size_t n)
         {
             return memcmp(s1, s2, n);
+        }
+        
+        size_t GetBlockSize(void* ptr)
+        {
+            return APRO_MEM_REAL(ptr)->size;
         }
 
     }

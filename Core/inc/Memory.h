@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 28/02/2014
+ *  @date 21/05/2012 - 05/12/2014
  *
  *  Redefines basic memory function, like malloc, realloc, free. It is usefull when the engine
  *  use the Memory Tracker.
@@ -47,6 +47,18 @@
 namespace APro
 {
     ////////////////////////////////////////////////////////////
+    /** @struct MemoryHeader
+     *  @ingroup Memory
+     *  @brief A memory Header made to simplify memory organization.
+    **/
+    ////////////////////////////////////////////////////////////
+    struct MemoryHeader
+    {
+        size_t size;     ///< @brief Size of the block
+        bool   is_array; ///< @brief True if block is an array.
+    } __attribute__ ((packed));
+    
+    ////////////////////////////////////////////////////////////
     /** @brief Allocate bytes using the malloc function.
      *  @ingroup Memory
      *
@@ -61,10 +73,21 @@ namespace APro
      *
      *  @return A pointer to allocated bytes.
      *
-     *  @note To allocate space for arrays, you should use the
-     *  Allocator class.
-     *  @note This function always initialize memory space to
+     *  @note 
+     *  This function always initialize memory space to
      *  zero.
+     * 
+     *  @note
+     *  The allocation system need to allocate a few more memory
+     *  to hold the block size and the array attribute. This make 
+     *  the system much more quicker as it does not have to get the
+     *  MemoryManager to get those informations. But this also
+     *  involve that the returned pointer is not actually the pointer
+     *  memory malloc() returned, this pointer can be retrieved using
+     *  the macro APRO_MEM_REAL (ptr) or APRO_CONSTMEM_REAL depending
+     *  on memory access.
+     *  
+     *  @see ::reallocate(), ::deallocate()
     **/
     ////////////////////////////////////////////////////////////
     APRO_DLL void* allocate(size_t byte, const char* func_, const char* file_, int line_, bool is_arr = false);
@@ -109,9 +132,19 @@ namespace APro
      *  @{
     **/
     ////////////////////////////////////////////////////////////
-    #define AProAllocate(sz) APro::allocate(sz, __FUNCTION__, __FILE__, __LINE__)
-    #define AProReallocate(ptr, sz) APro::reallocate(ptr, sz, __FUNCTION__, __FILE__, __LINE__)
-    #define AProDeallocate(ptr) APro::deallocate(ptr, __FUNCTION__, __FILE__, __LINE__)
+#define AProAllocate(sz)            APro::allocate(sz, __FUNCTION__, __FILE__, __LINE__)
+#define AProReallocate(ptr, sz)     APro::reallocate(ptr, sz, __FUNCTION__, __FILE__, __LINE__)
+#define AProDeallocate(ptr)         APro::deallocate(ptr, __FUNCTION__, __FILE__, __LINE__)
+    
+/// @brief Convert given Real -> MemoryHeader pointer
+#define APRO_MEM_HEAD(ptr)          (MemoryHeader*) ((void*)ptr)
+/// @brief Convert Virtual -> Real
+#define APRO_MEM_REAL (ptr)         (((char*)ptr) - sizeof(APro::MemoryHeader))
+/// @brief Convert Real -> Virtual
+#define APRO_MEM_VIRTUAL (ptr)      (((char*)ptr) + sizeof(APro::MemoryHeader))
+    
+#define APRO_CONSTMEM_REAL (ptr)    (((const char*)ptr) - sizeof(APro::MemoryHeader))
+#define APRO_CONSTMEM_VIRTUAL (ptr) (((const char*)ptr) + sizeof(APro::MemoryHeader))
     ////////////////////////////////////////////////////////////
     /** @} **/
     ////////////////////////////////////////////////////////////
@@ -137,6 +170,17 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         APRO_DLL int Cmp(const void * s1, const void * s2, size_t n);
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns the size of a block allocated using the
+         *  AProAllocate / AProDeallocate system.
+         *
+         *  @note 
+         *  Behaviour of this function is undefined on blocks not 
+         *  allocated using APro System.
+        **/
+        ////////////////////////////////////////////////////////////
+        APRO_DLL size_t GetBlockSize(void* block);
     }
 }
 
@@ -173,13 +217,8 @@ template <typename T> T* AProNew (size_t n, const char* func_, const char* file_
  *
  *  @note In the contrary of AProNew, AProDelete calls destructors
  *  for each objects in the array from the given pointer.
- *  The number of objects is known from the MemoryManager which
- *  keep trace of the memory block allocated previously using
- *  AProNew or APro::allocate.
- *
- *  If pointer is not an array, this functioin will detect it
- *  as the size of this memory block won't be suffisant to destroy
- *  more than 1 object.
+ *  The number of objects is known by the MemoryHeader, so you
+ *  have to use AProEngine allocation system.
  *
  *  @note If you allocate memory with APro::allocate and
  *  left it uninitialized, you may have some destructors calling
@@ -189,7 +228,7 @@ template <typename T> T* AProNew (size_t n, const char* func_, const char* file_
  *  @note If you delete a void pointer, it will only free the occupied
  *  memory.
  *
- *  @param ptr : Pointer to destroy.
+ *  @param ptr : Pointer to destroy. This pointer is VIRTUAL.
  *  @param func_ : Function calling this one.
  *  @param file_ : File where the function is.
  *  @param line_ : Line of call.
@@ -204,21 +243,23 @@ template <typename T> void AProDelete(T* ptr, const char* func_, const char* fil
     if(APro::Types::IsDestructible<T>())
     {
         size_t sz_t = sizeof(T);
+        // Looking for Header.
+        MemoryHeader* head = APRO_MEM_HEAD(ptr);
 
-        // Looking for Block.
-        const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((APro::MemoryManager::ptr_t) ptr);
-        if(mblock && mblock->is_array)
+        // Looking for Block. We try to avoid this function at it is too much costs.
+        // const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((ptr_t) ptr);
+        if(head && head->is_array)
         {
             // If block is valid and it is an array (# of objects superior or equal to 2), we determine how many objects there are in.
             // Each blocks should have been initialized. As this function is called with AProNewA, this is what is done with placement.
             // This is necessary as every allocation using AProNew uses placement new.
-            size_t n = (size_t) mblock->size / sz_t;
+            size_t n = (size_t) head->size / sz_t;
             while(n)
                 ptr[--n].~T();// Destroy each one in descending order to preserv cannonical destruction order of C++.
         }
         else
         {
-            // Block is not in the MemoryTracker, or it isnt an array. We call the destructor as delete would have done it.
+            // Block is not an array. We call the destructor as delete would have done it.
             ptr->~T();
         }
     }
@@ -243,7 +284,7 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
 /// @ingroup Memory
 /// @param T : Type of object.
 /// @see AProNewA, AProDelete
-#define AProNew(T, ...) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T ( __VA_ARGS__ )
+#define AProNew(T, ...) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T[1] ( __VA_ARGS__ )
 
 /// Constructs a new array of objects of given size and argues.
 /// @ingroup Memory
@@ -258,7 +299,7 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
 /// and you may experience troubles.
 /// @param P : Pointer to destroy.
 /// @see AProNew, AProNewA
-#define AProDelete(P) AProDelete(P, __FUNCTION__, __FILE__, __LINE__)
+#define AProDelete(P) AProDelete(ptr, __FUNCTION__, __FILE__, __LINE__)
 
 /// Constructs an object by calling the copy constructor and placement new.
 /// @ingroup Utils
@@ -287,7 +328,7 @@ template<typename T> void AProDestructObject(T* object, size_t sz = 1, bool _is_
         else
         {
             // Else call the destructor.
-            object->~T();
+            ptr->~T();
         }
     }
 }

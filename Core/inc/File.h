@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 30/08/2012 - 23/02/2014
+ *  @date 30/08/2012 - 07/11/2014
  *
  *  Defines the File class.
  *
@@ -17,6 +17,7 @@
 #include "Platform.h"
 #include "SString.h"
 #include "AutoPointer.h"
+
 #include "Path.h"
 #include "Directory.h"
 
@@ -51,6 +52,8 @@ namespace APro
         FILE*  hFile;            ///< Handle to opened file.
         char*  m_open_mode;      ///< Open mode. Valid if file is opened.
         int    m_last_operation; ///< Last operation. -1 if no operation, 1 if read, 2 if write.
+        bool   m_hasbom;         ///< True if file has valid UTF8 BOM. Initialized when file is opened.
+        bool   m_saveutf8;       ///< True if file is saved using utf8 encoding.
 
     public:
 
@@ -159,6 +162,12 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         bool isEOF() const;
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if File has UTF8BOM.
+         **/
+        ////////////////////////////////////////////////////////////
+        bool hasUTF8BOM() const { return m_hasbom; }
 
     public:
 
@@ -211,7 +220,31 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         String getFullPath() const;
-
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Set the m_saveutf8 property.
+         *  
+         *  It should be set to true if you want your file to be written
+         *  with UTF8 BOM.
+         *  This BOM is added to the beginning of the file, when a call
+         *  to close() is performed.
+        **/
+        ////////////////////////////////////////////////////////////
+        void setUtf8Writing(bool utf8writing) { m_saveutf8 = utf8writing; }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Force the file to read in mode UTF8. 
+         *  @note This option is not necessary if file contains a 
+         *  UTF8 BOM.
+        **/
+        ////////////////////////////////////////////////////////////
+        void forceUTF8(bool force) { m_hasbom = force ? force : m_hasbom; }
+        
+    private:
+        
+        void readbom ();
+        void writebom ();
+        
     public:
 
         static File Invalid; ///< An invalid file descriptor.

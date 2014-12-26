@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 01/12/2013 - 22/03/2014
+ *  @date 01/12/2013 - 11/12/2014
  *
+ *  @brief
  *  Defines the Atomic class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -30,7 +48,7 @@ namespace APro
     **/
     ////////////////////////////////////////////////////////////
     template<typename T>
-    class Atomic
+    class Atomic : public Swappable<Atomic<T> >
     {
     protected:
 
@@ -67,6 +85,18 @@ namespace APro
         {
 
         }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Construct this atomic from moving the given one.
+         *  
+         *  @note
+         *  Given Atomic is unvalidated after this operation.
+        **/
+        ////////////////////////////////////////////////////////////
+        Atomic(Atomic<T>&& rhs)
+        {
+            swap(rhs);
+        }
 
         ////////////////////////////////////////////////////////////
         /** @brief Destructs the atomic.
@@ -75,6 +105,22 @@ namespace APro
         ~Atomic()
         {
 
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Swap this object with another one from the same
+         *  kind.
+         *
+         *  @note
+         *  The lhs and rhs mutex are both locked during this process.
+        **/
+        ////////////////////////////////////////////////////////////
+        void swap(Atomic<T>& rhs)
+        {
+            THREADMUTEXAUTOLOCK(mutex);
+            THREADMUTEXAUTOLOCK(rhs.mutex);
+            using std::swap;
+            swap(value, rhs.value);
         }
 
     public:

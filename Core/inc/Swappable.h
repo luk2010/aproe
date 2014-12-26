@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 24/12/2013
+ *  @date 24/12/2013 - 29/11/2014
  *
  *  Defines the Swappable class.
  *
@@ -18,14 +18,19 @@
 
 namespace APro
 {
+    class SwappableTrait {};
+    
     ////////////////////////////////////////////////////////////
     /** @class Swappable
      *  @ingroup Utils
      *  @brief A class that defines an object Swappable.
+     *  Under C++11, you should create a constructor for movable
+     *  reference, enabling the move-and-swap idiom (which is a C++11
+     *  feature derived from the copy-and-swap idiom).
     **/
     ////////////////////////////////////////////////////////////
     template<typename Class>
-    class Swappable
+    class Swappable : public SwappableTrait
     {
     public:
 
@@ -36,7 +41,9 @@ namespace APro
          *  kind.
         **/
         ////////////////////////////////////////////////////////////
-        virtual void swap(const Class& obj) = 0;
+        virtual void swap(Class& obj) = 0;
+        friend void swap (Class& lhs, Class& rhs) { lhs.swap(rhs); }
+        
     };
 }
 

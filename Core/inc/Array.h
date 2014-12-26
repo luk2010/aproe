@@ -1,20 +1,35 @@
 /////////////////////////////////////////////////////////////
 /** @file Array.h
  *  @ingroup Utils
+ *  @brief Defines the Array class.
  *
  *  @author Luk2010
- *  @version 0.1A
+ *  @date 29/05/2012 - 11/12/2014
  *
- *  @date 29/05/2012 - 11/04/2014
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
  *
- *  Defines the Array class.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
  *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 ////////////////////////////////////////////////////////////
 #ifndef APROARRAY_H
 #define APROARRAY_H
 
 #include "Platform.h"
+#include "Swappable.h"
+#include "BaseObject.h"
 
 namespace APro
 {
@@ -40,11 +55,39 @@ namespace APro
      *  @note If reserved space isn't set, and/or physical size of the
      *  array is equal to logical size, then erasing objects will reduce
      *  the size of it and will give a reallocation of the memory space.
+     *
+     *  The Array object can be used using the following pattern 
+     *  (example is shown using ByteArray) :
+     *  ```
+     *  {
+     *      ByteArray myarray; 
+     *      myarray << Byte (0) << Byte (1) << Byte (2);
+     *      // The Array is destroyed at the end of the scope.
+     *  }
+     *  
+     *  {
+     *      ByteArray* myarrayptr = ByteArray::New({Byte(0),Byte(1),Byte(2)});
+     *      ByteArray::Delete(myarrayptr);
+     *      // Using the BaseObject pattern.
+     *  }
+     *
+     *  {
+     *      ByteArrayPtr myarrayglblptr = ByteArray::New({Byte(0),Byte(1),Byte(2)});
+     *      // The AutoPointer class release correctly the pointer, calling
+     *      // ByteArray::Delete () function.
+     *  }
+     *  ```
     **/
     ////////////////////////////////////////////////////////////
-    template <typename T>
-    class Array
+    template <typename T, AllocatorPool PoolNum = AllocatorPool::Default>
+    class Array : public BaseObject<Array<T, PoolNum> , PoolNum>,
+                  public Swappable <Array<T, PoolNum> >
     {
+    public:
+        
+        typedef typename Array<T, PoolNum> ArrayT;
+        typedef char* ArrayData;
+        
     protected:
 
         T* ptr;
@@ -70,7 +113,11 @@ namespace APro
          *  @param r : Size to reserve, in number of elements.
         **/
         ////////////////////////////////////////////////////////////
-        Array(size_t r) : ptr(nullptr), logical_size(0), physical_size(0) { reserve(r); }
+        Array(size_t r) : ptr(nullptr), logical_size(0), physical_size(0)
+        {
+            aproassert(r > 0, "Initializing Array with null size !");
+            reserve(r);
+        }
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructs an Array from C-style array.
@@ -81,23 +128,62 @@ namespace APro
         ////////////////////////////////////////////////////////////
         Array(const T* a, size_t sz) : ptr(nullptr), logical_size(0), physical_size(0)
         {
-            if(a && sz)
-            {
-                reserve(sz);
-                __assign_array(a, sz);
-            }
+            aproassert(a && sz, "Initializing Array with invalid pointer.");
+            reserve(sz);
+            __assign_array(a, sz);
         }
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructs an Array from another one.
         **/
         ////////////////////////////////////////////////////////////
-        Array(const Array<T>& rhs) : ptr(nullptr), logical_size(0), physical_size(0)
+        Array(const ArrayT& rhs) : ptr(nullptr), logical_size(0), physical_size(0)
         {
             if(rhs.size() > 0)
             {
                 reserve(rhs.size());
                 __assign_array(rhs.pointer(), rhs.size());
+            }
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Move an Array of same type to this one.
+         *  The given Array is let empty.
+        **/
+        ////////////////////////////////////////////////////////////
+        Array(ArrayT&& rhs)
+        {
+            if(rhs.size() > 0)
+            {
+                ptr               = rhs.ptr;
+                logical_size      = rhs.logical_size;
+                physical_size     = rhs.physical_size;
+                
+                rhs.ptr           = nullptr;
+                rhs.logical_size  = 0;
+                rhs.physical_size = 0;
+            }
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Initialize this Array with a given initializer_list.
+        **/
+        ////////////////////////////////////////////////////////////
+        Array(std::initializer_list<T> l) : ptr(nullptr), logical_size(0), physical_size(0)
+        {
+            if(l.size() > 0)
+            {
+                reserve(l.size());
+                if(Types::IsCopyConstructible<T>()) {
+                    for(std::initializer_list<T>::const_iterator it = l.begin(); it != l.end(); it++) {
+                        AProConstructedCopy (ptr + (it - l.begin), it, T);
+                    }
+                }
+                else {
+                    for(std::initializer_list<T>::const_iterator it = l.begin(); it != l.end(); it++) {
+                        Memory::Copy (ptr + (it - l.begin), it, T);
+                    }
+                }
             }
         }
 
@@ -107,6 +193,21 @@ namespace APro
         }
 
     private:
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Allocate new memory space for the Array.
+         *  @internal
+         *
+         *  @note
+         *  This function use the Allocator<> system, allowing us to 
+         *  keep track more easily of the memory allocated. We also
+         *  can keep memory of our pointer in differents pools.
+        **/
+        ////////////////////////////////////////////////////////////
+        T* __allocate (size_t* sz)
+        {
+            return (T*) Allocator<PoolNum>::Get().New<ArrayData>(sizeof(T) * sz);
+        }
 
         ////////////////////////////////////////////////////////////
         /** @brief Assign an array of fixed size to this array.
@@ -156,6 +257,12 @@ namespace APro
         ////////////////////////////////////////////////////////////
         /** @brief Destruct the array.
          *  @internal
+         *
+         *  @note
+         *  As we use the Allocator<> system, we can keep track more 
+         *  easily of our memory management. We use char* type to destroy
+         *  the array but destructors are already called by 
+         *  AProDestructObject<T> so we just need to release the memory.
         **/
         ////////////////////////////////////////////////////////////
         void __destroy_array()
@@ -165,8 +272,9 @@ namespace APro
                 // First call destructors on logical size.
                 AProDestructObject<T>(ptr, logical_size, true);
 
-                // Then release the array. The void* operator will use only the APro::Deallocate function.
-                AProDelete((void*) ptr);
+                // Then release the array.
+                //AProDelete((void*) ptr);
+                Allocator<PoolNum>::Get().Delete<char>(ptr);
             }
         }
 
@@ -364,6 +472,13 @@ namespace APro
         {
             return logical_size;
         }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the real size of this object (in number of
+         *  objects).
+        **/
+        ////////////////////////////////////////////////////////////
+        size_t physicalSize() const { return physical_size; }
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the number of space available without
@@ -407,6 +522,7 @@ namespace APro
          *  the array. Use reservedSpaceAvailable() to know how much
          *  reserved space the array has.
          *
+         *  @note
          *  If wanted reserved space is inferior to 2 times the physical
          *  size, the array will be reducted to that size even if objects
          *  are in this range, and will be destroyed.
@@ -419,7 +535,7 @@ namespace APro
                 if(new_physical_size > physical_size)
                 {
                     // Reallocation of array.
-                    T* tmp_array = (T*) AProAllocate(new_physical_size * sizeof(T));
+                    T* tmp_array = (T*) Allocator<PoolNum>::Get().New<ArrayData>(new_physical_size * sizeof(T));
 
                     Memory::Copy(tmp_array, ptr, logical_size * sizeof(T));
                     AProDeallocate(ptr);
@@ -446,7 +562,7 @@ namespace APro
             else
             {
                 // Allocate memory for the array.
-                ptr = (T*) AProAllocate(new_physical_size * sizeof(T));
+                ptr = (T*) Allocator<PoolNum>::Get().New<ArrayData>(new_physical_size * sizeof(T));
                 physical_size = new_physical_size;
             }
         }
@@ -575,8 +691,14 @@ namespace APro
 
     public:
 
-        T& at(size_t index) { return *(begin() + index); }
-        const T& at(size_t index) const { return *(begin() + index); }
+        T& at(size_t index) {
+            aproassert(index < logical_size);
+            return *(begin() + index);
+        }
+        const T& at(size_t index) const {
+            aproassert(index < logical_size);
+            return *(begin() + index);
+        }
 
         T& operator [] (size_t index) { return at(index); }
         const T& operator [] (size_t index) const { return at(index); }
@@ -646,6 +768,26 @@ namespace APro
             }
 
             return *this;
+        }
+        
+        Array<T>& operator = (Array<T> rhs)
+        {
+            move(rhs);
+            return *this;
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Swap two Arrays of same type.
+         *  @note This is less efficient than using the operator =
+         *  or Array::move() with std::move() to copy a returned 
+         *  value.
+        **/
+        ////////////////////////////////////////////////////////////
+        void swap (Array<T>& rhs)
+        {
+            std::swap(ptr,           rhs.ptr);
+            std::swap(logical_size,  rhs.logical_size);
+            std::swap(physical_size, rhs.physical_size);
         }
 
     public:
@@ -724,11 +866,34 @@ namespace APro
         {
             return find(obj) != end();
         }
+        
+    public:
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Set the data of this array to given one. 
+         *  
+         *  This array take ownership of the given pointer, assuming
+         *  given size and deleting him at destruction.
+         *
+         *  @note Think to clear the array before using this function, 
+         *  or your previous allocated memory will never be freed ! Use :
+         *  ``` 
+         *  if(!array.isEmpty()) array.clear();
+         *  ```
+        **/
+        ////////////////////////////////////////////////////////////
+        void acquireData(T* data, size_t lsz, size_t psz)
+        {
+            ptr = data;
+            logical_size = lsz;
+            physical_size = psz;
+        }
 
     };
 
-    typedef Array<HashType> HashArray;///< An array of HashType.
-    typedef Array<Byte>     ByteArray;///< An array of Byte.
+    typedef Array<HashType> HashArray;///< @brief An array of HashType.
+    typedef Array<Byte>     ByteArray;///< @brief An array of Byte.
+    typedef Array<char>     CharArray;///< @brief An Array of char.
 }
 
 #endif

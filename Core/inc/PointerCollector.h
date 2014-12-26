@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013 - 09/04/2014
+ *  @date 02/07/2013 - 29/11/2014
  *
  *  Defines the PointerCollector class.
  *
@@ -41,8 +41,8 @@ namespace APro
 
     private:
 
-        String name;///< Name of the collector.
-        Map<void*, unsigned int> pointers_utility;///< Map of pointers with their utility.
+        String name;                              ///< @brief Name of the collector.
+        Map<void*, unsigned int> pointers_utility;///< @brief Map of pointers with their utility.
 
     public:
 
@@ -94,6 +94,14 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         virtual bool exists(void* ptr) const;
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if the given pointer is still present
+         *  in the pointer database.
+         *  @see exists
+        **/
+        ////////////////////////////////////////////////////////////
+        bool isValid(void* pointer) const { return exists(pointer); }
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the number of registered pointers.

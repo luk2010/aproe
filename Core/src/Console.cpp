@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 27/06/2012
+ *  @date 27/06/2012 - 17/12/2014
  *
+ *  @brief
  *  Implements the Console Utility class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -28,8 +46,8 @@ namespace APro
     {
         currentState.background = Color::Black;
         currentState.foreground = Color::White;
-        currentState.blink = false;
-        currentState.bold = false;
+        currentState.blink      = false;
+        currentState.bold       = false;
     }
 
     Console::~Console()
@@ -74,13 +92,13 @@ namespace APro
         return *this;
     }
 
-    Console& Console::backgroundColor(Console::Color::_ color)
+    Console& Console::backgroundColor(Console::Color color)
     {
         currentState.background = color;
         return *this;
     }
 
-    Console& Console::foregroundColor(Console::Color::_ color)
+    Console& Console::foregroundColor(Console::Color color)
     {
         currentState.foreground = color;
         return *this;
@@ -98,7 +116,7 @@ namespace APro
         return *this;
     }
 
-    Console& Console::params(Color::_ foreground, Color::_ background, bool bold_, bool blink_)
+    Console& Console::params(Color foreground, Color background, bool bold_, bool blink_)
     {
         backgroundColor(background);
         foregroundColor(foreground);
@@ -111,8 +129,8 @@ namespace APro
     {
         currentState.background = Color::Black;
         currentState.foreground = Color::White;
-        currentState.blink = false;
-        currentState.bold = false;
+        currentState.blink      = false;
+        currentState.bold       = false;
 
         put(String(""));
 
@@ -178,7 +196,7 @@ namespace APro
 
 #if APRO_PLATFORM == APRO_WINDOWS
 
-    void Console::write(const String& str, Color::_ foreground, Color::_ background, bool bold, bool blink)
+    void Console::write(const String& str, Color foreground, Color background, bool bold, bool blink)
     {
         APRO_THREADSAFE_AUTOLOCK
 
@@ -198,7 +216,7 @@ namespace APro
     #define makeC(param) printf("\033[%sm",param)
     #define makeI(param) printf("\033[%dm",param)
 
-    void Console::write(const String& str, Color::_ foreground, Color::_ background, bool bold, bool blink)
+    void Console::write(const String& str, Color foreground, Color background, bool bold, bool blink)
     {
         APRO_THREADSAFE_AUTOLOCK
 
