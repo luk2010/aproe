@@ -354,7 +354,7 @@ namespace APro
     const MemoryManager::MemoryBlock* MemoryManager::retrieveMemoryBlock(ptr_t ptr) const
     {
         if(blocks.find(ptr) != blocks.end())
-            return blocks[ptr];
+            return &(blocks.at(ptr));
 
         return nullptr;
     }

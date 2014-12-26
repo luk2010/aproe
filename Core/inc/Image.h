@@ -14,6 +14,8 @@
 #ifndef APROIMAGE_H
 #define APROIMAGE_H
 
+#if 0
+
 #include "Resource.h"
 #include "Color.h"
 #include "SString.h"
@@ -87,5 +89,7 @@ namespace APro
         OriginData odata;
     };
 }
+
+#endif // 0
 
 #endif

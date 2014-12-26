@@ -11,6 +11,9 @@
  *  This file defines the Image class.
  *
 **/
+
+#if 0
+
 #include "Image.h"
 #include "ResourceManager.h"
 
@@ -212,3 +215,5 @@ namespace APro
         odata.height = 0;
     }
 }
+
+#endif // 0

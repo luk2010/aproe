@@ -16,6 +16,7 @@
 #include "Variant.h"
 #include "List.h"
 #include "SString.h"
+#include "AutoPointer.h"
 
 namespace APro
 {

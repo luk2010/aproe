@@ -95,6 +95,7 @@ project("core")
 	configuration "release"
 		flags {"OptimizeSpeed", "NoFramePointer", "ExtraWarnings", "NoEditAndContinue"};
 		flags "Unicode"
+		buildoptions { "-std=c++11" }
 		objdir "obj_release"
 		targetname "aproe_core";
 		targetdir "bin/release";

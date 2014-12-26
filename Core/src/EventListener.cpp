@@ -54,7 +54,7 @@ namespace APro
         return last_event;
     }
 
-    const unsigned long& EventListener::getId() const
+    const unsigned long EventListener::getId() const
     {
         return id;
     }
@@ -67,7 +67,7 @@ namespace APro
 
     void EventListener::removeEventProcessed(const HashType& event)
     {
-        StringArray::const_iterator it = eventprocessed.find(event);
+        HashArray::iterator it = eventprocessed.find(event);
         if(it != eventprocessed.end())
             eventprocessed.erase(it);
     }

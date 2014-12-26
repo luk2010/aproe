@@ -71,7 +71,7 @@ DIR* opendir(const char * _dir_name)
 struct dirent* readdir  (DIR* _dir_p)
 {
     if(!_dir_p)
-        return -1;
+        return nullptr;
 
     if(_dir_p->_cur_id == -1)
     {

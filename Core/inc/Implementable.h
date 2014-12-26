@@ -38,7 +38,7 @@ namespace APro
     {
     public:
 
-        typedef typename T* typeptr;///< Pointer to the implementation.
+        typedef T* typeptr;///< Pointer to the implementation.
 
     protected:
 

@@ -19,13 +19,13 @@ namespace APro
 
     Variant MathFunctionCos(const List<Variant>& args)
     {
-        double arg1 = args.at(0).to<double>();
+        double arg1 = args.at(0).cast<double>();
         return Variant(Angle::Cos(arg1));
     }
 
     Variant MathFunctionSin(const List<Variant>& args)
     {
-        double arg1 = args.at(0).to<double>();
+        double arg1 = args.at(0).cast<double>();
         return Variant(Angle::Sin(arg1));
     }
 
@@ -53,15 +53,15 @@ namespace APro
 
     }
 
-    MathFunction::ptr MathFunctionManager::find(const String& completeName)
+    MathFunctionPtr MathFunctionManager::find(const String& completeName)
     {
         List<String> names = completeName.explode('.');
         if(names.size() > 1)
         {
             List<String>::iterator it = names.begin() + (names.size() - 1);
-            String& func = it.get();// This is the function real name.
+            String& func = *it;// This is the function real name.
 
-            MathModulePtr curModule = module(names.begin().get());
+            MathModulePtr curModule = module(*(names.begin()));
             int i = 1;
             while(!curModule.isNull())
             {
@@ -79,10 +79,10 @@ namespace APro
                 return curModule->findFunction(func);
         }
 
-        return MathFunction::ptr();
+        return MathFunctionPtr::Null;
     }
 
-    MathModule::ptr MathFunctionManager::module(const String& moduleName)
+    MathModulePtr MathFunctionManager::module(const String& moduleName)
     {
         List<MathModulePtr>& modules = Manager<MathModule>::objects;
         for(unsigned int i = 0; i < modules.size(); ++i)
@@ -92,7 +92,7 @@ namespace APro
                 return tmp;
         }
 
-        return MathModule::ptr(nullptr);
+        return MathModulePtr::Null;
     }
 
     bool MathFunctionManager::hasModule(const String& moduleName)

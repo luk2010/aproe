@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2013
+ *  @date 11/09/2013 - 17/06/2014
  *
  *  Implements the Quaternion class.
  *
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////
 
 #include "Quaternion.h"
+#include "Matrix3x3.h"
+#include "Matrix3x4.h"
+#include "Matrix4x4.h"
 
 namespace APro
 {
@@ -109,7 +112,7 @@ namespace APro
         return Vector3(fTxz+fTwy, fTyz-fTwx, 1.0f-(fTxx+fTyy));
     }
 
-    Radian Quaternion::getRoll(bool reprojectAxis = true) const
+    Radian Quaternion::getRoll(bool reprojectAxis) const
     {
         if (reprojectAxis)
         {
@@ -130,7 +133,7 @@ namespace APro
         }
     }
 
-    Radian Quaternion::getPitch(bool reprojectAxis = true) const
+    Radian Quaternion::getPitch(bool reprojectAxis) const
     {
         if (reprojectAxis)
         {
@@ -150,7 +153,7 @@ namespace APro
         }
     }
 
-    Radian Quaternion::getYaw(bool reprojectAxis = true) const
+    Radian Quaternion::getYaw(bool reprojectAxis) const
     {
         if (reprojectAxis)
         {
@@ -184,7 +187,7 @@ namespace APro
         return Angle::ACos(m_w) * 2;
     }
 
-    Real lenght() const
+    Real Quaternion::lenght() const
     {
         return Math::Sqrt(squaredLenght());
     }
@@ -196,17 +199,17 @@ namespace APro
 
     Real Quaternion::normalize()
     {
-        Real length = length();
-        if (length < 1e-4f)
+        Real len = lenght();
+        if (len < 1e-4f)
             return 0.f;
 
-        Real rcpLength = 1.f / length;
+        Real rcpLength = 1.f / len;
         m_x *= rcpLength;
         m_y *= rcpLength;
         m_z *= rcpLength;
         m_w *= rcpLength;
 
-        return length;
+        return len;
     }
 
     Quaternion Quaternion::normalized() const
@@ -228,7 +231,7 @@ namespace APro
         return Quaternion(-m_x, -m_y, -m_z, m_w);
     }
 
-    Real inverseAndNormalize()
+    Real Quaternion::inverseAndNormalize()
     {
         inverse();
         return normalize();
@@ -254,7 +257,7 @@ namespace APro
 
     void Quaternion::toAxisAngle(Vector3& axis, Radian& angle) const
     {
-        angle = Angle::Acos(m_w) * 2.f;
+        angle = Angle::ACos(m_w) * 2.f;
         Real sinz = Angle::Sin(angle/2.f);
         if (Math::Abs(sinz) > 1e-4f)
         {
@@ -393,7 +396,7 @@ namespace APro
         if (r > 0) // In this case, |w| > 1/2.
         {
             q.m_w = Math::Sqrt(r + 1.f) * 0.5f; // We have two choices for the sign of w, arbitrarily pick the positive.
-            Real inv4w = 1.f / (4.f * m_w);
+            Real inv4w = 1.f / (4.f * q.m_w);
             q.m_x = (m[2][1] - m[1][2]) * inv4w;
             q.m_y = (m[0][2] - m[2][0]) * inv4w;
             q.m_z = (m[1][0] - m[0][1]) * inv4w;
@@ -401,7 +404,7 @@ namespace APro
         else if (m[0][0] > m[1][1] && m[0][0] > m[2][2]) // If |q.x| is larger than |q.y| and |q.z|, extract it first. This gives
         {                                                // best stability, and we know below x can't be zero.
             q.m_x = Math::Sqrt(1.f + m[0][0] - m[1][1] - m[2][2]) * 0.5f; // We have two choices for the sign of x, arbitrarily pick the positive.
-            const Real x4 = 1.f / (4.f * m_x);
+            const Real x4 = 1.f / (4.f * q.m_x);
             q.m_y = (m[0][1] + m[1][0]) * x4;
             q.m_z = (m[0][2] + m[2][0]) * x4;
             q.m_w = (m[2][1] - m[1][2]) * x4;
@@ -409,7 +412,7 @@ namespace APro
         else if (m[1][1] > m[2][2]) // |q.y| is larger than |q.x| and |q.z|
         {
             q.m_y = Math::Sqrt(1.f + m[1][1] - m[0][0] - m[2][2]) * 0.5f; // We have two choices for the sign of y, arbitrarily pick the positive.
-            const Real y4 = 1.f / (4.f * m_y);
+            const Real y4 = 1.f / (4.f * q.m_y);
             q.m_x = (m[0][1] + m[1][0]) * y4;
             q.m_z = (m[1][2] + m[2][1]) * y4;
             q.m_w = (m[0][2] - m[2][0]) * y4;
@@ -417,13 +420,13 @@ namespace APro
         else // |q.z| is larger than |q.x| or |q.y|
         {
             q.m_z = Math::Sqrt(1.f + m[2][2] - m[0][0] - m[1][1]) * 0.5f; // We have two choices for the sign of z, arbitrarily pick the positive.
-            const Real z4 = 1.f / (4.f * m_z);
+            const Real z4 = 1.f / (4.f * q.m_z);
             q.m_x = (m[0][2] + m[2][0]) * z4;
             q.m_y = (m[1][2] + m[2][1]) * z4;
             q.m_w = (m[1][0] - m[0][1]) * z4;
         }
 
-        Real oldLength = normalize();
+        Real oldLength = q.normalize();
     }
 
     void Quaternion::setFromRotationMatrix(const Matrix3x4& m)
@@ -492,7 +495,7 @@ namespace APro
                 IsFinite(m_w);
     }
 
-    bool Quaternion::equals(const Quaternion& other, Real epsilon = 1e-3f) const
+    bool Quaternion::equals(const Quaternion& other, Real epsilon) const
     {
         return Math::EqualsAbs(m_x, other.m_x, epsilon) &&
                Math::EqualsAbs(m_y, other.m_y, epsilon) &&
@@ -500,7 +503,7 @@ namespace APro
                Math::EqualsAbs(m_w, other.m_w, epsilon);
     }
 
-    Quaternion& Quaternion::multiply(const Quaternion& other)
+    Quaternion& Quaternion::multiply(const Quaternion& rkQ)
     {
         Real x = m_w * rkQ.m_x + m_x * rkQ.m_w + m_y * rkQ.m_z - m_z * rkQ.m_y;
         Real y = m_w * rkQ.m_y + m_y * rkQ.m_w + m_z * rkQ.m_x - m_x * rkQ.m_z;
@@ -512,7 +515,7 @@ namespace APro
         return *this;
     }
 
-    Quaternion Quaternion::multiplied(const Quaternion& other) const
+    Quaternion Quaternion::multiplied(const Quaternion& rkQ) const
     {
         return Quaternion
         (
@@ -541,13 +544,13 @@ namespace APro
 		Vector3 uv, uuv;
 		Vector3 qvec(m_x, m_y, m_z);
 
-		uv = qvec.crossProduct(vec);
-		uuv = qvec.crossProduct(uv);
+		uv = qvec.cross(vec);
+		uuv = qvec.cross(uv);
 
 		uv *= (2.0f * m_w);
 		uuv *= 2.0f;
 
-		vec = (v + uv + uuv);
+		vec = (vec + uv + uuv);
     }
 
     Quaternion& Quaternion::add(const Quaternion& other)
@@ -661,7 +664,7 @@ namespace APro
             //    interpolation safely.
             // 2. "source" and "target" are almost inverse of each other (fCos ~= -1), there
             //    are an infinite number of possibilities interpolation. but we haven't
-            //    have method to fix this case, so just use linear interpolation here.
+            //    any method to fix this case, so just use linear interpolation here.
             Quaternion t = (1.0f - t) * (*this) + t * target;
             // taking the complement requires renormalisation
             t.normalize();
@@ -673,7 +676,10 @@ namespace APro
     {
         Quaternion q = Quaternion::RotateFromTo(from, to);
         q = Quaternion::SphericalInterpolation(Quaternion::Identity, q, t);
-        return q.transform(from);
+
+        Vector3 r(from);
+        q.transform(r);
+        return r;
     }
 
     Vector3 Quaternion::SlerpVectorAbs(const Vector3& from, const Vector3& to, Radian a)
@@ -687,7 +693,7 @@ namespace APro
             return to;
         Real t = a / a2;
         q = Quaternion::SphericalInterpolation(Quaternion::Identity, q, t);
-        return q.transform(from);
+        return q.transformed(from);
     }
 
     Quaternion Quaternion::normalizedInterpolate(const Quaternion& target, Real t, bool shortestPath) const

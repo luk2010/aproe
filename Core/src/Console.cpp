@@ -164,6 +164,18 @@ namespace APro
         return put(String(buffer));
     }
 
+    Console& Console::operator<<(Real r)
+    {
+        return put(String::toString(r));
+    }
+
+    Console& Console::operator<< (unsigned int u)
+    {
+        char buffer[33];
+        sprintf(buffer, "%u", u);
+        return put(String(buffer));
+    }
+
 #if APRO_PLATFORM == APRO_WINDOWS
 
     void Console::write(const String& str, Color::_ foreground, Color::_ background, bool bold, bool blink)

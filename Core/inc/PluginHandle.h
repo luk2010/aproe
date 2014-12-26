@@ -18,7 +18,7 @@
 #include "DynamicLibrary.h"
 
 #define APRO_CURRENT_PLUGIN_MAJOR 1
-#define APRO_CURRENt_PLUGIN_MINOR 0
+#define APRO_CURRENT_PLUGIN_MINOR 0
 #define APRO_CURRENT_PLUGIN_BUILD 1
 
 namespace APro

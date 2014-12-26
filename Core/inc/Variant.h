@@ -16,6 +16,7 @@
 
 #include "Platform.h"
 #include "SString.h"
+#include "Maths.h"
 
 namespace APro
 {
@@ -48,10 +49,10 @@ namespace APro
             virtual void copy_from_value(const void* src, void** dest) = 0;
 
             /// Clone an object
-            virtual void clone(const void** src, void** dest) = 0;
+            virtual void clone(void* const* src, void** dest) = 0;
 
             /// Move an object (destruct the old and replace it be new one)
-            virtual void move(const void** src, void** dest) = 0;
+            virtual void move(void* const* src, void** dest) = 0;
 
             /// Return the value.
             virtual void* get_value(void** src) = 0;
@@ -75,10 +76,10 @@ namespace APro
             virtual void copy_from_value(const void* src, void** dest)
             { AProConstructedCopy(dest, *reinterpret_cast<const T*>(src), T); }
 
-            virtual void clone(const void** src, void** dest)
+            virtual void clone(void* const* src, void** dest)
             { *dest = *src; }
 
-            virtual void move(const void** src, void** dest)
+            virtual void move(void* const* src, void** dest)
             { *dest = *src; }
 
             virtual void* get_value(void** src)
@@ -102,15 +103,15 @@ namespace APro
                 *dest = AProNew(T, *reinterpret_cast<const T*>(src));
             }
 
-            virtual void clone(const void** src, void** dest)
+            virtual void clone(void* const* src, void** dest)
             {
-                *dest = AProNew(T, **reinterpret_cast<const T**>(src));
+                *dest = AProNew(T, **reinterpret_cast<T* const*>(src));
             }
 
-            virtual void move(const void** src, void** dest)
+            virtual void move(void* const* src, void** dest)
             {
                 AProDestructObject<T>(*reinterpret_cast<T**>(dest));
-                **reinterpret_cast<T**>(dest) = **reinterpret_cast<const T**>(src);
+                **reinterpret_cast<T**>(dest) = **reinterpret_cast<T* const*>(src);
             }
 
             virtual void* get_value(void** src)
@@ -214,7 +215,7 @@ namespace APro
 
     public:
 
-        Variant& swap(const Variant& other)
+        Variant& swap(Variant& other)
         {
             Algo::swap(policy, other.policy);
             Algo::swap(object, other.object);
@@ -252,7 +253,7 @@ namespace APro
         {
             if(!isEmpty())
             {
-                policy->static_delete(object);
+                policy->static_delete(&object);
                 policy = VariantPolicy::get_policy<VariantPolicy::empty_variant>();
                 object = nullptr;
             }
@@ -295,6 +296,12 @@ namespace APro
                 aprothrow(VariantPolicy::BadVariantCast);
             T* r = reinterpret_cast<T*>(policy->get_value(&object));
             return *r;
+        }
+
+        template<typename T>
+        const T& cast() const
+        {
+            return (const_cast<Variant*>(this))->cast<T>();
         }
     };
 }

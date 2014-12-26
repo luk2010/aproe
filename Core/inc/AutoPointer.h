@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013 - 16/04/2014
+ *  @date 02/07/2013 - 22/04/2014
  *
  *  Defines the AutoPointer class.
  *
@@ -74,6 +74,10 @@ namespace APro
 
         bool                is_owned;           ///< True if pointer is owned.
         AutoPointer<T>*     owner;              ///< Owning AutoPointer;
+
+    public:
+
+        static AutoPointer<T> Null;             ///< A Null static auto pointer.
 
     public:
 
@@ -275,7 +279,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         void setOwning(bool owning)
         {
-            aproassert(pointer && custom_collector);
+            aproassert1(pointer && custom_collector);
             aproassert(custom_collector->getPointerUtility(pointer) <= 1, "Too much AutoPointer objects hold the pointer to modify the owning property.");
 
             if(owning)
@@ -377,41 +381,41 @@ namespace APro
 
         inline T* operator ->()
         {
-            aproassert(pointer != nullptr);
+            aproassert1(pointer != nullptr);
             return pointer;
         }
 
         inline const T* operator ->() const
         {
-            aproassert(pointer != nullptr);
+            aproassert1(pointer != nullptr);
             return pointer;
         }
 
         inline T& operator *()
         {
-            aproassert(pointer != nullptr);
+            aproassert1(pointer != nullptr);
             return *pointer;
         }
 
         inline const T& operator *() const
         {
-            aproassert(pointer != nullptr);
+            aproassert1(pointer != nullptr);
             return *pointer;
         }
 
-        inline T* operator T* ()
+        inline operator T* ()
         {
-            aproassert(pointer != nullptr);
+            aproassert1(pointer != nullptr);
             return pointer;
         }
 
-        inline const T* operator T* () const
+        inline operator const T* () const
         {
-            aproassert(pointer != nullptr);
+            aproassert1(pointer != nullptr);
             return pointer;
         }
 
-        inline bool operator bool() const
+        inline operator bool() const
         {
             return !isNull();
         }

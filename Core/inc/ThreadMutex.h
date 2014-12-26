@@ -53,7 +53,6 @@ namespace APro
     class APRO_DLL ThreadMutex : public IMutex,
                                  public EventEmitter
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(ThreadMutex)
 
     public:
 

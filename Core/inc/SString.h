@@ -16,6 +16,7 @@
 
 #include "Platform.h"
 #include "Array.h"
+#include "List.h"
 
 namespace APro
 {
@@ -52,7 +53,7 @@ namespace APro
          *  @param str : C-style string.
         **/
         ////////////////////////////////////////////////////////////
-        explicit String(const char* str);
+        String(const char* str);
 
         ////////////////////////////////////////////////////////////
         /** Copy constructor
@@ -134,6 +135,7 @@ namespace APro
         static String toString(int num);
         static String toString(double num);
         static String toString(Real r);
+        static String toString(bool b);
 
         static int toInt(const String& str);
         static double toDouble(const String& str);
@@ -160,6 +162,7 @@ namespace APro
         static char toLower(char c);
 
         static String fromDouble(double d);
+        static String FromInt(int i);
 
         ////////////////////////////////////////////////////////////
         /** @brief Performs a standard hash.
@@ -181,6 +184,8 @@ namespace APro
 
         // return size of given string, without the null-terminated character.
         static int Size(const char* str);
+
+        static const String Empty;
 
         bool operator < (const String& other) const;
 

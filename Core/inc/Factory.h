@@ -63,8 +63,8 @@ namespace APro
         virtual ~Factory()
         {
             // Destroy every Prototypes in the factory.
-            Map<String, PrototypeBase*>::const_iterator e = prototypes.end();
-            for(Map<String, PrototypeBase*>::iterator it = prototypes.begin(); it != e; it++)
+            typename Map<String, PrototypeBase*>::const_iterator e = prototypes.end();
+            for(typename Map<String, PrototypeBase*>::iterator it = prototypes.begin(); it != e; it++)
             {
                 if(it.value())
                     AProDelete(it.value());
@@ -77,7 +77,8 @@ namespace APro
          *  @return A copy of this object.
         **/
         /////////////////////////////////////////////////////////////
-        PrototypeBase* create(const String& key) const { APRO_THREADSAFE_AUTOLOCK return prototypes.exists(key) ? prototypes[key]->clone() : nullptr; }
+        PrototypeBase* create(const String& key) const { APRO_THREADSAFE_AUTOLOCK
+        return prototypes.keyExists(key) ? reinterpret_cast<PrototypeBase*>(prototypes[key]->clone()) : nullptr; }
 
         /////////////////////////////////////////////////////////////
         /** @brief Register a prototype to this factory.
@@ -91,7 +92,7 @@ namespace APro
         /** @brief Tell if a prototype is registered.
         **/
         ////////////////////////////////////////////////////////////
-        bool hasPrototype(const String& key) { APRO_THREADSAFE_AUTOLOCK return prototypes.exists(key); }
+        bool hasPrototype(const String& key) { APRO_THREADSAFE_AUTOLOCK return prototypes.keyExists(key); }
 
         /////////////////////////////////////////////////////////////
         /** @see Printable::print

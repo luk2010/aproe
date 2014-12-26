@@ -20,7 +20,7 @@
 
 namespace APro
 {
-
+/*
     class APRO_DLL Keyboard : public EventEmitter
     {
 
@@ -105,7 +105,7 @@ namespace APro
         bool isRealPressed(KEY key);
     };
 
-/*
+
     class APRO_DLL KeyBoard : public EventEmitter,
                               public Implementable<KeyBoardImplementation>
     {

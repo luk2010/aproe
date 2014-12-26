@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////
 #include "Context.h"
 #include "Window.h"
+#include "RenderingAPI.h"
 
 namespace APro
 {
@@ -22,8 +23,8 @@ namespace APro
     Context::Context(Window* associatedWindow, RenderingAPI* renderingAPI)
         : EventEmitter()
     {
-        aproassert(associatedWindow != nullptr);
-        aproassert(renderingAPI != nullptr);
+        aproassert1(associatedWindow != nullptr);
+        aproassert1(renderingAPI != nullptr);
 
         m_window       = associatedWindow;
         m_renderingapi = renderingAPI;
@@ -70,8 +71,8 @@ namespace APro
 
     bool Context::bind()
     {
-        aproassert(m_renderingapi != nullptr);
-        aproassert(m_loaded == true);
+        aproassert1(m_renderingapi != nullptr);
+        aproassert1(m_loaded == true);
 
         if(!m_binded)
         {
@@ -85,8 +86,8 @@ namespace APro
 
     bool Context::unbind()
     {
-        aproassert(m_renderingapi != nullptr);
-        aproassert(m_loaded == true);
+        aproassert1(m_renderingapi != nullptr);
+        aproassert1(m_loaded == true);
 
         if(m_binded)
         {
@@ -104,12 +105,12 @@ namespace APro
         {
             if(!hasViewPort(viewport->getName()))
             {
-                viewports.push_back(viewport);
+                m_viewports.push_back(viewport);
                 aprodebug("Added Viewport \"") << viewport->getName() << "\" to viewports list.";
             }
             else
             {
-                Console::get() << "\n[Context]{addViewport} Can't add Viewport \"" << viewport->getName() << "\" to list because another one exists.";
+                Console::Get() << "\n[Context]{addViewport} Can't add Viewport \"" << viewport->getName() << "\" to list because another one exists.";
             }
         }
     }
@@ -117,86 +118,86 @@ namespace APro
     void Context::removeViewPort(const String& name)
     {
         Array<ViewPortPtr>::iterator it = getViewPortIterator(name);
-        if(it == viewports.end() || (*it).isNull())
+        if(it == m_viewports.end() || (*it).isNull())
         {
-            Console::get() << "\n[Context]{removeViewPort} Can't find ViewPort \"" << name << "\".";
+            Console::Get() << "\n[Context]{removeViewPort} Can't find ViewPort \"" << name << "\".";
             return;
         }
-        viewports.erase(it);
+        m_viewports.erase(it);
     }
 
-    const ViewPortPtr Context::getViewPort(const String& name) const
+    const ViewPortPtr& Context::getViewPort(const String& name) const
     {
         if(name.isEmpty())
-            return ViewPortPtr();
+            return ViewPortPtr::Null;
 
-        Array<ViewPortPtr>::const_iterator e = viewports.end();
-        for(Array<ViewPortPtr>::const_iterator it = viewports.begin(): it != e; it++)
+        Array<ViewPortPtr>::const_iterator e = m_viewports.end();
+        for(Array<ViewPortPtr>::const_iterator it = m_viewports.begin(); it != e; it++)
         {
             if(!(*it).isNull() &&
                (*it)->getName() == name)
                 return (*it);
         }
 
-        return ViewPortPtr();
+        return ViewPortPtr::Null;
     }
 
-    ViewPortPtr Context::getViewPort(const String & name)
+    ViewPortPtr& Context::getViewPort(const String & name)
     {
         if(name.isEmpty())
-            return ViewPortPtr();
+            return ViewPortPtr::Null;
 
-        Array<ViewPortPtr>::const_iterator e = viewports.end();
-        for(Array<ViewPortPtr>::iterator it = viewports.begin(): it != e; it++)
+        Array<ViewPortPtr>::const_iterator e = m_viewports.end();
+        for(Array<ViewPortPtr>::iterator it = m_viewports.begin(); it != e; it++)
         {
             if(!(*it).isNull() &&
                (*it)->getName() == name)
                 return (*it);
         }
 
-        return ViewPortPtr();
+        return ViewPortPtr::Null;
     }
 
-    const ViewPortPtr Context::getDefaultViewPort() const
+    const ViewPortPtr& Context::getDefaultViewPort() const
     {
-        return *viewports.begin();
+        return *m_viewports.begin();
     }
 
     Array<ViewPortPtr>::const_iterator Context::getViewPortIterator(const String& name) const
     {
         if(name.isEmpty())
-            return ViewPortPtr();
+            return m_viewports.end();
 
-        Array<ViewPortPtr>::const_iterator e = viewports.end();
-        for(Array<ViewPortPtr>::const_iterator it = viewports.begin(): it != e; it++)
+        Array<ViewPortPtr>::const_iterator e = m_viewports.end();
+        for(Array<ViewPortPtr>::const_iterator it = m_viewports.begin(); it != e; it++)
         {
             if(!(*it).isNull() &&
                (*it)->getName() == name)
                 return it;
         }
 
-        return ViewPortPtr();
+        return m_viewports.end();
     }
 
     Array<ViewPortPtr>::iterator Context::getViewPortIterator(const String& name)
     {
         if(name.isEmpty())
-            return ViewPortPtr();
+            return m_viewports.end();
 
-        Array<ViewPortPtr>::const_iterator e = viewports.end();
-        for(Array<ViewPortPtr>::iterator it = viewports.begin(): it != e; it++)
+        Array<ViewPortPtr>::const_iterator e = m_viewports.end();
+        for(Array<ViewPortPtr>::iterator it = m_viewports.begin(); it != e; it++)
         {
             if(!(*it).isNull() &&
                (*it)->getName() == name)
                 return it;
         }
 
-        return ViewPortPtr();
+        return m_viewports.end();
     }
 
     bool Context::hasViewPort(const String& name) const
     {
-        return getViewPortIterator(name) != viewports.end();
+        return getViewPortIterator(name) != m_viewports.end();
     }
 
     bool Context::hasViewPorts(const StringArray& names) const
@@ -216,7 +217,7 @@ namespace APro
 
     size_t Context::getNumViewPorts() const
     {
-        return viewports.size();
+        return m_viewports.size();
     }
 
     void Context::initDefaultViewPort()
@@ -238,27 +239,27 @@ namespace APro
         if(!m_loaded)
             return;
 
-        RectangleF zone(0, 0, width, height);
-        getDefaultViewPort()->setZone(zone);
+        Rectangle zone(0, 0, width, height);
+        (*m_viewports.begin())->setZone(zone);
 
-        for(size_t i = 0; i < viewports.size(); ++i)
+        for(size_t i = 0; i < m_viewports.size(); ++i)
         {
-            ViewPortPtr& viewport = viewports.at(i);
-            RectangleF& zonev = viewport->getZone();
+            ViewPortPtr& viewport = m_viewports.at(i);
+            Rectangle& zonev = viewport->getZone();
 
-            Intersection::_ result = zone.intersects(zonev);
+            Intersection result = zone.intersects(zonev);
 
-            if(result == Intersection::Between)
+            if(result == INTBETWEEN)
             {
-                viewport->setCurrentZone(RectangleF(Numeric::Min(zone.left(), zonev.left()),
-                                                    Numeric::Min(zone.top(), zonev.top()),
-                                                    Numeric::Min(zone.width(), zonev.width()),
-                                                    Numeric::Min(zone.height(), zonev.height())));
+                viewport->setCurrentZone(Rectangle(Numeric::Min(zone.getLeft(),   zonev.getLeft()),
+                                                   Numeric::Min(zone.getTop(),    zonev.getTop()),
+                                                   Numeric::Min(zone.getWidth(),  zonev.getWidth()),
+                                                   Numeric::Min(zone.getHeight(), zonev.getHeight())));
                 viewport->setVisible(true);
             }
-            else if(result == Intersection::Out)
+            else if(result == INTOUT)
             {
-                viewport->setCurrentZone(RectangleF(0,0,0,0));
+                viewport->setCurrentZone(Rectangle(0,0,0,0));
                 viewport->setVisible(false);
             }
             else
@@ -269,32 +270,21 @@ namespace APro
         }
     }
 
-    ViewPortPtr& Context::getViewPort(size_t index)
-    {
-        return viewports.at(index);
-    }
-
-    const ViewPortPtr& Context::getViewPort(size_t index) const
-    {
-        return viewports.at(index);
-    }
-
     EventPtr Context::createEvent(const HashType& e_type) const
     {
-        switch (e_type)
-        {
-        case ContextBindedEvent::Hash:
+        if(e_type == ContextBindedEvent::Hash) {
             EventPtr ret = (Event*) AProNew(ContextBindedEvent);
             ret->m_emitter = this;
             return ret;
+        }
 
-        case ContextUnbindedEvent::Hash:
+        else if(e_type == ContextUnbindedEvent::Hash) {
             EventPtr ret = (Event*) AProNew(ContextUnbindedEvent);
             ret->m_emitter = this;
             return ret;
-
-        default:
-            return EventEmitter::createEvent(e_type);
         }
+
+        else
+            return EventEmitter::createEvent(e_type);
     }
 }

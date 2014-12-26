@@ -18,6 +18,7 @@
 #include "Resource.h"
 #include "SString.h"
 #include "ParametedObject.h"
+#include "AutoPointer.h"
 
 namespace APro
 {
@@ -107,6 +108,8 @@ namespace APro
         ////////////////////////////////////////////////////////////
         const String& getDescription() const;
     };
+
+    typedef AutoPointer<ResourceWriter> ResourceWriterPtr;
 }
 
 #endif

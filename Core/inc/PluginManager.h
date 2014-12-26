@@ -228,7 +228,7 @@ namespace APro
         /** @brief Return the current api version of this engine.
         **/
         /////////////////////////////////////////////////////////////
-        const PluginApiVersion getCurrentApiversion() const;
+        const PluginApiVersion getCurrentApiVersion() const;
 
         /////////////////////////////////////////////////////////////
         /** @brief Tell if given plugin has a valid api version.

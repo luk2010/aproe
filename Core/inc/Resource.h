@@ -19,6 +19,7 @@
 #include "AutoPointer.h"
 #include "ThreadSafe.h"
 #include "SString.h"
+#include "HashedType.h"
 
 namespace APro
 {

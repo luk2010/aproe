@@ -14,13 +14,14 @@
 #ifndef APROEVENTEMITTER_H
 #define APROEVENTEMITTER_H
 
+#include "List.h"
 #include "Event.h"
 #include "EventListener.h"
 
-#include "List.h"
-
 namespace APro
 {
+    class EventUniter;
+
     /////////////////////////////////////////////////////////////
     /** @class EventEmitter
      *  @ingroup Events
@@ -119,7 +120,7 @@ namespace APro
          *  @return True if event has been handled at least one time.
         **/
         /////////////////////////////////////////////////////////////
-        bool sendEvent(EventPtr& e);
+        bool sendEvent(EventPtr e);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
@@ -132,7 +133,7 @@ namespace APro
          *  @return True if event has been handled.
         **/
         /////////////////////////////////////////////////////////////
-        bool sendEvent(EventPtr& e, EventListenerPtr& listener);
+        bool sendEvent(EventPtr e, EventListenerPtr& listener);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
@@ -144,7 +145,7 @@ namespace APro
          *  @return True if event has been handled.
         **/
         /////////////////////////////////////////////////////////////
-        bool sendEvent(EventPtr& e, const String& name);
+        bool sendEvent(EventPtr e, const String& name);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
@@ -156,7 +157,7 @@ namespace APro
          *  @return True if event has been handled.
         **/
         /////////////////////////////////////////////////////////////
-        bool sendEvent(EventPtr& e, const Id& listener);
+        bool sendEvent(EventPtr e, const Id& listener);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
@@ -171,7 +172,7 @@ namespace APro
          *  null, the global Event Uniter is used.
         **/
         /////////////////////////////////////////////////////////////
-        void sendASynchronousEvent(EventPtr& e, EventUniter* event_uniter = nullptr);
+        void sendASynchronousEvent(EventPtr e, EventUniter* event_uniter = nullptr);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
@@ -186,7 +187,7 @@ namespace APro
          *  null, the global Event Uniter is used.
         **/
         /////////////////////////////////////////////////////////////
-        void sendAsynchronousEvent(EventPtr& e, EventListenerPtr& listener, EventUniter* event_uniter = nullptr);
+        void sendAsynchronousEvent(EventPtr e, EventListenerPtr& listener, EventUniter* event_uniter = nullptr);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
@@ -201,7 +202,7 @@ namespace APro
          *  null, the global Event Uniter is used.
         **/
         /////////////////////////////////////////////////////////////
-        void sendAsynchronousEvent(EventPtr& e, const String& name, EventUniter* event_uniter = nullptr);
+        void sendAsynchronousEvent(EventPtr e, const String& name, EventUniter* event_uniter = nullptr);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
@@ -216,7 +217,7 @@ namespace APro
          *  null, the global Event Uniter is used.
         **/
         /////////////////////////////////////////////////////////////
-        void sendAsynchronousEvent(EventPtr& e, const Id& listener, EventUniter* event_uniter = nullptr);
+        void sendAsynchronousEvent(EventPtr e, const Id& listener, EventUniter* event_uniter = nullptr);
 
 
     protected:

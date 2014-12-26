@@ -39,7 +39,7 @@ namespace APro
     **/
     /////////////////////////////////////////////////////////////
     template<typename T, typename Container = Array<T> >
-    class Queue : public Copyable<Queue>,
+    class Queue : public Copyable<Queue <T, Container> >,
                   public Printable
     {
     protected:
@@ -84,7 +84,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         void print(Console& console) const
         {
-            console << "Queue <" << className<T>() << ", " << className<Container>() << "> { size : " << m_queue.size() << " }";
+            console << "Queue <" << className<T>() << ", " << className<Container>() << "> { size : " << (int) m_queue.size() << " }";
         }
 
     public: // Copyable
@@ -104,7 +104,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         bool operator == (const queue_t& other) const
         {
-            return m_queue == other;
+            return m_queue == other.m_queue;
         }
 
     public:

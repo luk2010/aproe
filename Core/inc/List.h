@@ -84,16 +84,16 @@ namespace APro
         class NodeIter
         {
         public:
-            Node* n;
+            mutable Node* n;
 
             NodeIter() : n(nullptr) {}
-            NodeIter(const Node* _node) : n(_node) {}
+            NodeIter(Node* _node) : n(_node) {}
             NodeIter(const NodeIter& it) : n(it.n) {}
 
-            T* operator T*() { return n ? n->data : nullptr; }
-            const T* operator T*() const { return n ? n->data : nullptr; }
+            operator T*() { return n ? n->data : nullptr; }
+            operator const T*() const { return n ? n->data : nullptr; }
 
-            void operator++() { if(n) n = n->next; }
+            void operator++(int) const { if(n) n = n->next; }
             NodeIter operator + (size_t n) { NodeIter it = *this; while(n) { it++; n--; } return it; }
             const NodeIter operator + (size_t n) const { NodeIter it = *(const_cast<NodeIter*>(this)); while(n) { it++; n--; } return it; }
 
@@ -207,10 +207,6 @@ namespace APro
 
                 sz++;
             }
-            else
-            {
-                aprodebug("Can't create Node.");
-            }
         }
 
         /////////////////////////////////////////////////////////////
@@ -252,10 +248,6 @@ namespace APro
                 }
 
                 sz++;
-            }
-            else
-            {
-                aprodebug("Can't create Node.");
             }
         }
 

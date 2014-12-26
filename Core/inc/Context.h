@@ -16,13 +16,13 @@
 
 #include "Platform.h"
 #include "AutoPointer.h"
-
-#include "EventReceiver.h"
 #include "ViewPort.h"
+#include "EventEmitter.h"
 
 namespace APro
 {
     class Window;
+    class RenderingAPI;
 
     ////////////////////////////////////////////////////////////
     /** @class Context
@@ -182,19 +182,19 @@ namespace APro
         /** @brief Return the ViewPort designated by his name.
         **/
         ////////////////////////////////////////////////////////////
-        const ViewPortPtr getViewPort(const String & name) const;
+        const ViewPortPtr& getViewPort(const String & name) const;
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the ViewPort designated by his name.
         **/
         ////////////////////////////////////////////////////////////
-        ViewPortPtr getViewPort(const String & name);
+        ViewPortPtr& getViewPort(const String & name);
 
         ////////////////////////////////////////////////////////////
         /** @brief Return the default ViewPort of this Context.
         **/
         ////////////////////////////////////////////////////////////
-        const ViewPortPtr getDefaultViewPort() const;
+        const ViewPortPtr& getDefaultViewPort() const;
 
     protected:
 

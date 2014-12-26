@@ -12,7 +12,10 @@
 **/
 ////////////////////////////////////////////////////////////
 
+#include "MatrixUtils.h"
 #include "Matrix3x3.h"
+#include "Quaternion.h"
+#include "Plane.h"
 
 namespace APro
 {
@@ -149,6 +152,11 @@ namespace APro
         return Quaternion(*this);
     }
 
+    Quaternion Matrix3x3::ToQuaternion(const Matrix3x3& m)
+    {
+        return m.toQuaternion();
+    }
+
     void Matrix3x3::setZero()
     {
         Memory::Set(v, sizeof(Real) * Rows * Cols, 0);
@@ -178,12 +186,12 @@ namespace APro
 
     void Matrix3x3::setScale(Real sx, Real sy, Real sz)
     {
-        (*this).multiply(Matrix3x3::Scale(sx, sy, sz));
+        (*this) *= (Matrix3x3::Scale(sx, sy, sz));
     }
 
     void Matrix3x3::setScale(const Vector3& scalef)
     {
-        (*this).multiply(Matrix3x3::Scale(scalef.x, scalef.y, scalef.z));
+        (*this) *= (Matrix3x3::Scale(scalef.x, scalef.y, scalef.z));
     }
 
     Vector3 Matrix3x3::getScale() const
@@ -236,7 +244,7 @@ namespace APro
 
     Matrix3x3 Matrix3x3::UniformScale(Real uniformScale)
     {
-        aproassert(IsFinite(scalef),"Scalar given not finite !");
+        aproassert(IsFinite(uniformScale),"Scalar given not finite !");
         return Matrix3x3::Scale(uniformScale, uniformScale, uniformScale);
     }
 
@@ -275,7 +283,7 @@ namespace APro
 
     Matrix3x3 Matrix3x3::Mirror(const Plane& p)
     {
-        aproassert(p.passThroughOrigin(), "A 3x3 matrix cannot represent mirroring about planes which do not pass through the origin ! Use Matrix3x4::Mirror instead!");
+        aproassert(p.passesThroughOrigin(), "A 3x3 matrix cannot represent mirroring about planes which do not pass through the origin ! Use Matrix3x4::Mirror instead!");
         return Matrix3x3
         (
             1.f - 2.f * p.normal.x * p.normal.x,       -2.f * p.normal.y * p.normal.x,       -2.f * p.normal.z * p.normal.x,
@@ -284,10 +292,10 @@ namespace APro
         );
     }
 
-    Matrix3x3 Matrix3x3::OrthographicProjection(const Plane& target)
+    Matrix3x3 Matrix3x3::OrthographicProjection(const Plane& p)
     {
         aproassert(p.normal.isNormalized(), "Normal must be normalized !");
-        aproassert(p.passThroughOrigin(), "A 3x3 matrix cannot represent mirroring about planes which do not pass through the origin ! Use Matrix3x4::Mirror instead!");
+        aproassert(p.passesThroughOrigin(), "A 3x3 matrix cannot represent mirroring about planes which do not pass through the origin ! Use Matrix3x4::Mirror instead!");
 
         Matrix3x3 m;
         Real x = p.normal.x;
@@ -324,7 +332,7 @@ namespace APro
 
     void Matrix3x3::swapRow(size_t row1, size_t row2)
     {
-        aproassert(Numeric::IsInRange(row1, 0, Rows) && Numeric::IsInRange(row2, 0, Rows), "Bad rows values !");
+        aproassert(Numeric::IsInRange(row1, (size_t) 0, (size_t) Rows) && Numeric::IsInRange(row2, (size_t) 0, (size_t) Rows), "Bad rows values !");
         swapNumeric(v[row1][0], v[row2][0]);
         swapNumeric(v[row1][1], v[row2][1]);
         swapNumeric(v[row1][2], v[row2][2]);
@@ -332,7 +340,7 @@ namespace APro
 
     void Matrix3x3::swapCol(size_t col1, size_t col2)
     {
-        aproassert(Numeric::IsInRange(col1, 0, Cols) && Numeric::IsInRange(col2, 0, Cols), "Bad Columns values !");
+        aproassert(Numeric::IsInRange(col1, (size_t) 0, (size_t) Cols) && Numeric::IsInRange(col2, (size_t) 0, (size_t) Cols), "Bad Columns values !");
         swapNumeric(v[0][col1], v[0][col2]);
         swapNumeric(v[1][col1], v[1][col2]);
         swapNumeric(v[2][col1], v[2][col2]);
@@ -402,7 +410,7 @@ namespace APro
     bool Matrix3x3::inverse(Real epsilon)
     {
         Matrix3x3 i = *this;
-        if(!MatrixUtils::InverseMatrix(i, epsilon))
+        if(!MatrixUtils<Matrix3x3>::InverseMatrix(i, epsilon))
             return false;
 
         *this = i;
@@ -708,7 +716,7 @@ namespace APro
         );
     }
 
-    Vector3 Matrix3x3::transformLeft(const Vector3& v) const
+    Vector3 Matrix3x3::transformLeft(const Vector3& vec) const
     {
         return Vector3
         (
@@ -744,7 +752,7 @@ namespace APro
     {
         if(!points || numPoints <= 0)
             return;
-        aproassert(stride >= sizeof(Vector3));
+        aproassert1(stride >= sizeof(Vector3));
 
         u8* data = reinterpret_cast<u8*>(points);
         for(int i = 0; i < numPoints; ++i)
@@ -769,7 +777,7 @@ namespace APro
     {
         if(!points || numPoints <= 0)
             return;
-        aproassert(stride >= sizeof(Vector4));
+        aproassert1(stride >= sizeof(Vector4));
 
         u8* data = reinterpret_cast<u8*>(points);
         for(int i = 0; i < numPoints; ++i)
@@ -801,6 +809,12 @@ namespace APro
         r[2][2] = DOT3STRIDED(v[2], c2, 3);
 
         return r;
+    }
+
+    Matrix3x3& Matrix3x3::operator *= (const Matrix3x3& scalar)
+    {
+        *this = *this * scalar;
+        return *this;
     }
 
     Matrix3x3 Matrix3x3::operator * (const Quaternion& rhs) const
@@ -897,7 +911,7 @@ namespace APro
 
     Matrix3x3& Matrix3x3::operator += (const Matrix3x3& rhs)
     {
-        aproassert(rhhs.isFinite(), "Matrix not finite !");
+        aproassert(rhs.isFinite(), "Matrix not finite !");
 
         for(int i = 0; i < Rows; ++i)
             for(int j = 0; j < Cols; ++j)
@@ -908,7 +922,7 @@ namespace APro
 
     Matrix3x3& Matrix3x3::operator -= (const Matrix3x3& rhs)
     {
-        aproassert(rhhs.isFinite(), "Matrix not finite !");
+        aproassert(rhs.isFinite(), "Matrix not finite !");
 
         for(int i = 0; i < Rows; ++i)
             for(int j = 0; j < Cols; ++j)
@@ -987,15 +1001,15 @@ namespace APro
 
     bool Matrix3x3::isRowOrthogonal(Real epsilon) const
     {
-        return getRowRef(0).isPerpendicular(getRowRef(1), epsilon),
-            && getRowRef(0).isPerpendicular(getRowRef(2), epsilon),
+        return getRowRef(0).isPerpendicular(getRowRef(1), epsilon)
+            && getRowRef(0).isPerpendicular(getRowRef(2), epsilon)
             && getRowRef(1).isPerpendicular(getRowRef(2), epsilon);
     }
 
     bool Matrix3x3::isColOrthogonal(Real epsilon) const
     {
-        return getCol(0).isPerpendicular(getCol(1), epsilon),
-            && getCol(0).isPerpendicular(getCol(2), epsilon),
+        return getCol(0).isPerpendicular(getCol(1), epsilon)
+            && getCol(0).isPerpendicular(getCol(2), epsilon)
             && getCol(1).isPerpendicular(getCol(2), epsilon);
     }
 

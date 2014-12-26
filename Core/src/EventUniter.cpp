@@ -24,7 +24,7 @@ namespace APro
 
     }
 
-    EventUniter::~EventUniter
+    EventUniter::~EventUniter()
     {
         terminate();
         events.clear();
@@ -69,7 +69,7 @@ namespace APro
 
             if(!_entry.listener.isNull())
             {
-                _entry.listener->receive(e);
+                _entry.listener->receive(_entry.event);
             }
         }
     }

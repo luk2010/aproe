@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 27/08/2012
+ *  @date 27/08/2012 - 07/05/2014
  *
  *  @addtogroup Global
  *  @addtogroup Memory
@@ -14,20 +14,19 @@
 #include "NullLoader.h"
 #include "NullResource.h"
 
+
 namespace APro
 {
-    NullLoader::NullLoader() : ResourceLoader()
+    NullLoader::NullLoader()
+        : ResourceLoader("NullLoader", "Null Loader for Tests")
     {
-        setParam(String("Name"), Variant(String("NullLoader")));
-        setParam(String("Description"), Variant(String("A Null Loader for testing purpose.")));
-        setParam(String("IsManual"), Variant(true));
+
     }
 
-    NullLoader::NullLoader(const NullLoader& loader) : ResourceLoader(loader)
+    NullLoader::NullLoader(const NullLoader& loader)
+        : ResourceLoader(loader)
     {
-        setParam(String("Name"), Variant(String("NullLoader")));
-        setParam(String("Description"), Variant(String("A Null Loader for testing purpose.")));
-        setParam(String("IsManual"), Variant(true));
+
     }
 
     NullLoader::~NullLoader()
@@ -35,8 +34,8 @@ namespace APro
 
     }
 
-    SharedPointer<Resource> NullLoader::loadResource(const String& filename)
+    ResourcePtr NullLoader::loadResource(const String& filename)
     {
-        return SharedPointer<Resource>(AProNew(NullResource, String(), filename));
+        return ResourcePtr(AProNew(NullResource, filename));
     }
 }

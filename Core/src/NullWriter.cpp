@@ -1,25 +1,25 @@
+////////////////////////////////////////////////////////////
 /** @file NullWriter.cpp
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 01/09/2012
- *
- *  @addtogroup Global
- *  @addtogroup Resource
+ *  @date 01/09/2012 - 16/06/2014
  *
  *  This file defines the NullWriter class.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "NullWriter.h"
+#include "NullResource.h"
 
 namespace APro
 {
-    NullWriter::NullWriter()
-        : ResourceWriter()
+    NullWriter::NullWriter(const String& n)
+        : ResourceWriter(n, String("A Null Writer (does nothing)."))
     {
-        setParam(String("Name"), Variant(String("NullWriter")));
-        setParam(String("Description"), Variant(String("A null ResourceWriter, do nothing.")));
+        compatible_hash << NullResource::Hash;
     }
 
     NullWriter::NullWriter(const NullWriter& other)
@@ -33,8 +33,8 @@ namespace APro
 
     }
 
-    void NullWriter::write(const SharedPointer<Resource> & resource, const String& /* filename */) const
+    void NullWriter::write(ResourcePtr& resource, const String& filename) const
     {
-        Console::get() << "\n[NullWriter] Writing object " << resource->getName() << " finished !";
+        /* Do nothing */
     }
 }

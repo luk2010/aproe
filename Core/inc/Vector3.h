@@ -668,7 +668,7 @@ namespace APro
          *  and error message is printed.
         **/
         ////////////////////////////////////////////////////////////
-        Vector3& normalized() const
+        Vector3 normalized() const
         {
             Vector3 copy = *this;
             Real oldLen = copy.normalize();

@@ -22,12 +22,12 @@ namespace APro
     {
     public:
 
-        NullWriter();
+        NullWriter(const String& n);
         NullWriter(const NullWriter& other);
 
         ~NullWriter();
 
-        void write(const SharedPointer<Resource> & resource, const String& filename) const;
+        void write(ResourcePtr& resource, const String& filename) const;
     };
 }
 

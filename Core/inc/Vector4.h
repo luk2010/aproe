@@ -18,6 +18,8 @@
 
 namespace APro
 {
+    class Matrix4x4;
+
     ////////////////////////////////////////////////////////////
     /** @class Vector4
      *  @ingroup Maths
@@ -129,7 +131,7 @@ namespace APro
 
         inline bool operator == (const Vector3& v) const
         {
-            return equals(v);
+            return toVector3().equals(v);
         }
 
         inline bool operator != (const Vector3& v) const
@@ -157,14 +159,14 @@ namespace APro
 
         bool operator <= ( const Vector3& rhs ) const
         {
-            if( x <= rhs.x && y <= rhs.y && z <= rhs.z && w <= rhs.w )
+            if( x <= rhs.x && y <= rhs.y && z <= rhs.z )
                 return true;
             return false;
         }
 
         bool operator >= ( const Vector3& rhs ) const
         {
-            if( x >= rhs.x && y >= rhs.y && z >= rhs.z && w >= rhs.w )
+            if( x >= rhs.x && y >= rhs.y && z >= rhs.z )
                 return true;
             return false;
         }
@@ -611,7 +613,7 @@ namespace APro
         /** @brief Return the Vector3 part of this vector.
         **/
         ////////////////////////////////////////////////////////////
-        const Vector3& toVector3() const { return *reinterpret_cast<Vector3*>(this); }
+        const Vector3& toVector3() const { return *reinterpret_cast<const Vector3*>(this); }
 
     public:
 

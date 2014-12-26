@@ -12,6 +12,14 @@
 **/
 /////////////////////////////////////////////////////////////
 #include "FileSystem.h"
+#include "Directory.h"
+#include "Path.h"
+
+#if APRO_PLATFORM == APRO_WINDOWS
+
+#else
+#   include <fcntl.h>
+#endif // APRO_PLATFORM
 
 namespace APro
 {
@@ -23,7 +31,7 @@ namespace APro
 
 #else
 
-        return access(path, F_OK) == 0;
+        return access(path.toCstChar(), F_OK) == 0;
 
 #endif
     }
@@ -61,8 +69,7 @@ namespace APro
 
     char FileSystem::GetSeparator()
     {
-        if(Platform::Get() == Platform::Windows ||
-           Platform::Get() == Platform::WindowsCE)
+        if(Platform::Get() == Platform::Windows)
             return '\\';
         else
             return '/';
@@ -88,7 +95,7 @@ namespace APro
 
         // We truncate the file and create it if it
         // doesn't exists.
-        FILE* fp = fopen(path, "wb");
+        FILE* fp = fopen(path.toCstChar(), "wb");
         if(fp)
         {
             fclose(fp);
@@ -109,7 +116,7 @@ namespace APro
 
 #else
 
-        if(mkdir(path, S_IRWXG | S_IRWXO | S_IRWXU) == 0)
+        if(mkdir(path.toCstChar(), S_IRWXG | S_IRWXO | S_IRWXU) == 0)
             return true;
 
         return false;
@@ -128,7 +135,7 @@ namespace APro
 
 #else
 
-        return remove(path) == 0;
+        return remove(path.toCstChar()) == 0;
 
 #endif
     }
@@ -138,14 +145,16 @@ namespace APro
         if(!FileSystem::Exists(path))
             return true;
 
-        Directory dir(path);
+
+        Directory dir = Directory(Path(path));
+
         if(dir.isValid())
         {
             if(!dir.isEmpty())
             {
                 if(recursive)
                 {
-                    dir.makeEmpty();
+                    dir.makeEmpty(recursive);
                 }
                 else
                 {
@@ -161,7 +170,7 @@ namespace APro
 
 #else
 
-            return rmdir(path);
+            return rmdir(path.toCstChar());
 
 #endif
 
@@ -232,7 +241,7 @@ namespace APro
 
 #else
 
-        return chdir(path) == 0;
+        return chdir(path.toCstChar()) == 0;
 
 #endif
     }

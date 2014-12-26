@@ -13,6 +13,8 @@
 /////////////////////////////////////////////////////////////
 #include "PluginHandle.h"
 #include "Console.h"
+#include "ResourceManager.h"
+#include "PluginManager.h"
 
 namespace APro
 {
@@ -35,7 +37,7 @@ namespace APro
         ResourceEntryPtr e = ResourceManager::Get().loadResourceWithLoader(mname, library_file, "DynamicLibraryLoader");
         if(e)
         {
-            dynLib = e->getResource<DynamicLibraryPtr>();
+            dynLib = e->getResource<DynamicLibrary>();
             if(!dynLib.isNull())
             {
                 dynLib->setEmitPolicy(EventEmitter::EP_NONE);
@@ -86,7 +88,7 @@ namespace APro
         {
             if(!dynLib->load())
             {
-                aprodebug("Can't load library '") << dynLib->getName() << "'.";
+                aprodebug("Can't load library '") << dynLib->getFilename() << "'.";
                 return false;
             }
         }
@@ -99,20 +101,20 @@ namespace APro
             // Verify API version
             if(!info)
             {
-                aprodebug("Plugin version not valid ! Expected '") << PluginManager::Get().getCurrentApiversion().build << "' but got 'null'.";
+                aprodebug("Plugin version not valid ! Expected '") << PluginManager::Get().getCurrentApiVersion().build << "' but got 'null'.";
                 return false;
             }
             if(!PluginManager::Get().isVersionValid(info->apiversion))
             {
-                aprodebug("Plugin version not valid ! Expected '") << PluginManager::Get().getCurrentApiversion().build << "' but got '" << info->apiversion.build << "'.";
+                aprodebug("Plugin version not valid ! Expected '") << PluginManager::Get().getCurrentApiVersion().build << "' but got '" << info->apiversion.build << "'.";
                 return false;
             }
 
             // Get Start function if version is ok.
-            DLL_START_PLUGIN startPluginFunc = (DLL_START_PLUGIN) dynLib->getSymbol(String("StartPlugin"));
+            DLL_START_PLUGIN startPluginFunc = (DLL_START_PLUGIN) dynLib->getSymbol("StartPlugin");
             if(!startPluginFunc)
             {
-                aprodebug("Couldn't find function 'StartPlugin' in library '") << dynLib->getName() << "'.";
+                aprodebug("Couldn't find function 'StartPlugin' in library '") << dynLib->getFilename() << "'.";
                 return false;
             }
             else
@@ -143,10 +145,10 @@ namespace APro
         APRO_THREADSAFE_AUTOLOCK
         {
             // Getting EndPlugin function.
-            DLL_END_PLUGIN endPluginFunc = (DLL_END_PLUGIN) dynLib->getSymbol(String("EndPlugin"));
+            DLL_END_PLUGIN endPluginFunc = (DLL_END_PLUGIN) dynLib->getSymbol("EndPlugin");
             if(!endPluginFunc)
             {
-                aprodebug("Couldn't find function 'EndPlugin' in library '") << dynLib->getName() << "'.";
+                aprodebug("Couldn't find function 'EndPlugin' in library '") << dynLib->getFilename() << "'.";
                 return false;
             }
             else
@@ -182,7 +184,7 @@ namespace APro
         }
         else
         {
-            if(reload_library && dynlib->isLoaded()) // Force library reloading.
+            if(reload_library && dynLib->isLoaded()) // Force library reloading.
                 dynLib->unload();
             initialize();
         }
@@ -215,7 +217,7 @@ namespace APro
         }
         else
         {
-            DLL_GET_PLUGININFO infofunc = (DLL_GET_PLUGININFO) dynLib->getSymbol(String("GetPluginInfo"));
+            DLL_GET_PLUGININFO infofunc = (DLL_GET_PLUGININFO) dynLib->getSymbol("GetPluginInfo");
             if(infofunc)
             {
                 APRO_THREADSAFE_AUTOLOCK
@@ -223,7 +225,7 @@ namespace APro
             }
             else
             {
-                aprodebug("Can't retrieve information of library '") << dynLib->getName() << "'.";
+                aprodebug("Can't retrieve information of library '") << dynLib->getFilename() << "'.";
 
                 APRO_THREADSAFE_AUTOLOCK
                 info = nullptr;
@@ -238,25 +240,27 @@ namespace APro
 
     EventPtr PluginHandle::createEvent(const HashType& e_type) const
     {
-        switch (e_type)
-        {
-        case PluginStartedEvent::Hash:
+        if(e_type == PluginStartedEvent::Hash) {
             EventPtr ret = (Event*) AProNew(PluginStartedEvent);
             ret->m_emitter = this;
             return ret;
+        }
 
-        case PluginStoppingEvent::Hash:
+        else if(e_type == PluginStoppingEvent::Hash) {
             EventPtr ret = (Event*) AProNew(PluginStoppingEvent);
             ret->m_emitter = this;
             return ret;
+        }
 
-        case PluginStoppedEvent::Hash:
+        else if(e_type == PluginStoppedEvent::Hash) {
             EventPtr ret = (Event*) AProNew(PluginStoppedEvent);
             ret->m_emitter = this;
             return ret;
+        }
 
-        default:
+        else {
             return EventEmitter::createEvent(e_type);
         }
+
     }
 }

@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/08/2012 - 15/02/2014
+ *  @date 25/08/2012 - 07/05/2014
  *
  *  Defines the ResourceManager singleton.
  *
@@ -61,8 +61,8 @@ namespace APro
      *
     **/
     ////////////////////////////////////////////////////////////
-    class APRO_DLL ResourceManager : public ThreadSafe,
-                                     public ParametedObject,
+    class APRO_DLL ResourceManager :
+                                     virtual public ParametedObject,
                                      virtual public Manager<ResourceLoader>,
                                      virtual public Manager<ResourceWriter>
     {
@@ -396,7 +396,7 @@ namespace APro
          *  true</strong> if pointer is valid.
         **/
         ////////////////////////////////////////////////////////////
-        bool addLoader(ResourceLoaderPtr& loader);
+        bool addLoader(const ResourceLoaderPtr& loader);
 
         ////////////////////////////////////////////////////////////
         /** @brief Removes a loader from this ResourceManager.

@@ -23,7 +23,8 @@
 namespace APro
 {
     class APRO_DLL AbstractObjectFactory;
-    class APRO_DLL AbstractObjectPtr;
+    class AbstractObject;
+    typedef AutoPointer<AbstractObject> AbstractObjectPtr;///< An AutoPointer to AbstractObject.
 
     ////////////////////////////////////////////////////////////
     /** @class AbstractObject
@@ -54,7 +55,7 @@ namespace APro
 
     public:
 
-        typedef AbstractObjectAutoPointer ptr;
+        typedef AbstractObjectPtr ptr;
 
     public:
 
@@ -131,7 +132,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         template<typename PropertyType> PropertyType& getProperty(const String& prop_name)
         {
-            return m_properties[prop_name].to<PropertyType>();
+            return m_properties[prop_name].cast<PropertyType>();
         }
 
         ////////////////////////////////////////////////////////////
@@ -141,7 +142,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         template<typename PropertyType> const PropertyType& getProperty(const String& prop_name) const
         {
-            return m_properties[prop_name].to<PropertyType>();
+            return m_properties[prop_name].cast<PropertyType>();
         }
 
         ////////////////////////////////////////////////////////////
@@ -163,8 +164,6 @@ namespace APro
     {
         APRO_DECLARE_MANUALSINGLETON(AbstractObjectFactory)
     };
-
-    typedef AutoPointer<AbstractObject> AbstractObjectPtr;///< An AutoPointer to AbstractObject.
 }
 
 #endif // APRO_ABSTRACTOBJECT_H

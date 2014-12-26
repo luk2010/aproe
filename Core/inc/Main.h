@@ -141,12 +141,12 @@ namespace APro
 
         const Console& getConsole() const
         {
-            return Console::get();
+            return Console::Get();
         }
 
         Console& getConsole()
         {
-            return Console::get();
+            return Console::Get();
         }
 
         const WindowManager& getWindowManager() const

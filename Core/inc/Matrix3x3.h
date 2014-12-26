@@ -15,9 +15,14 @@
 #define APRO_MATRIX3X3_H
 
 #include "Platform.h"
+#include "Vector3.h"
+#include "Vector4.h"
 
 namespace APro
 {
+    class Quaternion;
+    class Plane;
+
     ////////////////////////////////////////////////////////////
     /** @class Matrix3x3
      *  @ingroup Maths
@@ -240,10 +245,7 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         Quaternion toQuaternion() const;
-        static Quaternion ToQuaternion(const Matrix3x3& m)
-        {
-            return m.toQuaternion();
-        }
+        static Quaternion ToQuaternion(const Matrix3x3& m);
 
         ////////////////////////////////////////////////////////////
         /** @brief Sets every entries of this matrix to 0.
@@ -315,8 +317,8 @@ namespace APro
         ////////////////////////////////////////////////////////////
         Vector3 diagonale() const;
 
-        Real* ptr() { return v; }
-        const Real* ptr() const { return v; }
+        Real* ptr() { return &v[0][0]; }
+        const Real* ptr() const { return &v[0][0]; }
 
     public:
 
@@ -503,7 +505,7 @@ namespace APro
     public:
 
         Matrix3x3& operator = (const Matrix3x3& m) { set(m); return *this; }
-        Matrix3x3& operator = (const Quaternion& q) { set(q); return *this; }
+        Matrix3x3& operator = (const Quaternion& q) { fromQuaternion(q); return *this; }
 
     public:
 
@@ -793,6 +795,7 @@ namespace APro
         }
 
         Matrix3x3& operator *= (const Real& scalar);
+        Matrix3x3& operator *= (const Matrix3x3& scalar);
         Matrix3x3& operator /= (const Real& scalar);
         Matrix3x3& operator += (const Matrix3x3& rhs);
         Matrix3x3& operator -= (const Matrix3x3& rhs);

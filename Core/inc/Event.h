@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012 - 14/04/2014
+ *  @date 11/09/2012 - 02/05/2014
  *
  *  Defines the Event class and the main Events documentation.
  *
@@ -14,9 +14,9 @@
 #ifndef AROEVENT_H
 #define AROEVENT_H
 
-#include <Platform.h>
-#include <SString.h>
-#include <AutoPointer.h>
+#include "Platform.h"
+#include "SString.h"
+#include "AutoPointer.h"
 
 namespace APro
 {
@@ -133,13 +133,14 @@ namespace APro
 
     public:
 
-        EventEmitter*  m_emitter;///< Emitter of this event. Might be null but should not.
-        EventListener* m_target; ///< Target of this event. Might be null.
+        const EventEmitter*  m_emitter;///< Emitter of this event. Might be null but should not.
+        EventListener*       m_target; ///< Target of this event. Might be null.
+        bool                 must_stop; ///< Boolean to be set to true if listener does not want the event to continue his propagation.
 
     protected:
         HashType       m_type;    ///< Hash of event type. If 0, event is invalid.
         unsigned long  m_id;      ///< Id of the event.
-        bool           must_stop; ///< Boolean to be set to true if listener does not want the event to continue his propagation.
+
 
     public:
 
@@ -160,19 +161,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         /** @brief Return the emitter of this event.
          *
-         *  @warning There shoudl always be an emitter, but if user
-         *  send a faked event, you should use Event::hasEmitter to test
-         *  it.
-         *
-         *  @throw NullPtrToReference
-        **/
-        /////////////////////////////////////////////////////////////
-        EventEmitter& emitter();
-
-        /////////////////////////////////////////////////////////////
-        /** @brief Return the emitter of this event.
-         *
-         *  @warning There shoudl always be an emitter, but if user
+         *  @warning There should always be an emitter, but if user
          *  send a faked event, you should use Event::hasEmitter to test
          *  it.
          *
@@ -272,7 +261,7 @@ namespace APro
 /// @param name : Name of the event to declare.
 #define APRO_DECLARE_EVENT_NOCONTENT(name) \
 class APRO_DLL name : public Event \
-{ public: name() { m_type = Hash; } ~name() {} static HashType Hash; };
+{ public: name() { m_type = Hash; } ~name() {} static const HashType Hash; };
 
 /// @brief Declares a new event type with his hash.
 /// @ingroup Events
@@ -283,7 +272,7 @@ class APRO_DLL name : public Event \
 /// @param name : Name of the event to declare.
 #define APRO_DECLARE_EVENT_CONTENT(name) \
 class APRO_DLL name : public Event \
-{ public: name() { m_type = Hash; } ~name() {}
+{ public: name() { m_type = Hash; } ~name() {} static const HashType Hash;
 
 /// @brief Ends the APRO_DECLARE_EVENT_CONTENT macro.
 #define APRO_DECLARE_EVENT_CONTENT_END() };
@@ -296,7 +285,7 @@ class APRO_DLL name : public Event \
 ///
 /// @param name : Name of the event to register.
 #define APRO_REGISTER_EVENT_NOCONTENT(name) \
-HashType name::Hash = String::Hash( TOTEXT(name) );
+const HashType name::Hash = String::Hash( TOTEXT(name) );
 
 /// @brief Register a new event type hash.
 /// @ingroup Events
@@ -306,7 +295,7 @@ HashType name::Hash = String::Hash( TOTEXT(name) );
 ///
 /// @param name : Name of the event to register.
 #define APRO_REGISTER_EVENT_CONTENT(name) \
-HashType name::Hash = String::Hash( TOTEXT(name) );
+const HashType name::Hash = String::Hash( TOTEXT(name) );
 
     APRO_DECLARE_EVENT_NOCONTENT(NullEvent)
 

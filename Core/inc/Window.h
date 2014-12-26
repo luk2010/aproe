@@ -36,7 +36,7 @@ namespace APro
      *  Context object and then use the Window::show() method.
     **/
     ////////////////////////////////////////////////////////////
-    class APRO_DLL Window : public Implementable<WindowImplementation>
+    class APRO_DLL Window : public Implementable<WindowImplementation>,
                             public ThreadSafe,
                             public EventEmitter
 

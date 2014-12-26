@@ -16,6 +16,7 @@
 
 #include "Platform.h"
 #include "Implementation.h"
+#include "Context.h"
 
 namespace APro
 {
@@ -107,6 +108,8 @@ namespace APro
 
 
     };
+
+    typedef AutoPointer<RenderingAPI> RenderingAPIPtr;
 }
 
 #endif // APRO_RENDERINGAPI_H

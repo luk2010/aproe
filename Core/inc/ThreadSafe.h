@@ -73,12 +73,12 @@ namespace APro
         ////////////////////////////////////////////////////////////
         IMutex& getMutex() const { return mutex; }
 
-    private:
+    protected:
 
         mutable ThreadMutexI mutex;///< Mutex.
     };
 
-    #define APRO_THREADSAFE_AUTOLOCK THREADMUTEXAUTOLOCK(ThreadSafe::getMutex());
+    #define APRO_THREADSAFE_AUTOLOCK THREADMUTEXAUTOLOCK( mutex );
 }
 
 #endif // APRO_THREADSAFE_H

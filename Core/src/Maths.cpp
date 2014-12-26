@@ -12,18 +12,18 @@
 **/
 ////////////////////////////////////////////////////////////
 #include "Maths.h"
-#include <math.h>
-#include <limits.h>
+#include <ctgmath>
+#include <limits>
 
 namespace APro
 {
-    const Real Math::PI = 3.14159265359f;
-    const Real Math::_real_nan = std::numeric_limits<Real>::quiet_NaN();
-    const Real Math::_real_inf = std::numeric_limits<Real>::infinity();
-    const Real Math::epsilon_default = 1e-6f;
+     const Real Math::PI = 3.14159265359f;
+     const Real Math::_real_nan = std::numeric_limits<Real>::quiet_NaN();
+     const Real Math::_real_inf = std::numeric_limits<Real>::infinity();
+     const Real Math::epsilon_default = 1e-6f;
 
-    const Real Angle::DEGTORAD = Math::PI / 180.0f;
-    const Real Angle::RADTODEG = 180.0f / Math::PI;
+     const Real Angle::DEGTORAD = Math::PI / 180.0f;
+     const Real Angle::RADTODEG = 180.0f / Math::PI;
 
     namespace Math
     {
@@ -130,8 +130,13 @@ namespace APro
 
         void Modf(const Real& x, Real& frac, Real& intPart)
         {
-            Real __i;
-            Real __f = modf(x, &__i);
+            Real __i, __f;
+
+#ifdef _USE_DOUBLEREAL_
+            __f = modf(x, &__i);
+#else
+            __f = modff(x, &__i);
+#endif // _USE_DOUBLEREAL_
 
             frac = __f;
             intPart = __i;
@@ -144,9 +149,11 @@ namespace APro
 
         bool IsFinite(Real r)
         {
-            return sizeof(Real) == sizeof(float) ?
-                IsFinite<float>((float)r) :
-                IsFinite<double>((double)r);
+#ifdef _USE_DOUBLEREAL_
+            return IsFinite((double)r);
+#else
+            return IsFinite((float)r);
+#endif // _USE_DOUBLEREAL_
         }
 
         bool IsNan(Real r)
@@ -178,7 +185,7 @@ namespace APro
 
         Radian MinAngle(const Radian& a)
         {
-            return a % (2 * Math::PI);
+            return fmod(a, 2 * Math::PI);
         }
 
         Real Cos(const Radian& a)
@@ -249,7 +256,7 @@ namespace APro
 
     unsigned char colorvaluefromfloat(float v)
     {
-        v = Clamp(v, 0.0f, 1.0f);
+        Numeric::Clamp(v, 0.0f, 1.0f);
         return (unsigned char) proportionnal(v, 1.0f, 255.0f);
     }
 

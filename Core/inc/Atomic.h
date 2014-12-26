@@ -132,10 +132,10 @@ namespace APro
 
         bool operator == (const T& atom) const
         {
-            return equals(v);
+            return equals(atom);
         }
 
-        T operator T() const
+        operator T() const
         {
             return get();
         }
@@ -160,7 +160,7 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         AtomicNum()
-            : value(0)
+            : Atomic<T>(0)
         {
 
         }
@@ -187,7 +187,7 @@ namespace APro
     public:
 
 #define MAKEOP(op) \
-    AtomicNum<T> operator op (const T& v)               const { THREADMUTEXAUTOLOCK(mutex); return AtomicNum(value op v); } \
+    AtomicNum<T> operator op (const T& v)               const { THREADMUTEXAUTOLOCK( Atomic<T>::mutex ); return AtomicNum(Atomic<T>::value op v); } \
     AtomicNum<T> operator op (const AtomicNum<T>& atom) const { return *this op atom.get(); }
 
         MAKEOP(+)
@@ -195,8 +195,9 @@ namespace APro
         MAKEOP(/)
         MAKEOP(*)
 
+#undef  MAKEOP
 #define MAKEOP(op) \
-    AtomicNum<T>& operator op (const T& v)               { THREADMUTEXAUTOLOCK(mutex); value = v; return *this; } \
+    AtomicNum<T>& operator op (const T& v)               { THREADMUTEXAUTOLOCK( Atomic<T>::mutex ); Atomic<T>::value = v; return *this; } \
     AtomicNum<T>& operator op (const AtomicNum<T>& atom) { return *this op atom.get(); }
 
         MAKEOP(+=)

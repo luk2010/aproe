@@ -206,7 +206,7 @@ template <typename T> void AProDelete(T* ptr, const char* func_, const char* fil
         size_t sz_t = sizeof(T);
 
         // Looking for Block.
-        const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((ptr_t) ptr);
+        const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((APro::MemoryManager::ptr_t) ptr);
         if(mblock && mblock->is_array)
         {
             // If block is valid and it is an array (# of objects superior or equal to 2), we determine how many objects there are in.
@@ -243,14 +243,14 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
 /// @ingroup Memory
 /// @param T : Type of object.
 /// @see AProNewA, AProDelete
-#define AProNew(T, ...) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T[1] ( ## __VA_ARGS__)
+#define AProNew(T, ...) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T ( __VA_ARGS__ )
 
 /// Constructs a new array of objects of given size and argues.
 /// @ingroup Memory
 /// @param T : Type of objects.
 /// @param N : Size of array (in number of elements).
 /// @see AProNew, AProDelete
-#define AProNewA(T, N, ...) new (AProNew<T>(N, __FUNCTION__, __FILE__, __LINE__, true)) T[N] ( ## __VA_ARGS__)
+#define AProNewA(T, N, ...) new (AProNew<T>(N, __FUNCTION__, __FILE__, __LINE__, true)) T[N] ( __VA_ARGS__ )
 
 /// Destroys an array of objects and call destructor if possible.
 /// @ingroup Memory
@@ -258,7 +258,7 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
 /// and you may experience troubles.
 /// @param P : Pointer to destroy.
 /// @see AProNew, AProNewA
-#define AProDelete(P) AProDelete(ptr, __FUNCTION__, __FILE__, __LINE__)
+#define AProDelete(P) AProDelete(P, __FUNCTION__, __FILE__, __LINE__)
 
 /// Constructs an object by calling the copy constructor and placement new.
 /// @ingroup Utils
@@ -287,7 +287,7 @@ template<typename T> void AProDestructObject(T* object, size_t sz = 1, bool _is_
         else
         {
             // Else call the destructor.
-            ptr->~T();
+            object->~T();
         }
     }
 }

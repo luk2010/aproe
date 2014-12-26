@@ -62,9 +62,9 @@ namespace APro
 
 /// @brief Create a variable to lock a given mutex.
 ///
-/// The name of the lockguard will be __mutex_guard__ with the mutex variable name
+/// The name of the lockguard will be __mutex_guard__ with the line number
 /// appended.
-#define THREADMUTEXAUTOLOCK(mutex) ThreadMutexLockGuard __mutex_guard__##mutex (&mutex)
+#define THREADMUTEXAUTOLOCK( mutex ) ThreadMutexLockGuard __mutex_guard__##__LINE__ (&mutex)
 }
 
 #endif // APRO_MUTEXLOCKGUARD_H

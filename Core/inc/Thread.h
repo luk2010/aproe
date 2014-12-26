@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013
+ *  @date 06/04/2013 - 02/05/2014
  *
  *  Defines the Thread class.
  *
@@ -18,6 +18,8 @@
 #include "List.h"
 #include "SString.h"
 #include "EventEmitter.h"
+#include "ThreadMutexI.h"
+#include "Time.h"
 
 namespace APro
 {
@@ -52,15 +54,14 @@ namespace APro
     class APRO_DLL Thread : public NonCopyable,
                             public EventEmitter
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Thread)
 
     protected:
 
         /** @brief A mutex with a boolean. */
         struct MutexBool
         {
-            ThreadMutex mutex;///< Mutex for the boolean.
-            bool        value;///< Value of the boolean.
+            ThreadMutexI mutex;///< Mutex for the boolean.
+            bool         value;///< Value of the boolean.
         };
 
         typedef void (*pfunc) (void*);///< The type of function to callback.

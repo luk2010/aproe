@@ -36,7 +36,6 @@ namespace APro
     ////////////////////////////////////////////////////////////
     class APRO_DLL ThreadCondition : public NonCopyable
     {
-        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(ThreadCondition)
 
     public:
 

@@ -72,7 +72,7 @@ namespace APro
     MathFunctionPtr& MathModule::findFunction(const String& fname)
     {
         if(fname.isEmpty())
-            return MathFunctionPtr();
+            return MathFunctionPtr::Null;
 
         List<MathFunctionPtr>::const_iterator e = functions.end();
         for(List<MathFunctionPtr>::iterator it = functions.begin(); it != e; it++)
@@ -81,18 +81,18 @@ namespace APro
                 return *it;
         }
 
-        return MathFunctionPtr();
+        return MathFunctionPtr::Null;
     }
 
     const MathFunctionPtr& MathModule::findFunction(const String& fname) const
     {
-        return const_cast<MathModule*>(*this)->findFunction(fname);
+        return const_cast<MathModule*>(this)->findFunction(fname);
     }
 
     MathModulePtr& MathModule::findModule(const String& mname)
     {
         if(mname.isEmpty())
-            return MathModulePtr();
+            return MathModulePtr::Null;
 
         List<MathModulePtr>::const_iterator e = modules.end();
         for(List<MathModulePtr>::iterator it = modules.begin(); it != e; it++)
@@ -101,7 +101,7 @@ namespace APro
                 return *it;
         }
 
-        return MathModulePtr();
+        return MathModulePtr::Null;
     }
 
     const MathModulePtr& MathModule::findModule(const String& mname) const

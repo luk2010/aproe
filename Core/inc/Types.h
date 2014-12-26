@@ -34,7 +34,7 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         template <typename T, typename... Args>
-        APRO_DLL bool IsConstructible() { return std::is_constructible<T, Args>::value; }
+        APRO_DLL bool IsConstructible() { return std::is_constructible<T, Args...>::value; }
 
         ////////////////////////////////////////////////////////////
         /** @brief Tell if a Type is constructible by copy.

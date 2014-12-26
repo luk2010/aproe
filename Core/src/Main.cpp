@@ -16,6 +16,7 @@
 #include "FileSystem.h"
 #include "DynamicLibraryLoader.h"
 #include "NullLoader.h"
+#include "EventUniter.h"
 
 namespace APro
 {
@@ -47,9 +48,9 @@ namespace APro
 
         getConsole() << "\n[Main] Platform : ";
         getConsole() << "\n - OS = " << Platform::ToString(Platform::Get());
-        getConsole() << "\n - DebugMode = " << Platform::IsDebugMode() ? "True" : "False";
+        getConsole() << "\n - DebugMode = " << String::toString(Platform::IsDebugMode());
 
-        String workingdir(FileSystem::GetWorkingDirectory());
+        String workingdir(FileSystem::GetCurrentWorkingDirectory());
         getConsole() << "\n[Main] Current Working directory is \"" << workingdir << "\".";
 
         if(argc > 1 && String("--auto-set-cwd") == argv[1])
@@ -59,7 +60,7 @@ namespace APro
             workingdir = workingdir.extract(0, workingdir.findLast(FileSystem::GetSeparator()));
 
             getConsole() << "\n[Main] Setting Working directory to \"" << workingdir << "\".";
-            if(FileSystem::SetWorkingDirectory(workingdir))
+            if(FileSystem::SetCurrentWorkingDirectory(workingdir))
                 getConsole() << "OK";
             else
                 getConsole() << "FAILED";
@@ -74,7 +75,7 @@ namespace APro
         id_generator = AProNew(IdGenerator);
         if(id_generator)
         {
-            IdGenerator::__curent_IdGenerator = id_generator;
+            IdGenerator::__current_IdGenerator = id_generator;
             getConsole() << "\n[Main] Global ID Generator OK.";
         }
         else
@@ -87,7 +88,7 @@ namespace APro
         sharedpointer_collector = AProNew(PointerCollector, String("Global"));
         if(sharedpointer_collector)
         {
-            PointerCollector::__curent_PointerCollector = sharedpointer_collector;
+            PointerCollector::__current_PointerCollector = sharedpointer_collector;
             getConsole() << "\n[Main] Global Pointer Collector OK.";
         }
         else
@@ -102,7 +103,7 @@ namespace APro
         impFactory = AProNew(ImplementationFactory);
         if(impFactory)
         {
-            ImplementationFactory::__curent_ImplementationFactory = impFactory;
+            ImplementationFactory::__current_ImplementationFactory = impFactory;
             getConsole() << "\n[Main] Implementation Factory OK.";
         }
         else
@@ -115,7 +116,7 @@ namespace APro
         abstract_object_factory = AProNew(AbstractObjectFactory);
         if(abstract_object_factory)
         {
-            AbstractObjectFactory::__curent_AbstractObjectFactory = abstract_object_factory;
+            AbstractObjectFactory::__current_AbstractObjectFactory = abstract_object_factory;
             getConsole() << "\n[Main] Object Factory OK.";
         }
         else
@@ -130,7 +131,7 @@ namespace APro
         euniter = AProNew(EventUniter, String("GlobalUniter"));
         if(euniter)
         {
-            EventUniter::__curent_EventUniter = euniter;
+            EventUniter::__current_EventUniter = euniter;
             euniter->start();
             getConsole() << "\n[Main] EventUniter OK.";
         }
@@ -146,7 +147,7 @@ namespace APro
         tmanager = AProNew(ThreadManager);
         if(tmanager)
         {
-            ThreadManager::__curent_ThreadManager = tmanager;
+            ThreadManager::__current_ThreadManager = tmanager;
             getConsole() << "\n[Main] Thread Manager OK.";
         }
         else
@@ -159,7 +160,7 @@ namespace APro
         mathManager = AProNew(MathFunctionManager);
         if(mathManager)
         {
-            MathFunctionManager::__curent_MathFunctionManager = mathManager;
+            MathFunctionManager::__current_MathFunctionManager = mathManager;
             getConsole() << "\n[Main] Math Function Manager OK.";
         }
         else
@@ -179,7 +180,7 @@ namespace APro
             // Exemple Null Loader.
             resourceManager->addLoader(ResourceLoaderPtr(AProNew(NullLoader)));
 
-            ResourceManager::__curent_ResourceManager = resourceManager;
+            ResourceManager::__current_ResourceManager = resourceManager;
             getConsole() << "\n[Main] Resource Manager OK.";
         }
         else
@@ -192,7 +193,7 @@ namespace APro
         pluginManager = AProNew(PluginManager);
         if(pluginManager)
         {
-            PluginManager::__curent_PluginManager = pluginManager;
+            PluginManager::__current_PluginManager = pluginManager;
             getConsole() << "\n[Main] Plugin Manager OK. Loading plugins and implementations in directory \"plugins\".";
             pluginManager->loadDirectory(String("plugins/"));
         }
@@ -206,7 +207,7 @@ namespace APro
         windowManager = AProNew(WindowManager);
         if(windowManager)
         {
-            WindowManager::__curent_WindowManager = windowManager:
+            WindowManager::__current_WindowManager = windowManager;
             getConsole() << "\n[Main] Window Manager OK.";
         }
         else
@@ -255,7 +256,7 @@ namespace APro
             AProDelete(pluginManager);
 
             pluginManager = nullptr;
-            PluginManager::__curent_PluginManager = nullptr;
+            PluginManager::__current_PluginManager = nullptr;
             getConsole() << "\n[Main] Plugin Manager cleaned !";
         }
         else
@@ -268,7 +269,7 @@ namespace APro
             AProDelete(resourceManager);
 
             resourceManager = nullptr;
-            ResourceManager::__curent_ResourceManager = nullptr;
+            ResourceManager::__current_ResourceManager = nullptr;
             getConsole() << "\n[Main] Resource Manager cleaned !";
         }
         else
@@ -281,7 +282,7 @@ namespace APro
             AProDelete(mathManager);
 
             mathManager = nullptr;
-            MathFunctionManager::__curent_MathFunctionManager = nullptr;
+            MathFunctionManager::__current_MathFunctionManager = nullptr;
             getConsole() << "\n[Main] Math Manager cleaned !";
         }
         else
@@ -307,7 +308,7 @@ namespace APro
             AProDelete(euniter);
 
             euniter = nullptr;
-            EventUniter::__curent_EventUniter = nullptr;
+            EventUniter::__current_EventUniter = nullptr;
             getConsole() << "\n[Main] Global Event Uniter cleaned !";
         }
         else
@@ -320,7 +321,7 @@ namespace APro
             AProDelete(abstract_object_factory);
 
             abstract_object_factory = nullptr;
-            AbstractObjectFactory::__curent_AbstractObjectFactory = nullptr;
+            AbstractObjectFactory::__current_AbstractObjectFactory = nullptr;
             getConsole() << "\n[Main] Object Factory cleaned !";
         }
         else
@@ -333,7 +334,7 @@ namespace APro
             AProDelete(impFactory);
 
             impFactory = nullptr;
-            ImplementationFactory::__curent_ImplementationFactory = nullptr;
+            ImplementationFactory::__current_ImplementationFactory = nullptr;
             getConsole() << "\n[Main] Implementation Factory cleaned !";
         }
         else
@@ -359,7 +360,7 @@ namespace APro
             AProDelete(id_generator);
 
             id_generator = nullptr;
-            IdGenerator::__curent_IdGenerator = nullptr;
+            IdGenerator::__current_IdGenerator = nullptr;
             getConsole() << "\n[Main] Global ID Generator cleaned !";
         }
         else
@@ -373,7 +374,7 @@ namespace APro
     RenderingAPIPtr Main::createRenderingAPI()
     {
         if(ImplementationFactory::Get().hasPrototype(className<RenderingAPI>()))
-            return RenderingAPIPtr(ImplementationFactory::Get().create(className<RenderingAPI>()));
+            return RenderingAPIPtr(reinterpret_cast<RenderingAPI*>(ImplementationFactory::Get().create(className<RenderingAPI>())));
         else
             return RenderingAPIPtr(nullptr);
     }

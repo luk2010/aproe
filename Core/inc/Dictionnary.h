@@ -33,7 +33,7 @@ namespace APro
     public:
 
         virtual ~Dictionnary() {}
-        virtual void print(Console& console);
+        virtual void print(Console& console) const;
     };
 }
 

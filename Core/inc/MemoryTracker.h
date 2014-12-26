@@ -169,7 +169,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         void reportDeallocation(void* ptr, const char* func, const char* file, int line);
 
-        friend APRO_DLL void* allocate(size_t byte, const char* func_, const char* file_, int line_);
+        friend APRO_DLL void* allocate(size_t byte, const char* func_, const char* file_, int line_, bool is_arr);
         friend APRO_DLL void* reallocate(void*& ptr, size_t byte, const char* func_, const char* file_, int line_);
         friend APRO_DLL void  deallocate(void* ptr, const char* func_, const char* file_, int line_);
 

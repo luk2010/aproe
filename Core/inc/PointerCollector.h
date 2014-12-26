@@ -15,6 +15,7 @@
 #define APRO_POINTER_COLLECTOR_H
 
 #include "Platform.h"
+#include "Singleton.h"
 #include "SString.h"
 #include "Map.h"
 #include "ThreadSafe.h"
@@ -35,6 +36,7 @@ namespace APro
     ////////////////////////////////////////////////////////////
     class APRO_DLL PointerCollector : public ThreadSafe
     {
+    public:
         APRO_DECLARE_MANUALSINGLETON(PointerCollector)
 
     private:

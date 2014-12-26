@@ -36,43 +36,13 @@ namespace APro
 
     }
 
-    EventEmitter& Event::emitter()
-    {
-        if(m_emitter)
-            return *m_emitter;
-        else
-        {
-            aprothrow_ce("NullPtrToReference", "Null emitter !", "Event");
-        }
-    }
-
     const EventEmitter& Event::emitter() const
     {
         if(m_emitter)
             return *m_emitter;
         else
         {
-            APRO_THROW("NullPtrToReference", "Null emitter !", "Event");
-        }
-    }
-
-    EventListener& Event::listener()
-    {
-        if(m_listener)
-            return *m_listener;
-        else
-        {
-            APRO_THROW("NullPtrToReference", "Null target !", "Event");
-        }
-    }
-
-    const EventListener& Event::listener() const
-    {
-        if(m_listener)
-            return *m_listener;
-        else
-        {
-            APRO_THROW("NullPtrToReference", "Null target !", "Event");
+            aprothrow_ce("Null emitter !");
         }
     }
 
@@ -89,11 +59,6 @@ namespace APro
     bool Event::hasEmitter() const
     {
         return m_emitter == nullptr;
-    }
-
-    bool Event::hasListener() const
-    {
-        return m_listener == nullptr;
     }
 
     bool Event::isValid() const

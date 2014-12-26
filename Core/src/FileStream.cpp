@@ -80,7 +80,7 @@ namespace APro
         }
         else
         {
-            return m_file->read(&to, sizeof(char));
+            return m_file->read((unsigned char*) &to, sizeof(char));
         }
     }
 
@@ -189,7 +189,7 @@ namespace APro
         if(m_file.isNull() || !m_file->isOpened())
             return false;
 
-        return m_file->write(str.toCstChar(), str.size());
+        return m_file->write((const Byte*) str.toCstChar(), str.size());
     }
 
     bool FileStream::write(const Real& str)
@@ -226,7 +226,7 @@ namespace APro
     {
         if(m_file.isNull())
             return;
-        m_file->seek(File::C_BEGIN + (int) cp, (Offset) pos);
+        m_file->seek( (File::CursorPosition) (File::C_BEGIN + (int) cp), (Offset) pos);
     }
 
 }

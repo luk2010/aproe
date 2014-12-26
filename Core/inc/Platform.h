@@ -40,7 +40,6 @@ public:
     {
         Unknown     = 0,
         Windows     = APRO_WINDOWS,
-        WindowsCE   = APRO_WINDOWSCE,
         Linux       = APRO_LINUX,
         Apple       = APRO_OSX
     };
@@ -74,7 +73,6 @@ public:
     {
         if(platform == Unknown) return "Unknown";
         if(platform == Windows) return "Windows";
-        if(platform == WindowsCE) return "WindowsCE";
         if(platform == Linux) return "Linux";
         if(platform == Apple) return "Apple";
         return "Bad platform id !";

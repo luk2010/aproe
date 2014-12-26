@@ -52,6 +52,8 @@ namespace APro
         {
             EventPtr         event;
             EventListenerPtr listener;
+            bool operator == (const EventEntry& other) const {return event == other.event && listener == other.listener;}
+            bool operator != (const EventEntry& other) const {return !(*this == other); }
         } EventEntry;
         Queue<EventEntry> events;///< Events in the loop.
 

@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 23/10/2012
+ *  @date 23/10/2012 - 22/04/2014
  *
  *  @addtogroup Global
  *  @addtogroup Rendering
@@ -39,7 +39,7 @@ namespace APro
 
     }
 
-    ViewPort::ViewPort(const String& _name, const RectangleF& z)
+    ViewPort::ViewPort(const String& _name, const Rectangle& z)
         : zone(z), currentZone(z),
         visible(false),
         cameraName(""), name(_name)
@@ -52,32 +52,32 @@ namespace APro
 
     }
 
-    RectangleF& ViewPort::getZone()
+    Rectangle& ViewPort::getZone()
     {
         return zone;
     }
 
-    const RectangleF& ViewPort::getZone() const
+    const Rectangle& ViewPort::getZone() const
     {
         return zone;
     }
 
-    RectangleF& ViewPort::getCurrentZone()
+    Rectangle& ViewPort::getCurrentZone()
     {
         return currentZone;
     }
 
-    const RectangleF& ViewPort::getCurrentZone() const
+    const Rectangle& ViewPort::getCurrentZone() const
     {
         return currentZone;
     }
 
-    void ViewPort::setZone(const RectangleF& z)
+    void ViewPort::setZone(const Rectangle& z)
     {
         zone.set(z);
     }
 
-    void ViewPort::setCurrentZone(const RectangleF& z)
+    void ViewPort::setCurrentZone(const Rectangle& z)
     {
         currentZone.set(z);
     }
@@ -90,42 +90,42 @@ namespace APro
 
     float ViewPort::getLeft() const
     {
-        return zone.left();
+        return zone.getLeft();
     }
 
     float ViewPort::getTop() const
     {
-        return zone.top();
+        return zone.getTop();
     }
 
     float ViewPort::getHeight() const
     {
-        return zone.height();
+        return zone.getHeight();
     }
 
     float ViewPort::getWidth() const
     {
-        return zone.width();
+        return zone.getWidth();
     }
 
     float ViewPort::getCurrentLeft() const
     {
-        return currentZone.left();
+        return currentZone.getLeft();
     }
 
     float ViewPort::getCurrentTop() const
     {
-        return currentZone.top();
+        return currentZone.getTop();
     }
 
     float ViewPort::getCurrentHeight() const
     {
-        return currentZone.height();
+        return currentZone.getHeight();
     }
 
     float ViewPort::getCurrentWidth() const
     {
-        return currentZone.width();
+        return currentZone.getWidth();
     }
 
     bool ViewPort::isVisible() const

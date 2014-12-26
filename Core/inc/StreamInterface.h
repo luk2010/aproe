@@ -54,7 +54,7 @@ namespace APro
         /** @brief Returns true if End Of Stream (EOS) is reached.
         **/
         /////////////////////////////////////////////////////////////
-        bool operator bool () const;
+        operator bool () const;
 
         /////////////////////////////////////////////////////////////
         /** @brief Returns true if End Of Stream (EOS) is reached.

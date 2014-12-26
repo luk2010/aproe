@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 10/07/2013
+ *  @date 10/07/2013 - 17/06/2014
  *
  *  Implements a point.
  *
@@ -25,7 +25,7 @@ namespace APro
         set(point);
     }
 
-    Point::Point(const vector3U& position)
+    Point::Point(const Vector3& position)
     {
         set(position);
     }
@@ -75,7 +75,7 @@ namespace APro
         setX(x); setY(y); setZ(z);
     }
 
-    void Point::set(const Vector3U& position)
+    void Point::set(const Vector3& position)
     {
         set(position.x, position.y, position.z);
     }
@@ -85,14 +85,14 @@ namespace APro
         set(point.getX(), point.getY(), point.getZ());
     }
 
-    Vector3U Point::getDistance(const Point& other) const
+    Vector3 Point::getDistance(const Point& other) const
     {
-        return this->toVector3().vdistance(other.toVector3());
+        return (this->toVector3() - other.toVector3()).absoluted();
     }
 
-    Vector3U Point::toVector3() const
+    Vector3 Point::toVector3() const
     {
-        return Vector3U(getX(), getY(), getZ());
+        return Vector3(getX(), getY(), getZ());
     }
 
     void Point::copyFrom(const Point& other)

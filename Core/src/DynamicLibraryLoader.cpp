@@ -28,7 +28,7 @@ namespace APro
 
     ResourcePtr DynamicLibraryLoader::loadResource(const String& filename)
     {
-        DynamicLibrary* dynlib = AProNew(DynamicLibrary, String(), filename);
+        DynamicLibrary* dynlib = AProNew(DynamicLibrary, filename);
 
         if(dynlib->isLoaded())
             return ResourcePtr(dynlib);

@@ -22,12 +22,12 @@ namespace APro
     {
     public:
 
+        APRO_DECLARE_HASHEDTYPE;
+
         NullResource();
-        NullResource(const String& name_, const String& other);
+        NullResource(const String& filename);
 
         ~NullResource();
-
-        void destroy();
     };
 }
 

@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 27/08/2012
+ *  @date 27/08/2012 - 07/05/2014
  *
  *  @addtogroup Global
  *  @addtogroup Memory
@@ -28,7 +28,7 @@ namespace APro
 
         ~NullLoader();
 
-        SharedPointer<Resource> loadResource(const String& filename);
+        ResourcePtr loadResource(const String& filename);
     };
 }
 

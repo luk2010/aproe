@@ -17,6 +17,8 @@
 #include "Platform.h"
 #include "SString.h"
 #include "AutoPointer.h"
+#include "Path.h"
+#include "Directory.h"
 
 namespace APro
 {

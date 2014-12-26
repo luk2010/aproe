@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 23/10/2012
+ *  @date 23/10/2012 - 22/04/2014
  *
  *  @addtogroup Global
  *  @addtogroup Rendering
@@ -16,6 +16,7 @@
 
 #include "Platform.h"
 #include "Rectangle.h"
+#include "AutoPointer.h"
 
 namespace APro
 {
@@ -27,22 +28,22 @@ namespace APro
         ViewPort();
         ViewPort(const String& _name);
         ViewPort(const String& _name, const ViewPort& other);
-        ViewPort(const String& _name, const RectangleF& z);
+        ViewPort(const String& _name, const Rectangle& z);
 
         ~ViewPort();
 
     public:
 
-        RectangleF& getZone();
-        const RectangleF& getZone() const;
+        Rectangle& getZone();
+        const Rectangle& getZone() const;
 
-        RectangleF& getCurrentZone();
-        const RectangleF& getCurrentZone() const;
+        Rectangle& getCurrentZone();
+        const Rectangle& getCurrentZone() const;
 
     public:
 
-        void setZone(const RectangleF& z);
-        void setCurrentZone(const RectangleF& c);
+        void setZone(const Rectangle& z);
+        void setCurrentZone(const Rectangle& c);
 
         void reset();
 
@@ -77,12 +78,14 @@ namespace APro
 
     protected:
 
-        RectangleF zone;
-        RectangleF currentZone;
+        Rectangle zone;
+        Rectangle currentZone;
         bool visible;
         String cameraName;
         String name;
     };
+
+    typedef AutoPointer<ViewPort> ViewPortPtr;
 }
 
 #endif

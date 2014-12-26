@@ -1,14 +1,16 @@
+/////////////////////////////////////////////////////////////
 /** @file PointerCollector.cpp
  *  @ingroup Memory
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013
+ *  @date 02/07/2013 - 17/06/2014
  *
  *  Implements the PointerCollector class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #include "PointerCollector.h"
 #include "Console.h"
 
@@ -19,7 +21,7 @@ namespace APro
     PointerCollector::PointerCollector(const String& collector_name)
         : name(collector_name)
     {
-        pointers_utility.reserve(100);
+ //       pointers_utility.reserve(100);
     }
 
     PointerCollector::~PointerCollector()
@@ -31,7 +33,7 @@ namespace APro
     {
         APRO_THREADSAFE_AUTOLOCK
 
-        if(!pointers_utility.exists(ptr))
+        if(!pointers_utility.keyExists(ptr))
             pointers_utility[ptr] = 1;
         else
             pointers_utility[ptr]++;
@@ -41,9 +43,9 @@ namespace APro
     {
         APRO_THREADSAFE_AUTOLOCK
 
-        if(!pointers_utility.exists(ptr))
+        if(!pointers_utility.keyExists(ptr))
         {
-            Console::get() << "\n[PointerCollector] Collector \"" << name << "\" couldn't pop unexistant pointer \"" << (intptr_t) ptr << "\".";
+            Console::Get() << "\n[PointerCollector] Collector \"" << name << "\" couldn't pop unexistant pointer \"" << (intptr_t) ptr << "\".";
         }
         else
             pointers_utility[ptr] = (pointers_utility[ptr] == 0) ? 0 : pointers_utility[ptr]--;
@@ -53,16 +55,16 @@ namespace APro
     {
         APRO_THREADSAFE_AUTOLOCK
 
-        if(pointers_utility.exists(ptr))
+        if(pointers_utility.keyExists(ptr))
         {
-            pointers_utility.pop(ptr);
+            pointers_utility.erase(ptr);
         }
     }
 
     bool PointerCollector::exists(void* ptr) const
     {
         APRO_THREADSAFE_AUTOLOCK
-        return pointers_utility.exists(ptr);
+        return pointers_utility.keyExists(ptr);
     }
 
     size_t PointerCollector::getPointersCollected() const
@@ -74,7 +76,7 @@ namespace APro
     unsigned int PointerCollector::getPointerUtility(void* ptr) const
     {
         APRO_THREADSAFE_AUTOLOCK
-        return pointers_utility.exists(ptr) ? 0 : pointers_utility[ptr];
+        return pointers_utility.keyExists(ptr) ? 0 : pointers_utility[ptr];
     }
 
     const String& PointerCollector::getName() const

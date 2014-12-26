@@ -1,16 +1,16 @@
+/////////////////////////////////////////////////////////////
 /** @file Rectangle.h
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 26/09/2012
+ *  @date 26/09/2012 - 22/04/2014
  *
- *  @addtogroup Global
- *  @addtogroup System
- *
- *  This file defines the Rectangle class.
+ *  Defines the Rectangle class.
  *
 **/
+/////////////////////////////////////////////////////////////
 #ifndef APRORECTANGLE_H
 #define APRORECTANGLE_H
 
@@ -20,155 +20,160 @@
 
 namespace APro
 {
-    class Intersection
-    {
-    public:
-        enum _
-        {
-            In,
-            Out,
-            Between
-        };
-    };
-
-    template<typename T>
+    /////////////////////////////////////////////////////////////
+    /** @class Rectangle
+     *  @ingroup Utils
+     *  @brief A 2D Rectangle utility class.
+    **/
+    /////////////////////////////////////////////////////////////
     class Rectangle
     {
-    private:
+    public:
 
-        Vector2<T> origin;
-        Vector2<T> end;
+        Vector2 origin; ///< Holds the top - left point.
+        Vector2 end;    ///< Holds the bottom - right point.
 
     public:
 
-        Rectangle()
-        {
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs an empty Rectangle.
+        **/
+        /////////////////////////////////////////////////////////////
+        Rectangle();
 
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs a copy of another Rectangle.
+        **/
+        /////////////////////////////////////////////////////////////
+        Rectangle(const Rectangle& other);
 
-        Rectangle(const Rectangle<T>& other)
-            : origin(other.origin), end(other.end)
-        {
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs a Rectangle object from dimensions.
+         *  @param start : Top - left point of the Rectangle object.
+         *  @param dimension : Width and height of the Rectangle.
+        **/
+        /////////////////////////////////////////////////////////////
+        Rectangle(const Vector2& start, const Vector2& dimension);
 
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs a Rectangle object from dimensions.
+        **/
+        /////////////////////////////////////////////////////////////
+        Rectangle(Real left, Real top, Real width, Real height);
 
-        Rectangle(const Vector2<T>& start, const Vector2<T>& dimension)
-            : origin(start), end(start + dimension)
-        {
+        /////////////////////////////////////////////////////////////
+        /** @brief Destructs the Rectangle object.
+        **/
+        /////////////////////////////////////////////////////////////
+        ~Rectangle();
 
-        }
+    public:
 
-        Rectangle(T left_, T top_, T width_, T height_)
-            : origin(left_, top_), end(left_ + width_, top_ + height_)
-        {
+        /////////////////////////////////////////////////////////////
+        /** @brief Set dimensions of the Rectangle object.
+        **/
+        /////////////////////////////////////////////////////////////
+        void set(Real Left, Real Top, Real Width, Real Height);
 
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Set dimensions of the Rectangle object.
+        **/
+        /////////////////////////////////////////////////////////////
+        void set(const Vector2& start, const Vector2& dimension);
 
-        ~Rectangle()
-        {
+        /////////////////////////////////////////////////////////////
+        /** @brief Set dimensions of the Rectangle object.
+        **/
+        /////////////////////////////////////////////////////////////
+        void set(const Rectangle& other);
 
-        }
+    public:
 
-        void set(T Left, T Top, T Width, T Height)
-        {
-            origin.x = Left;
-            origin.y = Top;
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns Left coordinate.
+        **/
+        /////////////////////////////////////////////////////////////
+        inline Real getLeft() const { return origin.x; }
 
-            end.x = Left + Width;
-            end.y = Top + Height;
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns Right coordinate.
+        **/
+        /////////////////////////////////////////////////////////////
+        inline Real getRight() const { return end.x; }
 
-        void set(const Vector2<T>& start, const Vector2<T>& dimension)
-        {
-            origin = start;
-            end = start + dimension;
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns Top coordinate.
+        **/
+        /////////////////////////////////////////////////////////////
+        inline Real getTop() const { return origin.y; }
 
-        void set(const Rectangle<T>& other)
-        {
-            origin = other.origin;
-            end = other.end;
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns Bottom coordinate.
+        **/
+        /////////////////////////////////////////////////////////////
+        inline Real bottom() const { return end.y; }
 
-        T left() const
-        {
-            return origin.x;
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns Width of the Rectangle object.
+        **/
+        /////////////////////////////////////////////////////////////
+        inline Real getWidth() const { return end.y - origin.y; }
 
-        T right() const
-        {
-            return end.x;
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns Height of the Rectangle object.
+        **/
+        /////////////////////////////////////////////////////////////
+        inline Real getHeight() const { return end.x - origin.x; }
 
-        T top() const
-        {
-            return origin.y;
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns Size (Width,Height) of the Rectangle object.
+        **/
+        /////////////////////////////////////////////////////////////
+        inline Vector2 getSize() const { return end - origin; }
 
-        T bottom() const
-        {
-            return end.y;
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns Surface of the Rectangle object.
+        **/
+        /////////////////////////////////////////////////////////////
+        Real getSurface() const;
 
-        T width() const
-        {
-            return end.y - origin.y;
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if given 2d point is inside Rectangle.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool isInside(const Vector2& pt) const;
 
-        T height() const
-        {
-            return end.x - origin.x;
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Tells if point is inside or outside this Rectangle.
+        **/
+        /////////////////////////////////////////////////////////////
+        Intersection intersects(const Vector2& pt) const;
 
-        Vector2<T> size() const
-        {
-            return end - origin;
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns the Intersected Rectangle between this one
+         *  and given one.
+         *
+         *  If no intersection is found, an unvalid rectangle is returned.
+        **/
+        /////////////////////////////////////////////////////////////
+        Rectangle getIntersection(const Rectangle& rhs) const;
 
-        T surface() const
-        {
-            return width() * height();
-        }
+        /////////////////////////////////////////////////////////////
+        /** @brief Return true if Rectangle is valid.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool isValid() const;
 
-        Intersection::_ intersects(const Vector2<T>& pt) const
-        {
-            if(pt.x >= origin.x && pt.y >= origin.y &&
-               pt.x <= end.x && pt.y <= end.y)
-            {
-                return Intersection::In;
-            }
-            else
-            {
-                return Intersection::Out;
-            }
-        }
-        Intersection::_ intersects(const Rectangle<T>& rect) const
-        {
-            Vector2<T> Start(Numeric::Max(origin.x, rect.origin.x), Numeric::Max(origin.y, rect.origin.y));
-            Vector2<T> End(Numeric::Min(end.x, rect.end.x), Numeric::Min(end.y, rect.end.y));
-            Rectangle<T> Overlap(Start, End - Start);
+        /////////////////////////////////////////////////////////////
+        /** @brief Return the Intersection type between this Rectangle
+         *  and given one.
+        **/
+        /////////////////////////////////////////////////////////////
+        Intersection intersects(const Rectangle& rect) const;
 
-            if ((Start.x > End.x) || (Start.y > End.y))
-                return Intersection::Out;
-            else if ((Overlap == *this) || (Overlap == rect))
-                return Intersection::In;
-            else
-                return Intersection::Between;
-        }
-
-        bool operator == (const Rectangle& other) const
-        {
-            return origin == other.origin && end == other.end;
-        }
-
-        bool operator != (const Rectangle& other) const
-        {
-            return !(*this == other);
-        }
+        bool operator == (const Rectangle& other) const;
+        bool operator != (const Rectangle& other) const;
     };
-
-    typedef Rectangle<float> RectangleF;
-    typedef Rectangle<double> RectangleD;
 }
 
 #endif

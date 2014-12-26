@@ -65,14 +65,14 @@ namespace APro
         handle = DYNLIB_LOAD(getFilename().toCstChar());
         if(!handle)
         {
-            Console::get() << "\n[DynamicLibrary] Couldn't load DynLib " << getFilename() << " : " << DYNLIB_LASTERROR() << ".";
+            Console::Get() << "\n[DynamicLibrary] Couldn't load DynLib " << getFilename() << " : " << DYNLIB_LASTERROR() << ".";
             loaded.set(false);
             return false;
         }
         else
         {
             sendEvent(createEvent(DynamicLibraryLoadedEvent::Hash));
-            Console::get() << "\n[DynamicLibrary] DynLib " << getFilename() << " loaded successfuly.";
+            Console::Get() << "\n[DynamicLibrary] DynLib " << getFilename() << " loaded successfuly.";
             loaded.set(true);
             return true;
         }
@@ -87,14 +87,14 @@ namespace APro
 
         if(!DYNLIB_UNLOAD(handle))
         {
-            Console::get() << "\n[DynamicLibrary] Couldn't release DynLib " << getFilename() << " : " << DYNLIB_LASTERROR() << ".";
+            Console::Get() << "\n[DynamicLibrary] Couldn't release DynLib " << getFilename() << " : " << DYNLIB_LASTERROR() << ".";
             loaded.set(false);
             return false;
         }
         else
         {
             sendEvent(createEvent(DynamicLibraryUnloadedEvent::Hash));
-            Console::get() << "\n[DynamicLibrary] DynLib " << getFilename() << " unloaded successfuly.";
+            Console::Get() << "\n[DynamicLibrary] DynLib " << getFilename() << " unloaded successfuly.";
             loaded.set(false);
             return true;
         }
@@ -107,19 +107,19 @@ namespace APro
 
     EventPtr DynamicLibrary::createEvent(const HashType& e_type) const
     {
-        switch (e_type)
-        {
-        case DynamicLibraryLoadedEvent::Hash:
+        if(e_type == DynamicLibraryLoadedEvent::Hash) {
             EventPtr ret = (Event*) AProNew(DynamicLibraryLoadedEvent);
             ret->m_emitter = this;
             return ret;
+        }
 
-        case DynamicLibraryUnloadedEvent::Hash:
+        else if(e_type == DynamicLibraryUnloadedEvent::Hash) {
             EventPtr ret = (Event*) AProNew(DynamicLibraryUnloadedEvent);
             ret->m_emitter = this;
             return ret;
+        }
 
-        default:
+        else {
             return EventEmitter::createEvent(e_type);
         }
     }

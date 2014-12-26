@@ -656,4 +656,21 @@ namespace APro
     {
         return hash() < other.hash();
     }
+
+    String String::toString(bool b)
+    {
+        if(b)
+            return String("True");
+        else
+            return String("False");
+    }
+
+    String String::FromInt(int i)
+    {
+        char buffer[32];
+        sprintf(buffer, "%d", i);
+        return String(buffer);
+    }
+
+    const String String::Empty = String("");
 }

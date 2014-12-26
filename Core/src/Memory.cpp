@@ -15,7 +15,11 @@
 #include "Memory.h"
 #include "MemoryTracker.h"
 
+#include "Exception.h"
+#include "Console.h"
+
 #include <stdio.h>
+#include <cstring>
 
 namespace APro
 {

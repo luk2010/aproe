@@ -12,8 +12,8 @@
 **/
 /////////////////////////////////////////////////////////////
 #include "EventEmitter.h"
+#include "EventUniter.h"
 #include "Console.h"
-#include "StringStream.h"
 
 namespace APro
 {
@@ -34,7 +34,7 @@ namespace APro
 
     }
 
-    bool EventEmitter::sendEvent(EventPtr& e)
+    bool EventEmitter::sendEvent(EventPtr e)
     {
         if(e.isNull() || ! e->isValid())
         {
@@ -51,8 +51,8 @@ namespace APro
         if(epolicy == EP_MANUAL)
         {
             bool tmp = false;
-            ListenersList::const_iterator e = listeners.end();
-            for(ListenersList::iterator it = listeners.begin(); it != e && !(e->must_stop); it++)
+            ListenersList::const_iterator _end = listeners.end();
+            for(ListenersList::iterator it = listeners.begin(); it != _end && !(e->must_stop); it++)
             {
                 if((*it)->receive(e))
                     tmp = true;
@@ -61,12 +61,15 @@ namespace APro
             return tmp;
         }
         else if(epolicy == EP_UNITER)
-            return sendAsynchronousEvent(e);
+        {
+            sendASynchronousEvent(e);
+            return true;// Stub
+        }
         else
             return true;// Stub
     }
 
-    bool EventEmitter::sendEvent(EventPtr& e, EventListenerPtr& listener)
+    bool EventEmitter::sendEvent(EventPtr e, EventListenerPtr& listener)
     {
         if(e.isNull() || ! e->isValid())
         {
@@ -91,7 +94,7 @@ namespace APro
         }
     }
 
-    bool EventEmitter::sendEvent(EventPtr& e, const String& listener)
+    bool EventEmitter::sendEvent(EventPtr e, const String& listener)
     {
         EventListenerPtr& ptr = getListener(listener);
 
@@ -104,20 +107,20 @@ namespace APro
         return sendEvent(e, listener);
     }
 
-    bool EventEmitter::sendEvent(EventPtr& e, const Id& listener)
+    bool EventEmitter::sendEvent(EventPtr e, const Id& listener)
     {
         EventListenerPtr& ptr = getListener(listener);
 
         if(ptr.isNull())
         {
-            aprodebug("Listener \"") << listener << "\" given not found.";
+            aprodebug("Listener \"") << (long unsigned int) listener << "\" given not found.";
             return false;
         }
 
         return sendEvent(e, listener);
     }
 
-    void EventEmitter::sendASynchronousEvent(EventPtr& e, EventUniter* event_uniter)
+    void EventEmitter::sendASynchronousEvent(EventPtr e, EventUniter* event_uniter)
     {
         if(!e.isNull())
         {
@@ -130,15 +133,15 @@ namespace APro
                 return;
             }
 
-            ListenersList::const_iterator e = listeners.end();
-            for(ListenersList::iterator it = listeners.begin(); it != e; it++)
+            ListenersList::const_iterator _e = listeners.end();
+            for(ListenersList::iterator it = listeners.begin(); it != _e; it++)
             {
-                event_uniter->push(e, it);
+                event_uniter->push(e, *it);
             }
         }
     }
 
-    void EventEmitter::sendAsynchronousEvent(EventPtr& e, EventListenerPtr& listener, EventUniter* event_uniter)
+    void EventEmitter::sendAsynchronousEvent(EventPtr e, EventListenerPtr& listener, EventUniter* event_uniter)
     {
         if(listener.isNull())
         {
@@ -161,7 +164,7 @@ namespace APro
         }
     }
 
-    void EventEmitter::sendAsynchronousEvent(EventPtr& e, const String& name, EventUniter* event_uniter)
+    void EventEmitter::sendAsynchronousEvent(EventPtr e, const String& name, EventUniter* event_uniter)
     {
         EventListenerPtr& ptr = getListener(name);
 
@@ -174,13 +177,13 @@ namespace APro
         sendAsynchronousEvent(e, ptr, event_uniter);
     }
 
-    void EventEmitter::sendAsynchronousEvent(EventPtr& e, const Id& listener, EventUniter* event_uniter)
+    void EventEmitter::sendAsynchronousEvent(EventPtr e, const Id& listener, EventUniter* event_uniter)
     {
         EventListenerPtr& ptr = getListener(listener);
 
         if(ptr.isNull())
         {
-            aprodebug("Listener \"") << listener << "\" given not found.";
+            aprodebug("Listener \"") << (long unsigned int) listener << "\" given not found.";
             return;
         }
 
@@ -198,9 +201,10 @@ namespace APro
         ret   << "\n-----------------------------------"
               << "\n";
 
-        for (unsigned int i = 0; i < events.size(); ++i)
+        EventsList::const_iterator e = events.end();
+        for (EventsList::const_iterator it = events.begin(); it != e; it++)
         {
-            ret << " + " << events.getPair(i).first() << " : " << events.getPair(i).second() << "\n";
+            ret << " + Hash['" << it.key() << "'] : " << it.value() << "\n";
         }
 
         ret << "-----------------------------------";
@@ -209,17 +213,20 @@ namespace APro
 
     const String& EventEmitter::getEventDocumentation(const HashType& event) const
     {
-        events.exists(event) ? return events[event] : return String();
+        if(events.keyExists(event))
+            return events.at(event);
+        else
+            return String::Empty;
     }
 
     bool EventEmitter::isEventDocumented(const HashType& event) const
     {
-        return events.exists(event);
+        return events.keyExists(event);
     }
 
     bool EventEmitter::isEventHandled(const HashType& event) const
     {
-        return events.exists(event);
+        return events.keyExists(event);
     }
 
     int EventEmitter::registerListener(const EventListenerPtr& listener)
@@ -229,13 +236,13 @@ namespace APro
             EventListenerPtr& _phl = getListener(listener->getName());
             if(!_phl.isNull())
             {
-                Console::get() << "\n[EventEmitter]{registerListener} Can't register listener \"" << listener->getName() << "\" because name already taken.";
+                Console::Get() << "\n[EventEmitter]{registerListener} Can't register listener \"" << listener->getName() << "\" because name already taken.";
                 return -1;
             }
             else
             {
                 listeners.append(listener);
-                return listeners.lastIndex();
+                return listeners.size() - 1;
             }
         }
         else
@@ -251,13 +258,13 @@ namespace APro
             EventListenerPtr& _listener = getListener(name);
             if(_listener.isNull())
             {
-                Console::get() << "\n[EventEmitter]{unregisterListener} Can't find listener \"" << name << "\".";
+                Console::Get() << "\n[EventEmitter]{unregisterListener} Can't find listener \"" << name << "\".";
                 return -1;
             }
             else
             {
                 int index = listeners.find(_listener);
-                listeners.erase(index);
+                listeners.erase(listeners.begin()+(size_t)index);
                 return index;
             }
         }
@@ -270,13 +277,13 @@ namespace APro
         EventListenerPtr& _listener = getListener(id);
         if(_listener.isNull())
         {
-            Console::get() << "\n[EventEmitter]{unregisterListener} Can't find listener \"" << id << "\".";
+            Console::Get() << "\n[EventEmitter]{unregisterListener} Can't find listener \"" << (int) id << "\".";
             return -1;
         }
         else
         {
             int index = listeners.find(_listener);
-            listeners.erase(index);
+            listeners.erase(listeners.begin()+(size_t)index);
             return index;
         }
 
@@ -287,21 +294,20 @@ namespace APro
     {
         if(!name.isEmpty())
         {
-            const EventListenerPtr& _listener;
             for(unsigned int i = 0; i < listeners.size(); ++i)
             {
-                _listener = listeners.at(i);
+                const EventListenerPtr& _listener = listeners.at(i);
                 if(!_listener.isNull() && _listener->getName() == name)
                 {
                     return _listener;
                 }
             }
 
-            return nullptr;
+            return EventListenerPtr::Null;
         }
         else
         {
-            return EventListenerPtr();
+            return EventListenerPtr::Null;
         }
     }
 
@@ -309,52 +315,49 @@ namespace APro
     {
         if(!name.isEmpty())
         {
-            EventListenerPtr& _listener;
             for(unsigned int i = 0; i < listeners.size(); ++i)
             {
-                _listener = listeners.at(i);
+                EventListenerPtr& _listener = listeners.at(i);
                 if(!_listener.isNull() && _listener->getName() == name)
                 {
                     return _listener;
                 }
             }
 
-            return nullptr;
+            return EventListenerPtr::Null;
         }
         else
         {
-            return EventListenerPtr();
+            return EventListenerPtr::Null;
         }
     }
 
     const EventListenerPtr& EventEmitter::getListener(const Id& identifier) const
     {
-        const EventListenerPtr& plistener;
         for (unsigned int i = 0; i < listeners.size(); ++i)
         {
-            plistener = listeners.at(i);
+            const EventListenerPtr& plistener = listeners.at(i);
             if(!plistener.isNull() && plistener->getId() == identifier)
             {
                 return plistener;
             }
         }
 
-        return nullptr;
+        return EventListenerPtr::Null;
     }
 
     EventListenerPtr& EventEmitter::getListener(const Id& identifier)
     {
-        EventListenerPtr& plistener;
         for (unsigned int i = 0; i < listeners.size(); ++i)
         {
-            plistener = listeners.at(i);
+            EventListenerPtr& plistener = listeners.at(i);
             if(!plistener.isNull() && plistener->getId() == identifier)
             {
                 return plistener;
             }
         }
 
-        return nullptr;
+        return EventListenerPtr::Null;
     }
 
     EventPtr EventEmitter::createEvent(const HashType& e_type) const

@@ -25,7 +25,7 @@ namespace APro
 
     AbstractObject::AbstractObject(const AbstractObject& other, AbstractObjectFactory* factory)
     {
-        m_name = other.name;
+        m_name = other.m_name;
         m_factory = factory ? factory : other.m_factory;
     }
 
@@ -66,7 +66,7 @@ namespace APro
 
     bool AbstractObject::hasProperty(const String& prop_name) const
     {
-        return m_properties.exists(prop_name);
+        return m_properties.keyExists(prop_name);
     }
 
     size_t AbstractObject::getPropertiesNumber() const

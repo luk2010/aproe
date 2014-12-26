@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 23/02/2014 - 27/02/2014
+ *  @date 23/02/2014 - 06/05/2014
  *
  *  Defines the Directory class.
  *
@@ -15,6 +15,8 @@
 #define APRO_DIRECTORY_H
 
 #include "Platform.h"
+#include "SString.h"
+#include "Path.h"
 
 namespace APro
 {
@@ -23,7 +25,7 @@ namespace APro
      *  @ingroup Utils
      *  @brief A handle to a directory in the FileSystem.
      *
-     *  This handle autoclose whhen it is destroyed, but to avoid
+     *  This handle autoclose when it is destroyed, but to avoid
      *  resource leaks while program is running, you should use this
      *  class for local Directory objects, so at the scope-end,
      *  directory will be closed.
@@ -56,12 +58,13 @@ namespace APro
             String name; ///< Name of the entry (generally name of the file/directory).
             Id     d_ino;///< Identifier of the entry.
 
-            static Entry End;    ///< Entry end.
-            static Entry Invalid;///< Entry invalid.
+            static entry_t End;    ///< Entry end.
+            static entry_t Invalid;///< Entry invalid.
 
-            bool isValid() { return *this != Entry::Invalid && !name.isEmpty(); }
-            bool isEnd() { return *this != Entry::End; }
-            bool operator == (const Entry& other) { return name == other.name && d_ino == other.d_ino; }
+            bool isValid() { return *this != entry_t::Invalid && !name.isEmpty(); }
+            bool isEnd() { return *this != entry_t::End; }
+            bool operator == (const entry_t& other) { return name == other.name && d_ino == other.d_ino; }
+            bool operator != (const entry_t& other) { return !(*this == other); }
 
         } Entry;
 
@@ -153,6 +156,26 @@ namespace APro
         ////////////////////////////////////////////////////////////
         int countEntries();
 
+        ////////////////////////////////////////////////////////////
+        /** @brief Return true if different from Directory::Invalid.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool isValid() const;
+
+        ////////////////////////////////////////////////////////////
+        /** @brief Return true if directory is empty.
+        **/
+        ////////////////////////////////////////////////////////////
+        bool isEmpty();
+
+        ////////////////////////////////////////////////////////////
+        /** @brief If not empty, make it so.
+         *  @param recursive_mode : If set to true, delete also every
+         *  folders by calling their Directory::makeEmpty() function.
+        **/
+        ////////////////////////////////////////////////////////////
+        void makeEmpty(bool recursive_mode = true);
+
     public:
 
         ////////////////////////////////////////////////////////////
@@ -169,6 +192,11 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         void rewind();
+
+    public:
+
+        bool operator == (const Directory& other) const;
+        bool operator != (const Directory& other) const { return !(*this == other); }
     };
 }
 

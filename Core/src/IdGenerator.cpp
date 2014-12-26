@@ -62,7 +62,7 @@ namespace APro
         unsigned long ret = m_cur_id;
         if(ret + m_incrementation > m_max)
         {
-            APRO_THROW("MaxRangeReached", "Max range for id reached !", "IdGenerator");
+            aprothrow_ce("Max range for id reached !");
         }
 
         m_cur_id += m_incrementation;

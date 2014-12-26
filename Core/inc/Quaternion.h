@@ -15,9 +15,14 @@
 #define APRO_QUATERNION_H
 
 #include "Platform.h"
+#include "Vector3.h"
 
 namespace APro
 {
+    class Matrix3x3;
+    class Matrix3x4;
+    class Matrix4x4;
+
     ////////////////////////////////////////////////////////////
     /** @class Quaternion
      *  @ingroup Maths
@@ -456,7 +461,7 @@ namespace APro
         /** @brief Returns a pointer to the first entry (m_x).
         **/
         ////////////////////////////////////////////////////////////
-        const Real* ptr() { return &m_x; }
+        const Real* ptr() const { return &m_x; }
 
     public:
 

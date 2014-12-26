@@ -42,7 +42,7 @@ namespace APro
                 return (*it);
         }
 
-        return PluginHandlePtr;
+        return PluginHandlePtr::Null;
     }
 
     const PluginHandlePtr PluginManager::getPluginHandle(const String& name) const
@@ -56,7 +56,7 @@ namespace APro
                 return (*it);
         }
 
-        return PluginHandlePtr;
+        return PluginHandlePtr::Null;
     }
 
     PluginHandlePtr PluginManager::addPluginHandle(const String& name, const String& filename, bool load_now)
@@ -238,7 +238,7 @@ namespace APro
                 Directory::Entry ent;
                 while(dir >> ent)
                 {
-                    if(!addPluginHhandle(String(), String(ent.d_name), true).isNull())
+                    if(!addPluginHandle(String(), ent.name, true).isNull())
                         ret++;
                 }
 
@@ -300,7 +300,7 @@ namespace APro
 
     bool PluginManager::isVersionValid(const PluginApiVersion& version) const
     {
-        return getCurrentApiversion().build == version.build;
+        return getCurrentApiVersion().build == version.build;
     }
 
     bool PluginManager::isOutdated(const PluginApiVersion& version) const
@@ -308,7 +308,7 @@ namespace APro
         return !isVersionValid(version);
     }
 
-    void PluginManager::print(Console& console)
+    void PluginManager::print(Console& console) const
     {
         APRO_THREADSAFE_AUTOLOCK
 

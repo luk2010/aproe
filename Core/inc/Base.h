@@ -87,7 +87,8 @@ namespace APro
     typedef angle_t             Radian;     ///< Represents a Radian angle measure.
     typedef angle_t             Degree;     ///< Represents a Degree angle measure.
 
-    typedef unsigned int        HashType; ///< A standard hash type.
+    typedef unsigned int        HashType;   ///< A standard hash type.
+    typedef signed   long       Id;         ///< A generic id type.
 
 
 // ---------------------------------------------------
@@ -98,7 +99,7 @@ namespace APro
 // x86 or x64.
 
     CCASSERT(sizeof(char) == 1)                 // char = 1 Byte  (8 bits)
-    CCASSERT(sizeof(BYTE) == 1)                 // BYTE = 1 Byte  (8 bits)
+    CCASSERT(sizeof(Byte) == 1)                 // BYTE = 1 Byte  (8 bits)
     CCASSERT(sizeof(u8)   == 1)                 // u8   = 1 Byte  (8 bits)
     CCASSERT(sizeof(u16)  == 2)                 // u16  = 2 Bytes (16 bits)
     CCASSERT(sizeof(u32)  == 4)                 // u32  = 4 Bytes (32 bits)
@@ -184,8 +185,9 @@ namespace APro
      *  @return true if a is less than b.
     **/
     /////////////////////////////////////////////////////////////
-    template <typename T>
-    bool is_less(const T& a, const T& b) { return a < b;  }
+    template <class T> struct is_less {
+        bool operator() (const T& x, const T& y) const { return x < y; }
+    };
 
     /////////////////////////////////////////////////////////////
     /** @brief Block given calling Thread while a given boolean is
@@ -193,6 +195,13 @@ namespace APro
     **/
     /////////////////////////////////////////////////////////////
     void __wait_boolean__(bool* b, bool result) { while (*b != result); }
+
+    enum Intersection
+    {
+        INTIN,
+        INTOUT,
+        INTBETWEEN
+    };
 }
 
 ////////////////////////////////////////////////////////////
@@ -210,9 +219,9 @@ namespace APro
 ////////////////////////////////////////////////////////////
 
 #if APRO_DEBUG == APRO_ON
-#   define aprodebug(a) Console::get() << "\n" << __FUNCTION__ << " (" << __LINE__ << ") : " << a
+#   define aprodebug(a) Console::Get() << "\n" << __FUNCTION__ << " (" << __LINE__ << ") : " << a
 #else
-#   define aprodebug(a) EmptyConsole::get()
+#   define aprodebug(a) EmptyConsole::Get()
 #endif
 
 #if APRO_DEBUG == APRO_ON
@@ -230,6 +239,6 @@ if(!(condition) ) \
 #   define aproassert(a,b)
 #endif
 
-#define aproassert(a) aproassert(a, "")
+#define aproassert1(a) aproassert(a, "")
 
 #endif

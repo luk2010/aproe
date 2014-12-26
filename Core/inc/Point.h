@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 10/07/2013
+ *  @date 10/07/2013 - 17/06/2014
  *
  *  Defines a point.
  *
@@ -17,6 +17,7 @@
 #include "Platform.h"
 #include "Copyable.h"
 #include "Printable.h"
+#include "Vector3.h"
 
 namespace APro
 {
@@ -76,7 +77,7 @@ namespace APro
          *  @param position : Position of the point.
         **/
         /////////////////////////////////////////////////////////////
-        explicit Point(const Vector3U& position);
+        explicit Point(const Vector3& position);
 
         /////////////////////////////////////////////////////////////
         /** @brief Destructor.
@@ -139,7 +140,7 @@ namespace APro
          *  @param position : Position of the point.
         **/
         /////////////////////////////////////////////////////////////
-        void set(const Vector3U& position);
+        void set(const Vector3& position);
 
         /////////////////////////////////////////////////////////////
         /** @brief Set coordinates from other point.
@@ -156,7 +157,7 @@ namespace APro
          *  @return the distance.
         **/
         /////////////////////////////////////////////////////////////
-        Vector3U getDistance(const Point& other) const;
+        Vector3 getDistance(const Point& other) const;
 
     public:
 
@@ -164,7 +165,7 @@ namespace APro
         /** @brief Convert this point to a Vector3U.
         **/
         /////////////////////////////////////////////////////////////
-        Vector3U toVector3() const;
+        Vector3 toVector3() const;
 
     public: // Copyable
 

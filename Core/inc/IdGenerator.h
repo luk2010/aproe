@@ -16,6 +16,7 @@
 
 #include "Platform.h"
 #include "ThreadSafe.h"
+#include "Singleton.h"
 
 namespace APro
 {
@@ -116,8 +117,6 @@ namespace APro
         /////////////////////////////////////////////////////////////
         bool canPick() const;
     };
-
-    typedef unsigned long Id; ///< A generic id type.
 }
 
 #endif // APRO_IDGENERATOR_H

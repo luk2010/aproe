@@ -39,10 +39,12 @@ namespace APro
      *  - else a = b.
     **/
     /////////////////////////////////////////////////////////////
-    template<typename key_t, typename value_t, typename cmp_t = APro::is_less<key_t> >
+    template<class key_t, class value_t, class cmp_t = APro::is_less<key_t> >
     class Map
     {
     public:
+
+        typedef Map<key_t, value_t, cmp_t> map_t;///< Typedef to tell current map.
 
         /////////////////////////////////////////////////////////////
         /** @brief Describe a Node in the Map.
@@ -61,9 +63,9 @@ namespace APro
             key_t*      m_key;
             value_t*    m_value;
 
-            Node* m_left,
-                  m_right,
-                  m_parent;
+            Node* m_left;
+            Node* m_right;
+            Node* m_parent;
 
             Node()
                 : m_key(nullptr), m_value(nullptr),
@@ -84,7 +86,8 @@ namespace APro
             }
 
             Node(const Node& other)
-                : data(nullptr), next(nullptr)
+                : m_key(nullptr), m_value(nullptr),
+                m_left(nullptr), m_right(nullptr), m_parent(nullptr)
             {
                 m_key = (key_t*) AProAllocate(sizeof(key_t));
                 AProConstructedCopy(m_key, other.k, key_t);
@@ -219,8 +222,8 @@ namespace APro
 
         public:
             node_iterator_preorder() : parent(nullptr), node(nullptr) {}
-            node_iterator_preorder(const Node* n, const map_t* p) { parent = p; node = n; }
-            node_iterator_preorder(const node_iterator_preorder& it) { parent = it.parent; node = it.n; }
+            node_iterator_preorder(const Node* n, const map_t* p) { parent = const_cast<map_t*>(p); node = const_cast<Node*>(n); }
+            node_iterator_preorder(const node_iterator_preorder& it) { parent = it.parent; node = it.node; }
             ~node_iterator_preorder() {}
 
             node_iterator_preorder& next()
@@ -229,9 +232,9 @@ namespace APro
                 {
                     Node* p;
 
-                    if(*this == end())
+                    if(*this == parent->end())
                     { // Increment from end, return begin.
-                        node = begin().node;
+                        node = parent->begin().node;
                     }
                     else
                     {
@@ -244,14 +247,14 @@ namespace APro
                         else
                         {
                             p = node->m_parent;
-                            while(p && node = p->m_right)
+                            while(p && node == p->m_right)
                             {
                                 node = p;
                                 p = p->m_parent;
                             }
 
                             node = p;
-                            if(!node) node = end();
+                            if(!node) node = parent->end().node;
                         }
                     }
                 }
@@ -259,10 +262,10 @@ namespace APro
                 return *this;
             }
 
-            const node_iterator_preorder& next() const { return const_cast<node_iterator_preorder*>(*this)->next(); }
+            const node_iterator_preorder& next() const { return const_cast<node_iterator_preorder*>(this)->next(); }
 
-            node_iterator_preorder& operator ++ () { return *this->next(); }
-            const node_iterator_preorder& operator ++ () const { return *this->next(); }
+            node_iterator_preorder& operator ++ (int) { return this->next(); }
+            const node_iterator_preorder& operator ++ (int) const { return this->next(); }
 
             value_t& value() { return *(node->m_value); }
             const value_t& value() const { return *(node->m_value); }
@@ -285,21 +288,19 @@ namespace APro
 
     public:
 
-        Node* _smallest_node() { m_root ? { Node* ret = m_root; while(ret->m_left) ret = ret->m_left; return ret; } : return nullnode; }
-        const Node* _smallest_node() const { m_root ? { Node* ret = m_root; while(ret->m_left) ret = ret->m_left; return ret; } : return nullnode; }
+        Node* _smallest_node() { if(m_root) { Node* ret = m_root; while(ret->m_left) ret = ret->m_left; return ret; } else return &nullnode; }
+        const Node* _smallest_node() const { if(m_root) { Node* ret = m_root; while(ret->m_left) ret = ret->m_left; return ret; } else return &nullnode; }
 
-        Node* _biggest_node() { m_root ? { Node* ret = m_root; while(ret->m_right) ret = ret->m_right; return ret; } : return nullnode; }
-        const Node* _biggest_node() const { m_root ? { Node* ret = m_root; while(ret->m_right) ret = ret->m_right; return ret; } : return nullnode; }
-
-    public:
-
-        iterator       begin()       { return iterator(_smallest_node()); }
-        const_iterator begin() const { return const_iterator(_smallest_node()); }
-        const_iterator end()   const { return const_iterator(&nullnode); }
+        Node* _biggest_node() { if(m_root) { Node* ret = m_root; while(ret->m_right) ret = ret->m_right; return ret; } else return &nullnode; }
+        const Node* _biggest_node() const { if(m_root) { Node* ret = m_root; while(ret->m_right) ret = ret->m_right; return ret; } else return &nullnode; }
 
     public:
 
-        typedef Map<key_t, value_t, cmp_t> map_t;///< Typedef to tell current map.
+        iterator       begin()       { return iterator(_smallest_node(), this); }
+        const_iterator begin() const { return const_iterator(_smallest_node(), this); }
+        const_iterator end()   const { return const_iterator(&nullnode, this); }
+
+    public:
 
         /////////////////////////////////////////////////////////////
         /** @brief Constructs an empty map.
@@ -363,12 +364,13 @@ namespace APro
         /////////////////////////////////////////////////////////////
         Node* lookup_node(const key_t& k)
         {
+            cmp_t cmp;
             Node* n = m_root;
             while(n != nullptr)
             {
-                if(cmp_t(k, *(n->m_key))
+                if(cmp(k, *(n->m_key)))
                    n = n->m_left;
-                else if (cmp_t(*(n->m_key), k))
+                else if (cmp(*(n->m_key), k))
                     n = n->m_right;
                 else
                     return n;
@@ -414,7 +416,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         const value_t& at(const key_t& k) const
         {
-            Node* n = lookup_node(k);
+            const Node* n = lookup_node(k);
             aproassert(n, "Bad key given !");
 
             return *(n->m_value);
@@ -492,6 +494,7 @@ namespace APro
         /////////////////////////////////////////////////////////////
         Node* insert_ret_node(const key_t& k, const value_t& v)
         {
+            cmp_t cmp;
             Node* newn = new_node(k, v, nullptr, nullptr);
             if(newn)
             {
@@ -503,7 +506,7 @@ namespace APro
                     Node* n = m_root;
                     while(1)
                     {
-                        if(cmp_t(k, *(m_root->m_key)))
+                        if(cmp(k, *(m_root->m_key)))
                         {
                             if(n->m_left == nullptr)
                             {
@@ -515,7 +518,7 @@ namespace APro
                                 n = n->m_left;
                             }
                         }
-                        else if(cmp_t(*(m_root->m_key), k))
+                        else if(cmp(*(m_root->m_key), k))
                         {
                             if(n->m_right == nullptr)
                             {
@@ -529,7 +532,7 @@ namespace APro
                         }
                         else
                         {
-                            n->m_value = v;
+                            *(n->m_value) = v;
                             AProDelete(newn);// We don't care about it now.
                             return n;
                         }
@@ -643,7 +646,7 @@ namespace APro
 
             // delete the node.
             AProDelete(n);
-            sz--;
+            m_sz--;
         }
 
     public:

@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/05/2013
+ *  @date 25/05/2013 - 02/05/2014
  *
  *  Defines a C-style array.
  *
@@ -146,8 +146,8 @@ namespace APro
             return m_array;
         }
 
-        Type* operator Type* () { return m_array; }
-        const Type* operator Type* const () { return m_array; }
+        operator Type* () { return m_array; }
+        operator const Type* () const { return m_array; }
 
         /////////////////////////////////////////////////////////////
         /** @see Copyable::copyFrom

@@ -15,7 +15,7 @@
 
 namespace APro
 {
-    void Dictionnary::print(Console& console)
+    void Dictionnary::print(Console& console) const
     {
         console << "Dictionnary \n[";
 

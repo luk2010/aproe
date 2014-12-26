@@ -118,7 +118,7 @@ namespace APro
         /** @brief Return the id of this listener.
         **/
         /////////////////////////////////////////////////////////////
-        const unsigned long& getId() const;
+        const unsigned long getId() const;
 
     public:
 

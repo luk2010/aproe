@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 27/08/2012 - 16/02/2014
+ *  @date 27/08/2012 - 07/05/2014
  *
  *  Implements the ResourceManager.
  *
@@ -372,7 +372,7 @@ namespace APro
         return ResourceLoaderPtr();
     }
 
-    bool ResourceManager::addLoader(ResourceLoaderPtr& loader)
+    bool ResourceManager::addLoader(const ResourceLoaderPtr& loader)
     {
         if(!loader.isNull())
         {

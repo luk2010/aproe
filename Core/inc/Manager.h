@@ -100,7 +100,7 @@ namespace APro
             APRO_THREADSAFE_AUTOLOCK
             int index = objects.find(obj);
             if(!obj.isNull() && index != -1)
-                objects.erase(objects.begin() + index);
+                objects.erase(objects.begin() + (size_t) index);
         }
 
         ////////////////////////////////////////////////////////////

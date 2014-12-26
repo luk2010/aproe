@@ -155,12 +155,12 @@ namespace APro
     /// Use these functions for Real type.
     namespace Math
     {
-        static const Real PI;///< PI constant in Real terms.
+        extern const Real PI;///< PI constant in Real terms.
 
-        static const Real _real_nan;///< Not a Number constant.
-        static const Real _real_inf;///< Infinite constant.
+        extern const Real _real_nan;///< Not a Number constant.
+        extern const Real _real_inf;///< Infinite constant.
 
-        static const Real epsilon_default;///< Basic epsilon for compare functions.
+        extern const Real epsilon_default;///< Basic epsilon for compare functions.
     }
 
     namespace Math
@@ -327,8 +327,8 @@ namespace APro
     /// @brief Regroups every Angle related functions.
     namespace Angle
     {
-        static const angle_t DEGTORAD;///< Constant to convert degree to radian.
-        static const angle_t RADTODEG;///< Constant to convert radian to degree.
+        extern const angle_t DEGTORAD;///< Constant to convert degree to radian.
+        extern const angle_t RADTODEG;///< Constant to convert radian to degree.
 
         ////////////////////////////////////////////////////////////
         /** @brief Return radian value of given degree angle.
@@ -502,8 +502,8 @@ namespace APro
          *  @note This is a specialization for Swappable objects.
         **/
         ////////////////////////////////////////////////////////////
-        template<template <typename Class> class S>
-        void swap(S<Class>& a, S<Class>& b)
+        template<class A, template<typename T> class Swappable >
+        void swap(Swappable<A>& a, Swappable<A>& b)
         {
             a.swap(b);
         }

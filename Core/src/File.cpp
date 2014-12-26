@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////
 #include "File.h"
 #include "FileSystem.h"
+#include "Console.h"
 
 namespace APro
 {
@@ -56,7 +57,7 @@ namespace APro
             bool ret = true;
             if(fwrite(bytes, sizeof(Byte), sz, hFile) != sz)
             {
-                Main::get().getConsole() << "\n[File]{write} Can't write '" << (int) (sz * sizeof(Byte)) << "' bytes to file '" << getFilename() << "' !";
+                Console::Get() << "\n[File]{write} Can't write '" << (int) (sz * sizeof(Byte)) << "' bytes to file '" << getFileName() << "' !";
                 ret = false;
             }
 
@@ -77,7 +78,7 @@ namespace APro
             bool ret = true;
             if(fread(buffer, sizeof(Byte), sz, hFile) != sz)
             {
-                Main::get().getConsole() << "\n[File]{write} Can't read '" << (int) (sz * sizeof(Byte)) << "' bytes from file '" << getFilename() << "' !";
+                Console::Get() << "\n[File]{write} Can't read '" << (int) (sz * sizeof(Byte)) << "' bytes from file '" << getFileName() << "' !";
                 ret = false;
             }
 
@@ -95,13 +96,13 @@ namespace APro
 
         if(open_mode)
         {
-            int sz = String::Size(open_mode);
-            m_open_mode = AProAllocate(sizeof(char) * sz);
-            Memory::Copy(m_open_mode, open_mode);
+            int sz = String::Size(open_mode) + 1;
+            m_open_mode = (char*) AProAllocate(sizeof(char) * sz);
+            Memory::Copy(m_open_mode, open_mode, sz);
         }
         else
         {
-            m_open_mode = AProAllocate(sizeof(char) * 3);
+            m_open_mode = (char*) AProAllocate(sizeof(char) * 3);
             m_open_mode[0] = 'r'; m_open_mode[1] = 'b'; m_open_mode[2] = '\0';
         }
 
@@ -119,20 +120,20 @@ namespace APro
         return true;
     }
 
-    bool File::open(const String& filename, const char* open_mode)
+    bool File::open(const Path& filename, const char* open_mode)
     {
         if(isOpened())
             close();
 
         if(open_mode)
         {
-            int sz      = String::Size(open_mode);
-            m_open_mode = AProAllocate(sizeof(char) * sz);
-            Memory::Copy(m_open_mode, open_mode);
+            int sz      = String::Size(open_mode) + 1;
+            m_open_mode = (char*) AProAllocate(sizeof(char) * sz);
+            Memory::Copy(m_open_mode, open_mode, sz);
         }
         else
         {
-            m_open_mode    = AProAllocate(sizeof(char) * 3);
+            m_open_mode    = (char*) AProAllocate(sizeof(char) * 3);
             m_open_mode[0] = 'r';
             m_open_mode[1] = 'b';
             m_open_mode[2] = '\0';
@@ -248,17 +249,18 @@ namespace APro
     {
         if(isOpened())
         {
-            Offset cur = tell();
-            seek(C_END);
-            Offset ret = tell();
-            seek(C_BEGIN, cur);
+            File* _this = const_cast<File*>(this);
+            Offset cur = _this->tell();
+            _this->seek(C_END);
+            Offset ret = _this->tell();
+            _this->seek(C_BEGIN, cur);
             return ret;
         }
 
         return -1;
     }
 
-    Directory File::getDirectory()
+    Directory File::getDirectory() const
     {
         if(m_file_path.isEmpty())
             return Directory::Invalid;
@@ -273,7 +275,7 @@ namespace APro
 
     String File::getFullPath() const
     {
-        return m_file_path.toString();
+        return m_file_path;
     }
 
     File File::Invalid = File(Path::Invalid);

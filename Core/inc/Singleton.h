@@ -40,17 +40,18 @@ namespace APro
     class& class::Get()\
     { static class singleton; return singleton;  }
 
+    #define __APRO_DECLARE_SINGLETON_CLASS(class) public: static class * __current_##class ;
+
     /// @brief Macro to define Main constructed classes.
     /// Harmonize the current functions in the SuperClass initialized
     /// in the Main Singleton.
-    #define APRO_DECLARE_MANUALSINGLETON(class) public: \
-        static class * __curent_##class ; \
+    #define APRO_DECLARE_MANUALSINGLETON(class) __APRO_DECLARE_SINGLETON_CLASS(class) \
         static bool IsCreated() { return __current_##class != nullptr; } \
         static class & Get() { return *__current_##class ; } \
         static class * GetPtr() { return __current_##class ; }
 
     #define APRO_IMPLEMENT_MANUALSINGLETON(class) \
-        class * class##::__current_##class = nullptr;
+        class * class::__current_##class = nullptr;
 }
 
 #endif

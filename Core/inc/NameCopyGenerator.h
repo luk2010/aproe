@@ -15,6 +15,7 @@
 #define APRO_NAMECOPYGENERATOR_h
 
 #include "Platform.h"
+#include "SString.h"
 
 namespace APro
 {

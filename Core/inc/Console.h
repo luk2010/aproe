@@ -255,6 +255,8 @@ namespace APro
         Console& operator << (char c);
         Console& operator << (int i);
         Console& operator << (unsigned long li);
+        Console& operator << (unsigned int u);
+        Console& operator << (Real r);
         ////////////////////////////////////////////////////////////
         /** @}
         **/

@@ -337,7 +337,7 @@ namespace APro
 
             // Now block is empty, copying object.
             for(unsigned int i = 0; i < sz; ++i)
-                __copy_object(obj, i);
+                __copy_object(*a, i);
 
             logical_size += sz;
         }
@@ -382,7 +382,7 @@ namespace APro
         /** @brief Return a pointer to this array.
         **/
         ////////////////////////////////////////////////////////////
-        const T* pointer() { return ptr; }
+        const T* pointer() const { return ptr; }
 
     public:
 
@@ -525,7 +525,7 @@ namespace APro
             }
 
             // Destruct objects between first and last and reduce the size.
-            size_t number_of_elements = (size_t) last - first;// Number of elements in bytes.
+            size_t number_of_elements = (size_t) (last - first);// Number of elements in bytes.
             number_of_elements /= sizeof(T);                  // Number of elements in objects.
 
             AProDestructObject<T>(first, number_of_elements, true);
@@ -579,7 +579,7 @@ namespace APro
         const T& at(size_t index) const { return *(begin() + index); }
 
         T& operator [] (size_t index) { return at(index); }
-        const T& operator [] const (size_t index) { return at(index); }
+        const T& operator [] (size_t index) const { return at(index); }
 
         size_t toIndex(const_iterator& it) const { return ((size_t)(it - begin())) / sizeof(T); }
 
@@ -705,7 +705,7 @@ namespace APro
         iterator find(const T& obj)
         {
             iterator it = begin();
-            const_iterator it_e = end();
+            iterator it_e = end();
 
             while(it != it_e)
                 if((*it) == obj)

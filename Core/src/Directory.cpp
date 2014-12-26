@@ -5,13 +5,15 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/02/2014 - 27/02/2014
+ *  @date 25/02/2014 - 06/05/2014
  *
  *  Implements the Directory class.
  *
 **/
 ////////////////////////////////////////////////////////////
 #include "Directory.h"
+#include "Console.h"
+#include "FileSystem.h"
 
 namespace APro
 {
@@ -138,19 +140,20 @@ namespace APro
                 *this >> e;
             }
 
+            rewind();
             return i;
         }
 
         return -1;
     }
 
-    Entry Directory::next()
+    Directory::Entry Directory::next()
     {
         if(isOpened())
         {
             int err = errno;
             struct dirent* _e = readdir(hDir);
-            if(!e)
+            if(!_e)
             {
                 {
                     if(err == errno)
@@ -180,7 +183,7 @@ namespace APro
         {
             int err = errno;
             struct dirent* _e = readdir(hDir);
-            if(!e)
+            if(!_e)
             {
                 {
                     if(err == errno)
@@ -208,6 +211,41 @@ namespace APro
     void Directory::rewind()
     {
         rewinddir(hDir);
+    }
+
+    bool Directory::isValid() const
+    {
+        return *this != Directory::Invalid;
+    }
+
+    bool Directory::isEmpty()
+    {
+        return countEntries() == 0;
+    }
+
+    void Directory::makeEmpty(bool recursive_mode)
+    {
+        if(isOpened())
+        {
+            Entry e = Entry::Invalid;
+            while (e != Entry::End)
+            {
+                *this >> e;
+                if(e == Entry::Invalid)
+                    break;
+
+                if (FileSystem::IsDirectory(e.name))
+                    FileSystem::RemoveDirectory(e.name, recursive_mode);
+                else
+                    FileSystem::RemoveFile(e.name);
+
+            }
+        }
+    }
+
+    bool Directory::operator==(const Directory& other) const
+    {
+        return m_dir_path == other.m_dir_path;
     }
 
     Directory::Entry Directory::Entry::End     = { String("End"),     -1 };

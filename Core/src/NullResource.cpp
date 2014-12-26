@@ -15,22 +15,19 @@
 
 namespace APro
 {
+    APRO_IMPLEMENT_HASHEDTYPE(NullResource);
+
     NullResource::NullResource() : Resource()
     {
-        type = String("NullResource");
+
     }
 
-    NullResource::NullResource(const String& name_, const String& other) : Resource(name_, other)
+    NullResource::NullResource(const String& filename) : Resource(filename)
     {
-        type = String("NullResource");
+
     }
 
     NullResource::~NullResource()
-    {
-
-    }
-
-    void NullResource::destroy()
     {
 
     }

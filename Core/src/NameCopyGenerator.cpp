@@ -33,7 +33,7 @@ namespace APro
         {
             _cpyname = name;
             _cpyname.append(" (");
-            _cpyname.append(String::fromInt(_cpy));
+            _cpyname.append(String::FromInt(_cpy));
             _cpyname.append(")");
 
         } while (isNameUsed(name));
