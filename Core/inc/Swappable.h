@@ -18,6 +18,8 @@
 
 namespace APro
 {
+    class SwappableTrait {};
+    
     ////////////////////////////////////////////////////////////
     /** @class Swappable
      *  @ingroup Utils
@@ -28,7 +30,7 @@ namespace APro
     **/
     ////////////////////////////////////////////////////////////
     template<typename Class>
-    class Swappable
+    class Swappable : public SwappableTrait
     {
     public:
 
@@ -41,12 +43,6 @@ namespace APro
         ////////////////////////////////////////////////////////////
         virtual void swap(Class& obj) = 0;
         friend void swap (Class& lhs, Class& rhs) { lhs.swap(rhs); }
-
-        Class& operator = (Class rhs)
-        {
-            swap (*static_cast<Class*>(this), rhs);
-            return *static_cast<Class*>(this);
-        }
         
     };
 }

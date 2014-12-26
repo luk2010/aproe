@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/05/2013 - 27/11/2014
+ *  @date 25/05/2013 - 15/12/2014
  *
+ *  @brief
  *  Defines a C-style array.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 /////////////////////////////////////////////////////////////
@@ -16,7 +34,9 @@
 
 #include "Platform.h"
 
+#include "BaseObject.h"
 #include "Copyable.h"
+#include "Swappable.h"
 #include "Printable.h"
 
 namespace APro
@@ -39,12 +59,15 @@ namespace APro
      *  automaticly in the clear() function.
     **/
     /////////////////////////////////////////////////////////////
-    template <typename Type, int S>
-    class CArray : public Copyable<CArray<Type, S> >,
+    template <typename Type, int S, AllocatorPool PoolNum = AllocatorPool::Default>
+    class CArray : public Copyable<CArray<Type, S, PoolNum> >,
+                   public Swappable<CArray<Type, S, PoolNum> >,
+                   public BaseObject<CArray<Type, S, PoolNum>, PoolNum >,
                    public Printable
     {
     public:
 
+        typedef typename CArray <Type,S,PoolNum> CArrayT;
         Type*  m_array;///< Pointer to the array.
         enum { Size = S; /**< Size of the array. */ };
 
@@ -80,19 +103,28 @@ namespace APro
 
     private:
 
+        /////////////////////////////////////////////////////////////
+        /** @brief Allocates the Array.
+        **/
+        /////////////////////////////////////////////////////////////
         void allocate_array()
         {
             if(!m_array)
             {
-                m_array = AProNewA(Type, Size);
+                m_array = Allocator<PoolNum>::Get().New<Type>(Size);
             }
         }
 
+        /////////////////////////////////////////////////////////////
+        /** @brief Deallocates the Array.
+         **/
+        /////////////////////////////////////////////////////////////
         void deallocate_array()
         {
             if(m_array)
             {
-                AProDelete(m_array);
+                Allocator<PoolNum>::Get().Delete(m_array);
+                m_array = nullptr;
             }
         }
 
@@ -112,11 +144,21 @@ namespace APro
         /** @brief Constructor from other array.
         **/
         /////////////////////////////////////////////////////////////
-        CArray(const CArray<Type, S>& other)
+        CArray(const CArrayT& other)
             : m_array(nullptr)
         {
             allocate_array();
             set(other);
+        }
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Move an Array.
+        **/
+        /////////////////////////////////////////////////////////////
+        CArray(CArrayT&& rhs)
+        {
+            m_array = rhs.m_array;
+            rhs.m_array = nullptr;
         }
 
         /////////////////////////////////////////////////////////////
@@ -153,7 +195,7 @@ namespace APro
         /** @see Copyable::copyFrom
         **/
         /////////////////////////////////////////////////////////////
-        void copyFrom(const CArray<Type, S>& other)
+        void copyFrom(const CArrayT& other)
         {
             for(unsigned int i = 0; i < S, ++i)
             {
@@ -165,7 +207,7 @@ namespace APro
         /** @see Copyable::operator==
         **/
         /////////////////////////////////////////////////////////////
-        bool operator == (const CArray<Type>& other) const
+        bool operator == (const CArrayT& other) const
         {
             if(getSize() != other.getSize())
                 return false;
@@ -218,7 +260,17 @@ namespace APro
         /////////////////////////////////////////////////////////////
         void print(Console& console) const
         {
-            console << "C Array { Type = \"" << className<Type>() << "\", Size = \"" << S << "\" } ";
+            console << "CArray { Type = \"" << className<Type>() << "\", Size = \"" << S << "\" } ";
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Swap this object with another one from the same
+         *  kind.
+        **/
+        ////////////////////////////////////////////////////////////
+        void swap(CArrayT& obj)
+        {
+            std::swap (m_array, obj.m_array);
         }
     };
 }

@@ -19,7 +19,7 @@ How to use these files
 ### Installation
 
 1. Verify that you have premake4 installed. See extra/README for more details.
-2. Run premake4 --with-all [plat] where plat is the desired platform, and "--with-all" active every "--with" debugging options. We also recommend the —with-cpp11 option to activate C++11 features, which are great. 
+2. Run premake4 --with-all [plat] where plat is the desired platform, and "--with-all" active every "--with" debugging options.  
 3. Use the generated build files to build the library.
 
 This process will generate the Core lirary, without any plugins or examples.
@@ -27,9 +27,9 @@ For help on premake4 script options, type "premake4 --help".
 
 ### Cleaning
 
-Just run 'premake4 clean' to clean every unused files. You will have to re-run the initial premake4
+Just run 'premake4 clean' to clean every unused files. You will have to re-run the initial premake4 
 script to get the makefiles again.
-'html' folder created by Doxygen isn' destroyed during cleaning, so you'll have to remove it manually.
+'html' folder created by Doxygen isn’t destroyed during cleaning, so you'll have to remove it manually.
 
 ### Working on the sources
 
@@ -44,5 +44,6 @@ Then open the 'index.html' file in the 'html' directory with your favorite brows
 
 ### Dependancies 
 
-You must have 'pthread' if you want multithreading features. This feature is enabled by default, but you still
-can disable it with option '--no-thread'in premake4.
+Basic needs :
+- C++11 compliant compiler (GCC/Clang recommended)
+- Recommended : pThread lib. If you don’t want multithread features, disable it with ‘—no-thread’ option.

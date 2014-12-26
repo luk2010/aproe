@@ -1,33 +1,51 @@
+////////////////////////////////////////////////////////////
 /** @file Color.h
+ *  @ingroup Utils
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 24/09/2012
+ *  @date 24/09/2012 - 15/12/2014
  *
- *  @addtogroup Global
- *  @addtogroup System
+ *  @brief
+ *  This file implements the Color class.
  *
- *  This file defines the Color class.
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
+////////////////////////////////////////////////////////////
 #include "Color.h"
 #include "Maths.h"
 
 namespace APro
 {
-    Color Color::Black((unsigned char) 0,0,0,255);
-    Color Color::White((unsigned char) 255,255,255,255);
-    Color Color::Red((unsigned char) 255,0,0,255);
-    Color Color::Green((unsigned char) 0,255,0,255);
-    Color Color::Blue((unsigned char) 0,0,255,255);
+    Color Color::Black  ((uint8_t) 0,   0,   0,   255);
+    Color Color::White  ((uint8_t) 255, 255, 255, 255);
+    Color Color::Red    ((uint8_t) 255, 0,   0,   255);
+    Color Color::Green  ((uint8_t) 0,   255, 0,   255);
+    Color Color::Blue   ((uint8_t) 0,   0,   255, 255);
 
-    Color Color::rgb(unsigned char r, unsigned char g, unsigned char b)
+    Color Color::rgb(uint8_t r, uint8_t g, uint8_t b)
     {
         return Color(r,g,b,255);
     }
 
-    Color Color::rgba(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+    Color Color::rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
     {
         return Color(r,g,b,a);
     }
@@ -38,19 +56,19 @@ namespace APro
 
     }
 
-    Color::Color(unsigned long int c, Format::_ f)
+    Color::Color(uint32_t c, Format f)
         : color(0)
     {
         set(c, f);
     }
 
-    Color::Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+    Color::Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
         : color(0)
     {
         set(r, g, b, a);
     }
 
-    Color::Color(float r, float g, float b, float a)
+    Color::Color(Real r, Real g, Real b, Real a)
     {
         set(colorvaluefromfloat(r),
             colorvaluefromfloat(g),
@@ -63,13 +81,20 @@ namespace APro
     {
 
     }
+    
+    Color::Color(Color&& rhs)
+    : color (0)
+    {
+        color = rhs.color;
+        rhs.color = 0;
+    }
 
     Color::~Color()
     {
 
     }
 
-    void Color::set(unsigned long int c, Format::_ f)
+    void Color::set(uint32_t c, Format f)
     {
         if(f == Format::RGBA)
         {
@@ -77,12 +102,12 @@ namespace APro
         }
         else if(f == Format::ARGB)
         {
-            unsigned char* c_ = (unsigned char*) &c;
+            uint8_t* c_ = (uint8_t*) &c;
             set(c_[1], c_[2], c_[3], c_[0]);
         }
         else if(f == Format::ABGR)
         {
-            unsigned char* c_ = (unsigned char*) &c;
+            uint8_t* c_ = (uint8_t*) &c;
             set(c_[3], c_[2], c_[1], c_[0]);
         }
         else
@@ -91,16 +116,16 @@ namespace APro
         }
     }
 
-    void Color::set(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+    void Color::set(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
     {
-        unsigned char* c = (unsigned char*) &color;
+        uint8_t* c = (uint8_t*) &color;
         c[0] = r;
         c[1] = g;
         c[2] = b;
         c[3] = a;
     }
 
-    void Color::set(float r, float g, float b, float a)
+    void Color::set(Real r, Real g, Real b, Real a)
     {
         set(colorvaluefromfloat(r),
             colorvaluefromfloat(g),
@@ -108,9 +133,9 @@ namespace APro
             colorvaluefromfloat(a));
     }
 
-    void Color::set(Component::_ component, unsigned char c)
+    void Color::set(Component component, uint8_t c)
     {
-        unsigned char* c_ = (unsigned char*) &color;
+        uint8_t* c_ = (uint8_t*) &color;
 
         if(component == Component::Red)
         {
@@ -135,45 +160,45 @@ namespace APro
         color = other.color;
     }
 
-    unsigned char Color::get(Component::_ c) const
+    uint8_t Color::get(Component c) const
     {
         if(c == Component::Red)
         {
-            return ((const unsigned char*) &color) [0];
+            return ((const uint8_t*) &color) [0];
         }
         else if(c == Component::Green)
         {
-            return ((const unsigned char*) &color) [1];
+            return ((const uint8_t*) &color) [1];
         }
         else if(c == Component::Blue)
         {
-            return ((const unsigned char*) &color) [2];
+            return ((const uint8_t*) &color) [2];
         }
         else
         {
-            return ((const unsigned char*) &color) [3];
+            return ((const uint8_t*) &color) [3];
         }
     }
 
-    float Color::lightness() const
+    Real Color::lightness() const
     {
-        const unsigned char* c = (const unsigned char*) &color;
+        const uint8_t* c = (const uint8_t*) &color;
         return 0.5f + (Numeric::Max3(c[0], c[1], c[2]) + Numeric::Min3(c[0], c[1], c[2]));
     }
 
-    float Color::luminance() const
+    Real Color::luminance() const
     {
-        const unsigned char* c = (const unsigned char*) &color;
-        return 0.3f * (float) c[0] + 0.59f * (float) c[1] + 0.11f * (float) c[2];
+        const uint8_t* c = (const uint8_t*) &color;
+        return 0.3f * (Real) c[0] + 0.59f * (Real) c[1] + 0.11f * (Real) c[2];
     }
 
-    float Color::average() const
+    Real Color::average() const
     {
-        const unsigned char* c = (const unsigned char*) &color;
-        return ((int) c[0] + (int) c[1] + (int) c[2])/3;
+        const uint8_t* c = (const uint8_t*) &color;
+        return ((uint32_t) c[0] + (uint32_t) c[1] + (uint32_t) c[2])/3;
     }
 
-    void Color::format(unsigned long int & ret, Format::_ f) const
+    void Color::format(uint32_t & ret, Format f) const
     {
         if(f == Format::RGBA)
         {
@@ -182,8 +207,8 @@ namespace APro
         }
         else
         {
-            const unsigned char* c = (const unsigned char*) &color;
-            unsigned char* cret = (unsigned char*) &ret;
+            const uint8_t* c = (const uint8_t*) &color;
+            uint8_t* cret    = (uint8_t*)       &ret;
 
             if(f == Format::ARGB)
             {
@@ -206,7 +231,7 @@ namespace APro
 
     Color& Color::darker()
     {
-        unsigned char* c = (unsigned char*) &color;
+        uint8_t* c = (uint8_t*) &color;
 
         c[0] -= 10;
         c[1] -= 10;
@@ -217,7 +242,7 @@ namespace APro
 
     Color& Color::lighter()
     {
-        unsigned char* c = (unsigned char*) &color;
+        uint8_t* c = (uint8_t*) &color;
 
         c[0] += 10;
         c[1] += 10;
@@ -234,12 +259,6 @@ namespace APro
     bool Color::operator != (const Color& other) const
     {
         return other.color != color;
-    }
-
-    Color& Color::operator = (const Color& other)
-    {
-        color = other.color;
-        return *this;
     }
 
     Color& Color::operator += (const Color& other)
@@ -278,13 +297,5 @@ namespace APro
         return cret += *this;
     }
 
-    Color::operator const unsigned char* () const
-    {
-        return (const unsigned char*) &color;
-    }
-
-    Color::operator unsigned char* ()
-    {
-        return (unsigned char*) &color;
-    }
+    
 }

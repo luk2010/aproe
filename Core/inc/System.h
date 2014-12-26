@@ -3,7 +3,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 07/11/2014
+ *  @date 21/05/2012 - 11/12/2014
  *
  *  @addtogroup Global
  *  @addtogroup Memory
@@ -139,6 +139,8 @@ namespace APro
             return "Clang/LLVM C++ Compiler";
 #elif defined
             return "Intel C++ Compiler";
+#else
+            return "Unkown";
 #endif
         }
     };

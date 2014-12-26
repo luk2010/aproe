@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013 - 29/11/2014
+ *  @date 02/07/2013 - 15/12/2014
  *
+ *  @brief
  *  Defines the AutoPointer class.
+ * 
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -81,6 +99,8 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor.
+         *  The PointerCollector is set to the default one, i.e. 
+         *  PointerCollector::Get().
         **/
         ////////////////////////////////////////////////////////////
         AutoPointer()
@@ -91,6 +111,8 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor from adress.
+         *  The PointerCollector is set to the default one, i.e.
+         *  PointerCollector::Get().
          *  @param pointer_to_init : Pointer to reference.
         **/
         ////////////////////////////////////////////////////////////
@@ -106,7 +128,7 @@ namespace APro
          *  @param pointer_to_init : Poionter to reference.
          *  @param p_collector : Pointer to a custom collector. if a null
          *  PointerCollector is passed in argument, the global PointerCollector
-         *  object is used.
+         *  object is used. (i.e. PointerCollector::Get())
          *  @param owning : @see ::is_owned property.
          *  @param _owner : if a null owner is passed in argument,
          *  the 'this' pointer is used. @see ::owner property.
@@ -136,7 +158,6 @@ namespace APro
             init_pointer();
         }
         
-#ifdef APRO_CPP11
         ////////////////////////////////////////////////////////////
         /** @brief Constructor by move.
          *  @param auto_pointer : Pointer to move.
@@ -155,7 +176,6 @@ namespace APro
             autopointer.is_owned         = false;
             autopointer.owner            = nullptr;
         }
-#endif
 
         ////////////////////////////////////////////////////////////
         /** @brief Constructor by copy.
@@ -234,6 +254,10 @@ namespace APro
          *
          *  Use it to perform custom destruction as virtual destroy
          *  function object (as in AbstractObject).
+         *
+         *  @note 
+         *  The overload use of this function is deprecated, because
+         *  AProDelete already use destructor system on Objects.
          *
          *  @note Never forget to call ::deallocate_pointer at the end
          *  of this function.
@@ -486,17 +510,16 @@ namespace APro
             return !(*this == other);
         }
 
-/* This operator is disabled, as seen in Swappable, operator = (AutoPointer<T> ) is
-   more efficient than operator = (const AutoPointer<T>&) (copy-and-swap or move-and-swap).
         AutoPointer& operator = (const AutoPointer<T>& other)
         {
             set(other.pointer);
             return *this;
         }
-*/
         
         void swap (AutoPointer<T>& autopointer)
         {
+            // We don't need 'using std::swap' because std::swap is always okay
+            // for swapping pointers.
             std::swap(pointer,          autopointer.pointer);
             std::swap(custom_collector, autopointer.custom_collector);
             std::swap(is_owned,         autopointer.is_owned);
