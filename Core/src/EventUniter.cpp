@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/12/2013
+ *  @date 02/12/2013 - 28/12/2014
  *
+ *  @brief
  *  Implements the EventUniter object.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
 /////////////////////////////////////////////////////////////
@@ -27,18 +45,19 @@ namespace APro
     EventUniter::~EventUniter()
     {
         terminate();
-        events.clear();
+        commands.clear();
     }
 
-    void EventUniter::push(EventPtr& e, EventListenerPtr& l)
+    void EventUniter::push(SendCommand& command)
     {
         APRO_THREADSAFE_AUTOLOCK
-
-        EventEntry _entry;
-        _entry.event    = e;
-        _entry.listener = l;
-
-        events.push(_entry);
+        commands.push(command);
+        
+        if(isidling) 
+		{
+			isidling = false;
+			idlecondition.signal();
+		}
     }
 
     void EventUniter::exec()
@@ -48,28 +67,43 @@ namespace APro
         // destructor of this class.
         while(1)
         {
-            EventEntry _entry;
+            SendCommand command;
             {
-                APRO_THREADSAFE_AUTOLOCK
-                _entry = events.get();
-                events.pop();
+            	APRO_THREADSAFE_AUTOLOCK
+            	
+				if(commands.isEmpty())
+				{
+					// If queue is empty, we wait for push() function to signal us
+					// that it is not anymore.
+					isidling = true;
+					idlecondition.wait(&getMutex());
+				}
+                
+                command = commands.get();
+                commands.pop();
             }
 
-            if(_entry.event.isNull() || ! _entry.event->isValid())
+            if(command.eventptr == nullptr || ! command.eventptr->isValid())
             {
                 aprodebug("Incorrect event given.");
                 continue;
             }
 
-            if(_entry.event->must_stop)
+            if(command.eventptr->mustStop())
             {
                 aprodebug("Event has stop flag setted.");
                 continue;
             }
 
-            if(!_entry.listener.isNull())
+            if(!command.listeners.isEmpty())
             {
-                _entry.listener->receive(_entry.event);
+                for(uint32_t i = 0; i < command.listeners.size(); ++i) {
+					EventListenerPtr& listener = command.listeners.at(i);
+					listener->receive( (EventRef) *(command.eventptr));
+					if(command.eventptr->mustStop()) {
+						break;
+					}
+                }
             }
         }
     }

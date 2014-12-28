@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/12/2013
+ *  @date 02/12/2013 - 28/12/2014
  *
+ *  @brief
  *  Defines the EventUniter object.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
 /////////////////////////////////////////////////////////////
@@ -51,15 +69,16 @@ namespace APro
         APRO_DECLARE_MANUALSINGLETON(EventUniter)
 
     private:
-
-        typedef struct EventEntry
+        
+        typedef Array<EventListenerPtr> ListenersArray;
+        typedef struct _SendCommand
         {
-            EventPtr         event;
-            EventListenerPtr listener;
-            bool operator == (const EventEntry& other) const {return event == other.event && listener == other.listener;}
-            bool operator != (const EventEntry& other) const {return !(*this == other); }
-        } EventEntry;
-        Queue<EventEntry> events;///< Events in the loop.
+        	EventCopy* 		eventptr;  ///< @brief A COPY of the Event to send, made generally by the EventEmitter.
+        	ListenersArray 	listeners; ///< @brief An Array of listeners, to which to send the Event to.
+        } SendCommand;
+        Queue<SendCommand> commands; ///< @brief Commands the Uniter have to send, in order.
+        ThreadCondition    idlecondition; ///< @brief Thread Condition for idling purpose.
+        bool               isidling: ///< @brief True if idling.
 
     public:
 
@@ -81,12 +100,17 @@ namespace APro
     public:
 
         /////////////////////////////////////////////////////////////
-        /** @brief Push an event in the Queue.
-         *
-         *  It will be sended to given listener.
+        /** @brief Push a Command in the Queue.
         **/
         /////////////////////////////////////////////////////////////
-        void push(EventPtr& e, EventListenerPtr& l);
+        void push(SendCommand& command);
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if this Uniter is waiting for an Event
+         *  to send.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool isIdling() const { return isidling; }
 
     protected:
 

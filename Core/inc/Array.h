@@ -4,7 +4,7 @@
  *  @brief Defines the Array class.
  *
  *  @author Luk2010
- *  @date 29/05/2012 - 26/12/2014
+ *  @date 29/05/2012 - 28/12/2014
  *
  *  @copyright
  *  Atlanti's Project Engine
@@ -857,6 +857,54 @@ namespace APro
                     it++;
 
             return it_e;
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if this array contains given object
+         *  caracteristic, according to the given compareason function.
+         *
+         *  @param rhs : The object to compare with.
+         *  @param cmp : A function to use to compare objects in this array 
+		 *  with the given object.
+		 *
+		 *  @note
+		 *  This is equivalent to a Batch Compareason.
+		 *
+		 *  @return The iterator where the found object is, end() otherwise.
+        **/
+        ////////////////////////////////////////////////////////////
+        template <typename T2>
+        iterator find(const T2& rhs, std::function<bool(const T&, const T2)> cmp)
+        {
+        	for(iterator it = begin(); it != end(); it++) {
+				if(cmp(*it, rhs)) {
+					return it;
+				}
+        	}
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns true if this array contains given object
+         *  caracteristic, according to the given compareason function.
+         *
+         *  @param rhs : The object to compare with.
+         *  @param cmp : A function to use to compare objects in this array 
+		 *  with the given object.
+		 *
+		 *  @note
+		 *  This is equivalent to a Batch Compareason.
+		 *
+		 *  @return The iterator where the found object is, end() otherwise.
+        **/
+        ////////////////////////////////////////////////////////////
+        template <typename T2>
+        const_iterator find(const T2& rhs, std::function<bool(const T&, const T2)> cmp) const
+        {
+        	for(const_iterator it = begin(); it != end(); it++) {
+				if(cmp(*it, rhs)) {
+					return it;
+				}
+        	}
         }
 
         ////////////////////////////////////////////////////////////

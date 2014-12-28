@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013
+ *  @date 06/04/2013 - 28/12/2014
  *
+ *  @brief 
  *  Implements the Condition class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -115,7 +133,24 @@ namespace APro
             return pthread_wait_error(ret);
         }
 #else
-        /* If pthread is not enaled, we always return WE_OK and the condition is not waited. This
+        /* If pthread is not enabled, we always return WE_OK and the condition is not waited. This
+        can be confusing in a non-threaded application using threads, but anyway in a non-threaded
+        application you shouldn't use threads class. This is only for the core engine. */
+        return WE_OK;
+#endif
+    }
+    
+    WaitError ThreadCondition::wait(ThreadMutexI* mutexptr)
+    {
+#ifdef _COMPILE_WITH_PTHREAD_
+        if(mutexptr == nullptr)
+            return WE_EINVALUE;
+
+		int ret = pthread_cond_wait(GET_CONDITIONPTR(), (pthread_mutex_t*) mutexptr->m_mutex);
+		return pthread_wait_error(ret);
+
+#else
+        /* If pthread is not enabled, we always return WE_OK and the condition is not waited. This
         can be confusing in a non-threaded application using threads, but anyway in a non-threaded
         application you shouldn't use threads class. This is only for the core engine. */
         return WE_OK;

@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012 - 27/12/2014
+ *  @date 11/09/2012 - 28/12/2014
  *
  *  @brief
  *  Implements the EventEmitter class.
@@ -49,7 +49,7 @@ namespace APro
 
     EventEmitter::~EventEmitter()
     {
-
+	
     }
 
     bool EventEmitter::sendEvent(EventLocalPtr e)
@@ -377,6 +377,17 @@ namespace APro
             {
                 int index = listeners.find(_listener);
                 listeners.erase(listeners.begin()+(size_t)index);
+                
+                // We must find listener in every processed event.
+                for(ListenersByType::iterator it = listenersbytype.begin(); it != listenersbytype.end(); it++) {
+					ListenersList::iterator found = it.value().find<String>(name, [] (const EventListenerPtr& l, const String& n) {
+																				return l->getName() == n;
+																		    });
+					if(found != it.value().end()) {
+						it.value().erase(found);
+					}
+                }
+                 
                 return index;
             }
         }
@@ -396,6 +407,17 @@ namespace APro
         {
             int index = listeners.find(_listener);
             listeners.erase(listeners.begin()+(size_t)index);
+            
+            // We must find listener in every processed event.
+			for(ListenersByType::iterator it = listenersbytype.begin(); it != listenersbytype.end(); it++) {
+				ListenersList::iterator found = it.value().find<Id>(id, [] (const EventListenerPtr& l, const Id& n) {
+																				return l->getId() == n;
+																		    });
+				if(found != it.value().end()) {
+					it.value().erase(found);
+				}
+			}
+            
             return index;
         }
 

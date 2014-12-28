@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/07/2013 - 19/11/2013
+ *  @date 03/07/2013 - 28/12/2014
  *
  *  Defines a queue.
  *
@@ -148,6 +148,15 @@ namespace APro
         unsigned int size() const
         {
             return m_queue.size();
+        }
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Return True if empty.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool isEmpty() const
+        {
+        	return m_queue.isEmpty();
         }
 
     public:
