@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 19/09/2012 - 17/12/2014
+ *  @date 19/09/2012 - 26/12/2014
  *
  *  @brief
  *  Defines the Context class.
@@ -95,7 +95,7 @@ namespace APro
     protected:
 
         Window*            m_window;       ///< Associated Window.
-        RenderingAPI*      m_renderingapi; ///< RenderingAPI wich constructe the Context object.
+        RenderingAPI*      m_renderingapi; ///< RenderingAPI wich constructs the Context object.
         bool               m_loaded;       ///< true if Context object is ready to be binded.
         bool               m_binded;       ///< true if binded.
         Array<ViewPortPtr> m_viewports;    ///< Viewports holded by this Context object.

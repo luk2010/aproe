@@ -5,17 +5,35 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012
+ *  @date 11/09/2012 - 27/12/2014
  *
+ *  @brief
  *  Implements the Event class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
 /////////////////////////////////////////////////////////////
-#include <Event.h>
-#include <Main.h>// For the id generator.
+#include "Event.h"
+#include "IdGenerator.h"
 
-#include <EventEmitter.h>
-#include <EventListener.h>
+#include "EventEmitter.h"
+#include "EventListener.h"
 
 namespace APro
 {
@@ -25,7 +43,7 @@ namespace APro
     Event::Event()
     {
         m_type      = 0;
-        m_id        = Main::Get().getIdGenerator().pick();
+        m_id        = IdGenerator::Get().pick();
         m_target    = nullptr;
         m_emitter   = nullptr;
         must_stop   = false;
@@ -74,6 +92,17 @@ namespace APro
     void Event::mustStop()
     {
         must_stop = true;
+    }
+    
+    Prototype* Event::clone() const
+    {
+    	Event* e = AProNew(Event);
+    	e->m_emitter = m_emitter;
+    	e->m_id      = m_id;
+    	e->m_target  = m_target;
+    	e->m_type    = m_type;
+    	e->must_stop = must_stop;
+    	return (Prototype*) e;
     }
 
 }

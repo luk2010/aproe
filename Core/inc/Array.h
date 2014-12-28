@@ -4,7 +4,7 @@
  *  @brief Defines the Array class.
  *
  *  @author Luk2010
- *  @date 29/05/2012 - 11/12/2014
+ *  @date 29/05/2012 - 26/12/2014
  *
  *  @copyright
  *  Atlanti's Project Engine
@@ -72,6 +72,7 @@ namespace APro
      *  }
      *
      *  {
+     *		typedef AutoPointer<ByteArray> ByteArrayPtr;
      *      ByteArrayPtr myarrayglblptr = ByteArray::New({Byte(0),Byte(1),Byte(2)});
      *      // The AutoPointer class release correctly the pointer, calling
      *      // ByteArray::Delete () function.
@@ -692,11 +693,11 @@ namespace APro
     public:
 
         T& at(size_t index) {
-            aproassert(index < logical_size);
+            aproassert1(index < logical_size);
             return *(begin() + index);
         }
         const T& at(size_t index) const {
-            aproassert(index < logical_size);
+            aproassert1(index < logical_size);
             return *(begin() + index);
         }
 

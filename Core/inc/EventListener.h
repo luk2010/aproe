@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012, 02/11/2013
+ *  @date 11/09/2012 - 27/12/2014
  *
+ *  @brief
  *  Defines the EventListener class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 /////////////////////////////////////////////////////////////
@@ -37,18 +55,33 @@ namespace APro
      *  we hope you will have good use of it.
      *
      *  The listener have a unique identifiable id.
+     *
+     *  ### Process of handling an event by the Listener.
+     * 
+     *  - 1. Event is null ?
+     *  - 2. Event is allowed ?
+     *  - 3. Listener call the handle() method.
+     *  - 4. Listener calls every callbacks <b>in the order they
+     *  were registered<\b>.
+     *  - 5. Returns true, that indicates event has been handled
+     *  correctly by the Listener.
     **/
     /////////////////////////////////////////////////////////////
-    class APRO_DLL EventListener
+    class APRO_DLL EventListener : public BaseObject <EventListener>
     {
-//      APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(EventListener)
-
+	protected:
+		
+		typedef std::function<void (Event&)> Callback;
+		typedef Array<Callback> Callbacks;
+		typedef Map<HashType, Callbacks> CallbacksbyType;
+		
     protected:
 
-        String      m_name;         ///< Name of the listener.
-        Id          id;             ///< Id of this listener.
-        EventPtr    last_event;     ///< Last event received by this listener.
-        HashArray   eventprocessed; ///< List of event normally processed by this listener.
+        String          m_name;         ///< @brief Name of the listener.
+        Id              id;             ///< @brief Id of this listener.
+        EventCopy*      last_event;     ///< @brief Last event received by this listener.
+        HashArray       eventprocessed; ///< @brief List of event normally processed by this listener.
+        CallbacksbyType callbacks;      ///< @brief Array of callbacks to call, filtered by event type.
 
     public:
 
@@ -60,14 +93,12 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         EventListener(const String & name = String("no_name"));
-
-        /////////////////////////////////////////////////////////////
-        /** @brief Constructor by copy.
-         *
-         *  @note A new id is generated in this function.
+        
+         /////////////////////////////////////////////////////////////
+        /** @brief Destructs the Listener.
         **/
         /////////////////////////////////////////////////////////////
-        EventListener(const EventListener& other);
+        virtual ~EventListener() {}
 
     public:
 
@@ -75,14 +106,18 @@ namespace APro
         /** @brief Receive an event, store it as last received and
          *  handle it.
          *  @param event : Event to receive.
-         *  @return true if event has been corectly used.
-         *
-         *  The event is correctly used only if the ::handle() function
-         *  return true. So the last event will be stored, but if
-         *  ::handle() return false the event won't be stored.
+         *  @return true if event has been correctly passed through the
+         *  function.
         **/
         /////////////////////////////////////////////////////////////
-        bool receive(EventPtr& event);
+        bool receive(EventRef event);
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Returns true if this Listener has ever received any
+         *  Event.
+        **/
+        /////////////////////////////////////////////////////////////
+        bool hasLastEvent() const { return last_event != nullptr; }
 
     protected:
 
@@ -98,7 +133,7 @@ namespace APro
          *  @return true if event is used, user-dependant.
         **/
         /////////////////////////////////////////////////////////////
-        virtual bool handle(EventPtr& event) { return false; }
+        virtual bool handle(EventRef event) { return true; };
 
     public:
 
@@ -112,7 +147,7 @@ namespace APro
         /** @brief Return the last event received by this listener.
         **/
         /////////////////////////////////////////////////////////////
-        const EventPtr& getLastEventReceived() const;
+        const EventRef getLastEventReceived() const;
 
         /////////////////////////////////////////////////////////////
         /** @brief Return the id of this listener.
@@ -140,7 +175,30 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         bool isEventProcessed(const HashType& event) const;
-
+        
+	public:
+		
+		/////////////////////////////////////////////////////////////
+        /** @brief Adds a callback to this listener.
+         *
+         *  @warning
+         *  The given callback can be removed only using the ::clearCallbacks()
+         *  method, which removes every other callbacks.
+        **/
+        /////////////////////////////////////////////////////////////
+		void addCallback(const HashType& event, Callback func);
+		
+		/////////////////////////////////////////////////////////////
+        /** @brief Removes every callbacks for a given event.
+        **/
+        /////////////////////////////////////////////////////////////
+		void clearCallbacks(const HashType& event);
+		
+		/////////////////////////////////////////////////////////////
+        /** @brief Removes every callbacks.
+        **/
+        /////////////////////////////////////////////////////////////
+		void clearAllCallbacks();
     };
 
     typedef AutoPointer<EventListener> EventListenerPtr;///< AutoPointer of EventListener. No custom destruction needed, so simple typedef used.

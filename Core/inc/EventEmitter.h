@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012 - 06/02/2014
+ *  @date 11/09/2012 - 27/12/2014
  *
+ *  @brief
  *  Defines the EventEmitter class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 /////////////////////////////////////////////////////////////
@@ -74,6 +92,7 @@ namespace APro
 
         typedef Map<HashType, String>  EventsList;   ///< List of events type, with documentation.
         typedef List<EventListenerPtr> ListenersList;///< List of listeners pointer.
+        typedef Map<HashType, ListenersList> ListenersByType; ///< @brief If an Event Type have been specified for a Listener, store it here.
 
         enum EmitPolicy
         {
@@ -83,6 +102,7 @@ namespace APro
         };
 
         ListenersList   listeners;///< List of AutoPointer to listeners.
+        ListenersByType listenersbytype; ///< @brief Map of Listeners by Type (General Listeners in the 0 type.)
         EventsList      events;   ///< List of events type with documentation, handled correctly by this emitter.
         EmitPolicy      epolicy;  ///< Current EmitPolicy. By default, it is EP_MANUAL.
 
@@ -120,7 +140,7 @@ namespace APro
          *  @return True if event has been handled at least one time.
         **/
         /////////////////////////////////////////////////////////////
-        bool sendEvent(EventPtr e);
+        bool sendEvent(EventLocalPtr e);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
@@ -133,7 +153,7 @@ namespace APro
          *  @return True if event has been handled.
         **/
         /////////////////////////////////////////////////////////////
-        bool sendEvent(EventPtr e, EventListenerPtr& listener);
+        bool sendEvent(EventLocalPtr e, EventListenerPtr& listener);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
@@ -145,7 +165,7 @@ namespace APro
          *  @return True if event has been handled.
         **/
         /////////////////////////////////////////////////////////////
-        bool sendEvent(EventPtr e, const String& name);
+        bool sendEvent(EventLocalPtr e, const String& name);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Synchronous Event System.
@@ -157,7 +177,7 @@ namespace APro
          *  @return True if event has been handled.
         **/
         /////////////////////////////////////////////////////////////
-        bool sendEvent(EventPtr e, const Id& listener);
+        bool sendEvent(EventLocalPtr e, const Id& listener);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
@@ -172,7 +192,7 @@ namespace APro
          *  null, the global Event Uniter is used.
         **/
         /////////////////////////////////////////////////////////////
-        void sendASynchronousEvent(EventPtr e, EventUniter* event_uniter = nullptr);
+        void sendASynchronousEvent(EventLocalPtr e, EventUniter* event_uniter = nullptr);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
@@ -187,7 +207,7 @@ namespace APro
          *  null, the global Event Uniter is used.
         **/
         /////////////////////////////////////////////////////////////
-        void sendAsynchronousEvent(EventPtr e, EventListenerPtr& listener, EventUniter* event_uniter = nullptr);
+        void sendAsynchronousEvent(EventLocalPtr e, EventListenerPtr& listener, EventUniter* event_uniter = nullptr);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
@@ -202,7 +222,7 @@ namespace APro
          *  null, the global Event Uniter is used.
         **/
         /////////////////////////////////////////////////////////////
-        void sendAsynchronousEvent(EventPtr e, const String& name, EventUniter* event_uniter = nullptr);
+        void sendAsynchronousEvent(EventLocalPtr e, const String& name, EventUniter* event_uniter = nullptr);
 
         /////////////////////////////////////////////////////////////
         /** @brief Send an event using the Asynchronous Event System.
@@ -217,7 +237,7 @@ namespace APro
          *  null, the global Event Uniter is used.
         **/
         /////////////////////////////////////////////////////////////
-        void sendAsynchronousEvent(EventPtr e, const Id& listener, EventUniter* event_uniter = nullptr);
+        void sendAsynchronousEvent(EventLocalPtr e, const Id& listener, EventUniter* event_uniter = nullptr);
 
 
     protected:
@@ -270,6 +290,16 @@ namespace APro
         bool isEventHandled(const HashType& event) const;
 
     public:
+    	
+    	/////////////////////////////////////////////////////////////
+        /** @brief Register a new listener to this emitter.
+         *
+         *  @param nlistener : Listener to register aand create. If the 
+         *  listener name is already present, -1 is returned.
+         *  @return The Pointer to the created Listener.
+        **/
+        /////////////////////////////////////////////////////////////
+        EventListenerPtr registerListener(const String& nlistener);
 
         /////////////////////////////////////////////////////////////
         /** @brief Register a new listener to this emitter.
@@ -282,6 +312,34 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         int registerListener(const EventListenerPtr& listener);
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Register a new listener to this emitter, preparing it
+         *  for specific event sending.
+         *
+         *  @param nlistener : Listener to register. If the listener
+         *  name is already present, -1 is returned.
+         *  @param elist : The given Listener will receive, from this emitter,
+         *  only the Events Types given in the list.
+         *
+         *  @return The Pointer to the created Listener.
+        **/
+        /////////////////////////////////////////////////////////////
+        EventListenerPtr registerListener(const String& nlistener, std::initializer_list<HashType> elist);
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Register a new listener to this emitter, preparing it
+         *  for specific event sending.
+         *
+         *  @param listener : Listener to register. If the listener
+         *  name is already present, -1 is returned.
+         *  @param elist : The given Listener will receive, from this emitter,
+         *  only the Events Types given in the list.
+         *
+         *  @return The index in the internal list.
+        **/
+        /////////////////////////////////////////////////////////////
+        int registerListener(const EventListenerPtr& listener, std::initializer_list<HashType> elist);
 
         /////////////////////////////////////////////////////////////
         /** @brief Unregister listener.
@@ -350,7 +408,7 @@ namespace APro
          *  are handled.
         **/
         /////////////////////////////////////////////////////////////
-        virtual EventPtr createEvent(const HashType& e_type) const;
+        virtual EventLocalPtr createEvent(const HashType& e_type) const;
 
     public:
 

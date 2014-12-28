@@ -1,16 +1,34 @@
+////////////////////////////////////////////////////////////
 /** @file String.cpp
+ *  @ingroup Global
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 30/11/2014
+ *  @date 25/06/2012 - 26/12/2014
  *
- *  @addtogroup Global
- *  @addtogroup Memory
- *
+ *  @brief
  *  This file defines the String class.
  *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
 **/
+////////////////////////////////////////////////////////////
 #include "ThreadMutex.h"
 #include "SString.h"
 
@@ -41,18 +59,16 @@ namespace APro
         assertFinal();
     }
 
-    String::String(const Number& nb)
+    String::String(const Real& nb)
     {
         mstr.append('\0');
         append(nb);
     }
     
-#ifdef APRO_CPP11
     String::String(String&& rhs)
     {
         mstr.swap(rhs.mstr);
     }
-#endif
 
     String::~String()
     {
@@ -67,8 +83,6 @@ namespace APro
 
     void String::append(char c)
     {
-
-
         mstr.insert(mstr.lastIndex(), c);
 
         assertFinal();
@@ -99,11 +113,9 @@ namespace APro
         assertFinal();
     }
 
-    void String::append(const Number& nb)
+    void String::append(const Real& nb)
     {
-
-
-        append(String::fromDouble(nb.toReal()));
+        append(String::toString(nb));
     }
 
     void String::prepend(char c)
@@ -116,8 +128,6 @@ namespace APro
 
     void String::prepend(const String& c)
     {
-
-
         for(int i = ((int) c.size()) - 1; i >= 0; i--)
             prepend(c.at(i));
         assertFinal();
@@ -125,8 +135,6 @@ namespace APro
 
     void String::prepend(const char* c)
     {
-
-
         size_t sz = strlen(c);
         if(sz > 0)
         {
@@ -136,11 +144,9 @@ namespace APro
         assertFinal();
     }
 
-    void String::prepend(const Number& nb)
+    void String::prepend(const Real& nb)
     {
-
-
-        prepend(String::fromDouble(nb.toReal()));
+        prepend(String::toString(nb));
     }
 
     void String::insert(size_t before, char c, size_t it)
@@ -195,7 +201,7 @@ namespace APro
 
         if(last >= size()) last = size() - 1;
 
-        mstr.erase(first, last);
+        mstr.erase(begin() + first, begin() + last);
         assertFinal();
     }
 
@@ -391,16 +397,14 @@ namespace APro
         return *this;
     }
 
-    String& String::operator<<(const Number& nb)
+    String& String::operator<<(const Real& nb)
     {
-
-        append(String::fromDouble(nb.toReal()));
+        append(String::fromDouble(nb));
         return *this;
     }
 
     void String::assertFinal()
     {
-
         if(mstr.at(size()) != '\0')
             mstr.append('\0');
     }
@@ -584,7 +588,7 @@ namespace APro
         return ret;
     }
 
-    String String::operator+(const Number& nb) const
+    String String::operator+(const Real& nb) const
     {
 
         String ret(*this);

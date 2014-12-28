@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 30/11/2014
+ *  @date 25/06/2012 - 26/12/2014
  *
+ *  @brief
  *  Defines the String class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -20,8 +38,6 @@
 
 namespace APro
 {
-    class Number;
-
     ////////////////////////////////////////////////////////////
     /** @class String
      *  @ingroup Global
@@ -61,12 +77,6 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         String(const String& str);
-
-        ////////////////////////////////////////////////////////////
-        /** Constructor from a Number.
-        **/
-        ////////////////////////////////////////////////////////////
-        String(const Number& nb);
         
         ////////////////////////////////////////////////////////////
         /** @brief Move Constructor.
@@ -83,22 +93,63 @@ namespace APro
         void swap (String& rhs);
 
         ~String();
-
+        
+	public:
+        
+        ////////////////////////////////////////////////////////////
+        /** @{
+         *  @brief Appends the given char, string or real to this 
+         *  String.
+         *  @see Array::append(), Array::reserve(), Array::push_back(),
+         *  Array::prepend()
+        **/
+        ////////////////////////////////////////////////////////////
         void append(char c);
         void append(const char* c);
         void append(const String& c);
-        void append(const Number& nb);
+        void append(const Real& rhs);
+        /** @} */
 
+        ////////////////////////////////////////////////////////////
+        /** @{
+         *  @brief Prepends the given char, string or real to this 
+         *  String.
+         *  @see Array::append(), Array::reserve(), Array::push_front(),
+         *  Array::prepend()
+        **/
+        ////////////////////////////////////////////////////////////
         void prepend(char c);
         void prepend(const char* c);
         void prepend(const String& c);
-        void prepend(const Number& nb);
+        void prepend(const Real& rhs);
+        /** @} */
 
+        ////////////////////////////////////////////////////////////
+        /** @{
+         *  @brief Insert the given char, string or real to this 
+         *  String.
+         *  @see Array::insert(), Array::reserve()
+        **/
+        ////////////////////////////////////////////////////////////
         void insert(size_t before, char c, size_t it = 1);
         void insert(size_t before, const char* c, size_t it = 1);
         void insert(size_t before, const String& c, size_t it = 1);
+        void insert(size_t before, const Real& rhs, size_t it = 1);
+        /** @} */
+        
+	public:
 
+		////////////////////////////////////////////////////////////
+        /** @brief Erases given indexes in the String. ( [first, last[ )
+        **/
+        ////////////////////////////////////////////////////////////
         void erase(size_t first, size_t last = 0);
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Clears the String.
+        **/
+        ////////////////////////////////////////////////////////////
+        void clear();
 
         size_t findFirst(char c, size_t from = 0) const;
         size_t findFirst(const String& str, size_t from = 0) const;
@@ -127,8 +178,6 @@ namespace APro
 
         const char* toCstChar() const;
 
-        void clear();
-
         char& at(size_t index);
         const char& at(size_t index) const;
 
@@ -144,7 +193,7 @@ namespace APro
         String& operator << (char c);
         String& operator << (const String & str);
         String& operator << (const char* str);
-        String& operator << (const Number& nb);
+        String& operator << (Real nb);
 
         static String toString(unsigned int num);
         static String toString(int num);
@@ -168,7 +217,7 @@ namespace APro
 
         String operator + (const char* other) const;
         String operator + (const String& other) const;
-        String operator + (const Number& nb) const;
+        String operator + (const Real& nb) const;
 
         static String toUpper(const String& other);
         static String toLower(const String& other);

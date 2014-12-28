@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 05/12/2014
+ *  @date 21/05/2012 - 26/12/2014
  *
  *  Redefines basic memory function, like malloc, realloc, free. It is usefull when the engine
  *  use the Memory Tracker.
@@ -72,6 +72,8 @@ namespace APro
      *  will be an array.
      *
      *  @return A pointer to allocated bytes.
+     *  @throw NotEnoughMemoryException if memory could not be 
+     *  allocated.
      *
      *  @note 
      *  This function always initialize memory space to
@@ -142,7 +144,8 @@ namespace APro
 #define APRO_MEM_REAL (ptr)         (((char*)ptr) - sizeof(APro::MemoryHeader))
 /// @brief Convert Real -> Virtual
 #define APRO_MEM_VIRTUAL (ptr)      (((char*)ptr) + sizeof(APro::MemoryHeader))
-    
+
+#define APRO_CONSTMEM_HEAD(ptr)     (const MemoryHeader*) ((const void*)ptr)
 #define APRO_CONSTMEM_REAL (ptr)    (((const char*)ptr) - sizeof(APro::MemoryHeader))
 #define APRO_CONSTMEM_VIRTUAL (ptr) (((const char*)ptr) + sizeof(APro::MemoryHeader))
     ////////////////////////////////////////////////////////////

@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012 - 02/05/2014
+ *  @date 11/09/2012 - 27/12/2014
  *
+ *  @brief
  *  Defines the Event class and the main Events documentation.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 /////////////////////////////////////////////////////////////
@@ -43,6 +61,22 @@ namespace APro
      *
      *  A listener is an object that have the possibility to handle
      *  a given event. @note The listener never destroy the event.
+     *
+     *  Every emitter can create and register basic Listener, which 
+     *  you can add callbacks. TThis is the "simple" method.
+     *  @code
+     *  EventListenerPtr myListener = myemitter->registerListener("MyListener", MyCustomEvent::Hash);
+     *  myListener->addCallback(MyCustomEvent::Hash, [] (Event& e) { 
+	 *  Console::get() << "\nHello !"; 
+	 *  });
+	 *  @endcode
+	 *
+	 *  You can also subclass the Listener to make your own handle() 
+	 *  function. You then register it :
+	 *  @code
+	 *  CustomListenerPtr mylistener = CustomListener::New();
+	 *  myemitter->registerListener(mylistener, MyCustomEvent::Hash);
+	 *  @endcode
      *
      *  ### The emitter
      *
@@ -127,19 +161,18 @@ namespace APro
      *  @note The event id is given by the global IdGenerator.
     **/
     /////////////////////////////////////////////////////////////
-    class APRO_DLL Event : public NonCopyable
+    class APRO_DLL Event : public Prototype
     {
-//        APRO_DECLARE_SHAREDPOINTER_CLASS_TYPEDEF(Event)
 
     public:
 
-        const EventEmitter*  m_emitter;///< Emitter of this event. Might be null but should not.
-        EventListener*       m_target; ///< Target of this event. Might be null.
-        bool                 must_stop; ///< Boolean to be set to true if listener does not want the event to continue his propagation.
+		EventEmitter*  m_emitter;///< Emitter of this event. Might be null but should not.
+        EventListener* m_target; ///< Target of this event. Might be null.
+        bool           must_stop;///< Boolean to be set to true if listener does not want the event to continue his propagation.
 
     protected:
-        HashType       m_type;    ///< Hash of event type. If 0, event is invalid.
-        unsigned long  m_id;      ///< Id of the event.
+        HashType       m_type;   ///< Hash of event type. If 0, event is invalid.
+        unsigned long  m_id;     ///< Id of the event.
 
 
     public:
@@ -247,10 +280,76 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         void mustStop();
-
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Clone this object.
+         *  @note This function should be used only by a factory.
+         *
+         *  @return A new instance of this object.
+        **/
+        /////////////////////////////////////////////////////////////
+        virtual Prototype* clone() const;
+        
+	public:
+		
+		/////////////////////////////////////////////////////////////
+        /** @brief Returns the event with another type.
+         * 
+         *  Use this function depending on the ::type() return, you should
+         *  test this value with your handled types to be sure Event is
+         *  of correct type.
+        **/
+        /////////////////////////////////////////////////////////////
+		template<typename T>
+		T& to() { return *(dynamic_cast<T*>(this)); }
+		
+		/////////////////////////////////////////////////////////////
+        /** @brief Returns the event with another type.
+         * 
+         *  Use this function depending on the ::type() return, you should
+         *  test this value with your handled types to be sure Event is
+         *  of correct type.
+        **/
+        /////////////////////////////////////////////////////////////
+		template<typename T>
+		const T& to() const { return *(dynamic_cast<const T*>(this)); }
     };
 
-    typedef AutoPointer<Event> EventPtr;///< An AutoPointer to Events.
+    typedef Event* EventRawPtr; ///< @brief A normal pointer to an Event.
+    typedef AutoPointer<Event> EventPtr;///< @brief An AutoPointer to Events.
+    typedef Event& EventRef; ///< @brief A reference to an event. Prefers this type instead of EventPtr.
+    typedef Event  EventCopy; ///< @brief An explicit copy of an Event.
+    
+    class EventLocalPtr
+    {
+    	Event* ptr;
+    	
+	public:
+
+    	EventLocalPtr() : ptr (nullptr) {}
+    	
+    	EventLocalPtr(const EventLocalPtr& rhs) : ptr (nullptr) { 
+    		if(rhs.ptr)
+				ptr = dynamic_cast<Event*>(rhs.ptr->clone()); 
+		}
+		
+    	EventLocalPtr(EventLocalPtr&& rhs) : ptr (rhs.ptr) { 
+    		rhs.ptr = nullptr; 
+		}
+    	
+    	~EventLocalPtr() { 
+    		if(ptr) 
+				AProDelete(ptr); 
+    	}
+    	
+    	Event& operator* () { return *ptr; }
+    	const Event& operator* () const { return *ptr; }
+    	
+    	Event& operator-> () { return *ptr; }
+    	const Event& operator-> () const { return *ptr; }
+    	
+    	bool operator == (Event* rhs) { return ptr == rhs; }
+    };
 
 /// @brief Declares a new event type with his hash.
 /// @ingroup Events
@@ -268,6 +367,19 @@ class APRO_DLL name : public Event \
 /// You must use this function in a header file. See
 /// APRO_REGISTER_EVENT_CONTENT for registering the event
 /// in a source file.
+///
+/// When creating an event with specific content, you should
+/// overload the ::clone() method to clone your content 
+/// to newly created event.
+///
+/// @code
+/// Prototype* MyEvent::clone() const
+/// { 
+///    MyEvent* e = dynamic_cast<MyEvent*>(Event::clone());
+///    [ Clone your data... ]
+///    return (Prototype*) e;
+/// }
+/// @endcode
 ///
 /// @param name : Name of the event to declare.
 #define APRO_DECLARE_EVENT_CONTENT(name) \

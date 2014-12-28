@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 18/04/2014
+ *  @date 20/09/2012 - 26/12/2014
  *
+ *  @brief
  *  Implements the Main class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -17,6 +35,50 @@
 #include "DynamicLibraryLoader.h"
 #include "NullLoader.h"
 #include "EventUniter.h"
+
+// ==============================================================
+// Some useful defines
+
+#define FACTORY_CREATE(class,name) 						    \
+	name = AProNew (class); 								\
+	if(name) 												\
+	{ 													 	\
+		class::__current_##class = name;					\
+		getConsole() << "\n[Main] class OK."                \
+	}														\
+	else													\
+	{														\
+		getConsole() << "\n[Main] Can't create class !";    \
+		clear(); aprothrow(MainException);                  \
+	}
+	
+#define FACTORY_CLEAN(class,name)							\
+	if(name)												\
+	{														\
+		AProDelete(name);									\
+		name = nullptr;										\
+		class::__current_##class = nullptr;                 \
+		getConsole() << "\n[Main] class cleaned.";          \
+	}
+
+#define SINGLETON_CLEAN(class,name) 						\
+	FACTORY_CLEAN(class,name)
+#define SINGLETON_CREATE(class,name)						\
+	FACTORY_CREATE(class,name)
+	
+#define GENERIC_CHECK(class,name)                           \
+	if(name) 												\
+	{ 													 	\
+		class::__current_##class = name;					\
+		getConsole() << "\n[Main] class OK."                \
+	}														\
+	else													\
+	{														\
+		getConsole() << "\n[Main] Can't create class !";    \
+		clear(); aprothrow(MainException);                  \
+	}
+
+// ==============================================================
 
 namespace APro
 {
@@ -31,23 +93,24 @@ namespace APro
 
     Main::Main()
     {
-        resourceManager = nullptr;
-        impFactory = nullptr;
-        pluginManager = nullptr;
-        mathManager = nullptr;
-        windowManager = nullptr;
-        tmanager = nullptr;
+        resourceManager 		= nullptr;
+        impFactory				= nullptr;
+        pluginManager 			= nullptr;
+        mathManager 			= nullptr;
+        windowManager 			= nullptr;
+        tmanager			 	= nullptr;
         sharedpointer_collector = nullptr;
         abstract_object_factory = nullptr;
-        id_generator = nullptr;
+        id_generator 			= nullptr;
+        rendererfactory 		= nullptr;
     }
 
-    Main& Main::init(int argc, const char* argv[])
+    Main& Main::init(int argc, const char** argv)
     {
         getConsole() << "\n[Main] Initializing Main...";
 
         getConsole() << "\n[Main] Platform : ";
-        getConsole() << "\n - OS = " << Platform::ToString(Platform::Get());
+        getConsole() << "\n - OS        = " << Platform::ToString(Platform::Get());
         getConsole() << "\n - DebugMode = " << String::toString(Platform::IsDebugMode());
 
         String workingdir(FileSystem::GetCurrentWorkingDirectory());
@@ -66,143 +129,46 @@ namespace APro
                 getConsole() << "FAILED";
         }
 
-        setOption((int) GlobalOption::Debugging_Implementation, false);
+/* Main Options are now obsolete.
+        setOption((int) GlobalOption::Debugging_Implementation, Platform::IsDebugMode());
         getConsole() << "\n[Main] Current configuration is : "
                      << "\n - Debugging Implementation = " << (hasOption((int) GlobalOption::Debugging_Implementation) ? "True" : "False");
+*/
 
         // -- Core ---------------------------------------------------------------------
 
-        id_generator = AProNew(IdGenerator);
-        if(id_generator)
-        {
-            IdGenerator::__current_IdGenerator = id_generator;
-            getConsole() << "\n[Main] Global ID Generator OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Global ID Generator ! Aborting...";
-            clear();
-            aprothrow(MainException);
-        }
+        SINGLETON_CREATE(IdGenerator, id_generator)
 
         sharedpointer_collector = AProNew(PointerCollector, String("Global"));
-        if(sharedpointer_collector)
-        {
-            PointerCollector::__current_PointerCollector = sharedpointer_collector;
-            getConsole() << "\n[Main] Global Pointer Collector OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Global Pointer Collector ! Aborting...";
-            clear();
-            aprothrow(MainException);
-        }
+        GENERIC_CHECK(PointerCollector, sharedpointer_collector)
 
         // -- Factory ------------------------------------------------------------------
 
-        impFactory = AProNew(ImplementationFactory);
-        if(impFactory)
-        {
-            ImplementationFactory::__current_ImplementationFactory = impFactory;
-            getConsole() << "\n[Main] Implementation Factory OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Implementation Factory ! Aborting...";
-            clear();
-            aprothrow(MainException);
-        }
-
-        abstract_object_factory = AProNew(AbstractObjectFactory);
-        if(abstract_object_factory)
-        {
-            AbstractObjectFactory::__current_AbstractObjectFactory = abstract_object_factory;
-            getConsole() << "\n[Main] Object Factory OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Object Factory ! Aborting...";
-            clear();
-            aprothrow(MainException);
-        }
+        FACTORY_CREATE(ImplementationFactory, impFactory)
+        FACTORY_CREATE(AbstractObjectFactory, abstract_object_factory)
+        FACTORY_CREATE(RenderingAPIFactory,   rendererfactory)
 
         // -- Event Uniter -------------------------------------------------------------
 
         euniter = AProNew(EventUniter, String("GlobalUniter"));
-        if(euniter)
-        {
-            EventUniter::__current_EventUniter = euniter;
-            euniter->start();
-            getConsole() << "\n[Main] EventUniter OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create EventUniter ! Aborting...";
-            clear();
-            aprothrow(MainException);
-        }
+        GENERIC_CHECK(EventUniter, euniter)
+        euniter->start();
 
         // -- Manager ------------------------------------------------------------------
 
-        tmanager = AProNew(ThreadManager);
-        if(tmanager)
-        {
-            ThreadManager::__current_ThreadManager = tmanager;
-            getConsole() << "\n[Main] Thread Manager OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Thread Manager ! Aborting...";
-            clear();
-            aprothrow(MainException);
-        }
+        SINGLETON_CREATE(ThreadManager, tmanager)
+        SINGLETON_CREATE(MathManager,   mathManager)
 
-        mathManager = AProNew(MathFunctionManager);
-        if(mathManager)
-        {
-            MathFunctionManager::__current_MathFunctionManager = mathManager;
-            getConsole() << "\n[Main] Math Function Manager OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Math Function Manager ! Aborting...";
-            clear();
-            aprothrow(MainException);
-        }
+        SINGLETON_CREATE(ResourceManager, resourceManager)
+        // Default loader for libraries.
+		resourceManager->addLoader(ResourceLoaderPtr(AProNew(DynamicLibraryLoader)));
+		resourceManager->setDefaultLoader(DYNLIB_EXTENSION, "DynamicLibraryLoader");
+		// Exemple Null Loader.
+		resourceManager->addLoader(ResourceLoaderPtr(AProNew(NullLoader)));
 
-        resourceManager = AProNew(ResourceManager);
-        if(resourceManager)
-        {
-            // Default loader for libraries.
-            resourceManager->addLoader(ResourceLoaderPtr(AProNew(DynamicLibraryLoader)));
-            resourceManager->setDefaultLoader(DYNLIB_EXTENSION, "DynamicLibraryLoader");
-
-            // Exemple Null Loader.
-            resourceManager->addLoader(ResourceLoaderPtr(AProNew(NullLoader)));
-
-            ResourceManager::__current_ResourceManager = resourceManager;
-            getConsole() << "\n[Main] Resource Manager OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Resource Manager ! Aborting...";
-            clear();
-            aprothrow(MainException);
-        }
-
-        pluginManager = AProNew(PluginManager);
-        if(pluginManager)
-        {
-            PluginManager::__current_PluginManager = pluginManager;
-            getConsole() << "\n[Main] Plugin Manager OK. Loading plugins and implementations in directory \"plugins\".";
-            pluginManager->loadDirectory(String("plugins/"));
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Plugin Manager ! Aborting...";
-            clear();
-            aprothrow(MainException);
-        }
+        SINGLETON_CREATE(PluginManager, pluginManager)
+        getConsole() << "\n[Main] Loading plugins and implementations in directory \"plugins\"."
+        pluginManager->loadDirectory(String("plugins/"));
 
         windowManager = AProNew(WindowManager);
         if(windowManager)
@@ -251,122 +217,18 @@ namespace APro
         }
 
 
-        if(pluginManager)
-        {
-            AProDelete(pluginManager);
+        SINGLETON_CLEAN(PluginManager,   	 pluginManager)
+		SINGLETON_CLEAN(ResourceManager, 	 resourceManager)
+		SINGLETON_CLEAN(MathManager,     	 mathManager)
+		SINGLETON_CLEAN(ThreadManager,   	 tmanager)
+        SINGLETON_CLEAN(EventUniter,    	 euniter)
+        
+        FACTORY_CLEAN(ImplementationFactory, impFactory)
+        FACTORY_CLEAN(AbstractObjectFactory, abstract_object_factory)
+        FACTORY_CLEAN(RenderingAPIFactory,   rendererfactory)
 
-            pluginManager = nullptr;
-            PluginManager::__current_PluginManager = nullptr;
-            getConsole() << "\n[Main] Plugin Manager cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Plugin Manager because not initialized !";
-        }
-
-        if(resourceManager)
-        {
-            AProDelete(resourceManager);
-
-            resourceManager = nullptr;
-            ResourceManager::__current_ResourceManager = nullptr;
-            getConsole() << "\n[Main] Resource Manager cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Resource Manager because not initialized !";
-        }
-
-        if(mathManager)
-        {
-            AProDelete(mathManager);
-
-            mathManager = nullptr;
-            MathFunctionManager::__current_MathFunctionManager = nullptr;
-            getConsole() << "\n[Main] Math Manager cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Math Manager because not initialized !";
-        }
-
-        if(tmanager)
-        {
-            AProDelete(tmanager);
-
-            tmanager = nullptr;
-            ThreadManager::__current_ThreadManager = nullptr;
-            getConsole() << "\n[Main] Thread Manager cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Thread Manager because not initialized !";
-        }
-
-        if(euniter)
-        {
-            AProDelete(euniter);
-
-            euniter = nullptr;
-            EventUniter::__current_EventUniter = nullptr;
-            getConsole() << "\n[Main] Global Event Uniter cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Global Event Uniter because not initialized !";
-        }
-
-        if(abstract_object_factory)
-        {
-            AProDelete(abstract_object_factory);
-
-            abstract_object_factory = nullptr;
-            AbstractObjectFactory::__current_AbstractObjectFactory = nullptr;
-            getConsole() << "\n[Main] Object Factory cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Object Factory because not initialized !";
-        }
-
-        if(impFactory)
-        {
-            AProDelete(impFactory);
-
-            impFactory = nullptr;
-            ImplementationFactory::__current_ImplementationFactory = nullptr;
-            getConsole() << "\n[Main] Implementation Factory cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Implementation Factory because not initialized !";
-        }
-
-        if(sharedpointer_collector)
-        {
-            AProDelete(sharedpointer_collector);
-
-            sharedpointer_collector = nullptr;
-            PointerCollector::__current_PointerCollector = nullptr;
-            getConsole() << "\n[Main] Global Pointer Collector cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Global Pointer Collector because not initialized !";
-        }
-
-        if(id_generator)
-        {
-            AProDelete(id_generator);
-
-            id_generator = nullptr;
-            IdGenerator::__current_IdGenerator = nullptr;
-            getConsole() << "\n[Main] Global ID Generator cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Global ID Generator because not initialized !";
-        }
+        SINGLETON_CLEAN(PointerCollector, 	 sharedpointer_collector)
+        SINGLETON_CLEAN(IdGenerator, 		 id_generator)
 
         getConsole() << "\n[Main] Cleaned !";
     }

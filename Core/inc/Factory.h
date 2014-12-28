@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 19/05/2013 - 22/02/2014
+ *  @date 19/05/2013 - 26/12/2014
  *
+ *  @brief
  *  Defines the Factory class and Design Pattern.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 /////////////////////////////////////////////////////////////
@@ -86,7 +104,7 @@ namespace APro
          *  @param proto : Prototype to store.
         **/
         /////////////////////////////////////////////////////////////
-        void register_prototype(const String& key, PrototypeBase* proto) { APRO_THREADSAFE_AUTOLOCK if(proto) { prototypes[key] = proto; proto->fact = this; } }
+        void register_prototype(const String& key, PrototypeBase* proto) { APRO_THREADSAFE_AUTOLOCK if(proto) { prototypes[key] = proto; /* proto->fact = this; */ } }
 
         ////////////////////////////////////////////////////////////
         /** @brief Tell if a prototype is registered.

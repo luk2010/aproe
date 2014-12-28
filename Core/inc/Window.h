@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/09/2012 - 16/04/2014
+ *  @date 03/09/2012 - 27/12/2014
  *
  *  Defines the Window class.
  *
@@ -250,11 +250,25 @@ namespace APro
     APRO_DECLARE_EVENT_CONTENT(WindowMovedEvent)
         size_t new_x;
         size_t new_y;
+        
+        Prototype* clone() const {
+        	WindowMovedEvent* e = static_cast<WindowMovedEvent*>(Event::clone());
+        	e->new_x = new_x;
+        	e->new_y = new_y;
+        	return e;
+        }
     APRO_DECLARE_EVENT_CONTENT_END()
 
     APRO_DECLARE_EVENT_CONTENT(WindowSizedEvent)
         size_t new_width;
         size_t new_height;
+        
+        Prototype* clone() const {
+        	WindowSizedEvent* e = static_cast<WindowSizedEvent*>(Event::clone());
+        	e->new_width = new_width;
+        	e->new_height = new_height;
+        	return e;
+        }
     APRO_DECLARE_EVENT_CONTENT_END()
 }
 

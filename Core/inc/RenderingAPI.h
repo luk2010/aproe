@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/04/2014
+ *  @date 18/04/2014 - 26/12/2014
  *
+ *  @brief 
  *  Defines the RenderingAPI implementation.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -18,8 +36,12 @@
 #include "Implementation.h"
 #include "Context.h"
 
+#include "Singleton.h"
+
 namespace APro
 {
+	class RenderingAPIFactory;
+	
     ////////////////////////////////////////////////////////////
     /** @class RenderingAPI
      *  @ingroup Rendering
@@ -50,6 +72,8 @@ namespace APro
         virtual ~RenderingAPI() {}
 
     public:
+    	
+    	friend class RenderingAPIFactory;
 
         ////////////////////////////////////////////////////////////
         /** @name Context Managing functions
@@ -103,13 +127,61 @@ namespace APro
         virtual void unregisterContext(Context* context) = 0;
 
         /** @} */
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns the name of this Rendering API.
+        **/
+        ////////////////////////////////////////////////////////////
+        const String& getName() const { return m_name; }
 
     protected:
 
-
+		////////////////////////////////////////////////////////////
+        /** @brief Sets the name of this Rendering API, which will be
+         *  saw in debug mode messages.
+        **/
+        ////////////////////////////////////////////////////////////
+		void setName(const String& renderername) { m_name = renderername; }
+		
+	private:
+		
+		String m_name;
     };
 
     typedef AutoPointer<RenderingAPI> RenderingAPIPtr;
+    
+    ////////////////////////////////////////////////////////////
+    /** @brief The RenderingAPIFactory is a factory instanciated
+     *  by the Main Object. 
+     *
+     *  @note
+     *  You can create a rendering api directly from this factory.
+    **/
+    ////////////////////////////////////////////////////////////
+    class RenderingAPIFactory : public Factory<RenderingAPI>
+    {
+    	APRO_DECLARE_MANUALSINGLETON(RenderingAPIFactory)
+    	
+	public:
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns true if given renderer name is registered.
+        **/
+        ////////////////////////////////////////////////////////////
+		bool hasRenderer (const String& renderer) const;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Lists every registered renderers.
+        **/
+        ////////////////////////////////////////////////////////////
+		String listRegisteredRenderers() const;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Creates a new Renderer using given name.
+        **/
+        ////////////////////////////////////////////////////////////
+		RenderingAPIPtr createRenderer(const String& renderer, const String& renderername) const;
+    };
 }
 
 #endif // APRO_RENDERINGAPI_H

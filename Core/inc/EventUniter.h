@@ -15,6 +15,9 @@
 #define APRO_EVENTUNITER_H
 
 #include "Platform.h"
+#include "BaseObject.h"
+#include "ThreadSafe.h"
+
 #include "Queue.h"
 #include "Event.h"
 #include "Thread.h"
@@ -41,7 +44,8 @@ namespace APro
      *  be done in the destructor while destructing the object.
     **/
     /////////////////////////////////////////////////////////////
-    class APRO_DLL EventUniter : public ThreadSafe,
+    class APRO_DLL EventUniter : public BaseObject <EventUniter>,
+								 public ThreadSafe,
                                  public Thread
     {
         APRO_DECLARE_MANUALSINGLETON(EventUniter)
