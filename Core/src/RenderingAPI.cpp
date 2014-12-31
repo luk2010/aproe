@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 26/12/2014
+ *  @date 26/12/2014 - 30/12/2014
  *
  *  @brief 
  *  Implements the RenderingAPI and RenderingAPIFactory classes.
@@ -55,7 +55,24 @@ namespace APro
 	{
 		aproassert1(prototypes.keyExists(renderer));
 		RenderingAPI* render = create(renderer);
-		render->setName(renderername);
-		return RenderingAPIPtr(render);
+		if (render)
+		{
+			render->setName(renderername);
+			return RenderingAPIPtr(render);
+		}
+		else
+			return RenderingAPIPtr::Null;
+	}
+	
+	StringArray RenderingAPIFactory::getRenderersList() const
+	{
+		return prototypes.getKeysArray();
+	}
+	
+	void RendererInfo::print(Console& console) const
+	{
+		console << "\nDriver Vendor   : " << drivervendor;
+		console << "\nDriver Renderer : " << renderer;
+		console << "\nDriver Version  : " << version;
 	}
 }

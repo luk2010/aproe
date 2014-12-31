@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/04/2014 - 26/12/2014
+ *  @date 18/04/2014 - 30/12/2014
  *
  *  @brief 
  *  Defines the RenderingAPI implementation.
@@ -37,10 +37,23 @@
 #include "Context.h"
 
 #include "Singleton.h"
+#include "Printable.h"
 
 namespace APro
 {
 	class RenderingAPIFactory;
+	
+	class RendererInfo : 
+		public Printable
+	{
+	public:
+			
+		String drivervendor; ///< @brief Name of the Vendor responsible for this implementation.
+		String version;      ///< @brief Version of the Implementation.
+		String renderer;     ///< @brief Name of the hardware renderer.
+		
+		void print(Console& console) const;
+	};
 	
     ////////////////////////////////////////////////////////////
     /** @class RenderingAPI
@@ -133,6 +146,16 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         const String& getName() const { return m_name; }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Returns Info about the current Renderer.
+         *
+         *  @note
+         *  This function is implemented as it should fill every fields
+         *  in the returned structure.
+        **/
+        ////////////////////////////////////////////////////////////
+        virtual RendererInfo getRendererInfo() const = 0;
 
     protected:
 
@@ -181,6 +204,12 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
 		RenderingAPIPtr createRenderer(const String& renderer, const String& renderername) const;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns an Array with every registered Renderers.
+        **/
+        ////////////////////////////////////////////////////////////
+		StringArray getRenderersList() const;
     };
 }
 

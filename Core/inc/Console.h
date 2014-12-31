@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 17/12/2014
+ *  @date 25/06/2012 - 30/12/2014
  *
  *  @brief
  *  Defines the Console Utility class.
@@ -274,6 +274,17 @@ namespace APro
         /** @}
         **/
         ////////////////////////////////////////////////////////////
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Blocks the calling thread, waiting for the user to
+         *  input a String in the Command Prompt untill the given
+         *  terminal character.
+         *
+         *  @param terminaison : The ending character.
+         *  @return Input String.
+        **/
+        ////////////////////////////////////////////////////////////
+        String waitInput(char terminaison = '\n');
 
     private:
         ////////////////////////////////////////////////////////////

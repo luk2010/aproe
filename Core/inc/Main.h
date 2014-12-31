@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 26/12/2014
+ *  @date 20/09/2012 - 30/12/2014
  *
  *  @brief
  *  Defines the Main class.
@@ -125,36 +125,6 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         void clear();
-
-    public:
-
-        ////////////////////////////////////////////////////////////
-        /** Describes a set of global options.
-        **/
-        ////////////////////////////////////////////////////////////
-        class GlobalOption
-        {
-            public: enum t
-            {
-                Debugging_Implementation = 1
-            };
-        };
-
-        ////////////////////////////////////////////////////////////
-        /** Set an option to given state.
-         *  @param option : Option to set the state.
-         *  @param state : New state of the option.
-        **/
-        ////////////////////////////////////////////////////////////
-//      void setOption(unsigned int option, bool state);
-
-        ////////////////////////////////////////////////////////////
-        /** Tell if an option is activated or not.
-         *  @param option : Option to tell.
-         *  @return If the option is activated.
-        **/
-        ////////////////////////////////////////////////////////////
-//		bool hasOption(unsigned int option) const;
 
     public:
 
@@ -346,7 +316,7 @@ namespace APro
 			RenderingAPIFactory::Get().listRegisteredRenderers();
 			
 			Console::Get() << "\nPlease choose one API by typing its name : \n";
-			String in = Console::Get().waitInput('\n');
+			String in = Console::Get().waitInput();
 			
 			if(apis.find(in) == apis.end()) {
 				Console::Get() << "\nWrong API. Please restart program.";

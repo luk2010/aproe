@@ -240,22 +240,22 @@ namespace APro
         /* We do nothing as it is to the user to do somethings. */
     }
 
-    EventPtr Thread::createEvent(const HashType& e_type) const
+    EventLocalPtr Thread::createEvent(const HashType& e_type) const
     {
         switch(e_type)
         {
         case ThreadStartedEvent::Hash:
-            EventPtr ret = AProNew(ThreadStartedEvent);
+            EventLocalPtr ret = AProNew(ThreadStartedEvent);
             ret->m_emitter = this;
             return ret;
 
         case ThreadFinishedEvent::Hash:
-            EventPtr ret = AProNew(ThreadFinishedEvent);
+            EventLocalPtr ret = AProNew(ThreadFinishedEvent);
             ret->m_emitter = this;
             return ret;
 
         case ThreadTerminatedEvent::Hash:
-            EventPtr ret = AProNew(ThreadTerminatedEvent);
+            EventLocalPtr ret = AProNew(ThreadTerminatedEvent);
             ret->m_emitter = this;
             return ret;
 

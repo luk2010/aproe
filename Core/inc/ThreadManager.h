@@ -5,10 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013
+ *  @date 06/04/2013 - 30/12/2014
  *
+ *  @brief
  *  Defines the ThreadManager class.
  *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 ////////////////////////////////////////////////////////////
 #ifndef APRO_THREADMANAGER_H
@@ -44,7 +61,8 @@ namespace APro
      *  need event support you can create them as normal objects.
     **/
     ////////////////////////////////////////////////////////////
-    class APRO_DLL ThreadManager : public ThreadSafe
+    class APRO_DLL ThreadManager : public BaseObject <ThreadManager>,
+								   public ThreadSafe
     {
 
         APRO_DECLARE_MANUALSINGLETON(ThreadManager)

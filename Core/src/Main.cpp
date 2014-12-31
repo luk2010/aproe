@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 26/12/2014
+ *  @date 20/09/2012 - 30/12/2014
  *
  *  @brief
  *  Implements the Main class.
@@ -65,6 +65,28 @@
 	FACTORY_CLEAN(class,name)
 #define SINGLETON_CREATE(class,name)						\
 	FACTORY_CREATE(class,name)
+	
+#define SINGLETON_BASECREATE(class,name)                    \
+	name = class::New();     								\
+	if(name) 												\
+	{ 													 	\
+		class::__current_##class = name;					\
+		getConsole() << "\n[Main] class OK."                \
+	}														\
+	else													\
+	{														\
+		getConsole() << "\n[Main] Can't create class !";    \
+		clear(); aprothrow(MainException);                  \
+	}
+
+#define SINGLETON_BASEDELETE(class,name)                    \
+	if(name)												\
+	{														\
+		class::Delete(name);						     	\
+		name = nullptr;										\
+		class::__current_##class = nullptr;                 \
+		getConsole() << "\n[Main] class cleaned.";          \
+	}
 	
 #define GENERIC_CHECK(class,name)                           \
 	if(name) 												\
@@ -129,12 +151,6 @@ namespace APro
                 getConsole() << "FAILED";
         }
 
-/* Main Options are now obsolete.
-        setOption((int) GlobalOption::Debugging_Implementation, Platform::IsDebugMode());
-        getConsole() << "\n[Main] Current configuration is : "
-                     << "\n - Debugging Implementation = " << (hasOption((int) GlobalOption::Debugging_Implementation) ? "True" : "False");
-*/
-
         // -- Core ---------------------------------------------------------------------
 
         SINGLETON_CREATE(IdGenerator, id_generator)
@@ -150,23 +166,23 @@ namespace APro
 
         // -- Event Uniter -------------------------------------------------------------
 
-        euniter = AProNew(EventUniter, String("GlobalUniter"));
+        euniter = EventUniter::New(String("GlobalUniter"));
         GENERIC_CHECK(EventUniter, euniter)
         euniter->start();
 
         // -- Manager ------------------------------------------------------------------
 
-        SINGLETON_CREATE(ThreadManager, tmanager)
-        SINGLETON_CREATE(MathManager,   mathManager)
+        SINGLETON_BASECREATE(ThreadManager, tmanager)
+        SINGLETON_BASECREATE(MathManager,   mathManager)
 
-        SINGLETON_CREATE(ResourceManager, resourceManager)
+        SINGLETON_BASECREATE(ResourceManager, resourceManager)
         // Default loader for libraries.
 		resourceManager->addLoader(ResourceLoaderPtr(AProNew(DynamicLibraryLoader)));
 		resourceManager->setDefaultLoader(DYNLIB_EXTENSION, "DynamicLibraryLoader");
 		// Exemple Null Loader.
 		resourceManager->addLoader(ResourceLoaderPtr(AProNew(NullLoader)));
 
-        SINGLETON_CREATE(PluginManager, pluginManager)
+        SINGLETON_BASECREATE(PluginManager, pluginManager)
         getConsole() << "\n[Main] Loading plugins and implementations in directory \"plugins\"."
         pluginManager->loadDirectory(String("plugins/"));
 
@@ -217,11 +233,11 @@ namespace APro
         }
 
 
-        SINGLETON_CLEAN(PluginManager,   	 pluginManager)
-		SINGLETON_CLEAN(ResourceManager, 	 resourceManager)
-		SINGLETON_CLEAN(MathManager,     	 mathManager)
-		SINGLETON_CLEAN(ThreadManager,   	 tmanager)
-        SINGLETON_CLEAN(EventUniter,    	 euniter)
+        SINGLETON_BASEDELETE(PluginManager,   	 pluginManager)
+		SINGLETON_BASEDELETE(ResourceManager, 	 resourceManager)
+		SINGLETON_BASEDELETE(MathManager,     	 mathManager)
+		SINGLETON_BASEDELETE(ThreadManager,   	 tmanager)
+        SINGLETON_BASEDELETE(EventUniter,    	 euniter)
         
         FACTORY_CLEAN(ImplementationFactory, impFactory)
         FACTORY_CLEAN(AbstractObjectFactory, abstract_object_factory)
@@ -239,15 +255,5 @@ namespace APro
             return RenderingAPIPtr(reinterpret_cast<RenderingAPI*>(ImplementationFactory::Get().create(className<RenderingAPI>())));
         else
             return RenderingAPIPtr(nullptr);
-    }
-
-    void Main::setOption(unsigned int option, bool state)
-    {
-        options[option] = state;
-    }
-
-    bool Main::hasOption(unsigned int option) const
-    {
-        return options[option];
     }
 }

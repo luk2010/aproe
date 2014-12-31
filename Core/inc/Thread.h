@@ -249,7 +249,7 @@ namespace APro
          *  @see EventEmitter::createEvent
         **/
         /////////////////////////////////////////////////////////////
-        EventPtr createEvent(const HashType& e_type) const;
+        EventLocalPtr createEvent(const HashType& e_type) const;
     };
 
     /** @brief Thread is started. Send at the beginning of the 'run' function. */

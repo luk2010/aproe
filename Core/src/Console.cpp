@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 27/06/2012 - 17/12/2014
+ *  @date 27/06/2012 - 30/12/2014
  *
  *  @brief
  *  Implements the Console Utility class.
@@ -282,5 +282,17 @@ namespace APro
         result << "\n[" << class_ << "]" << "{" << func_ << "}" << "(" << String::toString(line_) << ") " << msg;
         put(result);
         return *this;
+    }
+    
+    String Console::waitInput(char terminaison)
+    {
+    	String ret;
+    	char c; std::cin.get(c);
+    	while (c != terminaison) {
+			ret.append(c);
+			std::cin.get(c);
+    	}
+    	
+    	return ret;
     }
 }
