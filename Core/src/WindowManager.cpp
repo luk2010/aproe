@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/09/2012 - 14/04/2014
+ *  @date 06/09/2012 - 19/01/2015
  *
+ *  @brief
  *  Implements the WindowManager class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -18,187 +36,90 @@ namespace APro
     APRO_IMPLEMENT_MANUALSINGLETON(WindowManager)
 
     WindowManager::WindowManager()
-        : windows(Manager<Window, Array<WindowPtr> >::objects)
     {
-        idgen.setBase(1);
-        idgen.setIncrementation(1);
-        idgen.setMaximumId(1024);
-        idgen.reset();
-        windows.append(WindowPtr(nullptr));
+    	m_eventutilities = nullptr;
     }
-
+    
     WindowManager::~WindowManager()
     {
-
+    	// NOTE : The WindowEventUtilities object should have been
+    	// allocated using AProNew.
+    	if(m_eventutilities) {
+			AProDelete(m_eventutilities);
+			m_eventutilities = nullptr;
+    	}
     }
-
-    WindowId WindowManager::create(const String& title, const size_t& width, const size_t& height, bool fullscreen)
+    
+    void WindowManager::setWindowEventUtilities(WindowEventUtilities* eventutilities)
     {
-        if(!title.isEmpty() &&
-           width > 0 && height > 0)
-        {
-            if(!Window::HasCorrectImplementation())
-            {
-                aprodebug("No valid implementation found to create Window object (title='") << title << "').";
-                return 0;
-            }
-
-            APRO_THREADSAFE_AUTOLOCK
-
-            // Look for free Id
-            WindowId id = findNulllId();
-            if(id == 0)
-            {
-                if(idgen.canPick())
-                    id = idgen.pick();
-            }
-
-            if(id != 0)
-            {
-                Window* new_win = AProNew(Window, id, title, width, height, fullscreen);
-
-                if(new_win)
-                {
-                    if(isIdValid(id))
-                        windows.at(id).set(new_win);
-                    else
-                        windows.append(new_win);
-
-                    windows.at(id).setOwning(true);
-                    return id;
-                }
-                else
-                {
-                    aprodebug("Can't allocate Window object (title='") << title << "').";
-                    idgen.unpick();
-                    return 0;
-                }
-            }
-            else
-            {
-                aprodebug("Can't create new Window object (title='") << title << "') because max Window number has been reached.";
-                return 0;
-            }
-        }
-
-        return 0;
+    	APRO_THREADSAFE_AUTOLOCK
+    	
+    	if(m_eventutilities) {
+			AProDelete(m_eventutilities);
+			m_eventutilities = nullptr;
+    	}
+    	
+    	if(eventutilities) {
+			m_eventutilities = eventutilities;
+			aprodebug("Using WindowEventUtilities '") << m_eventutilities->name() << "'.";
+    	}
+    	else {
+			aprodebug("Using Null WindowEventUtilities.");
+    	}
     }
-
-    bool WindowManager::destroy(WindowPtr& window)
+    
+    WindowEventUtilities* WindowManager::getWindowEventUtilities()
     {
-        aproassert(!window.isNull());
-
-        if(!isWindowRegistered(window))
-        {
-            aprodebug("Can't destroy unregistered Window (title='") << window->getTitle() << "').";
-            return false;
-        }
-
-        if(window.getPointerUses() > 1)
-            aprodebug("Window (title='") << window->getTitle() << "') is being destroyed but other AutoPointer holds it. They will be invalidate.";
-
-        // This call the destructor for sure.
-        // We do not erase the entry from the array as we want to re-use
-        // the Id.
-        window.nullize();
-        return true;
+    	return m_eventutilities;
     }
-
-    bool WindowManager::destroy(const WindowId& windowId)
+    
+    const WindowEventUtilities* WindowManager::getWindowEventUtilities() const
     {
-        aproassert(isIdValid(windowId));
-
-        APRO_THREADSAFE_AUTOLOCK
-
-        WindowPtr& windowptr = windows.at(windowId);
-
-        if(window.getPointerUses() > 1)
-            aprodebug("Window (title='") << window->getTitle() << "') is being destroyed but other AutoPointer holds it. They will be invalidate.";
-
-        // This call the destructor for sure.
-        // We do not erase the entry from the array as we want to re-use
-        // the Id.
-        windowptr.nullize();
-        return true;
+    	return m_eventutilities;
     }
-
-    WindowPtr& WindowManager::getWindow(const WindowId& windowid)
+    
+    void WindowManager::messagePump()
     {
-        APRO_THREADSAFE_AUTOLOCK
-        if(isIdValid(windowid))
-            return windows.at(windowid);
-        else
-            return WindowPtr(nullptr);
+    	APRO_THREADSAFE_AUTOLOCK
+    	if(m_eventutilities) {
+			m_eventutilities->messagePump(m_windows);
+    	}
     }
-
-    const WindowPtr& WindowManager::getWindow(const WindowId& windowid) const
+    
+    WindowProcPtr WindowManager::getWindowProcPointer()
     {
-        APRO_THREADSAFE_AUTOLOCK
-        if(isIdValid(windowid))
-            return windows.at(windowid);
-        else
-            return WindowPtr(nullptr);
+    	if(m_eventutilities) {
+			return m_eventutilities->windowProcPtr();
+    	}
+    	else {
+			return nullptr;
+    	}
     }
-
-    size_t WindowManager::countActiveWindows() const
+    
+    void WindowManager::registerWindow(const String& name, Window* window)
     {
-        APRO_THREADSAFE_AUTOLOCK
-        int cnt = 0;
-
-        WindowArray::const_iterator& e = windows.end();
-        for(WindowArray::const_iterator it = windows.begin() + 1; it != e; it++)
-            if(!(*it).isNull())
-                cnt++;
-
-        return cnt;
+    	APRO_THREADSAFE_AUTOLOCK
+    	
+    	if(window && !name.isEmpty()) {
+			if(!m_windows.keyExists(name)) {
+				m_windows[name] = window;
+				aprodebug("Registered Window '") << name << "'.";
+			}
+			else {
+				aprodebug("Window '") << name << "' already registered !";
+			}
+    	}
     }
-
-    void WindowManager::clear()
+    
+    void WindowManager::unregisterWindow(const String& name)
     {
-        APRO_THREADSAFE_AUTOLOCK
-
-        windows.clear();
-        windows.append(WindowPtr(nullptr));
-        idgen.reset();
+    	APRO_THREADSAFE_AUTOLOCK
+    	
+    	if(!name.isEmpty()) {
+			if(m_windows.keyExists(name)) {
+				m_windows.erase(name);
+				aprodebug("Unregistered Window '") << name << ".";
+			}
+    	}
     }
-
-    void WindowManager::updateWindows()
-    {
-        APRO_THREADSAFE_AUTOLOCK
-
-        WindowArray::const_iterator e = windows.end();
-        for(WindowArray::iterator it = windows.begin() + 1; it != e; it++)
-        {
-            if(!(*it).isNull())
-                (*it)->update();
-        }
-    }
-
-    bool WindowManager::isIdValid(const WindowId& windowid) const
-    {
-        APRO_THREADSAFE_AUTOLOCK
-        return windowid > 0 &&
-               windowid < windows.size();
-    }
-
-    bool WindowManager::isWindowRegistered(const WindowPtr& ptr) const
-    {
-        APRO_THREADSAFE_AUTOLOCK
-        return windows.find(ptr) > 0;
-    }
-
-    WindowId WindowManager::findNullId() const
-    {
-        APRO_THREADSAFE_AUTOLOCK
-
-        WindowArray::const_iterator e = windows.end();
-        for(WindowArray::const_iterator it = windows.begin() + 1; it != e; it++)
-        {
-            if((*it).isNull())
-                return windows.toIndex(it);
-        }
-
-        return 0;
-    }
-
 }

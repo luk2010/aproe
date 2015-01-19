@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/09/2012 - 12/04/2014
+ *  @date 06/09/2012 - 19/01/2015
  *
+ *  @brief
  *  Defines the WindowManager class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -15,33 +33,43 @@
 #define APROWINDOWMANAGER_H
 
 #include "Platform.h"
-#include "Manager.h"
-#include "IdGenerator.h"
+#include "BaseObject.h"
+#include "ThreadSafe.h"
 #include "Window.h"
 
 namespace APro
 {
+	typedef void* WindowProcPtr;
+	
+	////////////////////////////////////////////////////////////
+    /** @class WindowManager
+     *  @ingroup Core
+     *  @brief Implementation specific Window Utilities.
+    **/
+    ////////////////////////////////////////////////////////////
+	class WindowEventUtilities
+	{
+	public:
+		
+		WindowEventUtilities() {}
+		virtual ~WindowEventUtilities() {}
+		
+	public:
+		
+		virtual void messagePump(Map<String,Window*>& windows) = 0;
+		virtual WindowProcPtr windowProcPtr() = 0;
+		virtual const String name() = 0;
+	};
+	
     ////////////////////////////////////////////////////////////
     /** @class WindowManager
      *  @ingroup Core
-     *  @brief Manages every created Window instances in the
-     *  Engine.
-     *
-     *  The WindowManager easily creates and destroys Window objects
-     *  instanciated. When you create a Window, be sure a Window Plugin
-     *  is already loaded or nothing will be shown and you will
-     *  have to go through errors.
-     *
-     *  @note You can use the WindowManager::hasValidWindowImplementation()
-     *  to check the Window implementation.
-     *
-     *  @note The number of Window that can be created by this
-     *  manager is 1024. This is done to make the user not be
-     *  able to destroy the GUI subsystem in doing somethings
-     *  stupids. At least you will never need more than 1024 Windows.
+     *  @brief Manages the Window specific Events.
     **/
     ////////////////////////////////////////////////////////////
-    class APRO_DLL WindowManager : public Manager<Window, Array<WindowPtr> >
+    class APRO_DLL WindowManager :
+    	public BaseObject<WindowManager>,
+    	public ThreadSafe
     {
 
         APRO_DECLARE_MANUALSINGLETON(WindowManager)
@@ -56,116 +84,69 @@ namespace APro
 
         ////////////////////////////////////////////////////////////
         /** @brief Destructs the Window Manager.
-         *  @note Every Window objects created in this Manager will be
-         *  destroyed during the process.
         **/
         ////////////////////////////////////////////////////////////
         ~WindowManager();
-
-    public:
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Creates a new Window object and returns its Id.
-         *
-         *  @note Window is not showen at the end of this function,
-         *  so you must use Window::show() to show the Window. You should
-         *  associate a Context before showing the Window.
-         *
-         *  @return 0 if an error occured.
+        
+	public:
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Sets a new WindowEventUtilities.
         **/
         ////////////////////////////////////////////////////////////
-        WindowId create(const String& title, const size_t& width, const size_t& height, bool fullscreen);
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Destroys the given Window object.
-         *
-         *  If the Window object has a valid context, with a running
-         *  renderer, the renderer will be stopped and the context will
-         *  be invalid. @note The Context object may not be destroyed
-         *  with the Window object.
-         *
-         *  @param window : Valid pointer to a Window object. @note This
-         *  pointer can't be constant as this function nullize the pointer
-         *  and invalidate it.
-         *
-         *  @return true on success, false on error.
+		void setWindowEventUtilities(WindowEventUtilities* eventutilities);
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns the WindowEventUtilities.
         **/
         ////////////////////////////////////////////////////////////
-        bool destroy(WindowPtr& window);
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Destroys the given Window object.
-         *
-         *  If the Window object has a valid context, with a running
-         *  renderer, the renderer will be stopped and the context will
-         *  be invalid. @note The Context object may not be destroyed
-         *  with the Window object.
-         *
-         *  @return true on success, false on error.
+		WindowEventUtilities* getWindowEventUtilities();
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns the WindowEventUtilities.
         **/
         ////////////////////////////////////////////////////////////
-        bool destroy(const WindowId& windowId);
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Returns the Window indicated to given ID.
-         *  @return A null pointer if windowid is not valid.
+		const WindowEventUtilities* getWindowEventUtilities() const;
+		
+	public:
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Updates all the registered Windows. 
+         *  You can call it once per frame if not using Main::update().
         **/
         ////////////////////////////////////////////////////////////
-        WindowPtr& getWindow(const WindowId& windowid);
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Returns the Window indicated to given ID.
-         *  @return A null pointer if windowid is not valid.
+		void messagePump();
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns a pointer to a function pointer used by 
+         *  the WindowEventUtilities. This pointer might be used to
+         *  initialize the Window object.
         **/
         ////////////////////////////////////////////////////////////
-        const WindowPtr& getWindow(const WindowId& windowid) const;
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Returns the number of not-null registered Window.
+		WindowProcPtr getWindowProcPointer();
+		
+	public:
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Register a window to the message pump.
         **/
         ////////////////////////////////////////////////////////////
-        size_t countActiveWindows() const;
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Destroys every Window objects and reset the
-         *  IdGenerator.
+		void registerWindow(const String& name, Window* window);
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Unregister a window from the message pump.
         **/
         ////////////////////////////////////////////////////////////
-        void clear();
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Updates every windows message queue.
-        **/
-        ////////////////////////////////////////////////////////////
-        void updateWindows();
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Returns true if ID is valid.
-        **/
-        ////////////////////////////////////////////////////////////
-        bool isIdValid(const WindowId& windowid) const;
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Returns true if window is registered in the
-         *  WindowManager.
-        **/
-        ////////////////////////////////////////////////////////////
-        bool isWindowRegistered(const WindowPtr& window) const;
-
-    protected:
-
-        ////////////////////////////////////////////////////////////
-        /** @brief Returns the first null ID in the array.
-        **/
-        ////////////////////////////////////////////////////////////
-        WindowId findNullId() const;
-
-    private:
-
-        typedef Array<WindowPtr> WindowArray;
-        WindowArray&             windows;///< Array of windows.
-        IdGenerator              idgen;  ///< The Window Id Generator.
+		void unregisterWindow(const String& name);
+        
+	private:
+		
+		WindowEventUtilities* m_eventutilities; ///< @brief The specific WindowEventUtilities used by the manager.
+		Map<String, Window*>  m_windows; 		///< @brief Registered Windows.
     };
+    
+    #define WINDOWPROC_TO_DATA(func) *(void**)(&func)
+    #define DATA_TO_WINDOWPROC(type,func) *(type*)(&func)
 }
 
 #endif

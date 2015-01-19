@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/04/2014 - 30/12/2014
+ *  @date 18/04/2014 - 19/01/2015
  *
  *  @brief 
  *  Defines the RenderingAPI implementation.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,11 +33,13 @@
 #define APRO_RENDERINGAPI_H
 
 #include "Platform.h"
-#include "Implementation.h"
-#include "Context.h"
+#include "Factory.h"
+#include "ThreadSafe.h"
 
+#include "Context.h"
 #include "Singleton.h"
 #include "Printable.h"
+#include "Scene.h"
 
 namespace APro
 {
@@ -68,7 +70,9 @@ namespace APro
      *  them.
     **/
     ////////////////////////////////////////////////////////////
-    class RenderingAPI : public Implementation
+    class RenderingAPI : 
+    	public Prototype,
+		public ThreadSafe
     {
     public:
 
@@ -76,7 +80,7 @@ namespace APro
         /** @brief Constructs a RenderingAPI object.
         **/
         ////////////////////////////////////////////////////////////
-        RenderingAPI() {}
+        RenderingAPI();
 
         ////////////////////////////////////////////////////////////
         /** @brief Destructs a RenderingAPI object.
@@ -156,6 +160,55 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         virtual RendererInfo getRendererInfo() const = 0;
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Creates a new Window Rendering Target and attach it
+         *  to this Renderer.
+         *  
+         *  @note
+         *  The returned Window will not be shown. You have to use
+         *  Window::show() to show it on screen.
+        **/
+        ////////////////////////////////////////////////////////////
+		WindowPtr createWindow(const String& windowname, uint32_t width, uint32_t height, bool fullscreen);
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns the Root Scene node of this Renderer.
+         *  
+         *  @note
+         *  The Root Scene node is the first Node of the Scene. It must
+         *  contains every Renderable Object registered to this Renderer,
+         *  and contains every Scene susceptible to be rendered in a 
+         *  Rendering Target.
+        **/
+        ////////////////////////////////////////////////////////////
+		ScenePtr getRoot();
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns the Root Scene node of this Renderer.
+         *  
+         *  @note
+         *  The Root Scene node is the first Node of the Scene. It must
+         *  contains every Renderable Object registered to this Renderer,
+         *  and contains every Scene susceptible to be rendered in a 
+         *  Rendering Target.
+        **/
+        ////////////////////////////////////////////////////////////
+		const ScenePtr getCstRoot() const;
+		
+	protected:
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Creates a new Window Rendering Target.
+         * 
+         *  @note 
+         *  The created window should not be appended by this 
+         *  function to the renderer target list. The created Window
+         *  also should be fully initialized and ready to call 
+         *  Window::show(). 
+        **/
+        ////////////////////////////////////////////////////////////
+		WindowPtr _createWindowImpl(const String& windowname, uint32_t width, uint32_t height, bool fullscreen) const = 0;
 
     protected:
 
@@ -168,7 +221,9 @@ namespace APro
 		
 	private:
 		
-		String m_name;
+		String 				 m_name;			///< @brief Name of this Renderer.
+		RenderingTargetArray renderingtargets;  ///< @brief Targets rendered by this Renderer.
+		ScenePtr 			 rootscene;			///< @brief Root Scene node owned by the Renderer.
     };
 
     typedef AutoPointer<RenderingAPI> RenderingAPIPtr;

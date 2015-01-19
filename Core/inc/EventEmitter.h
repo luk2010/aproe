@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012 - 27/12/2014
+ *  @date 11/09/2012 - 17/01/2015
  *
  *  @brief
  *  Defines the EventEmitter class.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include "List.h"
 #include "Event.h"
 #include "EventListener.h"
+#include "ThreadSafe.h"
 
 namespace APro
 {
@@ -86,7 +87,8 @@ namespace APro
      *  @see Events for more explanation about the event system.
     **/
     /////////////////////////////////////////////////////////////
-    class APRO_DLL EventEmitter
+    class APRO_DLL EventEmitter :
+    	virtual public ThreadSafe
     {
     protected:
 

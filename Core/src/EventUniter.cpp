@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/12/2013 - 28/12/2014
+ *  @date 02/12/2013 - 19/01/2015
  *
  *  @brief
  *  Implements the EventUniter object.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,7 +45,13 @@ namespace APro
     EventUniter::~EventUniter()
     {
         terminate();
-        commands.clear();
+        
+		while(commands.size() > 0) {
+			if(commands.get().eventptr) {
+				AProDelete (commands.get().eventptr);
+			}
+			commands.pop();
+		}
     }
 
     void EventUniter::push(SendCommand& command)
@@ -92,6 +98,7 @@ namespace APro
             if(command.eventptr->mustStop())
             {
                 aprodebug("Event has stop flag setted.");
+                AProDelete(command.eventptr);
                 continue;
             }
 
@@ -104,6 +111,8 @@ namespace APro
 						break;
 					}
                 }
+                
+                AProDelete(command.eventptr);
             }
         }
     }

@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 30/12/2014
+ *  @date 20/09/2012 - 31/12/2014
  *
  *  @brief
  *  Defines the Main class.
@@ -228,14 +228,6 @@ namespace APro
             return *abstract_object_factory;
         }
 
-        ////////////////////////////////////////////////////////////
-        /** @brief Creates a RenderingAPI object.
-         *  @note An Implementation must be available to creates a new
-         *  RenderingAPI Object.
-        **/
-        ////////////////////////////////////////////////////////////
-        RenderingAPIPtr createRenderingAPI();
-
     private:
         // In activation order ! Don't change
 
@@ -274,10 +266,11 @@ namespace APro
         ThreadSafe and AutoPointer and the ThreadManager, as resources loading
         and writing is done multi-threaded. */
         ResourceManager* resourceManager;
-        /* 9. The PluginManager. Needs almost everything above. */
-        PluginManager* pluginManager;
-        /* 10. The WindowManager. Needs a window plugin loaded. */
+        /* 9. The WindowManager. */
         WindowManager* windowManager;
+        /* 10. The PluginManager. Needs almost everything above. */
+        PluginManager* pluginManager;
+        
 
     private:
 
@@ -337,7 +330,7 @@ namespace APro
 			Console::Get() << "\nInfo : " << renderer->getRendererInfo();
 			
 			// Creating a cool Window
-			WindowPtr window = renderer->createWindowWithContext(String("MyWindow"), String("MyFirstContext"));
+			WindowPtr window = renderer->createWindow(String("MyWindow"), 1024, 768, false);
 			if(window.isNull()) {
 				Console::Get() << "\nCould not create Window MyWindow...";
 				// We exit prematurly

@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 30/12/2014
+ *  @date 20/09/2012 - 19/01/2015
  *
  *  @brief
  *  Implements the Main class.
@@ -181,23 +181,12 @@ namespace APro
 		resourceManager->setDefaultLoader(DYNLIB_EXTENSION, "DynamicLibraryLoader");
 		// Exemple Null Loader.
 		resourceManager->addLoader(ResourceLoaderPtr(AProNew(NullLoader)));
+		
+		SINGLETON_BASECREATE(WindowManager, windowManager)
 
         SINGLETON_BASECREATE(PluginManager, pluginManager)
         getConsole() << "\n[Main] Loading plugins and implementations in directory \"plugins\"."
         pluginManager->loadDirectory(String("plugins/"));
-
-        windowManager = AProNew(WindowManager);
-        if(windowManager)
-        {
-            WindowManager::__current_WindowManager = windowManager;
-            getConsole() << "\n[Main] Window Manager OK.";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't create Window Manager ! Aborting...";
-            clear();
-            aprothrow(MainException);
-        }
 
         getConsole() << "\n[Main] Main Initialized ! Enjoy ;)";
         return *this;
@@ -220,20 +209,8 @@ namespace APro
 
         getConsole() << "\n[Main] Clearing everything...";
 
-        if(windowManager)
-        {
-            windowManager->clear();
-            AProDelete(windowManager);
-            windowManager = nullptr;
-            getConsole() << "\n[Main] Window Manager cleaned !";
-        }
-        else
-        {
-            getConsole() << "\n[Main] Can't clean Window Manager because not initialized !";
-        }
-
-
         SINGLETON_BASEDELETE(PluginManager,   	 pluginManager)
+        SINGLETON_BASEDELETE(WindowManager,      windowManager)
 		SINGLETON_BASEDELETE(ResourceManager, 	 resourceManager)
 		SINGLETON_BASEDELETE(MathManager,     	 mathManager)
 		SINGLETON_BASEDELETE(ThreadManager,   	 tmanager)
@@ -247,13 +224,5 @@ namespace APro
         SINGLETON_CLEAN(IdGenerator, 		 id_generator)
 
         getConsole() << "\n[Main] Cleaned !";
-    }
-
-    RenderingAPIPtr Main::createRenderingAPI()
-    {
-        if(ImplementationFactory::Get().hasPrototype(className<RenderingAPI>()))
-            return RenderingAPIPtr(reinterpret_cast<RenderingAPI*>(ImplementationFactory::Get().create(className<RenderingAPI>())));
-        else
-            return RenderingAPIPtr(nullptr);
     }
 }

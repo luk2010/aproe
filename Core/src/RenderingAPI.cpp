@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 26/12/2014 - 30/12/2014
+ *  @date 26/12/2014 - 19/01/2015
  *
  *  @brief 
  *  Implements the RenderingAPI and RenderingAPIFactory classes.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,6 +33,13 @@
 
 namespace APro
 {
+	void RendererInfo::print(Console& console) const
+	{
+		console << "\nDriver Vendor   : " << drivervendor;
+		console << "\nDriver Renderer : " << renderer;
+		console << "\nDriver Version  : " << version;
+	}
+	
 	APRO_IMPLEMENT_MANUALSINGLETON(RenderingAPIFactory)
 	
 	bool RenderingAPIFactory::hasRenderer (const String& renderer) const 
@@ -53,6 +60,8 @@ namespace APro
 	
 	RenderingAPIPtr RenderingAPIFactory::createRenderer(const String& renderer, const String& renderername) const 
 	{
+		APRO_THREADSAFE_AUTOLOCK
+		
 		aproassert1(prototypes.keyExists(renderer));
 		RenderingAPI* render = create(renderer);
 		if (render)
@@ -69,10 +78,37 @@ namespace APro
 		return prototypes.getKeysArray();
 	}
 	
-	void RendererInfo::print(Console& console) const
+	RenderingAPI::RenderingAPI()
 	{
-		console << "\nDriver Vendor   : " << drivervendor;
-		console << "\nDriver Renderer : " << renderer;
-		console << "\nDriver Version  : " << version;
+		rootscene = nullptr;
+	}
+	
+	WindowPtr RenderingAPI::createWindow(const String& windowname, uint32_t width, uint32_t height, bool fullscreen)
+	{
+		aproassert1(width != 0 && height != 0 && !windowname.isEmpty());
+		
+		APRO_THREADSAFE_AUTOLOCK
+		
+		// Call the implementation to create the Window object.
+		WindowPtr retwin = _createWindowImpl(windowname, width, height, fullscreen);
+		if(!retwin) {
+			aprodebug("Couldn't create Appropriate Window !");
+			return WindowPtr::Null;
+		}
+		
+		renderingtargets.append(retwin);
+		retwin->setActivated(false); // This should be activated when Window::show() is called.
+		
+		return retwin;
+	}
+	
+	ScenePtr RenderingAPI::getRoot()
+	{
+		return rootscene;
+	}
+	
+	const ScenePtr RenderingAPI::getRoot() const
+	{
+		return rootscene;
 	}
 }

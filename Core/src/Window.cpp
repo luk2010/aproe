@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 04/09/2012 - 16/04/2014
+ *  @date 04/09/2012 - 19/01/2015
  *
+ *  @brief
  *  Implements the Window class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -26,23 +44,18 @@ namespace APro
     APRO_REGISTER_EVENT_CONTENT(WindowMovedEvent)
     APRO_REGISTER_EVENT_CONTENT(WindowSizedEvent)
 
-    Window::Window(const WindowId& id, const String& title, size_t width, size_t height, bool fullscreen)
-        : EventEmitter(), ThreadSafe(), Implementable()
+    Window::Window(const String& windowname, size_t width, size_t height, bool fullscreen)
+        : NonCopyable(), EventEmitter(), RenderingTarget()
     {
-        aproassert(id != 0, "Bad ID given for Window.");
-        aproassert(createImplementation() == true, "Can't create implementation.");
-
-        m_id          = id;
-        m_title       = title;
+    	setName(windowname);
+        m_title       = windowname;
         m_rect.width  = width;
         m_rect.height = height;
         m_rect.x      = 0;
         m_rect.y      = 0;
         m_fullscreen  = fullscreen;
         m_cursorShown = true;
-        m_implementation = imp();
         m_status      = StatusNull;
-        m_implementation->parent_window = this;
 
         documentEvent(WindowCreatedEvent::Hash,   "Window is created. There are no garantee that the window has been showed or drawned. This event is sended after \"create\" has been called.");
         documentEvent(WindowDestroyedEvent::Hash, "Window is destroyed. This event is sended after \"destroy\" has been called.");
@@ -51,98 +64,125 @@ namespace APro
         documentEvent(WindowClosingEvent::Hash,   "Window is closing.");
         documentEvent(WindowShowedEvent::Hash,    "Window is showed. There is no garantee that the function \"show\" is a success.");
         documentEvent(WindowHideEvent::Hash,      "Window is hidden. There is no garantee that the function \"hide\" is a success.");
-
-        // Create the Window object
-        if(!m_implementation->create(title, width, height, fullscreen))
-        {
-            aprodebug("Can't create Window object (title='") << title << "'.";
-        }
-        else
-        {
-            m_status = StatusCreated;
-            sendEvent(createEvent(WindowCreatedEvent::Hash));
-        }
     }
 
     Window::~Window()
     {
         destroy();
     }
+    
+    bool Window::create()
+    {
+    	if(m_status == StatusNull)
+		{
+			if(_create())
+			{
+				WindowManager::Get().registerWindow(getName(), this);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return true;
+		}
+    }
 
     void Window::show()
     {
-        APRO_THREADSAFE_AUTOLOCK
-
-        if(m_status != StatusNull &&
-           m_status != StatusShown)
-        {
-            if(m_implementation->show())
-            {
-                m_status = StatusShown;
-                sendEvent(createEvent(WindowShowedEvent::Hash));
-            }
-        }
+        if(m_status == StatusNull)
+		{
+			// Create the Window before showing it.
+			if(create()) {
+				// Call this function again.
+				return show();
+			}
+		}
+		else if(m_status == StatusShown)
+		{
+			return;
+		}
+		else
+		{
+			// Call the implementation specific function.
+			_show();
+		}
     }
 
     void Window::hide()
     {
-        APRO_THREADSAFE_AUTOLOCK
-
-        if(m_status == StatusShown)
-        {
-            if(m_implementation->hide())
-            {
-                m_status = StatusHidden;
-                sendEvent(createEvent(WindowHideEvent::Hash));
-            }
-        }
+    	if(m_status == StatusNull)
+		{
+			// Create the Window
+			if(create()) {
+				// Call this fuction again.
+				return hide();
+			}
+		}
+		else if(m_status == StatusShown)
+		{
+			// Call implementation specific function.
+			_hide();
+		}
+		else
+		{
+			return;
+		}
     }
 
     void Window::move(int x, int y, bool relativePos)
     {
-        if(m_status != StatusNull &&
-           !m_fullscreen)
-        {
-            if(relativePos)
+    	if(m_status == StatusNull)
+		{
+			// Create the Window
+			if(create()) {
+				// Call this fuction again.
+				return move(x,y,relativePos);
+			}
+		}
+		else if(m_status == StatusShown && !m_fullscreen)
+		{
+			if(relativePos)
             {
                 x = x + m_rect.x;
                 y = y + m_rect.y;
             }
-            m_implementation->move(x, y);
-        }
-    }
-
-    void Window::_notifiate_window_moved(size_t new_x, size_t new_y)
-    {
-        m_rect.x = new_x;
-        m_rect.y = new_y;
-        sendEvent(createEvent(WindowMovedEvent::Hash));
+			_move(x, y);
+		}
+		else
+		{
+			return;
+		}
     }
 
     void Window::resize(size_t width, size_t height)
     {
-        if(m_status != StatusNull &&
-           !m_fullscreen)
-        {
-            m_implementation->resize(width, height);
-        }
-    }
-
-    void Window::_notifiate_window_resized(size_t new_width, size_t new_height)
-    {
-        m_rect.width = new_width;
-        m_rect.height = new_height;
-        if(m_context)
-            m_context->onWindowResized(new_width, new_height);
-        sendEvent(createEvent(WindowSizedEvent::Hash));
+    	if(m_status == StatusNull)
+		{
+			// Create the Window
+			if(create()) {
+				// Call this fuction again.
+				return resize(width, height);
+			}
+		}
+		else if(m_status == StatusShown)
+		{
+			_resize(width, height);
+		}
+    	else
+		{
+			return;
+		}
     }
 
     void Window::setTitle(const String& other)
     {
         if(m_status != StatusNull)
         {
-            m_title = other;
-            m_implementation->setTitle(other);
+            _setTitle(other);
         }
     }
 
@@ -156,7 +196,7 @@ namespace APro
         return m_status;
     }
 
-    String Window::getTitle() const
+    const String& Window::getTitle() const
     {
         return m_title;
     }
@@ -186,73 +226,54 @@ namespace APro
         return m_rect;
     }
 
-    void Window::update()
-    {
-        if(m_status != StatusNull)
-        {
-            m_implementation->update();
-        }
-    }
-
     void Window::toggleCursor() const
     {
-        if(m_status != StatusNull)
+        if(m_status == StatusShown)
         {
-            m_implementation->showCursor(!m_cursorShown);
-            m_cursorShown = !m_cursorShown;
+            _showCursor(!m_cursorshown);
         }
     }
 
-    void Window::associateContext(Context* context)
+    ContextPtr Window::getContext()
     {
-        if(m_status != StatusNull)
-        {
-            if(m_context)
-                m_context.nullize();// This destroy the Context.
-
-            m_context = context;
-            m_context.setOwning(true);// Only the Window object can destroy this Context object.
-        }
+        return ContextPtr(m_context, nullptr, true, &m_context);
     }
-
-    Context* Window::getAssociatedContext()
+    
+    const ContextPtr Window::getContext() const
     {
-        return m_context;
+        return ContextPtr(m_context, nullptr, true, &m_context);
     }
 
     void Window::destroy()
     {
         if(m_status != StatusNull)
         {
-            associateContext(nullptr);
-            sendEvent(createEvent(WindowClosingEvent::Hash));
-            m_implementation->destroy();
-            sendEvent(createEvent(WindowDestroyedEvent::Hash));
-            m_status = StatusNull;
+        	_destroy();
+        	WindowManager::Get().unregisterWindow(getName());
         }
     }
 
-    EventPtr Window::createEvent(const HashType& e_type) const
+    EventLocalPtr Window::createEvent(const HashType& e_type) const
     {
         switch (e_type)
         {
         case WindowCreatedEvent::Hash :
-            EventPtr ret = (Event*) AProNew(WindowCreatedEvent);
+            EventLocalPtr ret = (Event*) AProNew(WindowCreatedEvent);
             ret->m_emitter = this;
             return ret;
 
         case WindowClosingEvent::Hash :
-            EventPtr ret = (Event*) AProNew(WindowClosingEvent);
+            EventLocalPtr ret = (Event*) AProNew(WindowClosingEvent);
             ret->m_emitter = this;
             return ret;
 
         case WindowDestroyedEvent::Hash :
-            EventPtr ret = (Event*) AProNew(WindowDestroyedEvent);
+            EventLocalPtr ret = (Event*) AProNew(WindowDestroyedEvent);
             ret->m_emitter = this;
             return ret;
 
         case WindowHideEvent::Hash :
-            EventPtr ret = (Event*) AProNew(WindowHideEvent);
+            EventLocalPtr ret = (Event*) AProNew(WindowHideEvent);
             ret->m_emitter = this;
             return ret;
 
@@ -261,10 +282,10 @@ namespace APro
             e->new_x = m_rect.x;
             e->new_y = m_rect.y;
             e->m_emitter = this;
-            return EventPtr((Event*) e);
+            return EventLocalPtr((Event*) e);
 
         case WindowShowedEvent::Hash :
-            EventPtr ret = (Event*) AProNew(WindowShowedEvent);
+            EventLocalPtr ret = (Event*) AProNew(WindowShowedEvent);
             ret->m_emitter = this;
             return ret;
 
@@ -273,10 +294,45 @@ namespace APro
             e->new_width = m_rect.width;
             e->new_height = m_rect.height;
             e->m_emitter = this;
-            return EventPtr((Event*) e);
+            return EventLocalPtr((Event*) e);
 
         default:
             return EventEmitter::createEvent(e_type);
         }
+    }
+    
+    void Window::sendWindowCreatedEvent()
+    {
+    	sendEvent(createEvent(WindowCreatedEvent::Hash));
+    }
+    
+    void Window::sendWindowShowEvent()
+    {
+    	sendEvent(createEvent(WindowShowedEvent::Hash));
+    }
+    
+    void Window::sendWindowHideEvent()
+    {
+    	sendEvent(createEvent(WindowHideEvent::Hash));
+    }
+    
+    void Window::sendWindowMovedEvent()
+    {
+    	sendEvent(createEvent(WindowMovedEvent::Hash));
+    }
+    
+    void Window::sendWindowResizedEvent()
+    {
+    	sendEvent(createEvent(WindowSizedEvent::Hash));
+    }
+    
+    void Window::sendWindowClosingEvent()
+    {
+    	sendEvent(createEvent(WindowClosingEvent::Hash));
+    }
+    
+    void Window::sendWindowDestroyedEvent()
+    {
+    	sendEvent(createEvent(WindowDestroyedEvent::Hash));
     }
 }

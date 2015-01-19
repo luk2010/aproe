@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012 - 28/12/2014
+ *  @date 11/09/2012 - 17/01/2015
  *
  *  @brief
  *  Implements the EventEmitter class.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,6 +74,8 @@ namespace APro
         {
             bool tmp = false;
             
+            APRO_THREADSAFE_AUTOLOCK
+            
             // Global List
             for(ListenersList::iterator it = listenersbytype[0].begin(); 
 					it != listenersbytype[0].end() && !(e->must_stop); it++)
@@ -128,6 +130,7 @@ namespace APro
 
         if(!listener.isNull())
         {
+        	APRO_THREADSAFE_AUTOLOCK
             return listener->receive( (EventRef) *e);
         }
         else
@@ -238,6 +241,7 @@ namespace APro
 
     void EventEmitter::documentEvent(const HashType& event, const String& description)
     {
+    	APRO_THREADSAFE_AUTOLOCK
         events[event] = description;
     }
 
@@ -246,6 +250,8 @@ namespace APro
         String ret("[EventEmitter] Events documentation");
         ret   << "\n-----------------------------------"
               << "\n";
+			
+		APRO_THREADSAFE_AUTOLOCK
 
         EventsList::const_iterator e = events.end();
         for (EventsList::const_iterator it = events.begin(); it != e; it++)
@@ -285,6 +291,8 @@ namespace APro
 		}
 		else
 		{
+			APRO_THREADSAFE_AUTOLOCK
+			
 			EventListenerPtr listener = AProNew(EventListener);
 			listeners.append(listener);
 			listenersbytype[0].append(listener);
@@ -304,6 +312,8 @@ namespace APro
             }
             else
             {
+            	APRO_THREADSAFE_AUTOLOCK
+            	
                 listeners.append(listener);
                 listenersbytype[0].append(listener);
                 return listeners.size() - 1;
@@ -325,6 +335,8 @@ namespace APro
 		}
 		else
 		{
+			APRO_THREADSAFE_AUTOLOCK
+			
 			EventListenerPtr listener = AProNew(EventListener);
 			listeners.append(listener);
 			
@@ -348,6 +360,8 @@ namespace APro
             }
             else
             {
+            	APRO_THREADSAFE_AUTOLOCK
+            	
                 listeners.append(listener);
                 
                 for(auto type : elist) {
@@ -375,6 +389,8 @@ namespace APro
             }
             else
             {
+            	APRO_THREADSAFE_AUTOLOCK
+            	
                 int index = listeners.find(_listener);
                 listeners.erase(listeners.begin()+(size_t)index);
                 
@@ -405,6 +421,8 @@ namespace APro
         }
         else
         {
+        	APRO_THREADSAFE_AUTOLOCK
+        	
             int index = listeners.find(_listener);
             listeners.erase(listeners.begin()+(size_t)index);
             
@@ -428,6 +446,8 @@ namespace APro
     {
         if(!name.isEmpty())
         {
+        	APRO_THREADSAFE_AUTOLOCK
+        	
             for(unsigned int i = 0; i < listeners.size(); ++i)
             {
                 const EventListenerPtr& _listener = listeners.at(i);
@@ -449,6 +469,8 @@ namespace APro
     {
         if(!name.isEmpty())
         {
+        	APRO_THREADSAFE_AUTOLOCK
+        	
             for(unsigned int i = 0; i < listeners.size(); ++i)
             {
                 EventListenerPtr& _listener = listeners.at(i);
@@ -468,6 +490,8 @@ namespace APro
 
     const EventListenerPtr& EventEmitter::getListener(const Id& identifier) const
     {
+    	APRO_THREADSAFE_AUTOLOCK
+    	
         for (unsigned int i = 0; i < listeners.size(); ++i)
         {
             const EventListenerPtr& plistener = listeners.at(i);
@@ -482,6 +506,8 @@ namespace APro
 
     EventListenerPtr& EventEmitter::getListener(const Id& identifier)
     {
+    	APRO_THREADSAFE_AUTOLOCK
+    	
         for (unsigned int i = 0; i < listeners.size(); ++i)
         {
             EventListenerPtr& plistener = listeners.at(i);
@@ -504,6 +530,8 @@ namespace APro
 
     void EventEmitter::setEmitPolicy(EmitPolicy ep)
     {
+    	APRO_THREADSAFE_AUTOLOCK
+    	
         epolicy = ep;
     }
 
