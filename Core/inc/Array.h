@@ -4,11 +4,11 @@
  *  @brief Defines the Array class.
  *
  *  @author Luk2010
- *  @date 29/05/2012 - 28/12/2014
+ *  @date 29/05/2012 - 22/01/2015
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -86,8 +86,8 @@ namespace APro
     {
     public:
         
-        typedef typename Array<T, PoolNum> ArrayT;
-        typedef char* ArrayData;
+//       typedef typename Array<T, PoolNum> ArrayT;
+        typedef char ArrayData;
         
     protected:
 
@@ -138,7 +138,7 @@ namespace APro
         /** @brief Constructs an Array from another one.
         **/
         ////////////////////////////////////////////////////////////
-        Array(const ArrayT& rhs) : ptr(nullptr), logical_size(0), physical_size(0)
+        Array(const Array& rhs) : ptr(nullptr), logical_size(0), physical_size(0)
         {
             if(rhs.size() > 0)
             {
@@ -152,7 +152,7 @@ namespace APro
          *  The given Array is let empty.
         **/
         ////////////////////////////////////////////////////////////
-        Array(ArrayT&& rhs)
+        Array(Array&& rhs)
         {
             if(rhs.size() > 0)
             {
@@ -176,13 +176,13 @@ namespace APro
             {
                 reserve(l.size());
                 if(Types::IsCopyConstructible<T>()) {
-                    for(std::initializer_list<T>::const_iterator it = l.begin(); it != l.end(); it++) {
-                        AProConstructedCopy (ptr + (it - l.begin), it, T);
+                    for(auto it = l.begin(); it != l.end(); it++) {
+                        AProConstructedCopy (ptr + (it - l.begin), *it, T);
                     }
                 }
                 else {
-                    for(std::initializer_list<T>::const_iterator it = l.begin(); it != l.end(); it++) {
-                        Memory::Copy (ptr + (it - l.begin), it, T);
+                    for(auto it = l.begin(); it != l.end(); it++) {
+                        Memory::Copy (ptr + (it - l.begin), *it, sizeof(T));
                     }
                 }
             }
@@ -205,9 +205,9 @@ namespace APro
          *  can keep memory of our pointer in differents pools.
         **/
         ////////////////////////////////////////////////////////////
-        T* __allocate (size_t* sz)
+        T* __allocate (size_t sz)
         {
-            return (T*) Allocator<PoolNum>::Get().New<ArrayData>(sizeof(T) * sz);
+            return (T*) Allocator<PoolNum>::Get().template New<ArrayData>(sizeof(T) * sz);
         }
 
         ////////////////////////////////////////////////////////////
@@ -275,7 +275,7 @@ namespace APro
 
                 // Then release the array.
                 //AProDelete((void*) ptr);
-                Allocator<PoolNum>::Get().Delete<char>(ptr);
+                Allocator<PoolNum>::Get().Delete( (char*) ptr);
             }
         }
 
@@ -536,7 +536,7 @@ namespace APro
                 if(new_physical_size > physical_size)
                 {
                     // Reallocation of array.
-                    T* tmp_array = (T*) Allocator<PoolNum>::Get().New<ArrayData>(new_physical_size * sizeof(T));
+                    T* tmp_array = (T*) Allocator<PoolNum>::Get().template New<ArrayData>(new_physical_size * sizeof(T));
 
                     Memory::Copy(tmp_array, ptr, logical_size * sizeof(T));
                     AProDeallocate(ptr);
@@ -563,7 +563,7 @@ namespace APro
             else
             {
                 // Allocate memory for the array.
-                ptr = (T*) Allocator<PoolNum>::Get().New<ArrayData>(new_physical_size * sizeof(T));
+                ptr = (T*) Allocator<PoolNum>::Get().template New<ArrayData>(new_physical_size * sizeof(T));
                 physical_size = new_physical_size;
             }
         }

@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 19/05/2013 - 26/12/2014
+ *  @date 19/05/2013 - 20/01/2015
  *
  *  @brief
  *  Defines the Factory class and Design Pattern.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -149,6 +149,60 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         virtual Prototype* clone() const = 0;
+    };
+    
+    /////////////////////////////////////////////////////////////
+    /** @class PrototypeLocalPtr
+     *  @ingroup Utils
+	 *  @brief A local pointer which clone itself when changing 
+	 *  object.
+    **/
+    /////////////////////////////////////////////////////////////
+    template <typename T>
+    class PrototypeLocalPtr
+    {
+	private:
+		
+		T* ptr;
+		
+	public:
+		
+		PrototypeLocalPtr() : ptr (nullptr) { }
+		
+		explicit PrototypeLocalPtr(T* arg) : ptr(arg) { }
+		
+		PrototypeLocalPtr(const PrototypeLocalPtr<T>& rhs) : ptr (nullptr) { 
+    		if(rhs.ptr)
+				ptr = dynamic_cast<T*>(rhs.ptr->clone()); 
+		}
+		
+		PrototypeLocalPtr(PrototypeLocalPtr<T>&& rhs) : ptr (rhs.ptr) { 
+    		rhs.ptr = nullptr; 
+		}
+		
+		~PrototypeLocalPtr() { 
+    		if(ptr) 
+				AProDelete(ptr); 
+    	}
+    	
+    	T& operator* () { return *ptr; }
+    	const T& operator* () const { return *ptr; }
+    	
+    	T& operator-> () { return *ptr; }
+    	const T& operator-> () const { return *ptr; }
+    	
+    	bool isNull() const { return ptr == nullptr; }
+    	bool operator == (const T* rhs) const { return ptr == rhs; }
+    	operator bool() const { return !isNull(); }
+    	
+    	PrototypeLocalPtr& operator = (const PrototypeLocalPtr<T>& rhs) {
+    		if(ptr) 
+				AProDelete(ptr); 
+			ptr = nullptr;
+			if(rhs.ptr)
+				ptr = dynamic_cast<T*>(rhs.ptr->clone()); 
+			return *this;
+    	}
     };
 }
 

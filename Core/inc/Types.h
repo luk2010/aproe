@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 14/10/2013 - 15/12/2014
+ *  @date 14/10/2013 - 22/01/2015
  *
  *  @brief
  *  Types namespace for Types helpers.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,10 +33,15 @@
 #define APRO_TYPES_H
 
 #include "Base.h"
+#include "Swappable.h"
+#include "Copyable.h"
+
 #include <type_traits>
 
 namespace APro
 {
+	class APRO_DLL BaseObjectTrait {};
+	
     namespace Types
     {
         ////////////////////////////////////////////////////////////
@@ -58,8 +63,8 @@ namespace APro
         ////////////////////////////////////////////////////////////
         template<typename T>
         APRO_DLL bool IsDestructorCallable() { return std::is_fundamental<T>::value; }
-        template<typename T>
-        APRO_DLL bool IsDestructorCallable<T*>() { return std::is_fundamental<T>::value; }
+//        template<typename T>
+//        APRO_DLL bool IsDestructorCallable<T*>() { return std::is_fundamental<T>::value; }
 
         ////////////////////////////////////////////////////////////
         /** @brief Tell if a Type has a constructor that correspond to

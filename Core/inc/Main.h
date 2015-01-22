@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 31/12/2014
+ *  @date 20/09/2012 - 20/01/2015
  *
  *  @brief
  *  Defines the Main class.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -339,10 +339,41 @@ namespace APro
 			}
 			
 			// Getting Scene and setting background color to Green.
-			ScenePtr scene = renderer->getRoot();
-			scene->setBackgroundColor(Color::Green);
-			scene->setSize(SizeString("2048x2048"));
+			Scene& scene = renderer->getRoot();
+			scene.setBackgroundColor(Color::Green);
+			scene.setSceneSize(SizeString("2048x2048"));
+		
+			// 3 Methods to load an Object an add it to the SceneManager.
 			
+			// Verify we have the correct plugin.
+			if(!ResourceManager::Get().isFormatSupported(String("obj"))) {
+				Console::Get() << "\nCould not find loder for 'obj' file format. Please load plugin 'ObjFileFormat' or another one which load 'obj' file format.";
+				exit(-4);
+			}
+			
+			ObjectPtr myobjectpr;
+
+#if 0
+			// 1. Create an Entry, then load the objet in and add the resource to the SceneManager.
+			ResourceEntryPtr myobjectentry = ResourceManager::Get().createResourceEntry("MyObject");
+			ResourceManager::Get().loadResource(myobjectentry, "example.obj");
+			if(!myobject.isNull()) {
+				myobjectptr = scene.getSceneManager().addObject(ObjectType::Static, myobjectentry->getResource());
+			}
+			
+			// 2. Load the Resource and get the ResourceEntry directly.
+			ResourceEntryPtr myobjectentry = ResourceManager::Get().loadResource("MyObject", "example.obj");
+			if(!myobject.isNull()) {
+				myobjectptr = scene.getSceneManager().addObject(ObjectType::Static, myobjectentry->getResource());
+			}
+			
+			// 3. Let the SceneManager take care of it.
+			myobjectptr = scene.getSceneManager().addObject(ObjectType::Static, "MyObject", "example.obj");
+			
+			// Translate the object
+			myobjectptr->translate(10.0, 10.0, 5.0);
+#endif // 0
+
 			// Showing the window
 			window->show();
 			

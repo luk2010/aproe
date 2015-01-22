@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 26/12/2014 - 19/01/2015
+ *  @date 26/12/2014 - 20/01/2015
  *
  *  @brief 
  *  Implements the RenderingAPI and RenderingAPIFactory classes.
@@ -80,7 +80,7 @@ namespace APro
 	
 	RenderingAPI::RenderingAPI()
 	{
-		rootscene = nullptr;
+		rootscene = Scene::New();
 	}
 	
 	WindowPtr RenderingAPI::createWindow(const String& windowname, uint32_t width, uint32_t height, bool fullscreen)
@@ -102,13 +102,13 @@ namespace APro
 		return retwin;
 	}
 	
-	ScenePtr RenderingAPI::getRoot()
+	Scene& RenderingAPI::getRoot()
 	{
-		return rootscene;
+		return *rootscene;
 	}
 	
-	const ScenePtr RenderingAPI::getRoot() const
+	const Scene& RenderingAPI::getRoot() const
 	{
-		return rootscene;
+		return *rootscene;
 	}
 }

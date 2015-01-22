@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 17/09/2012 - 15/02/2014
+ *  @date 17/09/2012 - 21/01/2015
  *
+ *  @brief
  *  Implements the PluginHandle class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 /////////////////////////////////////////////////////////////
@@ -192,13 +210,11 @@ namespace APro
 
     bool PluginHandle::isStarted() const
     {
-        APRO_THREADSAFE_AUTOLOCK
         return started;
     }
 
     bool PluginHandle::isTerminated() const
     {
-        APRO_THREADSAFE_AUTOLOCK
         return terminated;
     }
 
@@ -238,22 +254,22 @@ namespace APro
         return dynLib;
     }
 
-    EventPtr PluginHandle::createEvent(const HashType& e_type) const
+    EventLocalPtr PluginHandle::createEvent(const HashType& e_type) const
     {
         if(e_type == PluginStartedEvent::Hash) {
-            EventPtr ret = (Event*) AProNew(PluginStartedEvent);
+            EventLocalPtr ret = (Event*) AProNew(PluginStartedEvent);
             ret->m_emitter = this;
             return ret;
         }
 
         else if(e_type == PluginStoppingEvent::Hash) {
-            EventPtr ret = (Event*) AProNew(PluginStoppingEvent);
+            EventLocalPtr ret = (Event*) AProNew(PluginStoppingEvent);
             ret->m_emitter = this;
             return ret;
         }
 
         else if(e_type == PluginStoppedEvent::Hash) {
-            EventPtr ret = (Event*) AProNew(PluginStoppedEvent);
+            EventLocalPtr ret = (Event*) AProNew(PluginStoppedEvent);
             ret->m_emitter = this;
             return ret;
         }

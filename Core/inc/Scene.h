@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 19/01/2015
+ *  @date 19/01/2015 - 20/01/2015
  *
  *  @brief 
  *  Defines the Scene implementation.
@@ -34,28 +34,103 @@
 
 #include "Platform.h"
 #include "BaseObject.h"
+#include "ThreadSafe.h"
 
 #include "Color.h"
 #include "SizeString.h"
+#include "SceneManager.h"
 
 namespace APro
 {
-	class Scene
-		: public BaseObject<Scene>
+	////////////////////////////////////////////////////////////
+	/** @class Scene
+	 *  @ingroup Core
+	 *  @brief Integrates every Scene related objects.
+	 *
+	 *  The Scene object has a great role in the Engine. It must 
+	 *  organize every objects before they can be drawn by the
+	 *  RenderingAPI. Objects should be organized using the 
+	 *  appropriate SceneManager, which can be the default one, 
+	 *  or a loaded one ( see SceneManagerFactory ).
+	 *  You can load the SceneManager you want, but you will have 
+	 *  to reload every objects. This can take time, depending on
+	 *  the SceneManager and on the number of objects.
+	**/
+	////////////////////////////////////////////////////////////
+	class Scene : 
+		public BaseObject<Scene>,
+		public ThreadSafe
 	{
 	public:
 		
-		Scene() {}
-		~Scene() {}
+		////////////////////////////////////////////////////////////
+        /** @brief Constructs a Scene object, and sets a new default 
+         *  SceneManager (using SceneManagerFactory::create("DefaultSceneManager") ).
+        **/
+        ////////////////////////////////////////////////////////////
+		Scene();
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Destructs the Scene object, and also the SceneManager.
+        **/
+        ////////////////////////////////////////////////////////////
+		~Scene();
 		
 	public:
 		
-		void setBackgroundColor(const Color& color) { m_backgroundcolor = color; }
-		void setSize(const SizeString& sizestring) { }
+		////////////////////////////////////////////////////////////
+        /** @brief Sets the background color for the whole scene.
+        **/
+        ////////////////////////////////////////////////////////////
+		void setBackgroundColor(const Color& color);
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns the background color for the whole scene.
+        **/
+        ////////////////////////////////////////////////////////////
+		const Color& getBackgroundColor() const;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Sets the size of the active Scene. 
+         *  @note This is a task performed by the SceneManager, but it
+         *  may probably reload the whole Scene so don't use it too 
+         *  much.
+        **/
+        ////////////////////////////////////////////////////////////
+		void setActiveSize(const SizeString& sizestring);
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns the size of the active Scene. 
+        **/
+        ////////////////////////////////////////////////////////////
+		Vector2 getActiveSize() const;
+		
+	public:
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns the SceneManager in use.
+        **/
+        ////////////////////////////////////////////////////////////
+		SceneManager& getSceneManager();
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns the SceneManager in use.
+        **/
+        ////////////////////////////////////////////////////////////
+		const SceneManager& getSceneManager() const;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Sets the SceneManager which will be used.
+         *  @note This function copy the SceneManager, and so can be 
+         *  very expensive.
+        **/
+        ////////////////////////////////////////////////////////////
+		SceneManager& setSceneManager(const SceneManagerLocalPtr& scenemanager);
 		
 	private:
 		
-		Color m_backgroundcolor;
+		Color                m_backgroundcolor; ///< @brief The background color.
+		SceneManagerLocalPtr m_scenemanager;    ///< @brief Manages the Scene nodes.
 	};
 	
 	typedef AutoPointer<Scene> ScenePtr;

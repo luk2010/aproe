@@ -5,10 +5,28 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/05/2012 - 26/12/2014
+ *  @date 21/05/2012 - 22/01/2015
  *
+ *  @brief
  *  Redefines basic memory function, like malloc, realloc, free. It is usefull when the engine
  *  use the Memory Tracker.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -139,13 +157,13 @@ namespace APro
 #define AProDeallocate(ptr)         APro::deallocate(ptr, __FUNCTION__, __FILE__, __LINE__)
     
 /// @brief Convert given Real -> MemoryHeader pointer
-#define APRO_MEM_HEAD(ptr)          (MemoryHeader*) ((void*)ptr)
+#define APRO_MEM_HEAD(ptr)          (APro::MemoryHeader*) ((void*)ptr)
 /// @brief Convert Virtual -> Real
 #define APRO_MEM_REAL (ptr)         (((char*)ptr) - sizeof(APro::MemoryHeader))
 /// @brief Convert Real -> Virtual
 #define APRO_MEM_VIRTUAL (ptr)      (((char*)ptr) + sizeof(APro::MemoryHeader))
 
-#define APRO_CONSTMEM_HEAD(ptr)     (const MemoryHeader*) ((const void*)ptr)
+#define APRO_CONSTMEM_HEAD(ptr)     (const APro::MemoryHeader*) ((const void*)ptr)
 #define APRO_CONSTMEM_REAL (ptr)    (((const char*)ptr) - sizeof(APro::MemoryHeader))
 #define APRO_CONSTMEM_VIRTUAL (ptr) (((const char*)ptr) + sizeof(APro::MemoryHeader))
     ////////////////////////////////////////////////////////////
@@ -247,7 +265,7 @@ template <typename T> void AProDelete(T* ptr, const char* func_, const char* fil
     {
         size_t sz_t = sizeof(T);
         // Looking for Header.
-        MemoryHeader* head = APRO_MEM_HEAD(ptr);
+        APro::MemoryHeader* head = APRO_MEM_HEAD(ptr);
 
         // Looking for Block. We try to avoid this function at it is too much costs.
         // const APro::MemoryManager::MemoryBlock* mblock = APro::MemoryManager::get().retrieveMemoryBlock((ptr_t) ptr);
@@ -287,7 +305,7 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
 /// @ingroup Memory
 /// @param T : Type of object.
 /// @see AProNewA, AProDelete
-#define AProNew(T, ...) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T[1] ( __VA_ARGS__ )
+#define AProNew(T, ...) new (AProNew<T>(1, __FUNCTION__, __FILE__, __LINE__)) T ( __VA_ARGS__ )
 
 /// Constructs a new array of objects of given size and argues.
 /// @ingroup Memory
@@ -302,7 +320,7 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
 /// and you may experience troubles.
 /// @param P : Pointer to destroy.
 /// @see AProNew, AProNewA
-#define AProDelete(P) AProDelete(ptr, __FUNCTION__, __FILE__, __LINE__)
+#define AProDelete(ptr) AProDelete(ptr, __FUNCTION__, __FILE__, __LINE__)
 
 /// Constructs an object by calling the copy constructor and placement new.
 /// @ingroup Utils
@@ -331,7 +349,7 @@ template<typename T> void AProDestructObject(T* object, size_t sz = 1, bool _is_
         else
         {
             // Else call the destructor.
-            ptr->~T();
+            object->~T();
         }
     }
 }

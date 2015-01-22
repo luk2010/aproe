@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012 - 27/12/2014
+ *  @date 11/09/2012 - 20/01/2015
  *
  *  @brief
  *  Defines the Event class and the main Events documentation.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include "Platform.h"
 #include "SString.h"
 #include "AutoPointer.h"
+#include "Factory.h"
 
 namespace APro
 {
@@ -320,36 +321,7 @@ namespace APro
     typedef Event& EventRef; ///< @brief A reference to an event. Prefers this type instead of EventPtr.
     typedef Event  EventCopy; ///< @brief An explicit copy of an Event.
     
-    class EventLocalPtr
-    {
-    	Event* ptr;
-    	
-	public:
-
-    	EventLocalPtr() : ptr (nullptr) {}
-    	
-    	EventLocalPtr(const EventLocalPtr& rhs) : ptr (nullptr) { 
-    		if(rhs.ptr)
-				ptr = dynamic_cast<Event*>(rhs.ptr->clone()); 
-		}
-		
-    	EventLocalPtr(EventLocalPtr&& rhs) : ptr (rhs.ptr) { 
-    		rhs.ptr = nullptr; 
-		}
-    	
-    	~EventLocalPtr() { 
-    		if(ptr) 
-				AProDelete(ptr); 
-    	}
-    	
-    	Event& operator* () { return *ptr; }
-    	const Event& operator* () const { return *ptr; }
-    	
-    	Event& operator-> () { return *ptr; }
-    	const Event& operator-> () const { return *ptr; }
-    	
-    	bool operator == (Event* rhs) { return ptr == rhs; }
-    };
+    typedef PrototypeLocalPtr<Event> EventLocalPtr;
 
 /// @brief Declares a new event type with his hash.
 /// @ingroup Events

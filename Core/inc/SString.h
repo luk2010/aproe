@@ -70,7 +70,7 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         explicit String(const char* str);
-        String(const char* str, size_t sz)
+        String(const char* str, size_t sz);
 
         ////////////////////////////////////////////////////////////
         /** Copy constructor

@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/04/2014 - 19/01/2015
+ *  @date 18/04/2014 - 20/01/2015
  *
  *  @brief 
  *  Defines the RenderingAPI implementation.
@@ -182,7 +182,7 @@ namespace APro
          *  Rendering Target.
         **/
         ////////////////////////////////////////////////////////////
-		ScenePtr getRoot();
+		Scene& getRoot();
 		
 		////////////////////////////////////////////////////////////
         /** @brief Returns the Root Scene node of this Renderer.
@@ -194,7 +194,7 @@ namespace APro
          *  Rendering Target.
         **/
         ////////////////////////////////////////////////////////////
-		const ScenePtr getCstRoot() const;
+		const Scene& getCstRoot() const;
 		
 	protected:
 		

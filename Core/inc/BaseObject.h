@@ -4,11 +4,11 @@
  *  @brief Defines the BaseObject class.
  *
  *  @author Luk2010
- *  @date 30/11/2014 - 15/12/2014
+ *  @date 30/11/2014 - 22/01/2015
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #define APRO_BASEOBJECT_H
 
 #include "Platform.h"
+#include "Memory.h"
 
 namespace APro
 {
@@ -56,7 +57,7 @@ namespace APro
     **/
     ////////////////////////////////////////////////////////////
     template<AllocatorPool PoolNum>
-    class Allocator
+    class APRO_DLL Allocator
     {
     public:
         
@@ -91,14 +92,14 @@ namespace APro
             if(num > 1) {
                 if (m_cursize + sizeof(T)*num < m_maxsize || m_maxsize == 0) {
                     m_cursize += sizeof(T)*num;
-                    return AProNewA (T, num);
+                    return AProNewA(T, num);
                 }
                 return nullptr;
             }
             else {
                 if (m_cursize + sizeof(T) < m_maxsize || m_maxsize == 0) {
                     m_cursize += sizeof(T);
-                    return AProNew (T);
+                    return AProNew(T);
                 }
                 return nullptr;
             }
@@ -217,8 +218,6 @@ namespace APro
         uint64_t m_cursize;
     };
     
-    class BaseObjectTrait {};
-    
     ////////////////////////////////////////////////////////////
     /** @class BaseObject
      *  @ingroup Core
@@ -230,7 +229,7 @@ namespace APro
     **/
     ////////////////////////////////////////////////////////////
     template <typename T, AllocatorPool PoolNum = AllocatorPool::Default>
-    class BaseObject : public BaseObjectTrait
+    class APRO_DLL BaseObject : public BaseObjectTrait
     {
     public:
         

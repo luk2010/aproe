@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 18/09/2012 - 15/02/2014
+ *  @date 18/09/2012 - 22/01/2015
  *
+ *  @brief
  *  Implements the DynamicLibrary class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 /////////////////////////////////////////////////////////////
@@ -105,16 +123,16 @@ namespace APro
         return loaded.get();
     }
 
-    EventPtr DynamicLibrary::createEvent(const HashType& e_type) const
+    EventLocalPtr DynamicLibrary::createEvent(const HashType& e_type) const
     {
         if(e_type == DynamicLibraryLoadedEvent::Hash) {
-            EventPtr ret = (Event*) AProNew(DynamicLibraryLoadedEvent);
+            EventLocalPtr ret = (Event*) AProNew(DynamicLibraryLoadedEvent);
             ret->m_emitter = this;
             return ret;
         }
 
         else if(e_type == DynamicLibraryUnloadedEvent::Hash) {
-            EventPtr ret = (Event*) AProNew(DynamicLibraryUnloadedEvent);
+            EventLocalPtr ret = (Event*) AProNew(DynamicLibraryUnloadedEvent);
             ret->m_emitter = this;
             return ret;
         }

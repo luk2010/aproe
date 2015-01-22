@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 31/12/2014 - 17/01/2015
+ *  @date 31/12/2014 - 20/01/2015
  *
  *  @brief 
  *  Defines the RenderingTarget interface.
@@ -57,8 +57,7 @@ namespace APro
 	 *  RenderingAPI::createWindow() (A Window is a RenderingTarget).
 	**/
 	////////////////////////////////////////////////////////////
-	class RenderingTarget : 
-		public BaseObject<RenderingTarget>,
+	class RenderingTarget :
 		public NonCopyable,
 		virtual public ThreadSafe
 	{

@@ -137,7 +137,7 @@ namespace APro
             return "Gnu C++ Compiler";
 #elif defined(APRO_COMPILER_CLANG)
             return "Clang/LLVM C++ Compiler";
-#elif defined
+#elif defined(APRO_COMPILER_INTEL)
             return "Intel C++ Compiler";
 #else
             return "Unkown";
@@ -160,12 +160,14 @@ namespace APro
 #define APRO_OSX 3
 
 // Inclusion des fichiers d'entetes globaux
+#include <inttypes.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <dirent.h>
+#include <functional>
 
 //----------------------------------------------//
 //                   Windows                    //

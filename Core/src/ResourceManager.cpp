@@ -5,9 +5,26 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 27/08/2012 - 07/05/2014
+ *  @date 27/08/2012 - 21/01/2015
  *
  *  Implements the ResourceManager.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -295,11 +312,15 @@ namespace APro
         APRO_THREADSAFE_AUTOLOCK
 
         ResourceEntryPtr entry = &(m_resource_entries.at(0));
-        while(m_resource_entries.size() > 0)
+        uint32_t idx = 0;
+        while(m_resource_entries.size() > idx)
         {
             entry->m_resource_data.nullize();
-            entry = &(m_resource_entries.at(0));
+            idx++;
+            
+            entry = &(m_resource_entries.at(idx));
         }
+        m_resource_entries.clear();
     }
 
     String ResourceManager::printResources() const
@@ -349,7 +370,7 @@ namespace APro
             aprodebug("Can't find loader '") << name << "'.";
         }
 
-        return ResourceLoaderPtr();
+        return ResourceLoaderPtr::Null;
     }
 
     const ResourceLoaderPtr ResourceManager::getLoader(const String& name) const
@@ -369,7 +390,7 @@ namespace APro
             aprodebug("Can't find loader '") << name << "'.";
         }
 
-        return ResourceLoaderPtr();
+        return ResourceLoaderPtr::Null;
     }
 
     bool ResourceManager::addLoader(const ResourceLoaderPtr& loader)
@@ -467,7 +488,7 @@ namespace APro
         if(m_default_loaders.keyExists(ext))
             return m_default_loaders[ext];
         else
-            return ResourceLoaderPtr();
+            return ResourceLoaderPtr::Null;
     }
 
     ResourceWriterPtr ResourceManager::getWriter(const String& name)
@@ -487,7 +508,7 @@ namespace APro
             aprodebug("Can't find writer '") << name << "'.";
         }
 
-        return ResourceWriterPtr();
+        return ResourceWriterPtr::Null;
     }
 
     const ResourceWriterPtr ResourceManager::getWriter(const String& name) const
@@ -507,7 +528,7 @@ namespace APro
             aprodebug("Can't find writer '") << name << "'.";
         }
 
-        return ResourceWriterPtr();
+        return ResourceWriterPtr::Null;
     }
 
     bool ResourceManager::addWriter(ResourceWriterPtr& writer)
@@ -627,7 +648,7 @@ namespace APro
         if(m_default_writers.keyExists(ext))
             return m_default_writers[ext];
         else
-            return ResourceWriterPtr();
+            return ResourceWriterPtr::Null;
     }
 
     ResourceLoaderPtr ResourceManager::_findCorrectLoader(const String& extension)
@@ -642,7 +663,7 @@ namespace APro
             // If null, we return a null loader.
         }
 
-        return ResourceLoaderPtr();
+        return ResourceLoaderPtr::Null;
     }
 
     ResourcePtr ResourceManager::_loadResourceFrom(const String& filename, ResourceLoaderPtr& loader)
