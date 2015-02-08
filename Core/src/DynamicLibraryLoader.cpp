@@ -16,7 +16,7 @@
 namespace APro
 {
     DynamicLibraryLoader::DynamicLibraryLoader()
-    : ResourceLoader("DynamicLibraryLoader", "Loads Dynamic Library Object")
+    : ResourceLoader(String("DynamicLibraryLoader"), String("Loads Dynamic Library Object"))
     {
 
     }

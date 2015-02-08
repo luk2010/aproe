@@ -64,7 +64,8 @@ namespace APro
 ///
 /// The name of the lockguard will be __mutex_guard__ with the line number
 /// appended.
-#define THREADMUTEXAUTOLOCK( mutex ) ThreadMutexLockGuard __mutex_guard__##__LINE__ (&mutex)
+#define THREADMUTEXAUTOLOCK_I        CONCAT( __mutex_guard__, __LINE__ )
+#define THREADMUTEXAUTOLOCK( mutex ) ThreadMutexLockGuard THREADMUTEXAUTOLOCK_I (&mutex)
 }
 
 #endif // APRO_MUTEXLOCKGUARD_H

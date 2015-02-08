@@ -1,170 +1,208 @@
+////////////////////////////////////////////////////////////
 /** @file Keys.h
+ *  @ingroup Core
  *
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 21/03/2013
+ *  @date 21/03/2013 - 07/02/2015
  *
- *  @addtogroup Global
- *  @addtogroup System
+ *  @brief
+ *  Defines the Keys used in the Engine.
  *
- *  This file defines the Keys used in the Engine.
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
+////////////////////////////////////////////////////////////
 #ifndef APRO_KEYS_H
 #define APRO_KEYS_H
 
 #include "Platform.h"
+#include "Event.h"
 
 namespace APro
 {
-    enum KEY
+	////////////////////////////////////////////////////////////
+	/** @class Key
+	 *  @ingroup Core
+	 *  @brief Groups every common Keys used by the Engine.
+	**/
+	////////////////////////////////////////////////////////////
+    class Key 
     {
-        KEY_CANCEL          = 0x03,//Touche Ctrl+Break
-        KEY_UNKNOW          = 0x07,
-        KEY_ERASE           = 0x08,//Effacer
-        KEY_TAB             = 0x09,//Tab
-        KEY_CLEAR           = 0x0C,//Clear
-        KEY_ENTER           = 0x0D,//Entrée
-        KEY_SHIFT           = 0x10,//Shift
-        KEY_CTRL            = 0x11,//Control
-        KEY_ALT             = 0x12,//Alt
-        KEY_PAUSE           = 0x13,//Pause
-        KEY_CAPSLOCK        = 0x14,//Caps lock (verrouillage des majuscules)
-        KEY_KANA            = 0x15,//Mode Kana ?
-        KEY_HANGUEL         = 0x15,//Mode Hanguel ?
-        KEY_HANGUL          = 0x15,//Mode Hangul ?
-        KEY_JUNJA           = 0x17,//Mode Junja ?
-        KEY_FINAL           = 0x18,//Mode Final ?
-        KEY_HANJA           = 0x19,//Mode Hanja ?
-        KEY_KENJI           = 0x19,//Mode Kenji ?
-        KEY_ESC             = 0x1B,//Echap
-        KEY_CONVERT         = 0x1C,//Mode Convertit ?
-        KEY_NOCONVERT       = 0x1D,//Mode non convertit ?
-        KEY_IME_ACCEPT      = 0x1E,//Unknown
-        KEY_MODECHANGE      = 0x1F,//Unknown
-        KEY_SPACE           = 0x20,//Espace
-        KEY_PAGEUP          = 0x21,//Page Up
-        KEY_PAGEDWN         = 0x22,//Page Down
-        KEY_FIN             = 0x23,//Fin
-        KEY_DEBUT           = 0x24,
-        KEY_LEFT            = 0x25,//Gauche
-        KEY_UP              = 0x26,//Haut
-        KEY_RIGHT           = 0x27,//Droite
-        KEY_DOWN            = 0x28,//Bas
-        KEY_SELECT          = 0x29,
-        KEY_PRINT           = 0x2A,
-        KEY_EXECUT          = 0x2B,
-        KEY_SCREENPRINT     = 0x2C,
-        KEY_INSER           = 0x2D,
-        KEY_DEL             = 0x2E,
-        KEY_HELP            = 0x2F,
-        KEY_0               = 0x30,
-        KEY_1               = 0x31,
-        KEY_2               = 0x32,
-        KEY_3               = 0x33,
-        KEY_4               = 0x34,
-        KEY_5               = 0x35,
-        KEY_6               = 0x36,
-        KEY_7               = 0x37,
-        KEY_8               = 0x38,
-        KEY_9               = 0x39,
-        KEY_A               = 0x41,
-        KEY_B               = 0x42,
-        KEY_C               = 0x43,
-        KEY_D               = 0x44,
-        KEY_E               = 0x45,
-        KEY_F               = 0x46,
-        KEY_G               = 0x47,
-        KEY_H               = 0x48,
-        KEY_I               = 0x49,
-        KEY_J               = 0x4A,
-        KEY_K               = 0x4B,
-        KEY_L               = 0x4C,
-        KEY_M               = 0x4D,
-        KEY_N               = 0x4E,
-        KEY_O               = 0x4F,
-        KEY_P               = 0x50,
-        KEY_Q               = 0x51,
-        KEY_R               = 0x52,
-        KEY_S               = 0x53,
-        KEY_T               = 0x54,
-        KEY_U               = 0x55,
-        KEY_V               = 0x56,
-        KEY_W               = 0x57,
-        KEY_X               = 0x58,
-        KEY_Y               = 0x59,
-        KEY_Z               = 0x5A,
-        KEY_LEFTWIN         = 0x5B,
-        KEY_RIGHTWIN        = 0x5C,
-        KEY_APPS            = 0x5D,
-        KEY_SLEEP           = 0x5F,
-        KEY_NUMPAD_0        = 0x60,
-        KEY_NUMPAD_1        = 0x61,
-        KEY_NUMPAD_2        = 0x62,
-        KEY_NUMPAD_3        = 0x63,
-        KEY_NUMPAD_4        = 0x64,
-        KEY_NUMPAD_5        = 0x65,
-        KEY_NUMPAD_6        = 0x66,
-        KEY_NUMPAD_7        = 0x67,
-        KEY_NUMPAD_8        = 0x68,
-        KEY_NUMPAD_9        = 0x69,
-        KEY_NUMPAD_MULT     = 0x6A,
-        KEY_NUMPAD_ADD      = 0x6B,
-        KEY_NUMPAD_SEP      = 0x6C,
-        KEY_NUMPAD_SUB      = 0x6D,
-        KEY_NUMPAD_DECI     = 0x6E,
-        KEY_NUMPAD_DIV      = 0x6F,
-        KEY_F1              = 0x70,
-        KEY_F2              = 0x71,
-        KEY_F3              = 0x72,
-        KEY_F4              = 0x73,
-		KEY_F5              = 0x74,
-		KEY_F6              = 0x75,
-		KEY_F7              = 0x76,
-		KEY_F8              = 0x77,
-		KEY_F9              = 0x78,
-		KEY_F10             = 0x79,
-		KEY_F11             = 0x7A,
-		KEY_F12             = 0x7B,
-		KEY_F13             = 0x7C,
-		KEY_F14             = 0x7D,
-		KEY_F15             = 0x7E,
-		KEY_F16             = 0x7F,
-		KEY_F17             = 0x80,
-		KEY_F18             = 0x81,
-		KEY_F19             = 0x82,
-		KEY_F20             = 0x83,
-		KEY_F21             = 0x84,
-		KEY_F22             = 0x85,
-		KEY_F23             = 0x86,
-		KEY_F24             = 0x87,
-        KEY_VERRNUM         = 0x90,
-        KEY_SCROLLLOCK      = 0x91,
-        KEY_LEFTSHIFT       = 0xA0,
-        KEY_RIGHTSHIFT      = 0xA1,
-        KEY_LEFTCTRL        = 0xA2,
-        KEY_RIGHTCTRL       = 0xA3,
-        KEY_LEFTMENU        = 0xA4,
-        KEY_RIGHTMENU       = 0xA5,
-        KEY_PLUS            = 0xBB,
-        KEY_VIRGULE         = 0xBC,
-        KEY_MINUS           = 0xBD,
-        KEY_ATTN            = 0xF6,
-        KEY_CRSEL           = 0xF7,
-        KEY_EXSEL           = 0xF8,
-        KEY_EREOF           = 0xF9,
-        KEY_PLAY            = 0xFA,
-        KEY_ZOOM            = 0xFB,
-        KEY_PA1             = 0xFD,
-        KEY_OEM_CLEAR       = 0xFE,
-
-
-		KEY_COUNT           = 0xFF
+	public:
+		
+		static const Key A;
+		static const Key B;
+		static const Key C;
+		static const Key D;
+		static const Key E;
+		static const Key F;
+		static const Key G;
+		static const Key H;
+		static const Key I;
+		static const Key J;
+		static const Key K;
+		static const Key L;
+		static const Key M;
+		static const Key N;
+		static const Key O;
+		static const Key P;
+		static const Key Q;
+		static const Key R;
+		static const Key S;
+		static const Key T;
+		static const Key U;
+		static const Key V;
+		static const Key W;
+		static const Key X;
+		static const Key Y;
+		static const Key Z;
+		
+		static const Key k0;
+		static const Key k1;
+		static const Key k2;
+		static const Key k3;
+		static const Key k4;
+		static const Key k5;
+		static const Key k6;
+		static const Key k7;
+		static const Key k8;
+		static const Key k9;
+		
+		static const Key Num0;
+		static const Key Num1;
+		static const Key Num2;
+		static const Key Num3;
+		static const Key Num4;
+		static const Key Num5;
+		static const Key Num6;
+		static const Key Num7;
+		static const Key Num8;
+		static const Key Num9;
+		
+		static const Key F1;
+		static const Key F2;
+		static const Key F3;
+		static const Key F4;
+		static const Key F5;
+		static const Key F6;
+		static const Key F7;
+		static const Key F8;
+		static const Key F9;
+		static const Key F10;
+		static const Key F11;
+		static const Key F12;
+		
+		static const Key Shift;
+		static const Key Control;
+		static const Key Menu;
+		
+		static const Key Tabulate;
+		static const Key CapsLock;
+		static const Key Erase;
+		static const Key Enter;
+		static const Key Pause;
+		static const Key Escape;
+		static const Key Space;
+		
+		static const Key Up;
+		static const Key Down;
+		static const Key Left;
+		static const Key Right;
+		
+		static const Key Invalid;
+		
+	public:
+		
+		static Key Translate(uint8_t vkey);
+		
+		static bool IsSpecial(const Key& key);
+		static bool IsShift(const Key& key);
+		static bool IsControl(const Key& key);
+		static bool IsMenu(const Key& key);
+		
+	public:
+		
+		Key() : m_id(0) {}
+		Key(uint8_t k) : m_id(k) {}
+		
+		Key& operator = (const Key& other) { m_id = other.m_id; return *this; }
+		bool operator == (const Key& other) const { return m_id == other.m_id; }
+		bool operator != (const Key& other) const { return m_id != other.m_id; }
+				
+	private:
+		
+		uint8_t m_id;
     };
-
-    APRO_DLL const char* keyToString(KEY k);
-    typedef char key_t;
+    
+    APRO_DECLARE_EVENT_CONTENT(KeyDownEvent)
+		Key key;
+		bool isShiftPressed;
+		bool isControlPressed;
+		bool isMenuPressed;
+		
+		Prototype* clone() {
+			KeyDownEvent* ev = dynamic_cast<KeyDownEvent*> (Event::clone());
+			ev->key 			 = key;
+			ev->isControlPressed = isControlPressed;
+			ev->isShiftPressed   = isShiftPressed;
+			ev->isMenuPressed    = isMenuPressed;
+			return ev;
+		}
+    APRO_DECLARE_EVENT_CONTENT_END()
+    
+    APRO_DECLARE_EVENT_CONTENT(KeyUpEvent)
+		Key key;
+		bool isShiftPressed;
+		bool isControlPressed;
+		bool isMenuPressed;
+		
+		Prototype* clone() {
+			KeyUpEvent* ev = dynamic_cast<KeyUpEvent*> (Event::clone());
+			ev->key 			 = key;
+			ev->isControlPressed = isControlPressed;
+			ev->isShiftPressed   = isShiftPressed;
+			ev->isMenuPressed    = isMenuPressed;
+			return ev;
+		}
+    APRO_DECLARE_EVENT_CONTENT_END()
+    
+    ////////////////////////////////////////////////////////////
+	/** @class KeyTranslateDictionnary
+	 *  @ingroup Core
+	 *  @brief Translate from a platform-specific virtual key
+	 *  to an Engine specific virtual key.
+	**/
+	////////////////////////////////////////////////////////////
+    class KeyTranslateDictionnary
+    {
+	public:
+		
+		virtual ~KeyTranslateDictionnary() {}
+		
+		////////////////////////////////////////////////////////////
+		/** @brief Translate platform-specific virtual key to
+		 *  Engine specific virtual key.
+		**/
+		////////////////////////////////////////////////////////////
+		virtual Key translate(uint8_t vkey) = 0;
+    };
 }
 
 #endif // APRO_KEYS_H

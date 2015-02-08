@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/09/2012 - 19/01/2015
+ *  @date 06/09/2012 - 02/02/2015
  *
  *  @brief
  *  Defines the WindowManager class.
@@ -36,6 +36,7 @@
 #include "BaseObject.h"
 #include "ThreadSafe.h"
 #include "Window.h"
+#include "Keys.h"
 
 namespace APro
 {
@@ -59,6 +60,26 @@ namespace APro
 		virtual void messagePump(Map<String,Window*>& windows) = 0;
 		virtual WindowProcPtr windowProcPtr() = 0;
 		virtual const String name() = 0;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns true if Keyboard is handled by this 
+         *  WindowEventUtilities class.
+        **/
+        ////////////////////////////////////////////////////////////
+		virtual bool isHardwareKeyboardAutoUpdated() const = 0;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns true if Mouse is handled by this 
+         *  WindowEventUtilities class.
+        **/
+        ////////////////////////////////////////////////////////////
+		virtual bool isMouseSupported() const = 0;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns a pointer to a valid KeyTranslateDictionnary.
+        **/
+        ////////////////////////////////////////////////////////////
+		virtual KeyTranslateDictionnary* getKeyTranslateDictionnary() const = 0;
 	};
 	
     ////////////////////////////////////////////////////////////

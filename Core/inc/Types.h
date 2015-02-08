@@ -101,7 +101,9 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         template <typename T>
-        APRO_DLL bool IsBaseObject() { return std::is_base_of<BaseObjectTrait, T>::value; }
+        APRO_DLL bool IsBaseObject(T& obj) { return std::is_base_of<BaseObjectTrait, T>::value; }
+        template <typename T>
+        APRO_DLL bool IsBaseObject(T* obj) { return std::is_base_of<BaseObjectTrait, T>::value; }
         
         ////////////////////////////////////////////////////////////
         /** @brief Returns true if a Type is copyable (derived from

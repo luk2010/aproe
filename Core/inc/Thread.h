@@ -52,7 +52,7 @@ namespace APro
     **/
     ////////////////////////////////////////////////////////////
     class APRO_DLL Thread : public NonCopyable,
-                            public EventEmitter
+                            virtual public EventEmitter
     {
 
     protected:

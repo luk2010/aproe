@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/04/2013 - 26/12/2014
+ *  @date 25/04/2013 - 07/02/2015
  *
  *  @brief
  *  Defines the ThreadSafe class.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -90,13 +90,19 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         IMutex& getMutex() const { return mutex; }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Return the internal mutex but typed.
+        **/
+        ////////////////////////////////////////////////////////////
+        ThreadMutexI& getMutexTyped() const { return mutex; }
 
     protected:
 
         mutable ThreadMutexI mutex;///< Mutex.
     };
 
-    #define APRO_THREADSAFE_AUTOLOCK THREADMUTEXAUTOLOCK( mutex );
+    #define APRO_THREADSAFE_AUTOLOCK THREADMUTEXAUTOLOCK( mutex ) ;
 }
 
 #endif // APRO_THREADSAFE_H

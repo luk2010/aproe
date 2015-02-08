@@ -4,7 +4,7 @@
  *  @brief Defines the BaseObject class.
  *
  *  @author Luk2010
- *  @date 30/11/2014 - 22/01/2015
+ *  @date 30/11/2014 - 03/02/2015
  *
  *  @copyright
  *  Atlanti's Project Engine
@@ -131,7 +131,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         template<typename T, typename ...Args>
         T* New (size_t num, Args&&... args) {
-            if(num > 1) {
+            if(num >= 2) {
                 if (m_cursize + sizeof(T) * num < m_maxsize || m_maxsize == 0) {
                     m_cursize += sizeof(T) * num;
                     return AProNewA (T, num, std::forward<Args>(args)...);
@@ -231,6 +231,10 @@ namespace APro
     template <typename T, AllocatorPool PoolNum = AllocatorPool::Default>
     class APRO_DLL BaseObject : public BaseObjectTrait
     {
+	public:
+		
+		typedef Allocator<PoolNum> PooledAllocator;
+		
     public:
         
         ////////////////////////////////////////////////////////////
@@ -238,7 +242,7 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         static T* New() {
-            return Allocator<PoolNum>::Get().New(1);
+            return Allocator<PoolNum>::Get().New<T>(1);
         }
         
         ////////////////////////////////////////////////////////////
@@ -247,7 +251,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         template <typename ...Args>
         static T* New(Args&&... args) {
-            return Allocator<PoolNum>::Get().New(1, std::forward<Args>(args)...);
+            return Allocator<PoolNum>::Get().New<T>(1, std::forward<Args>(args)...);
         }
         
         ////////////////////////////////////////////////////////////
@@ -255,7 +259,7 @@ namespace APro
          **/
         ////////////////////////////////////////////////////////////
         static T* NewA(size_t num) {
-            return Allocator<PoolNum>::Get().New(num);
+            return Allocator<PoolNum>::Get().New<T>(num);
         }
         
         ////////////////////////////////////////////////////////////
@@ -264,7 +268,7 @@ namespace APro
         ////////////////////////////////////////////////////////////
         template <typename ...Args>
         static T* New(size_t num, Args&&... args) {
-            return Allocator<PoolNum>::Get().New(num, std::forward<Args>(args)...);
+            return Allocator<PoolNum>::Get().New<T>(num, std::forward<Args>(args)...);
         }
         
         ////////////////////////////////////////////////////////////
@@ -281,8 +285,7 @@ namespace APro
         /** @brief Returns current AllocatorPool.
          **/
         ////////////////////////////////////////////////////////////
-        AllocatorPool getAllocatorPool () const { return PoolNum; }
-        
+        const AllocatorPool getAllocatorPool () const { return PoolNum; }
     };
 }
 

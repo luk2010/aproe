@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 20/01/2015
+ *  @date 20/09/2012 - 03/02/2015
  *
  *  @brief
  *  Defines the Main class.
@@ -80,6 +80,16 @@ namespace APro
 			Before,
 			After
 		};
+		
+		typedef std::function<void (void)> UpdateCallbackFunction;
+        typedef Array<UpdateCallbackFunction> UpdateCallbackFunctionArray;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Add a callback that can be called before or after
+         *  the Update function.
+        **/
+        ////////////////////////////////////////////////////////////
+		void addUpdateCallBack(UpdateCallback when, UpdateCallbackFunction what);
 
     protected:
 
@@ -117,7 +127,7 @@ namespace APro
          *  For now, it does nothing.
         **/
         ////////////////////////////////////////////////////////////
-        void update() {}
+        void update();
 
         ////////////////////////////////////////////////////////////
         /** Clean the Engine.
@@ -273,8 +283,9 @@ namespace APro
         
 
     private:
-
-        Map<int, bool> options;
+        
+        UpdateCallbackFunctionArray m_updatesafter;
+        UpdateCallbackFunctionArray m_updatesbefore;
     };
     
 #if 0
@@ -350,10 +361,10 @@ namespace APro
 				Console::Get() << "\nCould not find loder for 'obj' file format. Please load plugin 'ObjFileFormat' or another one which load 'obj' file format.";
 				exit(-4);
 			}
-			
-			ObjectPtr myobjectpr;
 
 #if 0
+			ObjectPtr myobjectpr;
+
 			// 1. Create an Entry, then load the objet in and add the resource to the SceneManager.
 			ResourceEntryPtr myobjectentry = ResourceManager::Get().createResourceEntry("MyObject");
 			ResourceManager::Get().loadResource(myobjectentry, "example.obj");

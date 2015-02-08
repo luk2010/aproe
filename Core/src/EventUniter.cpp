@@ -95,7 +95,7 @@ namespace APro
                 continue;
             }
 
-            if(command.eventptr->mustStop())
+            if(command.eventptr->must_stop)
             {
                 aprodebug("Event has stop flag setted.");
                 AProDelete(command.eventptr);
@@ -107,7 +107,7 @@ namespace APro
                 for(uint32_t i = 0; i < command.listeners.size(); ++i) {
 					EventListenerPtr& listener = command.listeners.at(i);
 					listener->receive( (EventRef) *(command.eventptr));
-					if(command.eventptr->mustStop()) {
+					if(command.eventptr->must_stop) {
 						break;
 					}
                 }

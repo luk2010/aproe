@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 08/11/2014 - 17/11/2014
+ *  @date 08/11/2014 - 05/02/2015
  *
+ *  @brief
  *  Defines the EBNFParser class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
 ////////////////////////////////////////////////////////////
@@ -15,6 +33,11 @@
 #define APRO_EBNFPARSER_H
 
 #include "Platform.h"
+
+#include "Array.h"
+#include "SString.h"
+
+#include "TokenScanner.h"
 
 namespace APro
 {
@@ -75,9 +98,9 @@ namespace APro
         public:
             
             virtual ~Element() {
-                while (!childs.isEmpty()) {
-                    delete childs[0];
-                    childs.erase(childs.begin());
+                while (!mchilds.isEmpty()) {
+                    delete mchilds[0];
+                    mchilds.erase(mchilds.begin());
                 }
             }
             
@@ -202,7 +225,7 @@ namespace APro
             const Type type() const { return ETGroup; }
         };
         
-        class ElementSentence : public Rule
+        class ElementSentence : public Element
         {
         public:
             
@@ -331,13 +354,13 @@ namespace APro
         };
         
     }
-    
+
+/*
     class EBNFParser
     {
     public:
         
-        
-        /// @brief Constructs the EBNF sentence tree for given sentence.
+
         bool addSentence(const char* ebnfs);
         
         bool parse(const UTF8String& sentence);
@@ -346,6 +369,7 @@ namespace APro
         
         Array<ElementSentence*> sentences;
     };
+*/
 }
 
 #endif // APRO_EBNFPARSER_H

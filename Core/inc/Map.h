@@ -33,6 +33,7 @@
 #define APROMAP_H
 
 #include "Platform.h"
+#include "Array.h"
 
 namespace APro
 {

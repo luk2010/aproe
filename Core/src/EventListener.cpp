@@ -57,8 +57,8 @@ namespace APro
 		bool ret = handle(event);
 		
 		// Call callbacks
-		for(uint32_t i = 0; i < callbacks[event].size(); ++i) {
-			callbacks[event].at(i) (event);
+		for(uint32_t i = 0; i < callbacks[event.type()].size(); ++i) {
+			callbacks[event.type()].at(i) (event);
 		}
 		
 		// Return and copy event

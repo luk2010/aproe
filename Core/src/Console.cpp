@@ -32,6 +32,7 @@
 #define _WIN32_WINNT 0x0500
 #include "Console.h"
 #include <stdio.h>
+#include <iostream>
 #include "ThreadMutex.h"
 #include "ThreadMutexLockGuard.h"
 

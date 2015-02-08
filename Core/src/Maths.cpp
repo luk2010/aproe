@@ -13,7 +13,7 @@
 ////////////////////////////////////////////////////////////
 #include "Maths.h"
 #include <math.h>
-#include <limits.h>
+#include <limits>
 
 namespace APro
 {

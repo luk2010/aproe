@@ -4,14 +4,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 29/05/2012 - 11/12/2014
+ *  @date 29/05/2012 - 03/02/2015
  *
  *  Defines some constants to be used on different platform. 
  *  This constants are universal.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@
 **/
 #ifndef APROBASE_H
 #define APROBASE_H
+
+#define CONCAT_I(a, b) a ## b
+#define CONCAT(a, b) CONCAT_I(a, b)
 
 /** @def TOTEXT(a)
  *  Transform something into text.
@@ -220,6 +223,12 @@ namespace APro
         INTOUT,
         INTBETWEEN
     };
+    
+    template <typename T>
+    using Invoke = typename T::type;
+    
+    template <typename Condition>
+    using EnableIf = Invoke<std::enable_if<Condition::value> >;
 }
 
 ////////////////////////////////////////////////////////////

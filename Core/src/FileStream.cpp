@@ -12,6 +12,8 @@
 **/
 /////////////////////////////////////////////////////////////
 #include "FileStream.h"
+#include "Console.h"
+#include "UTF8String.h"
 
 namespace APro
 {
@@ -239,7 +241,7 @@ namespace APro
             return false;
         }
         
-        UTF8Char::CodePoint cp = UTF8CHar::CPNull;
+        UTF8Char::CodePoint cp = UTF8Char::CPNull;
         
         if(!readUTF8Char(cp)) {
             return false;
@@ -308,7 +310,7 @@ namespace APro
             return false;
         
         // Write the current used char.
-        return m_file->write ((const char*) cptoc, vcu);
+        return m_file->write ((const Byte*) cptoc, vcu);
     }
     
     bool FileStream::write(const UTF8String& str)

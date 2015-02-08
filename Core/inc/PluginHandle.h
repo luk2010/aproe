@@ -141,7 +141,7 @@ namespace APro
     **/
     /////////////////////////////////////////////////////////////
     class APRO_DLL PluginHandle : public EventEmitter,
-                                  public ThreadSafe,
+                                  virtual public ThreadSafe,
                                   public NonCopyable
     {
 

@@ -43,8 +43,8 @@ namespace APro
         loaded.set(false);
         handle = nullptr;
 
-        documentEvent(DynamicLibraryLoadedEvent::Hash,   "DynamicLibrary has been loaded.");
-        documentEvent(DynamicLibraryUnloadedEvent::Hash, "DynamicLibrary has been unloaded.");
+        documentEvent(DynamicLibraryLoadedEvent::Hash,   String("DynamicLibrary has been loaded."));
+        documentEvent(DynamicLibraryUnloadedEvent::Hash, String("DynamicLibrary has been unloaded."));
     }
 
     DynamicLibrary::DynamicLibrary(const String& mfilename)
@@ -53,8 +53,8 @@ namespace APro
         loaded.set(false);
         handle = nullptr;
 
-        documentEvent(DynamicLibraryLoadedEvent::Hash,   "DynamicLibrary has been loaded.");
-        documentEvent(DynamicLibraryUnloadedEvent::Hash, "DynamicLibrary has been unloaded.");
+        documentEvent(DynamicLibraryLoadedEvent::Hash,   String("DynamicLibrary has been loaded."));
+        documentEvent(DynamicLibraryUnloadedEvent::Hash, String("DynamicLibrary has been unloaded."));
         load();
     }
 
@@ -126,13 +126,13 @@ namespace APro
     EventLocalPtr DynamicLibrary::createEvent(const HashType& e_type) const
     {
         if(e_type == DynamicLibraryLoadedEvent::Hash) {
-            EventLocalPtr ret = (Event*) AProNew(DynamicLibraryLoadedEvent);
+            EventLocalPtr ret((Event*) AProNew(DynamicLibraryLoadedEvent));
             ret->m_emitter = this;
             return ret;
         }
 
         else if(e_type == DynamicLibraryUnloadedEvent::Hash) {
-            EventLocalPtr ret = (Event*) AProNew(DynamicLibraryUnloadedEvent);
+            EventLocalPtr ret((Event*) AProNew(DynamicLibraryUnloadedEvent));
             ret->m_emitter = this;
             return ret;
         }

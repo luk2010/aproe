@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 11/09/2012 - 27/12/2014
+ *  @date 11/09/2012 - 07/02/2015
  *
  *  @brief
  *  Defines the EventListener class.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ namespace APro
      *  correctly by the Listener.
     **/
     /////////////////////////////////////////////////////////////
-    class APRO_DLL EventListener : public BaseObject <EventListener>
+    class APRO_DLL EventListener  //public BaseObject <EventListener>
     {
 	protected:
 		
@@ -94,7 +94,13 @@ namespace APro
         /////////////////////////////////////////////////////////////
         EventListener(const String & name = String("no_name"));
         
-         /////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////
+        /** @brief Copy a listener.
+        **/
+        /////////////////////////////////////////////////////////////
+        EventListener(const EventListener& other);
+        
+		/////////////////////////////////////////////////////////////
         /** @brief Destructs the Listener.
         **/
         /////////////////////////////////////////////////////////////

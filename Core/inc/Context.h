@@ -35,7 +35,7 @@
 #include "Platform.h"
 #include "AutoPointer.h"
 
-#include "EventReceiver.h"
+#include "EventEmitter.h"
 #include "ViewPort.h"
 
 namespace APro
@@ -284,7 +284,7 @@ namespace APro
          *  @see EventEmitter::createEvent
         **/
         /////////////////////////////////////////////////////////////
-        EventPtr createEvent(const HashType& e_type) const;
+        EventLocalPtr createEvent(const HashType& e_type) const;
     };
 
     typedef AutoPointer<Context> ContextPtr;///< An AutoPointer to a Context Object.

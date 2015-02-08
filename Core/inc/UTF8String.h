@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 04/11/2014 - 08/11/2014
+ *  @date 04/11/2014 - 07/02/2015
  *
+ *  @brief
  *  Defines the UTF8String class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
 ////////////////////////////////////////////////////////////
@@ -132,32 +150,13 @@ namespace APro
         
         UTF8String ();
         UTF8String (const UTF8String& str);
-        
-#if APRO_CPP11
         UTF8String (UTF8String&& str);
-#endif
+
+
+	public:
         
-    public:
-        
-        void append (const UTF8String& str);
-        void push_back (const UTF8String& str) { append(str); }
-        UTF8String& operator << (const UTF8String& str) { append(str); return *this; }
-        
-        void append (const UTF8Char::CodePoint& cp);
-        void push_back (const UTF8Char::CodePoint& cp) { append(str); }
-        
-        void prepend (const UTF8String& str);
-        void push_front (const UTF8String& str) { prepend(str); }
-        
-        void clear();
-        void erase(iterator beg, const_iterator e = nullptr);
-        
-        void insert(const UTF8Char::CodePoint& cp, const_iterator);
-        
-        
-    public:
-        
-        size_t size() { return mdata.size() - 1; }
+        size_t size() const { return mdata.size() - 1; }
+        bool isEmpty() const { return size() == 0; }
         
         typedef Array<UTF8Char::CodePoint>::iterator iterator;
         typedef Array<UTF8Char::CodePoint>::const_iterator const_iterator;
@@ -170,6 +169,23 @@ namespace APro
         
         iterator last() { return mdata.last(); }
         const_iterator last() const { return mdata.last(); }
+        
+    public:
+        
+        void append (const UTF8String& str);
+        void push_back (const UTF8String& str) { append(str); }
+        UTF8String& operator << (const UTF8String& str) { append(str); return *this; }
+        
+        void append (const UTF8Char::CodePoint& cp);
+        void push_back (const UTF8Char::CodePoint& cp) { append(cp); }
+        
+        void prepend (const UTF8String& str);
+        void push_front (const UTF8String& str) { prepend(str); }
+        
+        void clear();
+        void erase(iterator beg, const_iterator e = nullptr);
+        
+        void insert(const UTF8Char::CodePoint& cp, const_iterator);
         
     public:
         

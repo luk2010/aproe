@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 20/09/2012 - 19/01/2015
+ *  @date 20/09/2012 - 03/02/2015
  *
  *  @brief
  *  Implements the Main class.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include "DynamicLibraryLoader.h"
 #include "NullLoader.h"
 #include "EventUniter.h"
+#include "MathFunctionManager.h"
 
 // ==============================================================
 // Some useful defines
@@ -44,7 +45,7 @@
 	if(name) 												\
 	{ 													 	\
 		class::__current_##class = name;					\
-		getConsole() << "\n[Main] class OK."                \
+		getConsole() << "\n[Main] class OK.";               \
 	}														\
 	else													\
 	{														\
@@ -71,7 +72,7 @@
 	if(name) 												\
 	{ 													 	\
 		class::__current_##class = name;					\
-		getConsole() << "\n[Main] class OK."                \
+		getConsole() << "\n[Main] class OK.";               \
 	}														\
 	else													\
 	{														\
@@ -92,7 +93,7 @@
 	if(name) 												\
 	{ 													 	\
 		class::__current_##class = name;					\
-		getConsole() << "\n[Main] class OK."                \
+		getConsole() << "\n[Main] class OK.";               \
 	}														\
 	else													\
 	{														\
@@ -173,19 +174,19 @@ namespace APro
         // -- Manager ------------------------------------------------------------------
 
         SINGLETON_BASECREATE(ThreadManager, tmanager)
-        SINGLETON_BASECREATE(MathManager,   mathManager)
+        SINGLETON_BASECREATE(MathFunctionManager,   mathManager)
 
         SINGLETON_BASECREATE(ResourceManager, resourceManager)
         // Default loader for libraries.
 		resourceManager->addLoader(ResourceLoaderPtr(AProNew(DynamicLibraryLoader)));
-		resourceManager->setDefaultLoader(DYNLIB_EXTENSION, "DynamicLibraryLoader");
+		resourceManager->setDefaultLoader(String(DYNLIB_EXTENSION), String("DynamicLibraryLoader"));
 		// Exemple Null Loader.
 		resourceManager->addLoader(ResourceLoaderPtr(AProNew(NullLoader)));
 		
 		SINGLETON_BASECREATE(WindowManager, windowManager)
 
         SINGLETON_BASECREATE(PluginManager, pluginManager)
-        getConsole() << "\n[Main] Loading plugins and implementations in directory \"plugins\"."
+        getConsole() << "\n[Main] Loading plugins and implementations in directory \"plugins\".";
         pluginManager->loadDirectory(String("plugins/"));
 
         getConsole() << "\n[Main] Main Initialized ! Enjoy ;)";
@@ -212,7 +213,7 @@ namespace APro
         SINGLETON_BASEDELETE(PluginManager,   	 pluginManager)
         SINGLETON_BASEDELETE(WindowManager,      windowManager)
 		SINGLETON_BASEDELETE(ResourceManager, 	 resourceManager)
-		SINGLETON_BASEDELETE(MathManager,     	 mathManager)
+		SINGLETON_BASEDELETE(MathFunctionManager,     	 mathManager)
 		SINGLETON_BASEDELETE(ThreadManager,   	 tmanager)
         SINGLETON_BASEDELETE(EventUniter,    	 euniter)
         
@@ -224,5 +225,28 @@ namespace APro
         SINGLETON_CLEAN(IdGenerator, 		 id_generator)
 
         getConsole() << "\n[Main] Cleaned !";
+    }
+    
+    void Main::addUpdateCallBack(Main::UpdateCallback when, Main::UpdateCallbackFunction what)
+    {
+    	if(when == UpdateCallback::After) {
+			m_updatesafter.append(what);
+    	}
+    	else if(when == UpdateCallback::Before) {
+			m_updatesbefore.append(what);
+    	}
+    }
+    
+    void Main::update()
+    {
+    	// Use before callbacks
+    	for(uint32_t i = 0; i < m_updatesbefore.size(); ++i)  {
+			(m_updatesbefore.at(i)) ();
+    	}
+    	
+    	// Use after callbacks
+    	for(uint32_t i = 0; i < m_updatesafter.size(); ++i)  {
+			(m_updatesafter.at(i)) ();
+    	}
     }
 }

@@ -4,7 +4,7 @@
  *  @brief Defines the Array class.
  *
  *  @author Luk2010
- *  @date 29/05/2012 - 22/01/2015
+ *  @date 29/05/2012 - 07/02/2015
  *
  *  @copyright
  *  Atlanti's Project Engine
@@ -770,13 +770,13 @@ namespace APro
 
             return *this;
         }
-        
+/*        
         Array<T>& operator = (Array<T> rhs)
         {
             move(rhs);
             return *this;
         }
-        
+*/
         ////////////////////////////////////////////////////////////
         /** @brief Swap two Arrays of same type.
          *  @note This is less efficient than using the operator =
@@ -816,6 +816,7 @@ namespace APro
         }
 
         bool operator == (const Array<T>& rhs) const { return equals(rhs); }
+        bool operator != (const Array<T>& rhs) const { return !(*this == rhs); }
 
         ////////////////////////////////////////////////////////////
         /** @brief Return an iterator if given object is found in this
@@ -936,6 +937,19 @@ namespace APro
             ptr = data;
             logical_size = lsz;
             physical_size = psz;
+        }
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Convert an iterator to the Index property.
+        **/
+        ////////////////////////////////////////////////////////////
+        int convertIteratorToIndex(iterator& it)
+        {
+        	if(it != end()) {
+				return it - begin();
+        	} else {
+        		return -1;
+        	}
         }
 
     };

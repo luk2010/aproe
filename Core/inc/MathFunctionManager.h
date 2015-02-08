@@ -62,7 +62,7 @@ namespace APro
     **/
     ////////////////////////////////////////////////////////////
     class APRO_DLL MathFunctionManager : 
-    	public BaseObject<MathFunctionManager>
+    	public BaseObject<MathFunctionManager>,
     	public Manager<MathModule>
     {
         APRO_DECLARE_MANUALSINGLETON(MathFunctionManager)

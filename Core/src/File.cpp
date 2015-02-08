@@ -5,15 +5,35 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 30/08/2012 - 04/11/2014
+ *  @date 30/08/2012 - 07/02/2015
  *
+ *  @brief 
  *  Implements the File class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
 #include "File.h"
 #include "FileSystem.h"
 #include "UTF8String.h"
+
+#include "Console.h"
 
 namespace APro
 {
@@ -93,7 +113,7 @@ namespace APro
     {
         // Try to read UTF8 BOM
         UTF8Char::BOM bom;
-        if(!read(&bom, sizeof(bom)))
+        if(!read((Byte*) &bom, sizeof(bom)))
             m_hasbom = false;
         
         if (bom.byte1 == UTF8Char::CPBOM.byte1 &&
@@ -117,7 +137,7 @@ namespace APro
         if(isOpened())
         {
             seek(C_BEGIN);
-            write(&UTF8Char::CPBOM, sizeof(UTF8Char::CPBom));
+            write((Byte*) &UTF8Char::CPBOM, sizeof(UTF8Char::CPBOM));
         }
     }
 

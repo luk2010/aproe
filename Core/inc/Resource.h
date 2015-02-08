@@ -69,7 +69,7 @@ namespace APro
      *
     **/
     ////////////////////////////////////////////////////////////
-    class APRO_DLL Resource : public ThreadSafe,
+    class APRO_DLL Resource : virtual public ThreadSafe,
                               public HashedType,
                               public NonCopyable
     {

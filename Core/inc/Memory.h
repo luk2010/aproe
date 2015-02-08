@@ -157,11 +157,11 @@ namespace APro
 #define AProDeallocate(ptr)         APro::deallocate(ptr, __FUNCTION__, __FILE__, __LINE__)
     
 /// @brief Convert given Real -> MemoryHeader pointer
-#define APRO_MEM_HEAD(ptr)          (APro::MemoryHeader*) ((void*)ptr)
+#define APRO_MEM_HEAD(ptr)          ((APro::MemoryHeader*) ((void*)ptr))
 /// @brief Convert Virtual -> Real
-#define APRO_MEM_REAL (ptr)         (((char*)ptr) - sizeof(APro::MemoryHeader))
+#define APRO_MEM_REAL(ptr)          (((char*)ptr) - sizeof(APro::MemoryHeader))
 /// @brief Convert Real -> Virtual
-#define APRO_MEM_VIRTUAL (ptr)      (((char*)ptr) + sizeof(APro::MemoryHeader))
+#define APRO_MEM_VIRTUAL(ptr)       (((char*)ptr) + sizeof(APro::MemoryHeader))
 
 #define APRO_CONSTMEM_HEAD(ptr)     (const APro::MemoryHeader*) ((const void*)ptr)
 #define APRO_CONSTMEM_REAL (ptr)    (((const char*)ptr) - sizeof(APro::MemoryHeader))
@@ -312,7 +312,7 @@ template <> void AProDelete<void>(void* ptr, const char* func_, const char* file
 /// @param T : Type of objects.
 /// @param N : Size of array (in number of elements).
 /// @see AProNew, AProDelete
-#define AProNewA(T, N, ...) new (AProNew<T>(N, __FUNCTION__, __FILE__, __LINE__, true)) T[N] ( __VA_ARGS__ )
+#define AProNewA(T, N, ...) new (AProNew<T>(N, __FUNCTION__, __FILE__, __LINE__, true)) T[N] /* ( __VA_ARGS__ ) */
 
 /// Destroys an array of objects and call destructor if possible.
 /// @ingroup Memory

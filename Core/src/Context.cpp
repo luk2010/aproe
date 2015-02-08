@@ -270,16 +270,16 @@ namespace APro
         }
     }
 
-    EventPtr Context::createEvent(const HashType& e_type) const
+    EventLocalPtr Context::createEvent(const HashType& e_type) const
     {
         if(e_type == ContextBindedEvent::Hash) {
-            EventPtr ret = (Event*) AProNew(ContextBindedEvent);
+            EventLocalPtr ret((Event*) AProNew(ContextBindedEvent));
             ret->m_emitter = this;
             return ret;
         }
 
         else if(e_type == ContextUnbindedEvent::Hash) {
-            EventPtr ret = (Event*) AProNew(ContextUnbindedEvent);
+            EventLocalPtr ret((Event*) AProNew(ContextUnbindedEvent));
             ret->m_emitter = this;
             return ret;
         }

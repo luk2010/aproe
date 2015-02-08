@@ -93,7 +93,7 @@ namespace APro
     protected:
 
         typedef Map<HashType, String>  EventsList;   ///< List of events type, with documentation.
-        typedef List<EventListenerPtr> ListenersList;///< List of listeners pointer.
+        typedef Array<EventListenerPtr> ListenersList;///< List of listeners pointer.
         typedef Map<HashType, ListenersList> ListenersByType; ///< @brief If an Event Type have been specified for a Listener, store it here.
 
         enum EmitPolicy

@@ -69,7 +69,7 @@ namespace APro
          *  @param str : C-style string.
         **/
         ////////////////////////////////////////////////////////////
-        explicit String(const char* str);
+		String(const char* str);
         String(const char* str, size_t sz);
 
         ////////////////////////////////////////////////////////////

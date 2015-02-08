@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/12/2013 - 28/12/2014
+ *  @date 02/12/2013 - 07/02/2015
  *
  *  @brief
  *  Defines the EventUniter object.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@
 #include "Queue.h"
 #include "Event.h"
 #include "Thread.h"
+#include "ThreadCondition.h"
 
 namespace APro
 {
@@ -62,23 +63,36 @@ namespace APro
      *  be done in the destructor while destructing the object.
     **/
     /////////////////////////////////////////////////////////////
-    class APRO_DLL EventUniter : public BaseObject <EventUniter>,
-								 public ThreadSafe,
-                                 public Thread
+    class APRO_DLL EventUniter : 
+    	public BaseObject <EventUniter>,
+		public Thread
     {
         APRO_DECLARE_MANUALSINGLETON(EventUniter)
-
-    private:
         
-        typedef Array<EventListenerPtr> ListenersArray;
-        typedef struct _SendCommand
+	public:
+		
+		typedef Array<EventListenerPtr> ListenersArray;						
+		typedef struct _SendCommand
         {
         	EventCopy* 		eventptr;  ///< @brief A COPY of the Event to send, made generally by the EventEmitter.
         	ListenersArray 	listeners; ///< @brief An Array of listeners, to which to send the Event to.
+        	
+        	bool operator == (const struct _SendCommand& rhs) const {
+        		return eventptr == rhs.eventptr &&
+					   listeners == rhs.listeners;
+        	}
+        	
+        	bool operator != (const struct _SendCommand& rhs) const {
+        		return eventptr != rhs.eventptr ||
+					   listeners != rhs.listeners;
+        	}
         } SendCommand;
+
+    private:
+        
         Queue<SendCommand> commands; ///< @brief Commands the Uniter have to send, in order.
         ThreadCondition    idlecondition; ///< @brief Thread Condition for idling purpose.
-        bool               isidling: ///< @brief True if idling.
+        bool               isidling; ///< @brief True if idling.
 
     public:
 

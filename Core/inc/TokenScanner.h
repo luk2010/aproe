@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/11/2014 - 29/11/2014
+ *  @date 25/11/2014 - 07/02/2015
  *
+ *  @brief
  *  Defines the TokenScanner class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
 ////////////////////////////////////////////////////////////
@@ -23,20 +41,19 @@
 
 namespace APro
 {
+	/** @brief A generic Token Position.
+	 *  First is the line number, Second is the column number.
+	**/
+	typedef Pair<int, int> TokPosition;
+	
     ////////////////////////////////////////////////////////////
     /** @class Token
+     *  @ingroup Utils
      *  @brief A generic Token class used by the Token Scanner.
      **/
     ////////////////////////////////////////////////////////////
     class Token : public Swappable<Token>
     {
-    public:
-        
-        /** @brief A generic Token Position.
-         *  First is the line number, Second is the column number.
-        **/
-        typedef Pair<int, int> TokPosition;
-        
     private:
         
         int         type;       ///< @brief The Token's type.
@@ -48,9 +65,7 @@ namespace APro
         Token (int tp, const String& cont, const TokPosition& pos);
         Token (const Token& tok);
         
-#ifdef APRO_CPP11
         Token (Token&& tok);
-#endif
         
         Token& operator = (Token tok);
         
@@ -99,6 +114,7 @@ namespace APro
     
     ////////////////////////////////////////////////////////////
     /** @class TokenScanner
+     *  @ingroup Utils
      *  @brief Scan a stream and stores every encountered Tokens.
     **/
     ////////////////////////////////////////////////////////////

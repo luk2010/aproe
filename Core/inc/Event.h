@@ -167,7 +167,7 @@ namespace APro
 
     public:
 
-		EventEmitter*  m_emitter;///< Emitter of this event. Might be null but should not.
+		const EventEmitter*  m_emitter;///< Emitter of this event. Might be null but should not.
         EventListener* m_target; ///< Target of this event. Might be null.
         bool           must_stop;///< Boolean to be set to true if listener does not want the event to continue his propagation.
 
@@ -354,9 +354,9 @@ class APRO_DLL name : public Event \
 /// @endcode
 ///
 /// @param name : Name of the event to declare.
-#define APRO_DECLARE_EVENT_CONTENT(name) \
+#define APRO_DECLARE_EVENT_CONTENT( name ) \
 class APRO_DLL name : public Event \
-{ public: name() { m_type = Hash; } ~name() {} static const HashType Hash;
+{ public: name () { m_type = Hash; } ~name() {} static const HashType Hash;
 
 /// @brief Ends the APRO_DECLARE_EVENT_CONTENT macro.
 #define APRO_DECLARE_EVENT_CONTENT_END() };

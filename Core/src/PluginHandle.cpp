@@ -52,7 +52,7 @@ namespace APro
         started    = false;
         terminated = false;
 
-        ResourceEntryPtr e = ResourceManager::Get().loadResourceWithLoader(mname, library_file, "DynamicLibraryLoader");
+        ResourceEntryPtr e = ResourceManager::Get().loadResourceWithLoader(mname, library_file, String("DynamicLibraryLoader"));
         if(e)
         {
             dynLib = e->getResource<DynamicLibrary>();

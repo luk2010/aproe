@@ -36,6 +36,7 @@
 #include "ThreadSafe.h"
 
 #include "Factory.h"
+#include "Vector3.h"
 
 namespace APro
 {

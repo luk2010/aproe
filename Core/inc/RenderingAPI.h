@@ -40,6 +40,7 @@
 #include "Singleton.h"
 #include "Printable.h"
 #include "Scene.h"
+#include "Window.h"
 
 namespace APro
 {
@@ -208,7 +209,7 @@ namespace APro
          *  Window::show(). 
         **/
         ////////////////////////////////////////////////////////////
-		WindowPtr _createWindowImpl(const String& windowname, uint32_t width, uint32_t height, bool fullscreen) const = 0;
+		virtual WindowPtr _createWindowImpl(const String& windowname, uint32_t width, uint32_t height, bool fullscreen) const = 0;
 
     protected:
 

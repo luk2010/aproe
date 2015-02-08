@@ -18,7 +18,7 @@
 namespace APro
 {
     NullLoader::NullLoader()
-        : ResourceLoader("NullLoader", "Null Loader for Tests")
+        : ResourceLoader(String("NullLoader"), String("Null Loader for Tests"))
     {
 
     }

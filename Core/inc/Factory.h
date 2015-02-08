@@ -188,8 +188,8 @@ namespace APro
     	T& operator* () { return *ptr; }
     	const T& operator* () const { return *ptr; }
     	
-    	T& operator-> () { return *ptr; }
-    	const T& operator-> () const { return *ptr; }
+    	T* operator-> () { return ptr; }
+    	const T* operator-> () const { return ptr; }
     	
     	bool isNull() const { return ptr == nullptr; }
     	bool operator == (const T* rhs) const { return ptr == rhs; }
@@ -202,6 +202,12 @@ namespace APro
 			if(rhs.ptr)
 				ptr = dynamic_cast<T*>(rhs.ptr->clone()); 
 			return *this;
+    	}
+    	
+    	PrototypeLocalPtr& operator = (T* rhs) {
+    		if(ptr) 
+				AProDelete(ptr); 
+			ptr = rhs;
     	}
     };
 }

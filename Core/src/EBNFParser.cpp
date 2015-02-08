@@ -5,13 +5,32 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 13/11/2014 - 29/11/2014
+ *  @date 13/11/2014 - 07/02/2015
  *
+ *  @brief
  *  Implements the EBNFParser class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
 ////////////////////////////////////////////////////////////
 #include "EBNFParser.h"
+#include "TokenScannerHelper.h"
 
 namespace APro
 {
@@ -33,7 +52,7 @@ namespace APro
                 if(TokenScannerHelper::isAlpha(currentCharacter))
                 {
                     Token tok = scanIdentifier();
-                    tokens.append(stdmove(tok));
+                    tokens.append(std::move(tok));
                     currentToken++;
                     return;
                 }
@@ -42,7 +61,7 @@ namespace APro
                 else if (TokenScannerHelper::isQuote(currentCharacter))
                 {
                     Token tok = scanLiteral();
-                    tokens.append(stdmove(tok));
+                    tokens.append(std::move(tok));
                     currentToken++;
                     return;
                 }
@@ -52,13 +71,13 @@ namespace APro
                 {
                     if (currentCharacter == '(' && peekCharacter() == '*') {
                         Token tok = scanComment();
-                        tokens.append(stdmove(tok));
+                        tokens.append(std::move(tok));
                         currentToken++;
                         return;
                     }
                     else {
                         Token tok = scanOperator();
-                        tokens.append(stdmove(tok));
+                        tokens.append(std::move(tok));
                         currentToken++;
                         return;
                     }
@@ -84,7 +103,8 @@ namespace APro
         Token EBNFScanner::scanIdentifier()
         {
             TokPosition pos = createPosition();
-            String content  = String(&currentCharacter, 1);
+            char currchar   = getCurrentCharacter();
+            String content  = String(&currchar, 1);
             CharArray _equals; _equals << '-' << '_';
             
             while (hasNextCharacter())
@@ -92,10 +112,10 @@ namespace APro
                 nextCharacter();
                 
                 // Ensure this character is in identifier.
-                if(TokenScannerHelper::isAlphaNum(currentCharacter) ||
-                   TokenScannerHelper::isEquals(currentCharacter, _equals) )
+                if(TokenScannerHelper::isAlphaNum(getCurrentCharacter()) ||
+                   TokenScannerHelper::isEquals(getCurrentCharacter(), _equals) )
                 {
-                    content.append(currentCharacter);
+                    content.append(getCurrentCharacter());
                 }
                 else
                 {
@@ -116,10 +136,10 @@ namespace APro
             while (hasNextCharacter())
             {
                 nextCharacter();
-                content.append(currentCharacter);
+                content.append(getCurrentCharacter());
                 
                 // Ensure begin and end of literal.
-                if(TokenScannerHelper::isQuote(currentCharacter) && currentCharacter == _start) {
+                if(TokenScannerHelper::isQuote(getCurrentCharacter()) && getCurrentCharacter() == _start) {
                     break;
                 }
             }
@@ -129,18 +149,19 @@ namespace APro
         
         Token EBNFScanner::scanComment()
         {
+        	char currchar   = getCurrentCharacter();
             TokPosition pos = createPosition();
-            String content  = String(&currentCharacter, 1);
+            String content  = String(&currchar, 1);
             
             while (hasNextCharacter())
             {
                 nextCharacter();
-                content.append(currentCharacter);
+                content.append(getCurrentCharacter());
                 
-                if(currentCharacter == '*' && peekCharacter() == ')')
+                if(getCurrentCharacter() == '*' && peekCharacter() == ')')
                 {
                     nextCharacter();
-                    content.append(currentCharacter);
+                    content.append(getCurrentCharacter());
                     break;
                 }
                 
@@ -153,22 +174,23 @@ namespace APro
         Token EBNFScanner::scanOperator()
         {
             TokPosition pos = createPosition();
-            String content  = String(&currentCharacter, 1);
+            char currchar   = getCurrentCharacter();
+            String content  = String(&currchar, 1);
             char peak       = peekCharacter();
             
-            if(currentCharacter == ':' && peak == ':')
+            if(getCurrentCharacter() == ':' && peak == ':')
             {
                 nextCharacter();
-                content.append(currentCharacter);
+                content.append(getCurrentCharacter());
                 nextCharacter();
                 
-                if(currentCharacter != '=') {
-                    raiseError (String("Expecting '=' but got '") + currentCharacter + "' instead.");
-                    content.append(currentCharacter);
+                if(getCurrentCharacter() != '=') {
+                    raiseError (String("Expecting '=' but got '") + getCurrentCharacter() + "' instead.");
+                    content.append(getCurrentCharacter());
                     return Token (Token::TypeInvalid, content, pos);
                 }
                 
-                content.append(currentCharacter);
+                content.append(getCurrentCharacter());
             }
             
             return Token (TokOperator, content, pos);
@@ -177,7 +199,7 @@ namespace APro
         String EBNFScanner::GetUnquotedLiteral(const Token& literal)
         {
             if(literal.getType() == TokLiteral) {
-                String result = literal;
+                String result = literal.getContent();
                 result.interpretastext();
                 return result;
             }
@@ -186,32 +208,5 @@ namespace APro
     }
     
     using namespace EBNF;
-    
-    bool EBNFParser::addSentence (const char* ebnfs)
-    {
-        if(!ebnfs)
-            return false;
-        
-        int sz = String::Size(ebnfs);
-        if(!sz)
-            return false;
-        
-        String ebnfstr (ebnfs);
-        
-        // Okay here we have to get a new Sentence. Let it parse our string.
-        ElementSentence* newsentence = AProNew (ElementSentence);
-        if(!newsentence->parse(ebnfstr)) {
-            AProDelete (newsentence);
-            aprodebug("Can't parse sentence ('") << ebnfs << "').\n";
-            return false;
-        }
-        
-        // Just add it to the parser context.
-        sentences.append(newsentence);
-        
-        aprodebug("Parsed new Sentence ('") << newsentence->mname << "').\n";
-        return true;
-    }
-    
-    
+
 }

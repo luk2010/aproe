@@ -34,8 +34,9 @@
 #include "Platform.h"
 #include "ThreadSafe.h"
 #include "Implementable.h"
-#include "WindowImplementation.h"
 #include "EventEmitter.h"
+#include "RenderingTarget.h"
+#include "Context.h"
 
 namespace APro
 {
@@ -52,7 +53,6 @@ namespace APro
     **/
     ////////////////////////////////////////////////////////////
     class APRO_DLL Window : 
-    	public NonCopyable,
     	public EventEmitter,
 		public RenderingTarget
     {
@@ -331,7 +331,7 @@ namespace APro
          *  It should also take care of the Context object.
         **/
         /////////////////////////////////////////////////////////////
-		virtual void _move(size_t x, size_t y) = 0;
+		virtual void _resize(size_t width, size_t height) = 0;
 		
 		////////////////////////////////////////////////////////////
         /** @brief Helper to send WindowMovedEvent.

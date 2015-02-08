@@ -140,7 +140,7 @@ namespace APro
 #endif
     }
     
-    WaitError ThreadCondition::wait(ThreadMutexI* mutexptr)
+    WaitError ThreadCondition::wait(IMutex* mutexptr)
     {
 #ifdef _COMPILE_WITH_PTHREAD_
         if(mutexptr == nullptr)

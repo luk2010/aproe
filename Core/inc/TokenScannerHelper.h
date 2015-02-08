@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 28/11/2014
+ *  @date 28/11/2014 - 07/02/2015
  *
+ *  @brief
  *  Defines the TokenScannerHelper class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
 ////////////////////////////////////////////////////////////
@@ -20,6 +38,7 @@ namespace APro
 {
     /////////////////////////////////////////////////////////////
     /** @class TokenScannerHelper
+     *  @ingroup Utils
      *  @brief Helper class for TokenScanner.
     **/
     /////////////////////////////////////////////////////////////
@@ -78,7 +97,7 @@ namespace APro
          *  @param character : Character to test.
          **/
         /////////////////////////////////////////////////////////////
-        bool isWhiteSpace(char character);
+        static bool isWhiteSpace(char character);
         
         /////////////////////////////////////////////////////////////
         /** @brief Returns true if given character is contained in 
@@ -87,7 +106,7 @@ namespace APro
          *  @param array : Array to look in.
          **/
         /////////////////////////////////////////////////////////////
-        bool isEquals(char character, const CharArray& array);
+        static bool isEquals(char character, const CharArray& array);
     };
 }
 

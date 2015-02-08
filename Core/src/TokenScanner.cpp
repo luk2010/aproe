@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/11/2014 - 15/12/2014
+ *  @date 25/11/2014 - 07/02/2014
  *
  *  @brief
  *  Implements the TokenScanner class.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

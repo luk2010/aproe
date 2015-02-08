@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/04/2013 - 28/12/2014
+ *  @date 06/04/2013 - 07/02/2015
  *
  *  @brief
  *  Defines the Condition class.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -144,7 +144,7 @@ namespace APro
          *  @return WE_OK if everything is okay, else an error code.
         **/
         ////////////////////////////////////////////////////////////
-        WaitError wait(ThreadMutexI* mutexptr);
+        WaitError wait(IMutex* mutexptr);
 
     public:
 

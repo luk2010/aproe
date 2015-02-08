@@ -256,7 +256,7 @@ namespace APro
         EventsList::const_iterator e = events.end();
         for (EventsList::const_iterator it = events.begin(); it != e; it++)
         {
-            ret << " + Hash['" << it.key() << "'] : " << it.value() << "\n";
+            ret << " + Hash['" << String::toString(it.key()) << "'] : " << it.value() << "\n";
         }
 
         ret << "-----------------------------------";
@@ -391,8 +391,8 @@ namespace APro
             {
             	APRO_THREADSAFE_AUTOLOCK
             	
-                int index = listeners.find(_listener);
-                listeners.erase(listeners.begin()+(size_t)index);
+                ListenersList::iterator index = listeners.find(_listener);
+                listeners.erase(index);
                 
                 // We must find listener in every processed event.
                 for(ListenersByType::iterator it = listenersbytype.begin(); it != listenersbytype.end(); it++) {
@@ -404,7 +404,7 @@ namespace APro
 					}
                 }
                  
-                return index;
+                return listeners.convertIteratorToIndex(index);
             }
         }
 
@@ -423,8 +423,8 @@ namespace APro
         {
         	APRO_THREADSAFE_AUTOLOCK
         	
-            int index = listeners.find(_listener);
-            listeners.erase(listeners.begin()+(size_t)index);
+            ListenersList::iterator index = listeners.find(_listener);
+            listeners.erase(index);
             
             // We must find listener in every processed event.
 			for(ListenersByType::iterator it = listenersbytype.begin(); it != listenersbytype.end(); it++) {
@@ -436,7 +436,7 @@ namespace APro
 				}
 			}
             
-            return index;
+            return listeners.convertIteratorToIndex(index);
         }
 
         return -1;
