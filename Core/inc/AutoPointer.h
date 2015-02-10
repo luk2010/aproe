@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 02/07/2013 - 05/02/2015
+ *  @date 02/07/2013 - 10/02/2015
  *
  *  @brief
  *  Defines the AutoPointer class.
@@ -84,7 +84,7 @@ namespace APro
      *  AutoPointer and by the uncorrectly initialized AutoPointer.
     **/
     ////////////////////////////////////////////////////////////
-    template <typename T, class Enable = void>
+    template <typename T, typename Sfinae = void>
     class AutoPointer : public Swappable <AutoPointer <T> >
     {
     protected:
@@ -585,7 +585,7 @@ namespace APro
     };
     
     template<typename T>
-    class AutoPointer<T, EnableIf<std::is_base_of<BaseObjectTrait, T> > > : 
+    class AutoPointer<T, EnableIfBase<T> > :
     	public Swappable <AutoPointer <T> >
     {
     protected:
@@ -789,16 +789,16 @@ namespace APro
                 }
 /*
                 if(!Types::IsBaseObject((T*) pointer)) 
-				{*/
+				{
 					AProDelete(pointer);
 					pointer = nullptr;
                 /*}
                 else
-				{
+				{*/
 
 					T::PooledAllocator::Get().Delete(pointer);
 					pointer = nullptr;
-				}*/
+				/*}*/
             }
         }
 
