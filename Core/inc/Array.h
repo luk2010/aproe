@@ -4,7 +4,7 @@
  *  @brief Defines the Array class.
  *
  *  @author Luk2010
- *  @date 29/05/2012 - 07/02/2015
+ *  @date 29/05/2012 - 08/06/2015
  *
  *  @copyright
  *  Atlanti's Project Engine
@@ -284,13 +284,18 @@ namespace APro
         ////////////////////////////////////////////////////////////
         /** @brief Push an object to the end of the array.
          *
-         *  @note The object is copied if possible, or only Byte
-         *  copied.
+         *  Size is allocated only if necessary, based on the 
+         *  \c physical_size property.
+         *
+         *  @note The object is copied if possible, or only Memory - 
+         *  Copied.
         **/
         ////////////////////////////////////////////////////////////
         void push_back(const T& obj)
         {
-            reserve(logical_size + 1);
+        	if(logical_size + 1 < physical_size)
+				reserve(logical_size + 1);
+				
             __copy_object(obj, logical_size);
             logical_size++;
         }

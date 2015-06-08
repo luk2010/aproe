@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 10/07/2013 - 17/06/2014
+ *  @date 10/07/2013 - 17/02/2015
  *
+ *  @brief
  *  Defines a point.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 /////////////////////////////////////////////////////////////
@@ -25,9 +43,10 @@ namespace APro
     /** @class Point
      *  @ingroup Utils
      *  @brief Describes a point.
-     *  @details A point is a positionnable object that have
+     *  
+     *  A point is a positionnable object that have
      *  3 coordinates : X, Y and Z. you can convert it to or from
-     *  a Vector3U.
+     *  a Vector3.
      *
      *  Point is used for rendering points or to perform some
      *  intersections.
@@ -43,9 +62,9 @@ namespace APro
     {
     private:
 
-        unit_t m_x;///< X coordinate.
-        unit_t m_y;///< Y coordinate.
-        unit_t m_z;///< Z coordinate.
+        unit_t m_x;///< @brief X coordinate.
+        unit_t m_y;///< @brief Y coordinate.
+        unit_t m_z;///< @brief Z coordinate.
 
     public:
 

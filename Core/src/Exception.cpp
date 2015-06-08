@@ -18,7 +18,7 @@ namespace APro
     CustomException::CustomException(const char* msg, long l, const char* fi, const char* fu)
         : Exception(l, fi, fu)
     {
-        sprintf(buffer, "Custom exception thrown at line '%dl' of function '%s' in file '%s' : '%s'.",
+        sprintf(buffer, "Custom exception thrown at line '%ld' of function '%s' in file '%s' : '%s'.",
                 l, fu, fi, msg);
     }
 }

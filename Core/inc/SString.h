@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 26/12/2014
+ *  @date 25/06/2012 - 05/06/2015
  *
  *  @brief
  *  Defines the String class.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include "Platform.h"
 #include "Array.h"
 #include "List.h"
+#include "GenericHash.h"
 
 namespace APro
 {
@@ -245,6 +246,8 @@ namespace APro
         **/
         ////////////////////////////////////////////////////////////
         static HashType Hash(const char* str);
+        static int Hash(const String& str) { return String::Hash(str.toCstChar()); }
+        static int Hash2(char* const& str) { return (int) String::Hash(str); }
 
         // return size of given string, without the null-terminated character.
         static int Size(const char* str);
@@ -269,6 +272,15 @@ namespace APro
         void interpretastext();
         
         static String Empty;///< @brief An empty string.
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Build a string using the traditionnal vsprintf C
+         *  function.
+         *  @note The size of the String should not be more than
+         *  2048.
+        **/
+        ////////////////////////////////////////////////////////////
+        static String Build(const char* format, ...);
 
     protected:
 
@@ -277,6 +289,9 @@ namespace APro
 
     typedef Array<String> StringArray;
     typedef List<String>  StringList;
+    
+    APRO_DECLARE_GENERICHASH(char*, String::Hash2);
+    APRO_DECLARE_GENERICHASH(String, String::Hash);
 }
 
 #endif

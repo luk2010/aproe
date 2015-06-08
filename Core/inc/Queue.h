@@ -5,18 +5,40 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 03/07/2013 - 28/12/2014
+ *  @date 03/07/2013 - 01/03/2015
  *
+ *  @brief
  *  Defines a queue.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
 /////////////////////////////////////////////////////////////
 #ifndef APRO_QUEUE_H
 #define APRO_QUEUE_H
 
-#include <Array.h>
-#include <Copyable.h>
-#include <Printable.h>
+#include "Platform.h"
+#include "Array.h"
+
+#include "BaseObject.h"
+#include "Copyable.h"
+#include "Swappable.h"
+#include "Printable.h"
 
 namespace APro
 {
@@ -35,17 +57,20 @@ namespace APro
      *  used is an Array.
      *
      *  @note Queue is a Copyable object, but objects pushed in the
-     *  Queue should be copyable too.
+     *  Queue should be copyable too. It can also be swapped.
     **/
     /////////////////////////////////////////////////////////////
     template<typename T, typename Container = Array<T> >
-    class Queue : public Copyable<Queue <T, Container> >,
-                  public Printable
+    class Queue
+        : public BaseObject <Queue<T, Container> >,
+          public Copyable<Queue<T, Container> >,
+          public Swappable<Queue<T, Container> >,
+          public Printable
     {
     protected:
 
         typedef Queue<T, Container> queue_t;
-        Container m_queue;///< The container object.
+        Container m_queue;///< @brief The container object.
 
     public:
 
@@ -53,7 +78,7 @@ namespace APro
         /** @brief Constructs a Queue without objects.
         **/
         /////////////////////////////////////////////////////////////
-        Queue() { }
+        Queue() { /* Do nothing. */ }
 
         /////////////////////////////////////////////////////////////
         /** @brief Constructs a Queue from a Container.
@@ -66,6 +91,16 @@ namespace APro
         **/
         /////////////////////////////////////////////////////////////
         Queue(const queue_t& other) : m_queue(other.m_queue) { }
+        
+        /////////////////////////////////////////////////////////////
+        /** @brief Constructs from a moved object.
+         **/
+        /////////////////////////////////////////////////////////////
+        Queue(Queue<T, Container>&& rhs)
+            : m_queue(std::move(rhs.m_queue))
+        {
+            /* Do nothing. */
+        }
 
         /////////////////////////////////////////////////////////////
         /** @brief Destructs the Queue.
@@ -106,6 +141,15 @@ namespace APro
         {
             return m_queue == other.m_queue;
         }
+        
+    public:
+        
+        ////////////////////////////////////////////////////////////
+        /** @brief Swap this object with another one from the same
+         *  kind.
+        **/
+        ////////////////////////////////////////////////////////////
+        void swap(Queue<T, Container>& obj);
 
     public:
 
@@ -197,6 +241,13 @@ namespace APro
         }
 
     };
+    
+    template<typename T, typename Container>
+    void Queue<T, Container>::swap(Queue<T, Container>& obj)
+    {
+        using std::swap;
+        swap(m_queue, obj.m_queue);
+    }
 }
 
 #endif // APRO_QUEUE_H

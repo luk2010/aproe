@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 14/10/2013 - 22/01/2015
+ *  @date 14/10/2013 - 05/06/2015
  *
  *  @brief
  *  Types namespace for Types helpers.
@@ -112,6 +112,9 @@ namespace APro
         ////////////////////////////////////////////////////////////
         template <typename T>
         APRO_DLL bool IsCopyable() { return std::is_base_of<CopyableTrait, T>::value; }
+        
+        template <typename BObject>
+        using EnableIfBase = EnableIf<std::is_base_of<BaseObjectTrait, BObject> >;
     }
 }
 

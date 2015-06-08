@@ -5,7 +5,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 06/09/2012 - 02/02/2015
+ *  @date 06/09/2012 - 05/06/2015
  *
  *  @brief
  *  Defines the WindowManager class.
@@ -57,8 +57,27 @@ namespace APro
 		
 	public:
 		
+		////////////////////////////////////////////////////////////
+        /** @brief Should run the basic Message Pump.
+         *
+         *  It must handle events for each Window, and, if possible,
+         *  handle Mouse, Keyboard and other Hardware platform-specific
+         *  functions.
+        **/
+        ////////////////////////////////////////////////////////////
 		virtual void messagePump(Map<String,Window*>& windows) = 0;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns the static function corresponding to the 
+         *  Window Event Handling procedure, if one.
+        **/
+        ////////////////////////////////////////////////////////////
 		virtual WindowProcPtr windowProcPtr() = 0;
+		
+		////////////////////////////////////////////////////////////
+        /** @brief Returns the name of the Event Utilities.
+        **/
+        ////////////////////////////////////////////////////////////
 		virtual const String name() = 0;
 		
 		////////////////////////////////////////////////////////////

@@ -4,7 +4,7 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 29/05/2012 - 03/02/2015
+ *  @date 29/05/2012 - 05/06/2015
  *
  *  Defines some constants to be used on different platform. 
  *  This constants are universal.
@@ -222,6 +222,17 @@ namespace APro
         INTIN,
         INTOUT,
         INTBETWEEN
+    };
+    
+    /////////////////////////////////////////////////////////////
+    /** @brief A generic enum descriving Compareason results.
+    **/
+    /////////////////////////////////////////////////////////////
+    enum class CompareResult
+    {
+    	Inferior,
+    	Equal,
+    	Superior
     };
     
     template <typename T>

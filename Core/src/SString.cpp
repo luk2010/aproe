@@ -5,14 +5,14 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 25/06/2012 - 26/12/2014
+ *  @date 25/06/2012 - 10/04/2015
  *
  *  @brief
  *  This file defines the String class.
  *
  *  @copyright
  *  Atlanti's Project Engine
- *  Copyright (C) 2012 - 2014  Atlanti's Corp
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -726,5 +726,17 @@ namespace APro
                 erase (i);
             }
         }
+    }
+    
+    String String::Build(const char* format, ...)
+    {
+    	// From http://www.cplusplus.com/reference/cstdio/vsprintf/
+    	char buffer[2048];
+    	va_list args;
+    	va_start(args, format);
+    	vsprintf(buffer, format, args);
+    	String ret(buffer);
+    	va_end(args);
+    	return ret;
     }
 }

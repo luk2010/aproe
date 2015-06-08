@@ -257,19 +257,19 @@ namespace APro
     EventLocalPtr PluginHandle::createEvent(const HashType& e_type) const
     {
         if(e_type == PluginStartedEvent::Hash) {
-            EventLocalPtr ret = (Event*) AProNew(PluginStartedEvent);
+            EventLocalPtr ret(AProNew(PluginStartedEvent));
             ret->m_emitter = this;
             return ret;
         }
 
         else if(e_type == PluginStoppingEvent::Hash) {
-            EventLocalPtr ret = (Event*) AProNew(PluginStoppingEvent);
+            EventLocalPtr ret(AProNew(PluginStoppingEvent));
             ret->m_emitter = this;
             return ret;
         }
 
         else if(e_type == PluginStoppedEvent::Hash) {
-            EventLocalPtr ret = (Event*) AProNew(PluginStoppedEvent);
+            EventLocalPtr ret(AProNew(PluginStoppedEvent));
             ret->m_emitter = this;
             return ret;
         }

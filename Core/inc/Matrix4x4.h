@@ -5,9 +5,27 @@
  *  @author Luk2010
  *  @version 0.1A
  *
- *  @date 17/06/2014 - 30/06/2014
+ *  @date 17/06/2014 - 10/04/2015
  *
+ *  @brief
  *  Defines the Matrix4x4 class.
+ *
+ *  @copyright
+ *  Atlanti's Project Engine
+ *  Copyright (C) 2012 - 2015  Atlanti's Corp
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 **/
 ////////////////////////////////////////////////////////////
@@ -72,6 +90,13 @@ namespace APro
     public:
 
         void fromQuaternion(const Quaternion& quat) {}
+        
+        Real* operator[] (uint32_t row) { return v[row]; }
+        Real* operator[] (int32_t row) {
+        	if(!Numeric::IsInRange(row, 0, Rows - 1))
+				throw BadRangeAccessException(String::Build("Matrix4x4::operator[] (%i)", row).toCstChar(), row, 0, Rows);
+			return v[row];
+        }
     };
 }
 

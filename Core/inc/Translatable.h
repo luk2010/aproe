@@ -38,13 +38,13 @@ namespace APro
         /** @brief Translate the object.
         **/
         ////////////////////////////////////////////////////////////
-        virtual void translate(const Vector3F& to) = 0;
+        virtual void translate(const Vector3& to) = 0;
 
         ////////////////////////////////////////////////////////////
         /** @brief Rotate the object.
         **/
         ////////////////////////////////////////////////////////////
-        virtual void rotate(const Vector3F& axe, angle_t angle) = 0;
+        virtual void rotate(const Vector3& axe, angle_t angle) = 0;
     };
 }
 
